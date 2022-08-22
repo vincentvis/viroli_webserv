@@ -27,7 +27,7 @@ jobs:
 
       # Runs make, since our minimum requirement is that it makes
       - name: Run a one-line script
-        run: make -C webserv/
+        run: make -C code/
 
       # Runs a set tests for the github workflow test defined in the makefile
       - name: Run a multi-line script
