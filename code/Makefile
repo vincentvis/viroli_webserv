@@ -3,7 +3,6 @@
 #
 
 NAME		:= webserv
-LIB			:= libwebserv.a
 
 CXX			:= c++
 CFLAGS		:= -Wall -Werror -Wextra -pedantic -std=c++98
@@ -12,7 +11,7 @@ CFLAGS		:= -Wall -Werror -Wextra -pedantic -std=c++98
 #			  MAKE HELPERS			  #
 # # # # # # # # # # # # # # # # # # # #
 
-uniqlist = $(if $1,$(firstword $1) $(call uniqlist,$(filter-out $(firstword $1),$1)))
+uniqlist 	= $(if $1,$(firstword $1) $(call uniqlist,$(filter-out $(firstword $1),$1)))
 
 # # # # # # # # # # # # # # # # # # # #
 #			  DIRECTORIES			  #
@@ -26,35 +25,27 @@ INC_DIR		:= includes/
 #			  SOURCE_FILES			  #
 # # # # # # # # # # # # # # # # # # # #
 
-MAIN			:= $(SRC_DIR)main.cpp
+MAIN		:= $(SRC_DIR)main.cpp
 
 # a list of classes without the .cpp suffix!
-CLASSES			:=	config/config
+CLASSES		:= config/config
 
-OBJECTS			:= $(CLASSES:%=$(OBJ_DIR)%.o)
-HEADERS			:= $(CLASSES:%=$(INC_DIR)%.hpp)
+OBJECTS		:= $(CLASSES:%=$(OBJ_DIR)%.o)
+HEADERS		:= $(CLASSES:%=$(INC_DIR)%.hpp)
 
-UNIQ_DIRS		:= $(call uniqlist, $(foreach class, $(CLASSES), $(firstword $(subst /, , $(class)))))
+UNIQ_DIRS	:= $(call uniqlist, $(foreach class, $(CLASSES), $(firstword $(subst /, , $(class)))))
 
-# for "-I $(INCLUDE_DIR)/class_directory/"
-CPPFLAGS			:=	-I$(INC_DIR)
-CPPFLAGS			+= $(foreach dir, $(UNIQ_DIRS), $(join -I$(INC_DIR),$(dir)))
-
+CPPFLAGS	:= -I$(INC_DIR)
+CPPFLAGS	+= $(foreach dir, $(UNIQ_DIRS), $(join -I$(INC_DIR),$(dir)))
 
 # # # # # # # # # # # # # # # # # # # #
 #				  RULES				  #
 # # # # # # # # # # # # # # # # # # # #
 
-#all: $(NAME)
-all:
-	@echo "TODO - add \$$(NAME) rule as dependency"
+all: $(NAME)
 
-#$(LIB): $(OBJECTS) $(HEADERS)
-#	ar -rcs $(LIB) $(OBJECTS)
-
-$(NAME): $(LIB) $(MAIN)
-	@echo $(HEADERS)
-	$(CXX) $(CFLAGS) $(CPPFLAGS) $(MAIN) $(LIB) -o $(NAME)
+$(NAME): $(OBJECTS) $(MAIN)
+	$(CXX) $(CFLAGS) $(CPPFLAGS) $(OBJECTS) $(MAIN) -o $(NAME)
 
 $(OBJ_DIR)%.o: $(SRC_DIR)%.cpp $(HEADERS)
 	mkdir -p $(OBJ_DIR) $(dir $@)
@@ -65,9 +56,10 @@ clean:
 
 fclean:
 	@$(MAKE) clean
+	$(RM) $(NAME)
 
 re:
 	@$(MAKE) fclean
 	@$(MAKE) all
 
-.PHONY: all clean fclean re test
+.PHONY: all clean fclean re
