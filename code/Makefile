@@ -2,64 +2,66 @@
 # Makefile for viroli webserv project
 #
 
-NAME := webserv
-LIB  := libwebserv.a
+NAME		:= webserv
+LIB			:= libwebserv.a
+
+CXX			:= c++
+CFLAGS		:= -Wall -Werror -Wextra -pedantic -std=c++98
 
 # # # # # # # # # # # # # # # # # # # #
-#				DEFINES				  #
+#			  MAKE HELPERS			  #
 # # # # # # # # # # # # # # # # # # # #
 
-CFLAGS := -Wall -Werror -Wextra -pedantic -std=c++98
+uniqlist = $(if $1,$(firstword $1) $(call uniqlist,$(filter-out $(firstword $1),$1)))
 
-CXX := c++
+# # # # # # # # # # # # # # # # # # # #
+#			  DIRECTORIES			  #
+# # # # # # # # # # # # # # # # # # # #
+
+OBJ_DIR		:= object_files/
+SRC_DIR		:= source_files/
+INC_DIR		:= includes/
 
 # # # # # # # # # # # # # # # # # # # #
 #			  SOURCE_FILES			  #
 # # # # # # # # # # # # # # # # # # # #
 
-
-SOURCE_DIR			:= source_files/
-
-MAIN				:= $(SOURCE_DIR)main.cpp
+MAIN			:= $(SRC_DIR)main.cpp
 
 # a list of classes without the .cpp suffix!
-CLASSES				:= config/config
-CLASS_FILES			:= $(addprefix $(SOURCE_DIR), $(CLASSES))
+CLASSES			:=	config/config
 
-OBJECT_DIR			:= object_files/
-OBJ					:= $(CLASS_FILES:%=%.o)
+OBJECTS			:= $(CLASSES:%=$(OBJ_DIR)%.o)
+HEADERS			:= $(CLASSES:%=$(INC_DIR)%.hpp)
 
-INCLUDE_DIR			:= include/
-# since each class/.cpp file should be accompanied by a .hpp file we can use
-# the same list for that
-HEADER_FILES		:= $(addprefix $(INCLUDE_DIR), $(CLASS_FILES:%=%.hpp))
+UNIQ_DIRS		:= $(call uniqlist, $(foreach class, $(CLASSES), $(firstword $(subst /, , $(class)))))
 
 # for "-I $(INCLUDE_DIR)/class_directory/"
-CPPFLAGS			:=	-I $(INCLUDE_DIR)\
-						-I $(INCLUDE_DIR)config
+CPPFLAGS			:=	-I$(INC_DIR)
+CPPFLAGS			+= $(foreach dir, $(UNIQ_DIRS), $(join -I$(INC_DIR),$(dir)))
+
 
 # # # # # # # # # # # # # # # # # # # #
 #				  RULES				  #
 # # # # # # # # # # # # # # # # # # # #
 
-all: $(NAME)
+#all: $(NAME)
+all:
+	@echo "TODO - add \$$(NAME) rule as dependency"
 
-$(LIB): $(OBJ) $(HEADER_FILES)
-	@echo "LIB"
-	@echo $(OBJ)
-	@echo $(HEADER_FILES)
-	ar -r $(LIB) $(OBJ)
+#$(LIB): $(OBJECTS) $(HEADERS)
+#	ar -rcs $(LIB) $(OBJECTS)
 
 $(NAME): $(LIB) $(MAIN)
-	@echo $(HEADER_FILES)
+	@echo $(HEADERS)
 	$(CXX) $(CFLAGS) $(CPPFLAGS) $(MAIN) $(LIB) -o $(NAME)
 
-$(OBJECT_DIR)%.o: $(SOURCE_DIR)%.cpp $(HEADER_FILES)
+$(OBJ_DIR)%.o: $(SRC_DIR)%.cpp $(HEADERS)
 	mkdir -p $(OBJ_DIR) $(dir $@)
 	$(CXX) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 clean:
-	$(RM) -r $(OBJECT_DIR)
+	$(RM) -r $(OBJ_DIR)
 
 fclean:
 	@$(MAKE) clean
@@ -68,4 +70,4 @@ re:
 	@$(MAKE) fclean
 	@$(MAKE) all
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re test
