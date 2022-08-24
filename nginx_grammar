@@ -1,0 +1,46 @@
+/*
+    Whitespace does not seem to matter in NGINX config files!
+    As long as the whitespace is used in indentation or separation, we can just skip it.
+*/
+
+/*
+    Should we allow comments?
+    This would basically be "trim whitespace from start of every new line" + "if first char is `#` go to next line"
+*/
+
+%token WORD
+%token NUMBER
+
+application             : directive_list
+                        ;
+directive_list          :                directive
+                        | directive_list directive
+                        ;
+directive               : block_directive_name '=' prefix_string '{' directive_list '}'
+                        | block_directive_name prefix_string '{' directive_list '}'
+                        | block_directive_name '{' directive_list '}'
+                        | single_directive_name parameters ';'
+                        ;
+block_directive_name    : "server"
+                        | "host"
+                        | "location"
+                        | /* See https://nginx.org/en/docs/dirindex.html for full list of directive_list */
+                        ;
+single_directive_name   : "port"
+                        | "buffer_size"
+                        | "name"
+                        | "root"
+                        | "accepted_methods"
+                        | "autoindex"
+                        | "default_index"
+                        | "default_error"
+                        | "error_page"
+                        | "route_type"
+                        | "allow_upload"
+                        ;
+parameters              :            keyword
+                        | parameters keyword
+                        ;
+keyword                 : WORD
+                        | NUMBER
+                        ;
