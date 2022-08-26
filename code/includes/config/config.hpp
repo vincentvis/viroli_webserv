@@ -1,13 +1,12 @@
 #pragma once
 
-namespace Webserv
+#include <Composite.hpp>
+
+class Config
 {
-	class Config
-	{
 	public:
 		Config();
+		Config(const Config &Config);
 		~Config();
-	private:
-		int param;
-	};
-}
+		Config &operator=(const Config &Config);
+};
