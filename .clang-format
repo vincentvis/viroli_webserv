@@ -14,3 +14,4 @@ ColumnLimit: 120
 KeepEmptyLinesAtTheStartOfBlocks: false
 MaxEmptyLinesToKeep: 2
 AccessModifierOffset: 0
+IndentAccessModifiers: true
