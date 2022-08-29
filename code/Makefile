@@ -28,9 +28,9 @@ INC_DIR		:= includes/
 MAIN		:= $(SRC_DIR)main.cpp
 
 # a list of classes without the .cpp suffix!
-CLASSES		:= config/config\
-				config/Composite\
-				config/Server
+CLASSES		:= config/Directive\
+				config/DirectiveParam\
+				config/ConfigParser
 
 OBJECTS		:= $(CLASSES:%=$(OBJ_DIR)%.o)
 HEADERS		:= $(CLASSES:%=$(INC_DIR)%.hpp)
