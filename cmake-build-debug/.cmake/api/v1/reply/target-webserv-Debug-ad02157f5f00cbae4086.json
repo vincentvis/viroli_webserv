@@ -52,11 +52,11 @@
 			[
 				{
 					"backtrace" : 2,
-					"path" : "/Users/livlamin/Documents/WEBSERVER/includes"
+					"path" : "/Users/livlamin/Documents/WEBSERVER/code/includes"
 				},
 				{
 					"backtrace" : 2,
-					"path" : "/Users/livlamin/Documents/WEBSERVER/source_files"
+					"path" : "/Users/livlamin/Documents/WEBSERVER/code/source_files"
 				}
 			],
 			"language" : "CXX",
@@ -121,18 +121,18 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "code/source_files/server/server.cpp",
+			"path" : "code/source_files/main.cpp",
 			"sourceGroupIndex" : 0
 		},
 		{
 			"backtrace" : 1,
-			"path" : "code/includes/server/server.hpp",
+			"path" : "code/includes/server/Server.hpp",
 			"sourceGroupIndex" : 1
 		},
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "main.cpp",
+			"path" : "code/source_files/server/Server.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],

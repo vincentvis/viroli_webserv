@@ -49,19 +49,19 @@ cmake_ninja_workdir = /Users/livlamin/Documents/WEBSERVER/cmake-build-debug/
 
 build cmake_object_order_depends_target_webserv: phony || CMakeFiles/webserv.dir
 
-build CMakeFiles/webserv.dir/code/source_files/server/server.cpp.o: CXX_COMPILER__webserv_Debug /Users/livlamin/Documents/WEBSERVER/code/source_files/server/server.cpp || cmake_object_order_depends_target_webserv
-  DEP_FILE = CMakeFiles/webserv.dir/code/source_files/server/server.cpp.o.d
+build CMakeFiles/webserv.dir/code/source_files/main.cpp.o: CXX_COMPILER__webserv_Debug /Users/livlamin/Documents/WEBSERVER/code/source_files/main.cpp || cmake_object_order_depends_target_webserv
+  DEP_FILE = CMakeFiles/webserv.dir/code/source_files/main.cpp.o.d
   FLAGS = -std=c++98 -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -mmacosx-version-min=10.14 -std=gnu++98
-  INCLUDES = -I/Users/livlamin/Documents/WEBSERVER/includes -I/Users/livlamin/Documents/WEBSERVER/source_files
+  INCLUDES = -I/Users/livlamin/Documents/WEBSERVER/code/includes -I/Users/livlamin/Documents/WEBSERVER/code/source_files
+  OBJECT_DIR = CMakeFiles/webserv.dir
+  OBJECT_FILE_DIR = CMakeFiles/webserv.dir/code/source_files
+
+build CMakeFiles/webserv.dir/code/source_files/server/Server.cpp.o: CXX_COMPILER__webserv_Debug /Users/livlamin/Documents/WEBSERVER/code/source_files/server/Server.cpp || cmake_object_order_depends_target_webserv
+  DEP_FILE = CMakeFiles/webserv.dir/code/source_files/server/Server.cpp.o.d
+  FLAGS = -std=c++98 -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -mmacosx-version-min=10.14 -std=gnu++98
+  INCLUDES = -I/Users/livlamin/Documents/WEBSERVER/code/includes -I/Users/livlamin/Documents/WEBSERVER/code/source_files
   OBJECT_DIR = CMakeFiles/webserv.dir
   OBJECT_FILE_DIR = CMakeFiles/webserv.dir/code/source_files/server
-
-build CMakeFiles/webserv.dir/main.cpp.o: CXX_COMPILER__webserv_Debug /Users/livlamin/Documents/WEBSERVER/main.cpp || cmake_object_order_depends_target_webserv
-  DEP_FILE = CMakeFiles/webserv.dir/main.cpp.o.d
-  FLAGS = -std=c++98 -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -mmacosx-version-min=10.14 -std=gnu++98
-  INCLUDES = -I/Users/livlamin/Documents/WEBSERVER/includes -I/Users/livlamin/Documents/WEBSERVER/source_files
-  OBJECT_DIR = CMakeFiles/webserv.dir
-  OBJECT_FILE_DIR = CMakeFiles/webserv.dir
 
 
 # =============================================================================
@@ -71,7 +71,7 @@ build CMakeFiles/webserv.dir/main.cpp.o: CXX_COMPILER__webserv_Debug /Users/livl
 #############################################
 # Link the executable webserv
 
-build webserv: CXX_EXECUTABLE_LINKER__webserv_Debug CMakeFiles/webserv.dir/code/source_files/server/server.cpp.o CMakeFiles/webserv.dir/main.cpp.o
+build webserv: CXX_EXECUTABLE_LINKER__webserv_Debug CMakeFiles/webserv.dir/code/source_files/main.cpp.o CMakeFiles/webserv.dir/code/source_files/server/Server.cpp.o
   FLAGS = -std=c++98 -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -mmacosx-version-min=10.14
   OBJECT_DIR = CMakeFiles/webserv.dir
   POST_BUILD = :
