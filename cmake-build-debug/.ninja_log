@@ -1,0 +1,5 @@
+# ninja log v5
+0	350	1661777691000000000	CMakeFiles/webserv.dir/main.cpp.o	3274ad4c604d79ea
+0	50	1661777691000000000	CMakeFiles/webserv.dir/code/source_files/server/server.cpp.o	d7cffaf41d5c5930
+1	94	1661777712000000000	build.ninja	212778150dce5783
+1	41	1661777712000000000	webserv	2b429ab2cb0a4c3d
