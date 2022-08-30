@@ -11,7 +11,7 @@
 class Server
 {
 	protected:
-		uint32_t    _port;
+		uint16_t    _port;
 		std::string _serverName;
 		std::string _serverRoot;
 		int         _acceptedMethods; // 1,2,4
@@ -30,6 +30,7 @@ class Server
 		~Server();
 		Server(const Server &copy);
 		Server &operator=(const Server &copy);
+//		void testRun();
 };
 
 

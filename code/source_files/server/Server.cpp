@@ -47,7 +47,16 @@ Server &Server::operator=(const Server &copy)
 	//		std::vector<Locations>   _locations = copy._locations; // zoiets?
 	return (*this);
 }
+#include <sys/socket.h>
 
+void 	Server::testRun()
+//{
+//	int fd;
+//	fd = socket(AF_INET, SOCK_STREAM, int protocol);
+//	if (fd == -1)
+//		std::cout << "error" << std::endl;
+
+}
 
 Server::~Server()
 {
