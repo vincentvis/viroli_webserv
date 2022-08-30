@@ -1,24 +1,28 @@
 #pragma once
 
-#include "config/DirectiveParam.hpp"
+#include <string>
 #include <vector>
 
 class Directive
 {
 	public:
 		Directive();
+		Directive(std::string name);
+		Directive(std::string name, std::string param1);
+		Directive(std::string name, std::string param1, std::string param2);
 		// Directive(const Directive &other); 				// why is this needed again?
 		// Directive &operator=(const Directive &other);	// why is this needed again?
 		// ~Directive();
 
-		std::vector<Directive>      getChildren();
-		std::vector<DirectiveParam> getParameters();
-		std::string                 getName();
-		void                        setDirectiveName(std::string name);
-		Directive                   addChild(Directive newChild);
+		std::vector<Directive>   getChildren();
+		std::vector<std::string> getParameters();
+		std::string              getName();
+		void                     setDirectiveName(std::string name);
+		std::string              addParam(std::string param);
+		Directive                addChild(Directive newChild);
 
 	private:
-		std::string                 _directiveName;
-		std::vector<DirectiveParam> _parameters;
-		std::vector<Directive>      _children;
+		std::string              _directiveName;
+		std::vector<std::string> _parameters;
+		std::vector<Directive>   _children;
 };
