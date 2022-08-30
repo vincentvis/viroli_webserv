@@ -11,6 +11,6 @@ add_executable(webserv
         code/source_files/main.cpp
         code/includes/server/Server.hpp
         code/source_files/server/Server.cpp
-        )
+)
 
 #target_link_libraries(webserv PUBLIC libft)
