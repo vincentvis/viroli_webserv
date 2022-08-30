@@ -19,3 +19,4 @@ KeepEmptyLinesAtTheStartOfBlocks: false
 MaxEmptyLinesToKeep: 2
 AccessModifierOffset: 0
 IndentAccessModifiers: true
+Standard: c++03
