@@ -14,6 +14,7 @@ class Directive
 		// Directive &operator=(const Directive &other);	// why is this needed again?
 		// ~Directive();
 
+		bool                     isInitialized();
 		std::vector<Directive>   getChildren();
 		std::vector<std::string> getParameters();
 		std::string              getName();
@@ -22,6 +23,7 @@ class Directive
 		Directive                addChild(Directive newChild);
 
 	private:
+		bool                     _initialized;
 		std::string              _directiveName;
 		std::vector<std::string> _parameters;
 		std::vector<Directive>   _children;
