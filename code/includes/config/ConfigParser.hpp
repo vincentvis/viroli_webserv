@@ -3,12 +3,12 @@
 #include <cctype>
 #include <exception>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 
 class ConfigParser
 {
 	public:
-		ConfigParser();
 		ConfigParser(int argc, char const **argv);
 		// ConfigParser(const ConfigParser &other);
 		// ConfigParser &operator=(const ConfigParser &other);
@@ -34,18 +34,22 @@ class ConfigParser
 		};
 
 	private:
+		ConfigParser();
 		std::string trimWhitespace(std::string str);
 		std::string trimLeadingWhitespace(std::string str);
 		std::string trimTrailingWhitespace(std::string str);
 		std::string getNewLine();
 
-		std::string extractDirectiveName();
-		std::string extractParameters();
-		std::string detectBlockStart();
+		void extractDirectiveName();
+		void extractParameters();
+		void detectBlockStart();
+
+		void printDirectiveInfo();
 
 		std::string            _filePath;
 		std::ifstream          _fileStream;
 		std::string            _currentLine;
 		std::string            _partialResult;
+		Directive              _currentDirective;
 		std::vector<Directive> _parseResult;
 };

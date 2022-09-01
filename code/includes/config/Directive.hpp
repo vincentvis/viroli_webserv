@@ -1,5 +1,9 @@
 #pragma once
 
+#include "config/DirectiveParam.hpp"
+
+#include <iomanip>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -14,17 +18,19 @@ class Directive
 		// Directive &operator=(const Directive &other);	// why is this needed again?
 		// ~Directive();
 
-		bool                     isInitialized();
-		std::vector<Directive>   getChildren();
-		std::vector<std::string> getParameters();
-		std::string              getName();
-		void                     setDirectiveName(std::string name);
-		std::string              addParam(std::string param);
-		Directive                addChild(Directive newChild);
+		bool                        isInitialized();
+		std::vector<Directive>      getChildren();
+		std::vector<DirectiveParam> getParameters();
+		std::string                 getName();
+		void                        setDirectiveName(std::string name);
+		DirectiveParam              addParam(DirectiveParam newParam);
+		Directive                   addChild(Directive newChild);
+
+		void printDirectiveInfo(int depth);
 
 	private:
-		bool                     _initialized;
-		std::string              _directiveName;
-		std::vector<std::string> _parameters;
-		std::vector<Directive>   _children;
+		bool                        _initialized;
+		std::string                 _directiveName;
+		std::vector<DirectiveParam> _parameters;
+		std::vector<Directive>      _children;
 };
