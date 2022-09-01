@@ -33,6 +33,15 @@ class ConfigParser
 				}
 		};
 
+		class UnclosedQuotedStringException : public std::exception
+		{
+			public:
+				virtual const char *what() const throw()
+				{
+					return ("Found an unclosed quoted string in the config file");
+				}
+		};
+
 	private:
 		ConfigParser();
 		std::string trimWhitespace(std::string str);
@@ -40,8 +49,8 @@ class ConfigParser
 		std::string trimTrailingWhitespace(std::string str);
 		std::string getNewLine();
 
-		void extractDirectiveName();
-		void extractParameters();
+		void extractDirectiveName(Directive *currentDirective);
+		void extractParameters(Directive *currentDirective);
 		void detectBlockStart();
 
 		void printDirectiveInfo();
@@ -50,6 +59,5 @@ class ConfigParser
 		std::ifstream          _fileStream;
 		std::string            _currentLine;
 		std::string            _partialResult;
-		Directive              _currentDirective;
 		std::vector<Directive> _parseResult;
 };

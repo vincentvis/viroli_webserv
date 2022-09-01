@@ -65,10 +65,38 @@ Directive Directive::addChild(Directive newDirective)
 	return (_children.back());
 }
 
-DirectiveParam Directive::addParam(DirectiveParam newParam)
+DirectiveParam Directive::addParam(std::string newParam)
 {
-	_parameters.push_back(newParam);
-	return _parameters.back();
+	if (newParam == "false" || newParam == "true")
+	{
+		if (newParam == "true")
+		{
+			_parameters.push_back(DirectiveParam(false));
+		}
+		else
+		{
+			_parameters.push_back(DirectiveParam(true));
+		}
+		return (_parameters.back());
+	}
+	try
+	{
+		std::size_t pos = 0;
+		int         num = std::stoi(newParam, &pos);
+		if (pos != newParam.length())
+		{
+			_parameters.push_back(DirectiveParam(newParam));
+			return (_parameters.back());
+		}
+		_parameters.push_back(DirectiveParam(num));
+		return (_parameters.back());
+	}
+	catch (const std::exception &e)
+	{
+		// something went wrong in stoi.. so I guess it should just be a string?
+	}
+	_parameters.push_back(DirectiveParam(newParam));
+	return (_parameters.back());
 }
 
 void Directive::setDirectiveName(std::string name)

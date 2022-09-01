@@ -17,19 +17,20 @@ ConfigParser::ConfigParser(int argc, char const **argv)
 		throw std::invalid_argument("Problem while reading file");
 	}
 	this->parseCurrentStream();
+	printDirectiveInfo();
 }
 
 void ConfigParser::parseCurrentStream()
 {
+	Directive *currentDirective = new Directive();
+
 	getNewLine();
 
-	extractDirectiveName();
-	extractParameters();
+	extractDirectiveName(currentDirective);
+	extractParameters(currentDirective);
 
-	std::cout << "[" << this->_currentLine << "]" << std::endl;
+	this->_parseResult.push_back(*currentDirective);
 
-	_parseResult.push_back(_currentDirective);
-	printDirectiveInfo();
 	/*
 		parse line
 			- get directive name
@@ -41,6 +42,83 @@ void ConfigParser::parseCurrentStream()
 	*/
 	// get directive name
 	//
+}
+void ConfigParser::extractDirectiveName(Directive *currentDirective)
+{
+	std::string::iterator endOfName = this->_currentLine.begin();
+	std::string::iterator end       = this->_currentLine.end();
+	unsigned              length    = 0;
+
+	while (*endOfName && (std::islower(*endOfName) || *endOfName == '_'))
+	{
+		endOfName++;
+		length++;
+	}
+	if (length == 0)
+	{
+		throw DirectiveNameNotFoundException();
+	}
+	if (endOfName != end && !(*endOfName == ' ' || *endOfName == '\t'))
+	{
+		throw InvalidDirectiveNameException();
+	}
+	currentDirective->setDirectiveName(this->_currentLine.substr(0, length));
+	this->_currentLine = trimLeadingWhitespace(this->_currentLine.substr(length));
+	if (endOfName == end)
+	{
+		getNewLine();
+	}
+}
+
+void ConfigParser::extractParameters(Directive *currentDirective)
+{
+	this->_currentLine = trimLeadingWhitespace(this->_currentLine);
+
+	if (this->_currentLine.at(0) == ';' || this->_currentLine.at(0) == '{')
+	{
+		return;
+	}
+
+	std::string str;
+	if (this->_currentLine.at(0) == '"' || this->_currentLine.at(0) == '\'')
+	{
+		str                                 = this->_currentLine.substr(1);
+		std::string::size_type closingQuote = str.find_first_of(this->_currentLine.at(0));
+		if (closingQuote == std::string::npos)
+		{
+			throw UnclosedQuotedStringException();
+		}
+		str                = str.substr(0, closingQuote);
+		this->_currentLine = this->_currentLine.substr(closingQuote + 1);
+	}
+	else
+	{
+		std::string::size_type end_of_word = this->_currentLine.find_first_of(" \t;");
+		if (end_of_word == std::string::npos)
+		{
+			str                = this->_currentLine;
+			this->_currentLine = "";
+		}
+		else
+		{
+			str                = this->_currentLine.substr(0, end_of_word);
+			this->_currentLine = this->_currentLine.substr(end_of_word);
+		}
+	}
+	currentDirective->addParam(str);
+
+	if (std::isspace(this->_currentLine.at(0)))
+	{
+		extractParameters(currentDirective);
+	}
+}
+
+void ConfigParser::detectBlockStart()
+{
+	if (this->_currentLine.at(0) == '{')
+	{
+		// it's a new block,
+	}
 }
 
 std::string ConfigParser::getNewLine()
@@ -73,45 +151,6 @@ std::string ConfigParser::trimWhitespace(std::string str)
 	return (trimTrailingWhitespace(trimLeadingWhitespace(str)));
 }
 
-void ConfigParser::extractDirectiveName()
-{
-	std::string::iterator endOfName = this->_currentLine.begin();
-	std::string::iterator end       = this->_currentLine.end();
-	unsigned              length    = 0;
-
-	while (*endOfName && (std::islower(*endOfName) || *endOfName == '_'))
-	{
-		endOfName++;
-		length++;
-	}
-	if (length == 0)
-	{
-		throw DirectiveNameNotFoundException();
-	}
-	if (endOfName != end && !(*endOfName == ' ' || *endOfName == '\t'))
-	{
-		throw InvalidDirectiveNameException();
-	}
-	this->_currentDirective.setDirectiveName(this->_currentLine.substr(0, length));
-	this->_currentLine = trimLeadingWhitespace(this->_currentLine.substr(length));
-	if (endOfName == end)
-	{
-		getNewLine();
-	}
-}
-
-void ConfigParser::extractParameters()
-{
-	this->_currentLine = trimLeadingWhitespace(this->_currentLine);
-}
-
-void ConfigParser::detectBlockStart()
-{
-	if (this->_currentLine.at(0) == '{')
-	{
-		// it's a new block,
-	}
-}
 
 std::string ConfigParser::trimLeadingWhitespace(std::string str)
 {

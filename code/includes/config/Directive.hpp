@@ -23,7 +23,7 @@ class Directive
 		std::vector<DirectiveParam> getParameters();
 		std::string                 getName();
 		void                        setDirectiveName(std::string name);
-		DirectiveParam              addParam(DirectiveParam newParam);
+		DirectiveParam              addParam(std::string newParam);
 		Directive                   addChild(Directive newChild);
 
 		void printDirectiveInfo(int depth);
