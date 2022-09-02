@@ -2,7 +2,7 @@
 
 ConfigParser::ConfigParser(int argc, char const **argv)
 {
-	this->_filePath = "../data/config/default.config";
+	this->_filePath = "../data/config/incomplete.config";
 	if (argc > 1)
 	{
 		this->_filePath = argv[1];
@@ -16,34 +16,65 @@ ConfigParser::ConfigParser(int argc, char const **argv)
 	{
 		throw std::invalid_argument("Problem while reading file");
 	}
-	this->parseCurrentStream();
+	while (this->_currentLine.length() > 0 || this->_fileStream.eof() == false)
+	{
+		this->_parseResult = parseDirectiveBlock(this->_parseResult);
+	}
+	// parseCurrentStream(&this->_parseResult);
 	printDirectiveInfo();
 }
 
-void ConfigParser::parseCurrentStream()
+std::vector<Directive> ConfigParser::parseDirectiveBlock(std::vector<Directive> parent)
 {
-	Directive *currentDirective = new Directive();
+	if (this->_currentLine.length() == 0 && this->_fileStream.eof() == false)
+	{
+		getNewLine();
+		if (this->_fileStream.eof() == true && this->_currentLine.length() == 0)
+		{
+			return (parent);
+		}
+	}
 
-	getNewLine();
-
-	extractDirectiveName(currentDirective);
-	extractParameters(currentDirective);
-
-	this->_parseResult.push_back(*currentDirective);
-
-	/*
-		parse line
-			- get directive name
-			- get directive value (optional)
-			- is block directive? (skip whitespace && first char == '{')
-				- RECURSIVE
-				- skip '{' char, and add child, go into child and call parse line
-
-	*/
-	// get directive name
-	//
+	parent.push_back(parseDirective());
+	this->_currentLine = trimLeadingWhitespace(this->_currentLine);
+	return (parent);
 }
-void ConfigParser::extractDirectiveName(Directive *currentDirective)
+
+Directive ConfigParser::parseDirective()
+{
+	Directive newDirective;
+
+	newDirective.setDirectiveName(extractDirectiveName());
+	while (this->_currentLine.at(0) != ';' && this->_currentLine.at(0) != '{')
+	{
+		std::string newparam = extractParam();
+		newDirective.addParam(newparam);
+	}
+	if (this->_currentLine.at(0) == ';')
+	{
+		skipNextChar();
+		return (newDirective);
+	}
+	if (this->_currentLine.at(0) == '{')
+	{
+		skipNextChar();
+		std::vector<Directive> children;
+		while (this->_currentLine.at(0) != '}')
+		{
+			children = parseDirectiveBlock(children);
+		}
+		newDirective.addChildrenToVector(children);
+		if (this->_currentLine.at(0) != '}')
+		{
+			throw InvalidBlockConfigException();
+		}
+		skipNextChar();
+		return (newDirective);
+	}
+	throw InvalidBlockConfigException();
+}
+
+std::string ConfigParser::extractDirectiveName()
 {
 	std::string::iterator endOfName = this->_currentLine.begin();
 	std::string::iterator end       = this->_currentLine.end();
@@ -62,24 +93,20 @@ void ConfigParser::extractDirectiveName(Directive *currentDirective)
 	{
 		throw InvalidDirectiveNameException();
 	}
-	currentDirective->setDirectiveName(this->_currentLine.substr(0, length));
-	this->_currentLine = trimLeadingWhitespace(this->_currentLine.substr(length));
+
+	std::string directiveName = this->_currentLine.substr(0, length);
+	this->_currentLine        = trimLeadingWhitespace(this->_currentLine.substr(length));
 	if (endOfName == end)
 	{
 		getNewLine();
 	}
+	return (directiveName);
 }
 
-void ConfigParser::extractParameters(Directive *currentDirective)
+std::string ConfigParser::extractParam()
 {
-	this->_currentLine = trimLeadingWhitespace(this->_currentLine);
-
-	if (this->_currentLine.at(0) == ';' || this->_currentLine.at(0) == '{')
-	{
-		return;
-	}
-
 	std::string str;
+
 	if (this->_currentLine.at(0) == '"' || this->_currentLine.at(0) == '\'')
 	{
 		str                                 = this->_currentLine.substr(1);
@@ -105,45 +132,47 @@ void ConfigParser::extractParameters(Directive *currentDirective)
 			this->_currentLine = this->_currentLine.substr(end_of_word);
 		}
 	}
-	currentDirective->addParam(str);
+	this->_currentLine = trimLeadingWhitespace(this->_currentLine);
+	return (str);
+}
 
-	if (std::isspace(this->_currentLine.at(0)))
+void ConfigParser::skipNextChar()
+{
+	this->_currentLine = trimLeadingWhitespace(this->_currentLine.substr(1));
+	if (this->_currentLine.length() == 0 && this->_fileStream.eof() == false)
 	{
-		extractParameters(currentDirective);
+		getNewLine();
 	}
 }
 
-void ConfigParser::detectBlockStart()
+bool ConfigParser::getNewLine()
 {
-	if (this->_currentLine.at(0) == '{')
-	{
-		// it's a new block,
-	}
-}
-
-std::string ConfigParser::getNewLine()
-{
-	bool hasReachedEOF = false;
+	std::string partialResult;
+	bool        hasReachedEOF = false;
 
 	if (this->_currentLine.length() != 0)
 	{
-		this->_partialResult = this->_currentLine;
+		partialResult = this->_currentLine;
 	}
 	else
 	{
-		this->_partialResult = "";
+		partialResult = "";
 	}
 	getline(this->_fileStream, this->_currentLine);
 	if (this->_fileStream.eof())
 	{
 		hasReachedEOF = true;
 	}
-	this->_currentLine = this->_partialResult + trimWhitespace(this->_currentLine);
+	this->_currentLine = partialResult + trimWhitespace(this->_currentLine);
 	if (!hasReachedEOF && this->_currentLine.length() == 0)
 	{
 		return (getNewLine());
 	}
-	return (this->_currentLine);
+	if (hasReachedEOF && this->_currentLine.length() == 0)
+	{
+		return (false);
+	}
+	return (true);
 }
 
 std::string ConfigParser::trimWhitespace(std::string str)
@@ -178,20 +207,19 @@ std::string ConfigParser::trimTrailingWhitespace(std::string str)
 
 void ConfigParser::printDirectiveInfo()
 {
-	std::size_t i   = 0;
-	std::size_t max = this->_parseResult.size();
+	std::vector<Directive>::size_type i   = 0;
+	std::vector<Directive>::size_type max = this->_parseResult.size();
 
-	std::cout << "\033[4mDirective information:                                      \033[0m" << std::endl;
+	std::cout << "\033[4mDirective information:" << std::setw(38) << "\033[0m" << std::endl;
 	while (i < max)
 	{
-		_parseResult.at(i).printDirectiveInfo(0);
+		std::cout << "{" << std::endl;
+		_parseResult.at(i).printDirectiveInfo(1);
+		std::cout << "}," << std::endl;
 		i++;
 	}
 	std::cout << std::setfill('_') << std::setw(60) << "_" << std::endl;
 }
-
-
-// a valid directive name = lowercase + underscore (regex: [a-z_]+)
 
 // ConfigParser(const ConfigParser &other)
 // {

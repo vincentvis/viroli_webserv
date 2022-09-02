@@ -12,7 +12,7 @@ int main(int argc, char const *argv[])
 	}
 	catch (const std::exception &e)
 	{
-		std::cerr << e.what() << std::endl;
+		std::cerr << "exception: \n" << e.what() << std::endl;
 		return (1);
 	}
 	std::cout << "Ran " << argv[0] << " with argc: " << argc << std::endl;

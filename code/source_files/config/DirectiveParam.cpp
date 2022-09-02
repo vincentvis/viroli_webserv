@@ -7,22 +7,40 @@ DirectiveParam::DirectiveParam()
 
 DirectiveParam::DirectiveParam(std::string value)
 {
-	this->_type        = PT_STRING;
-	this->_stringValue = value;
+	if (value == "false" || value == "true")
+	{
+		_type      = PT_BOOL;
+		_boolValue = false;
+		if (value == "true")
+		{
+			_boolValue = true;
+		}
+		value.clear();
+		return;
+	}
+	try
+	{
+		std::size_t pos = 0;
+		int         num = std::stoi(value, &pos, 0);
+		if (pos != value.length())
+		{
+			_type        = PT_STRING;
+			_stringValue = value;
+			return;
+		}
+		_type     = PT_INT;
+		_intValue = num;
+		value.clear();
+		return;
+	}
+	catch (const std::exception &e)
+	{
+		// invalid argument exception if no conversion is possible
+		// out of range exception if the value is bigger than INT
+	}
+	_type        = PT_STRING;
+	_stringValue = value;
 }
-
-DirectiveParam::DirectiveParam(int value)
-{
-	this->_type     = PT_INT;
-	this->_intValue = value;
-}
-
-DirectiveParam::DirectiveParam(bool value)
-{
-	this->_type      = PT_BOOL;
-	this->_boolValue = value;
-}
-
 
 // DirectiveParam(const DirectiveParam &other)
 // {

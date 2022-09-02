@@ -20,13 +20,15 @@ class Directive
 
 		bool                        isInitialized();
 		std::vector<Directive>      getChildren();
+		std::vector<Directive>     *getChildVector();
 		std::vector<DirectiveParam> getParameters();
 		std::string                 getName();
 		void                        setDirectiveName(std::string name);
+		void                        addChildrenToVector(std::vector<Directive> children);
 		DirectiveParam              addParam(std::string newParam);
 		Directive                   addChild(Directive newChild);
 
-		void printDirectiveInfo(int depth);
+		void printDirectiveInfo(int depth = 0);
 
 	private:
 		bool                        _initialized;

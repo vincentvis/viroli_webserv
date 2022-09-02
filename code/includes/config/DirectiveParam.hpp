@@ -16,8 +16,6 @@ class DirectiveParam
 	public:
 		DirectiveParam();
 		DirectiveParam(std::string value);
-		DirectiveParam(int value);
-		DirectiveParam(bool value);
 		// DirectiveParam (const DirectiveParam &DirectiveParam);
 		// ~DirectiveParam ();
 		// DirectiveParam & operator = (const DirectiveParam &DirectiveParam);
