@@ -12,7 +12,7 @@
 class Server
 {
 	protected:
-		uint16_t    _port;
+		std::uint16_t    _port;
 		std::string _serverName;
 		std::string _serverRoot;
 		int         _acceptedMethods; // 1,2,4
