@@ -7,9 +7,8 @@
 
 int main(int argc, char const *argv[])
 {
-	Server                 Default;
-	ConfigParser           config;
-	std::vector<Directive> parseResult;
+	Server       Default;
+	ConfigParser config;
 
 	try {
 		config.parseFromArgs(argc, argv);
