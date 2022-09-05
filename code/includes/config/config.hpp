@@ -2,12 +2,13 @@
 
 namespace Webserv
 {
-	class Config
-	{
+class Config
+{
 	public:
 		Config();
 		~Config();
+
 	private:
 		int param;
-	};
-}
+};
+} // namespace Webserv
