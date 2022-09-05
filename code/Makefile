@@ -38,7 +38,8 @@ MAIN		:= $(SRC_DIR)main.cpp
 # a list of classes without the .cpp suffix!
 CLASSES		:= config/Directive\
 				config/DirectiveParam\
-				config/ConfigParser
+				config/ConfigParser\
+				server/Server
 
 OBJECTS		:= $(CLASSES:%=$(OBJ_DIR)%.o)
 HEADERS		:= $(CLASSES:%=$(INC_DIR)%.hpp)
