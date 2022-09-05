@@ -68,7 +68,6 @@ class ConfigParser
 		std::vector<Directive> *parseDirectiveBlock(std::vector<Directive> *parent);
 		Directive               parseDirective();
 
-
 		std::string trimWhitespace(std::string str);
 		std::string trimLeadingWhitespace(std::string str);
 		std::string trimTrailingWhitespace(std::string str);

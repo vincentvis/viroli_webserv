@@ -1,4 +1,6 @@
 #include "config/DirectiveParam.hpp"
+#include <cerrno>
+#include <stdlib.h>
 
 DirectiveParam::DirectiveParam()
 {
@@ -18,23 +20,20 @@ DirectiveParam::DirectiveParam(std::string value)
 		}
 		return;
 	}
-	try
-	{
-		std::size_t pos = 0;
-		_type           = PT_INT;
-		_intValue       = std::stoi(value, &pos, 0);
-		if (pos != value.length())
-		{
-			_type        = PT_STRING;
-			_stringValue = value;
-			_intValue    = 0;
-		}
-	}
-	catch (std::exception &e)
+
+	// using strtol from c lib because we cannot use std::stoi (which is C++11...)
+	char *endptr = NULL;
+	errno        = 0;
+	long longval = strtol(value.c_str(), &endptr, 0);
+	int  intval  = longval;
+	if (errno == EINVAL || errno == ERANGE || value.c_str() == endptr || *endptr != '\0' || intval != longval)
 	{
 		_type        = PT_STRING;
 		_stringValue = value;
+		return;
 	}
+	_intValue = longval;
+	_type     = PT_INT;
 }
 
 // DirectiveParam(const DirectiveParam &other)
@@ -94,16 +93,16 @@ void DirectiveParam::printParam()
 {
 	switch (_type)
 	{
-	case PT_UNSET:
-		break;
-	case PT_INT:
-		std::cout << _intValue;
-		break;
-	case PT_BOOL:
-		std::cout << std::boolalpha << _boolValue << std::noboolalpha;
-		break;
-	case PT_STRING:
-		std::cout << "\"" << _stringValue << "\"";
-		break;
+		case PT_UNSET:
+			break;
+		case PT_INT:
+			std::cout << _intValue;
+			break;
+		case PT_BOOL:
+			std::cout << std::boolalpha << _boolValue << std::noboolalpha;
+			break;
+		case PT_STRING:
+			std::cout << "\"" << _stringValue << "\"";
+			break;
 	}
 }
