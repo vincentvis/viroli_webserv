@@ -7,39 +7,34 @@ DirectiveParam::DirectiveParam()
 
 DirectiveParam::DirectiveParam(std::string value)
 {
+	_boolValue = false;
+	_intValue  = 0;
 	if (value == "false" || value == "true")
 	{
-		_type      = PT_BOOL;
-		_boolValue = false;
+		_type = PT_BOOL;
 		if (value == "true")
 		{
 			_boolValue = true;
 		}
-		value.clear();
 		return;
 	}
 	try
 	{
 		std::size_t pos = 0;
-		int         num = std::stoi(value, &pos, 0);
+		_type           = PT_INT;
+		_intValue       = std::stoi(value, &pos, 0);
 		if (pos != value.length())
 		{
 			_type        = PT_STRING;
 			_stringValue = value;
-			return;
+			_intValue    = 0;
 		}
-		_type     = PT_INT;
-		_intValue = num;
-		value.clear();
-		return;
 	}
-	catch (const std::exception &e)
+	catch (std::exception &e)
 	{
-		// invalid argument exception if no conversion is possible
-		// out of range exception if the value is bigger than INT
+		_type        = PT_STRING;
+		_stringValue = value;
 	}
-	_type        = PT_STRING;
-	_stringValue = value;
 }
 
 // DirectiveParam(const DirectiveParam &other)
@@ -99,16 +94,16 @@ void DirectiveParam::printParam()
 {
 	switch (_type)
 	{
-		case PT_UNSET:
-			break;
-		case PT_INT:
-			std::cout << _intValue;
-			break;
-		case PT_BOOL:
-			std::cout << std::boolalpha << _boolValue << std::noboolalpha;
-			break;
-		case PT_STRING:
-			std::cout << "\"" << _stringValue << "\"";
-			break;
+	case PT_UNSET:
+		break;
+	case PT_INT:
+		std::cout << _intValue;
+		break;
+	case PT_BOOL:
+		std::cout << std::boolalpha << _boolValue << std::noboolalpha;
+		break;
+	case PT_STRING:
+		std::cout << "\"" << _stringValue << "\"";
+		break;
 	}
 }

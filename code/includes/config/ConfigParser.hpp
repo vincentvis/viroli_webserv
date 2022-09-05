@@ -51,11 +51,20 @@ class ConfigParser
 				}
 		};
 
+		class DirectiveWithoutValueException : public std::exception
+		{
+			public:
+				virtual const char *what() const throw()
+				{
+					return ("Directive without value where value is required");
+				}
+		};
+
 	private:
 		ConfigParser();
 
-		std::vector<Directive> parseDirectiveBlock(std::vector<Directive> parent);
-		Directive              parseDirective();
+		std::vector<Directive> *parseDirectiveBlock(std::vector<Directive> *parent);
+		Directive               parseDirective();
 
 
 		std::string trimWhitespace(std::string str);

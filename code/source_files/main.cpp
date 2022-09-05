@@ -15,7 +15,7 @@ int main(int argc, char const *argv[])
 		std::cerr << "exception: \n" << e.what() << std::endl;
 		return (1);
 	}
-	std::cout << "Ran " << argv[0] << " with argc: " << argc << std::endl;
+	// std::cout << "Ran " << argv[0] << " with argc: " << argc << std::endl;
 
 	return 0;
 }

@@ -14,17 +14,14 @@ ConfigParser::ConfigParser(int argc, char const **argv)
 	}
 	if (this->_fileStream.bad())
 	{
+		this->_fileStream.close();
 		throw std::invalid_argument("Problem while reading file");
 	}
-	while (this->_currentLine.length() > 0 || this->_fileStream.eof() == false)
-	{
-		this->_parseResult = parseDirectiveBlock(this->_parseResult);
-	}
-	// parseCurrentStream(&this->_parseResult);
+	this->_parseResult = *parseDirectiveBlock(&this->_parseResult);
 	printDirectiveInfo();
 }
 
-std::vector<Directive> ConfigParser::parseDirectiveBlock(std::vector<Directive> parent)
+std::vector<Directive> *ConfigParser::parseDirectiveBlock(std::vector<Directive> *parent)
 {
 	if (this->_currentLine.length() == 0 && this->_fileStream.eof() == false)
 	{
@@ -34,9 +31,17 @@ std::vector<Directive> ConfigParser::parseDirectiveBlock(std::vector<Directive> 
 			return (parent);
 		}
 	}
+	if (this->_currentLine.at(0) == '}')
+	{
+		return (parent);
+	}
 
-	parent.push_back(parseDirective());
+	parent->push_back(parseDirective());
 	this->_currentLine = trimLeadingWhitespace(this->_currentLine);
+	if (this->_currentLine.length() > 0 || this->_fileStream.eof() == false)
+	{
+		return (parseDirectiveBlock(parent));
+	}
 	return (parent);
 }
 
@@ -53,16 +58,24 @@ Directive ConfigParser::parseDirective()
 	if (this->_currentLine.at(0) == ';')
 	{
 		skipNextChar();
+		if (newDirective.getParameters().size() == 0)
+		{
+			throw DirectiveWithoutValueException();
+		}
 		return (newDirective);
 	}
 	if (this->_currentLine.at(0) == '{')
 	{
 		skipNextChar();
-		std::vector<Directive> children;
-		while (this->_currentLine.at(0) != '}')
+
+		// this would be an empty block.. usesless?
+		if (this->_currentLine.at(0) == '}')
 		{
-			children = parseDirectiveBlock(children);
+			return (newDirective);
 		}
+
+		std::vector<Directive> children;
+		children = *parseDirectiveBlock(&children);
 		newDirective.addChildrenToVector(children);
 		if (this->_currentLine.at(0) != '}')
 		{
