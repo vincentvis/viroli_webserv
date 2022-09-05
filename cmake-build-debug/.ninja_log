@@ -7,3 +7,6 @@
 1	24	1661786130000000000	CMakeFiles/webserv.dir/code/source_files/config/config.cpp.o	fe11269075a1089b
 0	151	1662021691000000000	build.ninja	212778150dce5783
 3	507	1661860318000000000	CMakeFiles/webserv.dir/code/source_files/server/Server.cpp.o	c93c15b4cb6e0ab4
+1	618	1662373838000000000	CMakeFiles/webserv.dir/code/source_files/main.cpp.o	b48f21446e823d90
+3	621	1662373838000000000	CMakeFiles/webserv.dir/code/source_files/server/Server.cpp.o	c93c15b4cb6e0ab4
+621	709	1662373838000000000	webserv	2d1788bb0e62dcb3

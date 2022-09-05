@@ -6,6 +6,7 @@
 #define WEBSERV_SERVER_HPP
 
 #include <iostream>
+#include <cstdint>
 #include <vector>
 
 class Server
