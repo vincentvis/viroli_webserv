@@ -35,7 +35,7 @@ std::vector<Directive> ConfigParser::parseFromArgs(int argc, char const **argv)
 		throw std::invalid_argument("Problem while reading file");
 	}
 	this->_parseResult = *parseDirectiveBlock(&this->_parseResult);
-	printDirectiveInfo();
+	validateParseResult();
 	return (this->_parseResult);
 }
 
@@ -73,10 +73,15 @@ Directive ConfigParser::parseDirective()
 	Directive newDirective;
 
 	newDirective.setDirectiveName(extractDirectiveName());
-	while (this->_currentLine.at(0) != ';' && this->_currentLine.at(0) != '{')
+	while (!this->_currentLine.empty() && this->_currentLine.at(0) != ';' && this->_currentLine.at(0) != '{' &&
+	       this->_currentLine.at(0) != '}')
 	{
 		std::string newparam = extractParam();
 		newDirective.addParam(newparam);
+	}
+	if (this->_currentLine.empty())
+	{
+		throw InvalidBlockConfigException();
 	}
 	if (this->_currentLine.at(0) == ';')
 	{
@@ -169,6 +174,10 @@ std::string ConfigParser::extractParam()
 		}
 	}
 	this->_currentLine = trimLeadingWhitespace(this->_currentLine);
+	if (this->_currentLine.length() == 0)
+	{
+		getNewLine();
+	}
 	return (str);
 }
 
@@ -255,4 +264,16 @@ void ConfigParser::printDirectiveInfo()
 		i++;
 	}
 	std::cout << std::setfill('_') << std::setw(60) << "_" << std::endl;
+}
+
+// enforce that all top level elements are "server" directives
+void ConfigParser::validateParseResult()
+{
+	for (std::vector<Directive>::iterator obj = this->_parseResult.begin(); obj != this->_parseResult.end(); ++obj)
+	{
+		if (obj->getName() != "server")
+		{
+			throw InvalidTopLevelDirective();
+		}
+	}
 }

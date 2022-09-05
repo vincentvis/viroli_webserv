@@ -15,6 +15,8 @@ class ConfigParser
 		std::vector<Directive> getParseResult();
 		~ConfigParser();
 
+		void printDirectiveInfo();
+
 		class DirectiveNameNotFoundException : public std::exception
 		{
 			public:
@@ -60,6 +62,15 @@ class ConfigParser
 				}
 		};
 
+		class InvalidTopLevelDirective : public std::exception
+		{
+			public:
+				virtual const char *what() const throw()
+				{
+					return ("Only \"server\" directives allowed as top level directive");
+				}
+		};
+
 	private:
 		// disable copying
 		ConfigParser(const ConfigParser &other);
@@ -67,6 +78,7 @@ class ConfigParser
 
 		std::vector<Directive> *parseDirectiveBlock(std::vector<Directive> *parent);
 		Directive               parseDirective();
+		void                    validateParseResult();
 
 		std::string trimWhitespace(std::string str);
 		std::string trimLeadingWhitespace(std::string str);
@@ -76,8 +88,6 @@ class ConfigParser
 
 		std::string extractDirectiveName();
 		std::string extractParam();
-
-		void printDirectiveInfo();
 
 		std::string            _filePath;
 		std::ifstream          _fileStream;

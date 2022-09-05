@@ -36,18 +36,6 @@ DirectiveParam::DirectiveParam(std::string value)
 	_type     = PT_INT;
 }
 
-// DirectiveParam(const DirectiveParam &other)
-// {
-// }
-
-// DirectiveParam &operator =(const DirectiveParam &other)
-// {
-// }
-
-// DirectiveParam::~DirectiveParam()
-// {
-// }
-
 int DirectiveParam::getType()
 {
 	return this->_type;
@@ -105,4 +93,31 @@ void DirectiveParam::printParam()
 			std::cout << "\"" << _stringValue << "\"";
 			break;
 	}
+}
+
+std::pair<std::string, uint16_t> DirectiveParam::convertToHostAndPort()
+{
+	if (_type != PT_STRING)
+	{
+		return (std::make_pair("failure", -1));
+	}
+
+	std::string::size_type colon_position = _stringValue.find_first_of(":");
+	if (colon_position == std::string::npos)
+	{
+		return (std::make_pair("failure", -1));
+	}
+	std::string host = _stringValue.substr(0, colon_position);
+
+	char *endptr = NULL;
+	errno        = 0;
+	long longval = strtol(_stringValue.substr(colon_position + 1).c_str(), &endptr, 0);
+	int  intval  = longval;
+	if (errno == EINVAL || errno == ERANGE || _stringValue.c_str() == endptr || *endptr != '\0' ||
+	    intval != longval || intval > 65535)
+	{
+		return (std::make_pair("failure", -1));
+	}
+
+	return (std::make_pair(host, intval));
 }

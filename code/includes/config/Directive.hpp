@@ -14,9 +14,6 @@ class Directive
 		Directive(std::string name);
 		Directive(std::string name, std::string param1);
 		Directive(std::string name, std::string param1, std::string param2);
-		// Directive(const Directive &other); 				// why is this needed again?
-		// Directive &operator=(const Directive &other);	// why is this needed again?
-		// ~Directive();
 
 		bool                        isInitialized();
 		std::vector<Directive>      getChildren();

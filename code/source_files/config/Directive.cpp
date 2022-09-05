@@ -26,18 +26,6 @@ Directive::Directive(std::string name, std::string param1, std::string param2)
 	_initialized = true;
 }
 
-// Directive::~Directive()
-// {
-// }
-
-// Directive(const Directive &other)
-// {
-// }
-
-// Directive &operator=(const Directive &other)
-// {
-// }
-
 bool Directive::isInitialized()
 {
 	return _initialized;

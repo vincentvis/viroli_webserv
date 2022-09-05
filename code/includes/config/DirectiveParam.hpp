@@ -1,7 +1,9 @@
 #pragma once
 
 #include <iostream>
+#include <stdint.h>
 #include <string>
+#include <utility>
 
 enum ParamType
 {
@@ -16,9 +18,6 @@ class DirectiveParam
 	public:
 		DirectiveParam();
 		DirectiveParam(std::string value);
-		// DirectiveParam (const DirectiveParam &DirectiveParam);
-		// ~DirectiveParam ();
-		// DirectiveParam & operator = (const DirectiveParam &DirectiveParam);
 
 		int         getType();
 		std::string getStringValue();
@@ -29,6 +28,8 @@ class DirectiveParam
 		std::string setStringValue(std::string newValue);
 		int         setIntValue(int newValue);
 		bool        setBoolValue(bool newValue);
+
+		std::pair<std::string, uint16_t> convertToHostAndPort();
 
 		void printParam();
 

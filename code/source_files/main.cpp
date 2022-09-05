@@ -19,6 +19,8 @@ int main(int argc, char const *argv[])
 		return (1);
 	}
 
+	config.printDirectiveInfo();
+
 	// std::cout << "Ran " << argv[0] << " with argc: " << argc << std::endl;
 
 	return 0;
