@@ -9,11 +9,11 @@
 class ConfigParser
 {
 	public:
+		ConfigParser();
 		ConfigParser(int argc, char const **argv);
-		// ConfigParser(const ConfigParser &other);
-		// ConfigParser &operator=(const ConfigParser &other);
-		// ~ConfigParser();
-		void parseCurrentStream(std::vector<Directive> *parent);
+		std::vector<Directive> parseFromArgs(int argc, char const **argv);
+		std::vector<Directive> getParseResult();
+		~ConfigParser();
 
 		class DirectiveNameNotFoundException : public std::exception
 		{
@@ -61,7 +61,9 @@ class ConfigParser
 		};
 
 	private:
-		ConfigParser();
+		// disable copying
+		ConfigParser(const ConfigParser &other);
+		ConfigParser &operator=(const ConfigParser &other);
 
 		std::vector<Directive> *parseDirectiveBlock(std::vector<Directive> *parent);
 		Directive               parseDirective();

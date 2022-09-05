@@ -1,6 +1,23 @@
 #include "config/ConfigParser.hpp"
 
+ConfigParser::ConfigParser()
+{
+}
+
+ConfigParser::~ConfigParser()
+{
+	if (this->_fileStream.is_open())
+	{
+		this->_fileStream.close();
+	}
+}
+
 ConfigParser::ConfigParser(int argc, char const **argv)
+{
+	parseFromArgs(argc, argv);
+}
+
+std::vector<Directive> ConfigParser::parseFromArgs(int argc, char const **argv)
 {
 	this->_filePath = "../data/config/incomplete.config";
 	if (argc > 1)
@@ -19,6 +36,12 @@ ConfigParser::ConfigParser(int argc, char const **argv)
 	}
 	this->_parseResult = *parseDirectiveBlock(&this->_parseResult);
 	printDirectiveInfo();
+	return (this->_parseResult);
+}
+
+std::vector<Directive> ConfigParser::getParseResult()
+{
+	return _parseResult;
 }
 
 std::vector<Directive> *ConfigParser::parseDirectiveBlock(std::vector<Directive> *parent)
@@ -233,15 +256,3 @@ void ConfigParser::printDirectiveInfo()
 	}
 	std::cout << std::setfill('_') << std::setw(60) << "_" << std::endl;
 }
-
-// ConfigParser(const ConfigParser &other)
-// {
-// }
-
-// ConfigParser &operator=(const ConfigParser &other)
-// {
-// }
-
-// ConfigParser::~ConfigParser()
-// {
-// }
