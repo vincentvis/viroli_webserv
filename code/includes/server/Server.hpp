@@ -6,13 +6,13 @@
 #define WEBSERV_SERVER_HPP
 
 #include <iostream>
-#include <cstdint>
+#include <stdint.h>
 #include <vector>
 
 class Server
 {
 	protected:
-		std::uint16_t    _port;
+		uint16_t    _port;
 		std::string _serverName;
 		std::string _serverRoot;
 		int         _acceptedMethods; // 1,2,4
