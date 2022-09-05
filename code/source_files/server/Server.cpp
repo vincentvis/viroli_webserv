@@ -13,12 +13,12 @@ Server::Server()
 	this->_acceptedMethods  = 0; // 1,2,4
 	this->_defaultIndexPage = "empty";
 	this->_defaultErrorPage = "empty";
-	//	this->_errorPages; // zoiets?
+	//	this->_errorPages;
 	this->_routeType   = "empty";
 	this->_allowUpload = 0;
 	this->_autoIndex   = 0;
 	this->_bufferSize  = 0;
-	//	this->_locations; // zoiets?
+	//	this->_locations;
 }
 
 Server::Server(const Server &copy)
@@ -26,8 +26,8 @@ Server::Server(const Server &copy)
       _acceptedMethods(copy._acceptedMethods), _defaultIndexPage(copy._defaultIndexPage), _routeType(copy._routeType),
       _allowUpload(copy._allowUpload), _autoIndex(copy._autoIndex), _bufferSize(copy._bufferSize)
 {
-	//	this->_errorPages; // moet nog verwerkt worden
-	//	this->_locations; // moet nog verwerkt worden
+	//	this->_errorPages; // moet nog aangemaakt worden
+	//	this->_locations; // moet nog aangemaakt worden
 }
 
 
@@ -39,23 +39,13 @@ Server &Server::operator=(const Server &copy)
 	this->_acceptedMethods  = copy._acceptedMethods; // 1,2,4
 	this->_defaultIndexPage = copy._defaultIndexPage;
 	this->_defaultErrorPage = copy._defaultErrorPage;
-	//		std::vector<ErrorPage>    _errorPages  = copy._errorPages; // zoiets?
+	//		std::vector<ErrorPage>    _errorPages  = copy._errorPages; // moet nog aangemaakt worden
 	this->_routeType   = copy._routeType;
 	this->_allowUpload = copy._allowUpload;
 	this->_autoIndex   = copy._autoIndex;
 	this->_bufferSize  = copy._bufferSize;
-	//		std::vector<Locations>   _locations = copy._locations; // zoiets?
+	//		std::vector<Locations>   _locations = copy._locations; // moet nog aangemaakt worden
 	return (*this);
-}
-#include <sys/socket.h>
-
-void 	Server::testRun()
-//{
-//	int fd;
-//	fd = socket(AF_INET, SOCK_STREAM, int protocol);
-//	if (fd == -1)
-//		std::cout << "error" << std::endl;
-
 }
 
 Server::~Server()
