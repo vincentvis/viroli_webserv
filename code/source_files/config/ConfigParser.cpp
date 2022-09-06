@@ -27,6 +27,9 @@ std::vector<Directive> ConfigParser::parseFromArgs(int argc, char const **argv) 
 		throw std::invalid_argument("Problem while reading file");
 	}
 	this->_parseResult = *parseDirectiveBlock(&this->_parseResult);
+	if (this->_fileStream.eof() == false || this->_currentLine.length() != 0) {
+		throw std::invalid_argument("Invalid configuration file");
+	}
 	validateParseResult();
 	return (this->_parseResult);
 }
@@ -44,7 +47,9 @@ std::vector<Directive> *ConfigParser::parseDirectiveBlock(std::vector<Directive>
 		}
 	}
 	if (this->_currentLine.at(0) == '}') {
-		// check if there was a block started..
+		if (parent->size() == 0) {
+			throw InvalidBlockConfigException();
+		}
 		return (parent);
 	}
 
