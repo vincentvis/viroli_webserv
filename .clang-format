@@ -1,21 +1,34 @@
 BasedOnStyle: 'LLVM'
-IndentWidth: 8
+IndentWidth: 4
+TabWidth: 4
 UseTab: 'ForContinuationAndIndentation'
-BreakBeforeBraces: 'Linux'
+BreakBeforeBraces: 'Custom'
+BraceWrapping:
+  AfterClass: false
+  AfterControlStatement: 'MultiLine'
+  SplitEmptyFunction: false
+  BeforeCatch: false
+  BeforeWhile: false
+BreakBeforeConceptDeclarations: true
+BreakConstructorInitializers: 'AfterColon'
+BreakInheritanceList: 'AfterColon'
+IndentCaseLabels: true
+EmptyLineBeforeAccessModifier: 'Always'
 AllowShortIfStatementsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
-AllowShortBlocksOnASingleLine: false
+AllowShortBlocksOnASingleLine: 'Empty'
 AllowShortLoopsOnASingleLine: false
-IndentCaseLabels: false
+AccessModifierOffset: 0
+SpaceInEmptyBlock: true
 AlignAfterOpenBracket: 'BlockIndent'
-AlignConsecutiveAssignments: 'Consecutive'
-AlignConsecutiveMacros: 'Consecutive'
-AlignConsecutiveDeclarations: 'Consecutive'
+AlignConsecutiveAssignments: 'AcrossEmptyLines'
+AlignConsecutiveMacros: 'AcrossEmptyLines'
+AlignConsecutiveDeclarations: 'AcrossEmptyLines'
 AlignEscapedNewlines: 'Left'
 AlignOperands: true
-ColumnLimit: 120
 KeepEmptyLinesAtTheStartOfBlocks: false
 MaxEmptyLinesToKeep: 2
-AccessModifierOffset: 0
 IndentAccessModifiers: true
+ColumnLimit: 90
+Standard: c++03

@@ -7,8 +7,7 @@
 #include <string>
 #include <vector>
 
-class Directive
-{
+class Directive {
 	public:
 		Directive();
 		Directive(std::string name);
@@ -21,11 +20,10 @@ class Directive
 		std::vector<DirectiveParam> getParameters();
 		std::string                 getName();
 		void                        setDirectiveName(std::string name);
-		void                        addChildrenToVector(std::vector<Directive> children);
 		DirectiveParam              addParam(std::string newParam);
 		Directive                   addChild(Directive newChild);
 
-		void printDirectiveInfo(int depth = 0);
+		void                        printDirectiveInfo(int depth = 0);
 
 	private:
 		bool                        _initialized;
