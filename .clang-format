@@ -30,5 +30,5 @@ AlignOperands: true
 KeepEmptyLinesAtTheStartOfBlocks: false
 MaxEmptyLinesToKeep: 2
 IndentAccessModifiers: true
-ColumnLimit: 0
+ColumnLimit: 90
 Standard: c++03
