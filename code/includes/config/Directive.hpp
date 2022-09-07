@@ -15,10 +15,10 @@ class Directive {
 		Directive(std::string name, std::string param1, std::string param2);
 
 		bool                        isInitialized();
-		std::vector<Directive>      getChildren();
+		std::vector<Directive>      getChildren() const;
 		std::vector<Directive>     *getChildVector();
 		std::vector<DirectiveParam> getParameters();
-		std::string                 getName();
+		std::string                 getName() const;
 		void                        setDirectiveName(std::string name);
 		DirectiveParam              addParam(std::string newParam);
 		Directive                   addChild(Directive newChild);
@@ -29,5 +29,6 @@ class Directive {
 		bool                        _initialized;
 		std::string                 _directiveName;
 		std::vector<DirectiveParam> _parameters;
+		std::vector<std::string>    _stringParams;
 		std::vector<Directive>      _children;
 };

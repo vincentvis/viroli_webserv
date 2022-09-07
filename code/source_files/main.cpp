@@ -17,8 +17,7 @@ int main(int argc, char const *argv[]) {
 	}
 
 	config.printDirectiveInfo();
-
-	std::cout << "Ran " << argv[0] << " with argc: " << argc << std::endl;
+	Server FirstServer(config.getParseResult().at(0));
 
 	return 0;
 }

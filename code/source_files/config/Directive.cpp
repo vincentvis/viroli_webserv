@@ -26,7 +26,7 @@ bool Directive::isInitialized() {
 	return _initialized;
 }
 
-std::vector<Directive> Directive::getChildren() {
+std::vector<Directive> Directive::getChildren() const {
 	return _children;
 }
 
@@ -38,7 +38,7 @@ std::vector<DirectiveParam> Directive::getParameters() {
 	return _parameters;
 }
 
-std::string Directive::getName() {
+std::string Directive::getName() const {
 	return _directiveName;
 }
 

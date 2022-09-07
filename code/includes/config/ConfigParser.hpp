@@ -1,4 +1,5 @@
 #include "config/Directive.hpp"
+#include "config/Param.hpp"
 
 #include <cctype>
 #include <exception>
@@ -80,4 +81,5 @@ class ConfigParser {
 		std::ifstream           _fileStream;
 		std::string             _currentLine;
 		std::vector<Directive>  _parseResult;
+		std::vector<Param>      _configParams;
 };
