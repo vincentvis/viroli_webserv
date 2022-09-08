@@ -1,5 +1,6 @@
 
 #define PORT 8080
+#define BUFFER_SIZE 1
 #define MAX_CONN 1 // does nothing?
 
 // struct addrinfo {
@@ -69,6 +70,7 @@ uServer::~uServer(void){};
   Add sockets to vector
 */
 
+#include <cerrno> // remove
 void uServer::init(void) {
   int fd = 0;
   int opt = 1;
@@ -100,6 +102,10 @@ void uServer::init(void) {
     fcntl(fd, F_SETFL, O_NONBLOCK); // make socket non-blocking
     if (bind(fd, reinterpret_cast<sockaddr *>(&server), addrlen) < 0) {
       close(fd);
+      std::cerr
+          << std::strerror(errno)
+          << std::endl; // for testing purposses, has to be removed. address in
+                        // use when running a second server on the same machine
       std::cout << "error bind()\n";
       continue;
     }
@@ -125,9 +131,14 @@ void uServer::run(void) {
   socklen_t addrlen = sizeof(clientaddr);
   struct pollfd client;
 
-  char buffer[10];
-  char msg[] = "hello world\n";
+  // char buffer[BUFFER_SIZE + 1];
+  // char msg[] = "hello world\n";
+
+  std::vector<char> buffer(BUFFER_SIZE, 0);
+  std::string receiving;
+  std::string msg("Lorem ipsum");
   int nbytes = 0;
+  int tbytes = 0;
 
   for (;;) {
     if ((events = poll(_pfds.data(), _pfds.size(), -1)) < 0) {
@@ -146,28 +157,49 @@ void uServer::run(void) {
                            &addrlen)) < 0)) {
             std::cout << "error accept()\n";
           }
+
+          std::cout << "incoming connection from: "
+                    << inet_ntoa(clientaddr.sin_addr) << std::endl;
+
           memset(&client, 0, sizeof(client));
           client.fd = new_fd;
           client.events = POLLIN;
           _pfds.push_back(client);
           /* read or write */
         } else {
-          memset(&buffer, 0, sizeof(buffer));
-          nbytes = recv(_pfds[i].fd, &buffer, sizeof(buffer), 0);
-
-          int sender = _pfds[i].fd;
-          if (nbytes <= 0) {
-            if (nbytes == 0) {
-              std::cout << "connection closed\n";
-            } else {
-              std::cout << "error recv()\n";
+          /* don't set all of buffer to 0, because you might erase data */
+          /* recv == 0: remote has closed connection */
+          /* recv == -1: error has ocurred */
+          while ((nbytes = recv(_pfds[i].fd, buffer.data(), buffer.size(), 0)) >
+                 0) {
+            receiving.append(buffer.begin(), buffer.begin() + nbytes);
+            if (nbytes < 0) {
+              std::cout << "bytes recv: " << nbytes << std::endl;
+              break;
             }
-            close(_pfds[i].fd);
-            _pfds.erase(_pfds.begin() + i);
-          } else {
-            std::cout << buffer;
-            send(sender, &msg, sizeof(msg), 0);
           }
+          _pfds[i].events = POLLOUT;
+          // close(_pfds[i].fd);
+          // _pfds.erase(_pfds.begin() + i);
+          if (receiving.find("\r\n\r\n") != std::string::npos) {
+            std::cout << "==============\nrequest succesful\n==============\n";
+            std::cout << receiving << std::endl;
+          } else {
+            std::cout << "header incomplete or too large\n";
+          }
+          receiving.clear();
+        }
+      } else if (_pfds[i].revents & POLLOUT) {
+        tbytes = 0;
+        while (tbytes < msg.size()) {
+          nbytes =
+              send(_pfds[i].fd, &msg.data()[tbytes], (msg.size() - tbytes), 0);
+          tbytes += nbytes;
+        }
+        if (nbytes < 0) {
+          close(_pfds[i].fd);
+          _pfds.erase(_pfds.begin() + i);
+          break;
         }
       }
     }
@@ -175,13 +207,6 @@ void uServer::run(void) {
 }
 
 void uServer::check() {
-  // std::cout << "the ports:" << std::endl;
-  // for (std::vector<sockaddr_in>::iterator it = _servers.begin();
-  //      it != _servers.end(); ++it) {
-  //   std::cout << ntohs(it->sin_port) << std::endl;
-  // }
-  // std::cout << std::endl;
-
   std::cout << "# | POLLIN / POLLOUT" << std::endl;
   for (std::vector<pollfd>::iterator it = _pfds.begin(); it != _pfds.end();
        ++it) {
