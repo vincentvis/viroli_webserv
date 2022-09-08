@@ -5,7 +5,7 @@ Server::Server() {
 	this->_port             = 0;
 	this->_serverName       = "empty";
 	this->_serverRoot       = "empty";
-	this->_acceptedMethods  = "";
+	this->_allowedMethods   = "";
 	this->_defaultIndexPage = "empty";
 	this->_defaultErrorPage = "empty";
 	//	this->_errorPages;

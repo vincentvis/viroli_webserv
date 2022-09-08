@@ -21,7 +21,7 @@ class Server {
 		std::string _hostName;
 		std::string _serverName;
 		std::string _serverRoot;
-		std::string _acceptedMethods;
+		std::string _allowedMethods;
 		std::string _defaultIndexPage;
 		std::string _defaultErrorPage;
 		//		std::vector<ErrorPage>	_errorPages; // moet nog aangemaakt worden
