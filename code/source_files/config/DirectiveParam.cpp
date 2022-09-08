@@ -90,7 +90,7 @@ std::pair<std::string, uint16_t> DirectiveParam::convertToHostAndPort() {
 
 	std::string::size_type colon_position = _stringValue.find_first_of(":");
 	if (colon_position == std::string::npos) {
-		return (std::make_pair("failure", -1));
+		return (std::make_pair("failure", -2));
 	}
 	std::string host   = _stringValue.substr(0, colon_position);
 
@@ -101,7 +101,7 @@ std::pair<std::string, uint16_t> DirectiveParam::convertToHostAndPort() {
 	if (errno == EINVAL || errno == ERANGE || _stringValue.c_str() == endptr ||
 		*endptr != '\0' || intval != longval || intval > 65535)
 	{
-		return (std::make_pair("failure", -1));
+		return (std::make_pair("failure", -3));
 	}
 
 	return (std::make_pair(host, intval));
