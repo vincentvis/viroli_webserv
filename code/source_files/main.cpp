@@ -11,9 +11,10 @@ int main(int argc, char const *argv[]) {
   // ports.push_back(8081);
   // ports.push_back(8082);
 
-  Server(8080);
-  Server(8081);
-  Server(8082);
+  std::vector<Server> servers;
+  servers.push_back(Server(8080));
+  servers.push_back(Server(8081));
+  servers.push_back(Server(8082));
 
   // Server servers(ports);
 
