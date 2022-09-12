@@ -7,14 +7,10 @@
 #include <vector>
 
 class Server {
-		typedef std::vector<Param>           ParamVector;
-		typedef std::vector<Param>::iterator ParamIterator;
-		typedef void (Server::*setFromParam)(ParamVector);
-
 	private:
-		void setHostAndPort(ParamVector params);
-		void setFromParamServerName(ParamVector params);
-		void setFromParamAllowedMethods(ParamVector params);
+		void setFromParamHostAndPort(std::vector<Param> params);
+		void setFromParamServerName(std::vector<Param> params);
+		void setFromParamAllowedMethods(std::vector<Param> params);
 
 	protected:
 		uint16_t    _port;
@@ -32,7 +28,7 @@ class Server {
 		//		std::vector<Locations>	_locations; // moet nog aangemaakt worden
 
 	public:
-		Server(const std::map<std::string, std::vector<Param> > &config);
+		Server(const std::map<std::string, std::vector<Param> > config);
 		Server();
 		~Server();
 };

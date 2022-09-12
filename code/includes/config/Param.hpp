@@ -1,8 +1,10 @@
 #pragma once
 
+#include <cerrno>
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <stdlib.h>
 #include <string>
 #include <vector>
 
@@ -44,7 +46,12 @@ class Param {
 		void        setName(std::string name);
 		void        addValue(std::string value);
 		void        setChildren(std::map<std::string, std::vector<Param> > children);
+		std::string getFirstValue();
+		std::vector<std::string>            getValues();
 		std::vector<std::string>::size_type getNumValues();
+
+		int32_t                             convertToInt32(std::string source);
+		std::pair<std::string, uint16_t>    convertToHostAndPort(std::string source);
 
 		friend std::ostream &operator<<(std::ostream &os, const Param &param);
 		void

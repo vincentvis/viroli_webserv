@@ -16,6 +16,18 @@ int main(int argc, char const *argv[]) {
 		return (1);
 	}
 
+	std::vector<std::map<std::string, std::vector<Param> > > serverConfigs =
+		config.getParseResult();
+	std::vector<std::map<std::string, std::vector<Param> > >::iterator serverConfig =
+		serverConfigs.begin();
+	std::vector<std::map<std::string, std::vector<Param> > >::iterator configsEnd =
+		serverConfigs.end();
+	do {
+		Server Server(*serverConfig);
+		serverConfig++;
+	} while (serverConfig != configsEnd);
+
+
 	// config.printDirectiveInfo();
 	// std::vector<Directive>            serverConfigs = config.getParseResult();
 	// std::vector<Directive>::size_type end           = serverConfigs.size();

@@ -29,6 +29,42 @@ void Param::setChildren(std::map<std::string, std::vector<Param> > children) {
 	_children = children;
 }
 
+std::string Param::getFirstValue() {
+	return _values.at(0);
+}
+std::vector<std::string> Param::getValues() {
+	return _values;
+}
+
+int32_t Param::convertToInt32(std::string source) {
+	char *endptr    = NULL;
+	errno           = 0;
+	long    longval = strtol(source.c_str(), &endptr, 0);
+	int32_t intval  = longval;
+	if (errno == EINVAL || errno == ERANGE || source.c_str() == endptr ||
+		*endptr != '\0' || intval != longval)
+	{
+		return (-1);
+	}
+	return (intval);
+}
+
+std::pair<std::string, uint16_t> Param::convertToHostAndPort(std::string source) {
+	std::string::size_type colon_position = source.find_first_of(":");
+	if (colon_position == std::string::npos) {
+		return (std::make_pair("failure", -1));
+	}
+	std::string host = source.substr(0, colon_position);
+	errno            = 0;
+	int      intval  = convertToInt32(source.substr(colon_position + 1));
+	uint16_t port    = (uint16_t)intval;
+
+	if (intval == -1 || port != intval || port > 65535) {
+		return (std::make_pair("failure", -1));
+	}
+	return (std::make_pair(host, port));
+}
+
 std::ostream &operator<<(std::ostream &os, const Param &param) {
 	os << std::setw(Param::getDepth() * 4) << ""
 	   << "{" << std::endl;
