@@ -1,14 +1,14 @@
 #pragma once
 
-#include "config/Directive.hpp"
+#include "config/Param.hpp"
 #include <iostream>
 #include <map>
 #include <stdint.h>
 #include <vector>
 
 class Server {
-		typedef std::vector<DirectiveParam>           ParamVector;
-		typedef std::vector<DirectiveParam>::iterator ParamIterator;
+		typedef std::vector<Param>           ParamVector;
+		typedef std::vector<Param>::iterator ParamIterator;
 		typedef void (Server::*setFromParam)(ParamVector);
 
 	private:
@@ -32,7 +32,7 @@ class Server {
 		//		std::vector<Locations>	_locations; // moet nog aangemaakt worden
 
 	public:
-		Server(const Directive &config);
+		Server(const std::map<std::string, std::vector<Param> > &config);
 		Server();
 		~Server();
 };

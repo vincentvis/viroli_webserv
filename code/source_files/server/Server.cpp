@@ -20,55 +20,58 @@ Server::~Server() {
 }
 
 void Server::setHostAndPort(ParamVector params) {
-	DirectiveParam                   param = params.at(0);
-	std::pair<std::string, uint16_t> data  = param.convertToHostAndPort();
+	(void)params;
+	// Param                            param = params.at(0);
+	// std::pair<std::string, uint16_t> data  = param.convertToHostAndPort();
 
-	if (data.first == "failure")
-		throw std::invalid_argument("Invalid value in listen directive");
-	this->_hostName = data.first;
-	this->_port     = data.second;
-	std::cout << "- host: " << this->_hostName << std::endl
-			  << "- port: " << this->_port << std::endl;
+	// if (data.first == "failure")
+	// 	throw std::invalid_argument("Invalid value in listen directive");
+	// this->_hostName = data.first;
+	// this->_port     = data.second;
+	// std::cout << "- host: " << this->_hostName << std::endl
+	// 		  << "- port: " << this->_port << std::endl;
 }
 
 void Server::setFromParamServerName(ParamVector params) {
-	this->_serverName = params.at(0).getStringValue();
+	(void)params;
+	// this->_serverName = params.at(0).getStringValue();
 
-	std::cout << "- servername: " << this->_serverName << std::endl;
+	// std::cout << "- servername: " << this->_serverName << std::endl;
 }
 
 void Server::setFromParamAllowedMethods(ParamVector params) {
-	ParamIterator currentParam = params.begin();
-	ParamIterator end          = params.end();
+	(void)params;
+	// ParamIterator currentParam = params.begin();
+	// ParamIterator end          = params.end();
 
-	while (currentParam != end) {
-		std::string value = currentParam->getStringValue();
-		if (value == "GET" || value == "POST" || value == "DELETE") {
-			if (this->_allowedMethods.length() > 0)
-				this->_allowedMethods += "||";
-			this->_allowedMethods += value;
-		}
-		currentParam++;
-	}
-	std::cout << "- acceptedMethods: " << this->_allowedMethods << std::endl;
+	// while (currentParam != end) {
+	// 	std::string value = currentParam->getStringValue();
+	// 	if (value == "GET" || value == "POST" || value == "DELETE") {
+	// 		if (this->_allowedMethods.length() > 0)
+	// 			this->_allowedMethods += "||";
+	// 		this->_allowedMethods += value;
+	// 	}
+	// 	currentParam++;
+	// }
+	// std::cout << "- acceptedMethods: " << this->_allowedMethods << std::endl;
 }
 
-Server::Server(const Directive &config) {
+Server::Server(const std::map<std::string, std::vector<Param> > &config) {
 	std::map<std::string, setFromParam> jumpTable;
-	jumpTable["listen"]               = &Server::setHostAndPort;
-	jumpTable["server_name"]          = &Server::setFromParamServerName;
-	jumpTable["allowed_methods"]      = &Server::setFromParamAllowedMethods;
+	jumpTable["listen"]          = &Server::setHostAndPort;
+	jumpTable["server_name"]     = &Server::setFromParamServerName;
+	jumpTable["allowed_methods"] = &Server::setFromParamAllowedMethods;
 
 
-	std::vector<Directive> directives = config.getChildren();
-
+	// std::vector<Directive> directives = config.getChildren();
+	(void)config;
 	std::cout << "\033[4mMake a server\033[0m" << std::endl;
-	for (std::vector<Directive>::iterator directive = directives.begin();
-		 directive != directives.end(); ++directive)
-	{
-		if (jumpTable.find(directive->getName()) != jumpTable.end()) {
-			(this->*jumpTable.at(directive->getName()))(directive->getParameters());
-		}
-	}
+	// for (std::vector<Directive>::iterator directive = directives.begin();
+	// 	 directive != directives.end(); ++directive)
+	// {
+	// 	if (jumpTable.find(directive->getName()) != jumpTable.end()) {
+	// 		(this->*jumpTable.at(directive->getName()))(directive->getParameters());
+	// 	}
+	// }
 	std::cout << "\033[4m------ done with making a server\033[0m" << std::endl;
 }

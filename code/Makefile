@@ -36,9 +36,7 @@ INC_DIR		:= includes/
 MAIN		:= $(SRC_DIR)main.cpp
 
 # a list of classes without the .cpp suffix!
-CLASSES		:= config/Directive\
-				config/DirectiveParam\
-				config/Param\
+CLASSES		:= config/Param\
 				config/ConfigParser\
 				server/Server
 

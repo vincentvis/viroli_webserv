@@ -13,7 +13,8 @@ ConfigParser::ConfigParser(int argc, char const **argv) {
 	parseFromArgs(argc, argv);
 }
 
-std::vector<Directive> ConfigParser::parseFromArgs(int argc, char const **argv) {
+std::vector<ConfigParser::DirectiveMap>
+ConfigParser::parseFromArgs(int argc, char const **argv) {
 	if (argc > 1) {
 		this->_filePath = argv[1];
 	} else {
@@ -29,13 +30,12 @@ std::vector<Directive> ConfigParser::parseFromArgs(int argc, char const **argv) 
 	}
 
 	ConfigParser::parseStream(&this->_parsed);
-
-	// this->_parseResult = *parseDirectiveBlock(&this->_parseResult);
 	if (this->_fileStream.eof() == false || this->_currentLine.length() != 0) {
 		throw std::invalid_argument("Invalid configuration file");
 	}
-	validateParseResult();
-	return (this->_parseResult);
+	Param x;
+	x.printVectorOfMaps(this->_parsed);
+	return (this->_parsed);
 }
 
 void ConfigParser::parseStream(std::vector<ConfigParser::DirectiveMap> *parent) {
@@ -50,26 +50,21 @@ void ConfigParser::parseStream(std::vector<ConfigParser::DirectiveMap> *parent) 
 		extract_server_block_info(&map);
 		parent->push_back(map);
 	}
-
-	if (line_at_end_of_config_block()) {
-		return;
-	}
-	// parent->push_back(parseBlock());
 	return;
 }
-
-// DirectiveMap ConfigParser::parseBlock() {
-// }
-
 void ConfigParser::extract_server_block_info(ConfigParser::DirectiveMap *map) {
 	while (true) {
+		if (this->_currentLine.at(0) == '}') {
+			skipNextChar();
+			return;
+		}
 		std::string directiveName = extractDirectiveName();
 		if (map->find(directiveName) == map->end()) {
 			ParamVector params;
 			map->insert(std::make_pair(directiveName, params));
 		}
-		ParamVector params = (*map)[directiveName];
-		Param       param(directiveName);
+		ParamVector *params = &((*map)[directiveName]);
+		Param        param(directiveName);
 
 		while (!this->_currentLine.empty() && this->_currentLine.at(0) != ';' &&
 			   this->_currentLine.at(0) != '{' && this->_currentLine.at(0) != '}')
@@ -80,14 +75,14 @@ void ConfigParser::extract_server_block_info(ConfigParser::DirectiveMap *map) {
 		if (this->_currentLine.empty()) {
 			throw InvalidBlockConfigException();
 		}
+
 		// simple directive (with directive name && = N>0 params)
 		if (this->_currentLine.at(0) == ';') {
 			skipNextChar();
 			if (param.getNumValues() == 0) {
 				throw DirectiveWithoutValueException();
 			}
-			params.push_back(param);
-			std::cout << "param: " << param << std::endl;
+			params->push_back(param);
 			continue;
 		}
 
@@ -97,7 +92,7 @@ void ConfigParser::extract_server_block_info(ConfigParser::DirectiveMap *map) {
 
 			// this would be an empty block.. usesless?
 			if (this->_currentLine.at(0) == '}') {
-				params.push_back(param);
+				params->push_back(param);
 				continue;
 			}
 
@@ -105,25 +100,24 @@ void ConfigParser::extract_server_block_info(ConfigParser::DirectiveMap *map) {
 			extract_server_block_info(&submap);
 			param.setChildren(submap);
 
-			params.push_back(param);
-
-			if (this->_currentLine.at(0) != '}') {
+			params->push_back(param);
+			if (line_at_end_of_config_block() == false) {
 				throw InvalidBlockConfigException();
 			}
-			skipNextChar();
 		}
 	}
-	// return (map);
 }
 
 bool ConfigParser::line_needs_update() {
 	return (this->_currentLine.length() == 0 && this->_fileStream.eof() == false);
 }
+
 bool ConfigParser::line_at_end_of_config_block() {
 	return (this->_currentLine.length() > 0 && this->_currentLine.at(0) == '}');
 }
+
 void ConfigParser::skip_to_opening_after_n(std::string::size_type n) {
-	this->_currentLine = this->_currentLine.substr(n);
+	this->_currentLine = trimLeadingWhitespace(this->_currentLine.substr(n));
 	if (this->_currentLine.length() == 0) {
 		getNewLine();
 	}
@@ -137,94 +131,8 @@ void ConfigParser::skip_to_opening_after_n(std::string::size_type n) {
 }
 
 
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-
-std::vector<Directive> ConfigParser::getParseResult() {
-	return _parseResult;
-}
-
-std::vector<Directive> *ConfigParser::parseDirectiveBlock(std::vector<Directive> *parent
-) {
-	if (this->_currentLine.length() == 0 && this->_fileStream.eof() == false) {
-		getNewLine();
-		if (this->_fileStream.eof() == true && this->_currentLine.length() == 0) {
-			return (parent);
-		}
-	}
-	if (this->_currentLine.at(0) == '}') {
-		if (parent->size() == 0) {
-			throw InvalidBlockConfigException();
-		}
-		return (parent);
-	}
-
-	parent->push_back(parseDirective());
-	this->_currentLine = trimLeadingWhitespace(this->_currentLine);
-	if (this->_currentLine.length() > 0 || this->_fileStream.eof() == false) {
-		return (parseDirectiveBlock(parent));
-	}
-	return (parent);
-}
-
-Directive ConfigParser::parseDirective() {
-	Directive newDirective;
-
-	newDirective.setDirectiveName(extractDirectiveName());
-	while (!this->_currentLine.empty() && this->_currentLine.at(0) != ';' &&
-		   this->_currentLine.at(0) != '{' && this->_currentLine.at(0) != '}')
-	{
-		std::string newparam = extractParam();
-		newDirective.addParam(newparam);
-	}
-	if (this->_currentLine.empty()) {
-		throw InvalidBlockConfigException();
-	}
-	if (this->_currentLine.at(0) == ';') {
-		skipNextChar();
-		if (newDirective.getParameters().size() == 0) {
-			throw DirectiveWithoutValueException();
-		}
-		return (newDirective);
-	}
-	if (this->_currentLine.at(0) == '{') {
-		skipNextChar();
-
-		// this would be an empty block.. usesless?
-		if (this->_currentLine.at(0) == '}') {
-			return (newDirective);
-		}
-
-		parseDirectiveBlock(newDirective.getChildVector());
-		if (this->_currentLine.at(0) != '}') {
-			throw InvalidBlockConfigException();
-		}
-		skipNextChar();
-		return (newDirective);
-	}
-	throw InvalidBlockConfigException();
+std::vector<ConfigParser::DirectiveMap> ConfigParser::getParseResult() {
+	return _parsed;
 }
 
 std::string ConfigParser::extractDirectiveName() {
@@ -299,8 +207,12 @@ bool ConfigParser::getNewLine() {
 	if (this->_fileStream.eof()) {
 		hasReachedEOF = true;
 	}
-	this->_currentLine  = partialResult + trimWhitespace(this->_currentLine);
-	this->_lineIterator = this->_currentLine.begin();
+	this->_currentLine = trimWhitespace(this->_currentLine);
+	if (this->_currentLine.empty() == false && this->_currentLine.at(0) == '#') {
+		this->_currentLine = partialResult;
+		return (getNewLine());
+	}
+	this->_currentLine = partialResult + this->_currentLine;
 	if (!hasReachedEOF && this->_currentLine.length() == 0) {
 		return (getNewLine());
 	}
@@ -332,30 +244,4 @@ std::string ConfigParser::trimTrailingWhitespace(std::string str) {
 		end--;
 	}
 	return (std::string(start, end));
-}
-
-void ConfigParser::printDirectiveInfo() {
-	std::vector<Directive>::size_type i   = 0;
-	std::vector<Directive>::size_type max = this->_parseResult.size();
-
-	std::cout << "\033[4mDirective information:" << std::setw(38) << "\033[0m"
-			  << std::endl;
-	while (i < max) {
-		std::cout << "{" << std::endl;
-		_parseResult.at(i).printDirectiveInfo(1);
-		std::cout << "}," << std::endl;
-		i++;
-	}
-	std::cout << std::setfill('_') << std::setw(60) << "_" << std::endl;
-}
-
-// enforce that all top level elements are "server" directives
-void ConfigParser::validateParseResult() {
-	for (std::vector<Directive>::iterator obj = this->_parseResult.begin();
-		 obj != this->_parseResult.end(); ++obj)
-	{
-		if (obj->getName() != "server") {
-			throw InvalidTopLevelDirective();
-		}
-	}
 }

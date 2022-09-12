@@ -1,4 +1,3 @@
-#include "config/Directive.hpp"
 #include "config/Param.hpp"
 #include "server/Server.hpp"
 
@@ -12,13 +11,14 @@
 
 class ConfigParser {
 	public:
+		typedef std::vector<Param>                 ParamVector;
+		typedef std::map<std::string, ParamVector> DirectiveMap;
+
 		ConfigParser();
 		ConfigParser(int argc, char const **argv);
-		std::vector<Directive> parseFromArgs(int argc, char const **argv);
-		std::vector<Directive> getParseResult();
+		std::vector<DirectiveMap> parseFromArgs(int argc, char const **argv);
+		std::vector<DirectiveMap> getParseResult();
 		~ConfigParser();
-
-		void printDirectiveInfo();
 
 		class DirectiveNameNotFoundException : public std::exception {
 			public:
@@ -62,17 +62,12 @@ class ConfigParser {
 				}
 		};
 
-		typedef std::vector<Param>                 ParamVector;
-		typedef std::map<std::string, ParamVector> DirectiveMap;
 
 	private:
 		// disable copying
 		ConfigParser(const ConfigParser &other);
 		ConfigParser             &operator=(const ConfigParser &other);
 
-		std::vector<Directive>   *parseDirectiveBlock(std::vector<Directive> *parent);
-		Directive                 parseDirective();
-		void                      validateParseResult();
 
 		std::string               trimWhitespace(std::string str);
 		std::string               trimLeadingWhitespace(std::string str);
@@ -86,9 +81,7 @@ class ConfigParser {
 		std::string               _filePath;
 		std::ifstream             _fileStream;
 		std::string               _currentLine;
-		std::string::iterator     _lineIterator;
-		std::vector<Directive>    _parseResult;
-
+		std::vector<DirectiveMap> _parsed;
 
 		void                      parseStream(std::vector<DirectiveMap> *parent);
 		void                      maybeGetStreamContent();
@@ -96,5 +89,4 @@ class ConfigParser {
 		bool                      line_at_end_of_config_block();
 		void                      skip_to_opening_after_n(std::string::size_type n);
 		void                      extract_server_block_info(DirectiveMap *map);
-		std::vector<DirectiveMap> _parsed;
 };
