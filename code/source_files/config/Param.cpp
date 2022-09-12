@@ -1,5 +1,7 @@
 #include "config/Param.hpp"
 
+int Param::_depth = 0;
+
 Param::Param() {
 }
 
@@ -28,20 +30,31 @@ void Param::setChildren(std::map<std::string, std::vector<Param> > children) {
 }
 
 std::ostream &operator<<(std::ostream &os, const Param &param) {
-	os << "{" << std::endl << "\tname: \"" << param._name << "\"" << std::endl;
-	os << "\tvalues: [";
+	os << std::setw(Param::getDepth() * 4) << ""
+	   << "{" << std::endl;
+	Param::incrementDepth();
+	os << std::setw(Param::getDepth() * 4) << ""
+	   << "name: \"" << param._name << "\"," << std::endl;
+	os << std::setw(Param::getDepth() * 4) << ""
+	   << "values: [";
 	for (std::size_t i = 0; i < param._values.size(); i++) {
 		os << "'" << param._values[i] << "'";
 		if (i != param._values.size() - 1)
 			os << ", ";
 	}
-	os << "]" << std::endl;
+	os << "]," << std::endl;
 	if (param._children.size() > 0) {
-		std::cout << "children [" << std::endl;
+		os << std::setw(Param::getDepth() * 4) << ""
+		   << "children [" << std::endl;
+		Param::incrementDepth();
 		param.printMap(param._children);
-		std::cout << "]," << std::endl;
+		Param::decrementDepth();
+		os << std::setw(Param::getDepth() * 4) << ""
+		   << "]," << std::endl;
 	}
-
+	Param::decrementDepth();
+	os << std::setw(Param::getDepth() * 4) << ""
+	   << "}," << std::endl;
 	return os;
 }
 
@@ -55,7 +68,9 @@ void Param::printVectorOfMaps(
 
 	while (elem != end) {
 		std::cout << "server [" << std::endl;
+		incrementDepth();
 		printMap(*elem);
+		decrementDepth();
 		std::cout << "]," << std::endl;
 		elem++;
 	}

@@ -13,7 +13,7 @@ ConfigParser::ConfigParser(int argc, char const **argv) {
 	parseFromArgs(argc, argv);
 }
 
-std::vector<ConfigParser::DirectiveMap>
+std::vector<std::map<std::string, std::vector<Param> > >
 ConfigParser::parseFromArgs(int argc, char const **argv) {
 	if (argc > 1) {
 		this->_filePath = argv[1];
@@ -29,7 +29,7 @@ ConfigParser::parseFromArgs(int argc, char const **argv) {
 		throw std::invalid_argument("Problem while reading file");
 	}
 
-	ConfigParser::parseStream(&this->_parsed);
+	parseStream(&this->_parsed);
 	if (this->_fileStream.eof() == false || this->_currentLine.length() != 0) {
 		throw std::invalid_argument("Invalid configuration file");
 	}
@@ -38,7 +38,9 @@ ConfigParser::parseFromArgs(int argc, char const **argv) {
 	return (this->_parsed);
 }
 
-void ConfigParser::parseStream(std::vector<ConfigParser::DirectiveMap> *parent) {
+void ConfigParser::parseStream(
+	std::vector<std::map<std::string, std::vector<Param> > > *parent
+) {
 	if (line_needs_update()) {
 		getNewLine();
 	}
@@ -46,13 +48,15 @@ void ConfigParser::parseStream(std::vector<ConfigParser::DirectiveMap> *parent) 
 	// should be at first non-whitespace character here
 	while (this->_currentLine.find("server") == 0) {
 		skip_to_opening_after_n(sizeof("server") - 1);
-		ConfigParser::DirectiveMap map;
+		std::map<std::string, std::vector<Param> > map;
 		extract_server_block_info(&map);
 		parent->push_back(map);
 	}
 	return;
 }
-void ConfigParser::extract_server_block_info(ConfigParser::DirectiveMap *map) {
+void ConfigParser::extract_server_block_info(
+	std::map<std::string, std::vector<Param> > *map
+) {
 	while (true) {
 		if (this->_currentLine.at(0) == '}') {
 			skipNextChar();
@@ -60,11 +64,11 @@ void ConfigParser::extract_server_block_info(ConfigParser::DirectiveMap *map) {
 		}
 		std::string directiveName = extractDirectiveName();
 		if (map->find(directiveName) == map->end()) {
-			ParamVector params;
+			std::vector<Param> params;
 			map->insert(std::make_pair(directiveName, params));
 		}
-		ParamVector *params = &((*map)[directiveName]);
-		Param        param(directiveName);
+		std::vector<Param> *params = &((*map)[directiveName]);
+		Param               param(directiveName);
 
 		while (!this->_currentLine.empty() && this->_currentLine.at(0) != ';' &&
 			   this->_currentLine.at(0) != '{' && this->_currentLine.at(0) != '}')
@@ -96,7 +100,7 @@ void ConfigParser::extract_server_block_info(ConfigParser::DirectiveMap *map) {
 				continue;
 			}
 
-			ConfigParser::DirectiveMap submap;
+			std::map<std::string, std::vector<Param> > submap;
 			extract_server_block_info(&submap);
 			param.setChildren(submap);
 
@@ -131,7 +135,7 @@ void ConfigParser::skip_to_opening_after_n(std::string::size_type n) {
 }
 
 
-std::vector<ConfigParser::DirectiveMap> ConfigParser::getParseResult() {
+std::vector<std::map<std::string, std::vector<Param> > > ConfigParser::getParseResult() {
 	return _parsed;
 }
 
@@ -169,7 +173,7 @@ std::string ConfigParser::extractParam() {
 			throw UnclosedQuotedStringException();
 		}
 		str                = str.substr(0, closingQuote);
-		this->_currentLine = this->_currentLine.substr(closingQuote + 1);
+		this->_currentLine = this->_currentLine.substr(closingQuote + 2);
 	} else {
 		std::string::size_type end_of_word = this->_currentLine.find_first_of(" \t;");
 		if (end_of_word == std::string::npos) {

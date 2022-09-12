@@ -15,6 +15,23 @@ class Param {
 		std::vector<std::string>                   _values;
 		std::map<std::string, std::vector<Param> > _children;
 
+		//
+		static int getDepth() {
+			return _depth;
+		};
+		static int incrementDepth() {
+			_depth++;
+			return _depth;
+		};
+		static int decrementDepth() {
+			_depth--;
+			return _depth;
+		};
+		static int setDepth(int newDepth) {
+			Param::_depth = newDepth;
+			return _depth;
+		};
+
 
 	public:
 		Param();
@@ -29,21 +46,6 @@ class Param {
 		void        setChildren(std::map<std::string, std::vector<Param> > children);
 		std::vector<std::string>::size_type getNumValues();
 
-		static int                          getDepth() {
-									 return _depth;
-		};
-		static int incrementDepth() {
-			_depth++;
-			return _depth;
-		};
-		static int decrementDepth() {
-			_depth--;
-			return _depth;
-		};
-		static int setDepth(int newDepth) {
-			_depth = newDepth;
-			return _depth;
-		};
 		friend std::ostream &operator<<(std::ostream &os, const Param &param);
 		void
 		printVectorOfMaps(std::vector<std::map<std::string, std::vector<Param> > > map);
