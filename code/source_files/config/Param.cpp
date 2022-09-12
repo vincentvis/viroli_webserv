@@ -15,12 +15,24 @@ void Param::setName(std::string name) {
 	_name = name;
 }
 
+void Param::addValue(std::string value) {
+	_values.push_back(value);
+}
 
-// Param(const Param &other) {
-// }
+std::vector<std::string>::size_type Param::getNumValues() {
+	return (_values.size());
+}
 
-// Param &operator=(const Param &other) {
-// }
+void Param::setChildren(std::map<std::string, std::vector<Param> > children) {
+	_children = children;
+}
 
-// Param::~Param() {
-// }
+std::ostream &operator<<(std::ostream &os, const Param &param) {
+	os << "{" << std::endl << "\tname:" << param._name << std::endl;
+	os << "\tvalues: {" << std::endl;
+	for (std::size_t i = 0; i < param._values.size(); i++) {
+		os << "\t\t" << i << ": " << param._values[i] << std::endl;
+	}
+	os << "\t}," << std::endl;
+	return os;
+}

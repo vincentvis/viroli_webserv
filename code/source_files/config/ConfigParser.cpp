@@ -14,9 +14,10 @@ ConfigParser::ConfigParser(int argc, char const **argv) {
 }
 
 std::vector<Directive> ConfigParser::parseFromArgs(int argc, char const **argv) {
-	this->_filePath = "../data/config/incomplete.config";
 	if (argc > 1) {
 		this->_filePath = argv[1];
+	} else {
+		this->_filePath = "../data/config/incomplete.config";
 	}
 	this->_fileStream.open(this->_filePath.c_str(), std::ios_base::in);
 	if (this->_fileStream.is_open() == false) {
@@ -26,13 +27,140 @@ std::vector<Directive> ConfigParser::parseFromArgs(int argc, char const **argv) 
 		this->_fileStream.close();
 		throw std::invalid_argument("Problem while reading file");
 	}
-	this->_parseResult = *parseDirectiveBlock(&this->_parseResult);
+
+	ConfigParser::parseStream(&this->_parsed);
+
+	// this->_parseResult = *parseDirectiveBlock(&this->_parseResult);
 	if (this->_fileStream.eof() == false || this->_currentLine.length() != 0) {
 		throw std::invalid_argument("Invalid configuration file");
 	}
 	validateParseResult();
 	return (this->_parseResult);
 }
+
+void ConfigParser::parseStream(std::vector<ConfigParser::DirectiveMap> *parent) {
+	if (line_needs_update()) {
+		getNewLine();
+	}
+
+	// should be at first non-whitespace character here
+	while (this->_currentLine.find("server") == 0) {
+		skip_to_opening_after_n(sizeof("server") - 1);
+		ConfigParser::DirectiveMap map;
+		extract_server_block_info(&map);
+		parent->push_back(map);
+	}
+
+	if (line_at_end_of_config_block()) {
+		return;
+	}
+	// parent->push_back(parseBlock());
+	return;
+}
+
+// DirectiveMap ConfigParser::parseBlock() {
+// }
+
+void ConfigParser::extract_server_block_info(ConfigParser::DirectiveMap *map) {
+	while (true) {
+		std::string directiveName = extractDirectiveName();
+		if (map->find(directiveName) == map->end()) {
+			ParamVector params;
+			map->insert(std::make_pair(directiveName, params));
+		}
+		ParamVector params = (*map)[directiveName];
+		Param       param(directiveName);
+
+		while (!this->_currentLine.empty() && this->_currentLine.at(0) != ';' &&
+			   this->_currentLine.at(0) != '{' && this->_currentLine.at(0) != '}')
+		{
+			std::string newparam = extractParam();
+			param.addValue(newparam);
+		}
+		if (this->_currentLine.empty()) {
+			throw InvalidBlockConfigException();
+		}
+		// simple directive (with directive name && = N>0 params)
+		if (this->_currentLine.at(0) == ';') {
+			skipNextChar();
+			if (param.getNumValues() == 0) {
+				throw DirectiveWithoutValueException();
+			}
+			params.push_back(param);
+			std::cout << "param: " << param << std::endl;
+			continue;
+		}
+
+		// complex directive with directive name && N>=0 params && directive children
+		if (this->_currentLine.at(0) == '{') {
+			skipNextChar();
+
+			// this would be an empty block.. usesless?
+			if (this->_currentLine.at(0) == '}') {
+				params.push_back(param);
+				continue;
+			}
+
+			ConfigParser::DirectiveMap submap;
+			extract_server_block_info(&submap);
+			param.setChildren(submap);
+
+			params.push_back(param);
+
+			if (this->_currentLine.at(0) != '}') {
+				throw InvalidBlockConfigException();
+			}
+			skipNextChar();
+		}
+	}
+	// return (map);
+}
+
+bool ConfigParser::line_needs_update() {
+	return (this->_currentLine.length() == 0 && this->_fileStream.eof() == false);
+}
+bool ConfigParser::line_at_end_of_config_block() {
+	return (this->_currentLine.length() > 0 && this->_currentLine.at(0) == '}');
+}
+void ConfigParser::skip_to_opening_after_n(std::string::size_type n) {
+	this->_currentLine = this->_currentLine.substr(n);
+	if (this->_currentLine.length() == 0) {
+		getNewLine();
+	}
+	if (this->_currentLine.length() == 0 || this->_currentLine.at(0) != '{') {
+		throw InvalidDirectiveNameException();
+	}
+	this->_currentLine = trimLeadingWhitespace(this->_currentLine.substr(1));
+	if (this->_currentLine.length() == 0) {
+		getNewLine();
+	}
+}
+
+
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
 
 std::vector<Directive> ConfigParser::getParseResult() {
 	return _parseResult;
@@ -171,7 +299,8 @@ bool ConfigParser::getNewLine() {
 	if (this->_fileStream.eof()) {
 		hasReachedEOF = true;
 	}
-	this->_currentLine = partialResult + trimWhitespace(this->_currentLine);
+	this->_currentLine  = partialResult + trimWhitespace(this->_currentLine);
+	this->_lineIterator = this->_currentLine.begin();
 	if (!hasReachedEOF && this->_currentLine.length() == 0) {
 		return (getNewLine());
 	}

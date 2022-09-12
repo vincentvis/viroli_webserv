@@ -44,12 +44,13 @@ void Server::setFromParamAllowedMethods(ParamVector params) {
 	while (currentParam != end) {
 		std::string value = currentParam->getStringValue();
 		if (value == "GET" || value == "POST" || value == "DELETE") {
-			this->_acceptedMethods += value;
-			this->_acceptedMethods += "||";
+			if (this->_allowedMethods.length() > 0)
+				this->_allowedMethods += "||";
+			this->_allowedMethods += value;
 		}
 		currentParam++;
 	}
-	std::cout << "- acceptedMethods: " << this->_acceptedMethods << std::endl;
+	std::cout << "- acceptedMethods: " << this->_allowedMethods << std::endl;
 }
 
 Server::Server(const Directive &config) {
