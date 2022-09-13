@@ -9,15 +9,17 @@
 class Server {
 	private:
 		void setFromParamHostAndPort(std::vector<Param> params);
-		void setFromParamAllowedMethods(std::vector<Param> params);
 		void setFromParamErrorPages(std::vector<Param> params);
+		void setFromParamLocations(std::vector<Param> params);
+		void setFromParamAllowedMethods(std::vector<Param> params, std::string *target);
+		void setFromParamFirstStringValue(std::vector<Param> params, std::string *target);
 
 	protected:
 		uint16_t    _port;
 		std::string _hostName;
 		std::string _serverName;
-		std::string _serverRoot;
-		std::string _allowedMethods;
+		std::string _root;
+		std::string _allow;
 		std::string _defaultIndexPage;
 		std::string _defaultErrorPage;
 		//		std::vector<ErrorPage>	_errorPages; // moet nog aangemaakt worden
@@ -32,4 +34,5 @@ class Server {
 		Server(const std::map<std::string, std::vector<Param> > config);
 		Server();
 		~Server();
+		friend std::ostream &operator<<(std::ostream &os, const Server &server);
 };

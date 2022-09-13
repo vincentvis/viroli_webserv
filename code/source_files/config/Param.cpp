@@ -9,7 +9,7 @@ Param::Param(std::string name) {
 	_name = name;
 }
 
-std::string Param::getName() {
+std::string Param::getName() const {
 	return (_name);
 }
 
@@ -21,7 +21,7 @@ void Param::addValue(std::string value) {
 	_values.push_back(value);
 }
 
-std::vector<std::string>::size_type Param::getNumValues() {
+std::vector<std::string>::size_type Param::getNumValues() const {
 	return (_values.size());
 }
 
@@ -29,16 +29,16 @@ void Param::setChildren(std::map<std::string, std::vector<Param> > children) {
 	_children = children;
 }
 
-std::string Param::getFirstValue() {
-	return _values.at(0);
-}
-
-std::string Param::getNthValue(int n) {
+std::string Param::getNthValue(int n) const {
 	return _values.at(n);
 }
 
-std::vector<std::string> Param::getValues() {
+std::vector<std::string> Param::getValues() const {
 	return _values;
+}
+
+std::map<std::string, std::vector<Param> > Param::getChildren() const {
+	return _children;
 }
 
 int32_t Param::convertToInt32(std::string source) {

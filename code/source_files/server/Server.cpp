@@ -2,14 +2,14 @@
 
 Server::Server() {
 	std::cout << "server default constructer is built" << std::endl;
-	this->_port             = 0;
-	this->_serverName       = "empty";
-	this->_serverRoot       = "empty";
-	this->_allowedMethods   = "";
-	this->_defaultIndexPage = "empty";
-	this->_defaultErrorPage = "empty";
+	this->_port             = -1;
+	this->_serverName       = "";
+	this->_root             = "";
+	this->_allow            = "";
+	this->_defaultIndexPage = "";
+	this->_defaultErrorPage = "";
 	//	this->_errorPages;
-	this->_routeType   = "empty";
+	this->_routeType   = "";
 	this->_allowUpload = 0;
 	this->_autoIndex   = 0;
 	this->_bufferSize  = 0;
@@ -23,7 +23,7 @@ void Server::setFromParamHostAndPort(std::vector<Param> params) {
 	// consider only first param occorrence of listen directive
 	Param                            param = params.at(0);
 	std::pair<std::string, uint16_t> data =
-		param.convertToHostAndPort(param.getFirstValue());
+		param.convertToHostAndPort(param.getNthValue(0));
 
 	if (data.first == "failure")
 		throw std::invalid_argument("Invalid value in listen directive");
@@ -47,38 +47,41 @@ void Server::setFromParamErrorPages(std::vector<Param> params) {
 	} while (currentParam != end);
 }
 
-void Server::setFromParamAllowedMethods(std::vector<Param> params) {
+void Server::setFromParamAllowedMethods(std::vector<Param> params, std::string *target) {
 	std::vector<Param>::iterator currentParam = params.begin();
-	std::vector<Param>::iterator end          = params.end();
+	std::vector<Param>::iterator endParam     = params.end();
 
 	do {
 		std::vector<std::string>           values = currentParam->getValues();
 		std::vector<std::string>::iterator val    = values.begin();
-		std::vector<std::string>::iterator end    = values.begin();
+		std::vector<std::string>::iterator endVal = values.end();
 		do {
-			if (*val == "GET" || *val == "POST" || *val == "DELETE") {
+			if ((*val == "GET" || *val == "POST" || *val == "DELETE") &&
+				target->find(*val) == std::string::npos)
+			{
+				if (target->length() != 0) {
+					*target += ", ";
+				}
+				*target += *val;
 			}
 			val++;
-		} while (val != end);
+		} while (val != endVal);
 
 		currentParam++;
-	} while (currentParam !+end);
+	} while (currentParam != endParam);
+}
 
-	// while (currentParam != end) {
-	// 	std::string value = currentParam->getStringValue();
-	// 	if (value == "GET" || value == "POST" || value == "DELETE") {
-	// 		if (this->_allowedMethods.length() > 0)
-	// 			this->_allowedMethods += "||";
-	// 		this->_allowedMethods += value;
-	// 	}
-	// 	currentParam++;
-	// }
-	// std::cout << "- acceptedMethods: " << this->_allowedMethods << std::endl;
+void Server::setFromParamFirstStringValue(
+	std::vector<Param> params, std::string *target
+) {
+	Param p = params.at(0);
+	*target = p.getNthValue(0);
+}
+
+void Server::setFromParamLocations(std::vector<Param> params) {
 }
 
 Server::Server(const std::map<std::string, std::vector<Param> > config) {
-	std::cout << "\033[4mMake a server\033[0m" << std::endl;
-
 	std::map<std::string, std::vector<Param> >::const_iterator it;
 	std::map<std::string, std::vector<Param> >::const_iterator end = config.end();
 
@@ -86,23 +89,37 @@ Server::Server(const std::map<std::string, std::vector<Param> > config) {
 		setFromParamHostAndPort(it->second);
 	}
 	if ((it = config.find("server_name")) != end) {
-		Param p           = it->second.at(0);
-		this->_serverName = p.getFirstValue();
+		setFromParamFirstStringValue(it->second, &this->_serverName);
+	}
+	if ((it = config.find("root")) != end) {
+		setFromParamFirstStringValue(it->second, &this->_root);
 	}
 	if ((it = config.find("error_page")) != end) {
 		setFromParamErrorPages(it->second);
 	}
 	if ((it = config.find("allowed_methods")) != end) {
-		setFromParamAllowedMethods(it->second);
+		setFromParamAllowedMethods(it->second, &this->_allow);
 	}
+	if ((it = config.find("location")) != end) {
+		setFromParamLocations(it->second);
+	}
+}
 
+std::ostream &operator<<(std::ostream &os, const Server &server) {
+	os << "Server info:" << std::endl;
+	// clang-format off
 
-	// for (std::vector<Directive>::iterator directive = directives.begin();
-	// 	 directive != directives.end(); ++directive)
-	// {
-	// 	if (jumpTable.find(directive->getName()) != jumpTable.end()) {
-	// 		(this->*jumpTable.at(directive->getName()))(directive->getParameters());
-	// 	}
-	// }
-	std::cout << "------ \033[4mDone with making a server\033[0m" << std::endl;
+	#define INF_ALIGN std::setw(14) << std::left
+
+	os << INF_ALIGN << "Port" << ": \"" << server._port << "\"" << std::endl;
+	os << INF_ALIGN << "Host" << ": \"" << server._hostName << "\"" << std::endl;
+	os << INF_ALIGN << "Name" << ": \"" << server._serverName << "\"" << std::endl;
+	os << INF_ALIGN << "Allow" << ": \"" << server._allow << "\"" << std::endl;
+	os << INF_ALIGN << "Root" << ": \"" << server._root << "\"" << std::endl;
+	os << INF_ALIGN << "Error_pages" << ": \"" << server._root << "\"" << std::endl;
+
+	#undef INF_ALIGN
+	// clang-format on
+
+	return os;
 }

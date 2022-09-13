@@ -42,19 +42,25 @@ class Param {
 		// ~Param();
 		Param(std::string name);
 
-		std::string getName();
+		// name stuff
+		std::string getName() const;
 		void        setName(std::string name);
-		void        addValue(std::string value);
-		void        setChildren(std::map<std::string, std::vector<Param> > children);
-		std::string getFirstValue();
-		std::string getNthValue(int n);
-		std::vector<std::string>            getValues();
-		std::vector<std::string>::size_type getNumValues();
 
-		int32_t                             convertToInt32(std::string source);
-		std::pair<std::string, uint16_t>    convertToHostAndPort(std::string source);
+		// value stuff
+		void                                addValue(std::string value);
+		std::string                         getNthValue(int n) const;
+		std::vector<std::string>            getValues() const;
+		std::vector<std::string>::size_type getNumValues() const;
 
-		friend std::ostream &operator<<(std::ostream &os, const Param &param);
+		// children
+		void setChildren(std::map<std::string, std::vector<Param> > children);
+		std::map<std::string, std::vector<Param> > Param::getChildren() const;
+
+		// conversions
+		int32_t                          convertToInt32(std::string source);
+		std::pair<std::string, uint16_t> convertToHostAndPort(std::string source);
+
+		friend std::ostream             &operator<<(std::ostream &os, const Param &param);
 		void
 		printVectorOfMaps(std::vector<std::map<std::string, std::vector<Param> > > map);
 		void printMap(std::map<std::string, std::vector<Param> > currentMap) const;

@@ -22,20 +22,15 @@ int main(int argc, char const *argv[]) {
 		serverConfigs.begin();
 	std::vector<std::map<std::string, std::vector<Param> > >::iterator configsEnd =
 		serverConfigs.end();
+
+	std::vector<Server *> activeServers;
+
 	do {
-		Server Server(*serverConfig);
+		Server *a_server = new Server(*serverConfig);
+		std::cout << *a_server << std::endl; // FOR DEBUG
 		serverConfig++;
+		activeServers.push_back(a_server);
 	} while (serverConfig != configsEnd);
 
-
-	// config.printDirectiveInfo();
-	// std::vector<Directive>            serverConfigs = config.getParseResult();
-	// std::vector<Directive>::size_type end           = serverConfigs.size();
-
-	// for (std::vector<Directive>::size_type i = 0; i < end; i++) {
-	// 	Server Server(serverConfigs.at(i));
-	// }
-	// Server FirstServer(config.getParseResult().at(0));
-
-	return 0;
+	return (0);
 }
