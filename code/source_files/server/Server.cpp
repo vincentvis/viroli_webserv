@@ -30,22 +30,39 @@ void Server::setFromParamHostAndPort(std::vector<Param> params) {
 
 	this->_hostName = data.first;
 	this->_port     = data.second;
-
-	/* FOR DEBUG */
-	std::cout << "- host: " << this->_hostName << std::endl
-			  << "- port: " << this->_port << std::endl;
 }
 
-void Server::setFromParamServerName(std::vector<Param> params) {
-	this->_serverName = params.at(0).getFirstValue();
+void Server::setFromParamErrorPages(std::vector<Param> params) {
+	std::vector<Param>::iterator currentParam = params.begin();
+	std::vector<Param>::iterator end          = params.end();
 
-	std::cout << "- servername: " << this->_serverName << std::endl;
+	do {
+		if (currentParam->getNumValues() < 2) {
+			continue;
+		}
+		_errorPages.insert(
+			std::make_pair(currentParam->getNthValue(0), currentParam->getNthValue(1))
+		);
+		currentParam++;
+	} while (currentParam != end);
 }
 
 void Server::setFromParamAllowedMethods(std::vector<Param> params) {
-	(void)params;
-	// std::vector<Param>::iterator currentParam = params.begin();
-	// std::vector<Param>::iterator end          = params.end();
+	std::vector<Param>::iterator currentParam = params.begin();
+	std::vector<Param>::iterator end          = params.end();
+
+	do {
+		std::vector<std::string>           values = currentParam->getValues();
+		std::vector<std::string>::iterator val    = values.begin();
+		std::vector<std::string>::iterator end    = values.begin();
+		do {
+			if (*val == "GET" || *val == "POST" || *val == "DELETE") {
+			}
+			val++;
+		} while (val != end);
+
+		currentParam++;
+	} while (currentParam !+end);
 
 	// while (currentParam != end) {
 	// 	std::string value = currentParam->getStringValue();
@@ -69,8 +86,16 @@ Server::Server(const std::map<std::string, std::vector<Param> > config) {
 		setFromParamHostAndPort(it->second);
 	}
 	if ((it = config.find("server_name")) != end) {
-		setFromParamServerName(it->second);
+		Param p           = it->second.at(0);
+		this->_serverName = p.getFirstValue();
 	}
+	if ((it = config.find("error_page")) != end) {
+		setFromParamErrorPages(it->second);
+	}
+	if ((it = config.find("allowed_methods")) != end) {
+		setFromParamAllowedMethods(it->second);
+	}
+
 
 	// for (std::vector<Directive>::iterator directive = directives.begin();
 	// 	 directive != directives.end(); ++directive)

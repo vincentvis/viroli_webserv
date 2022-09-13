@@ -47,6 +47,7 @@ class Param {
 		void        addValue(std::string value);
 		void        setChildren(std::map<std::string, std::vector<Param> > children);
 		std::string getFirstValue();
+		std::string getNthValue(int n);
 		std::vector<std::string>            getValues();
 		std::vector<std::string>::size_type getNumValues();
 

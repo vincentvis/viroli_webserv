@@ -32,6 +32,11 @@ void Param::setChildren(std::map<std::string, std::vector<Param> > children) {
 std::string Param::getFirstValue() {
 	return _values.at(0);
 }
+
+std::string Param::getNthValue(int n) {
+	return _values.at(n);
+}
+
 std::vector<std::string> Param::getValues() {
 	return _values;
 }

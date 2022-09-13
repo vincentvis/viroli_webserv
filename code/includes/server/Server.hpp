@@ -9,8 +9,8 @@
 class Server {
 	private:
 		void setFromParamHostAndPort(std::vector<Param> params);
-		void setFromParamServerName(std::vector<Param> params);
 		void setFromParamAllowedMethods(std::vector<Param> params);
+		void setFromParamErrorPages(std::vector<Param> params);
 
 	protected:
 		uint16_t    _port;
@@ -21,10 +21,11 @@ class Server {
 		std::string _defaultIndexPage;
 		std::string _defaultErrorPage;
 		//		std::vector<ErrorPage>	_errorPages; // moet nog aangemaakt worden
-		std::string _routeType;
-		bool        _allowUpload;
-		bool        _autoIndex;
-		int         _bufferSize;
+		std::map<std::string, std::string> _errorPages;
+		std::string                        _routeType;
+		bool                               _allowUpload;
+		bool                               _autoIndex;
+		int                                _bufferSize;
 		//		std::vector<Locations>	_locations; // moet nog aangemaakt worden
 
 	public:
