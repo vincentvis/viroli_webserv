@@ -18,13 +18,12 @@
 class Server;
 
 /* buffer: with fixed size */
-/* data: to store the data received thus far */
-/* pollfd: can't be a reference (?) */
+/* data: to store the data receiveDatad thus far */
 class Connection {
 public:
-  // class Config _config;
   std::vector<char> _buffer;
   std::string _data;
+  Server &_server;
   struct sockaddr_in _socket;
   struct pollfd _pfd;
   int _bytes;
@@ -33,9 +32,13 @@ public:
   bool _listening;
 
   Connection();
-  Connection(int socket, struct pollfd pfd, bool listening);
+  Connection(Server &server, int socket, struct pollfd pfd, bool listening);
 
-  int receive(int index);
+  int dataRemainder() const;
+  void closeConnection(int index);
+  int receiveData(int index);
+  int sendData(int index);
+  void initializeResponse();
   bool isListening();
   void newConnection();
 };

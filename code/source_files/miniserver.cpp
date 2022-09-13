@@ -30,7 +30,7 @@ Server::Server(uint16_t port) {
   struct pollfd pfd = {fd, POLLIN, 0};
   Server::_pfds.push_back(pfd);
   Server::_sockets.insert(
-      std::pair<int32_t, Connection>(fd, Connection(port, pfd, true)));
+      std::pair<int32_t, Connection>(fd, Connection(*this, port, pfd, true)));
 }
 
 Server::Server(std::vector<uint16_t> &ports) {
@@ -54,20 +54,26 @@ void Server::run() {
          ++i) {
 
       /* incoming activity: new connection or ready to read */
-      if (Server::_pfds[i].revents & POLLIN) {
+      if (Server::_pfds[i].revents & POLLIN ||
+          Server::_pfds[i].revents & POLLOUT) {
         ++event;
         it = Server::_sockets.find(Server::_pfds[i].fd);
 
         /* socket exists */
         if (it != _sockets.end()) {
+          if (Server::_pfds[i].revents & POLLIN) {
 
-          /* is the socket a listening socket: accept new connection */
-          if (it->second.isListening()) {
-            it->second.newConnection();
+            /* is the socket a listening socket: accept new connection */
+            if (it->second.isListening()) {
+              it->second.newConnection();
 
-            /* socket is ready for read: receive data in buffer */
-          } else {
-            it->second.receive(i);
+              /* socket is ready for read: receiveData data in buffer */
+            } else {
+              it->second.receiveData(i);
+            }
+          } else if (Server::_pfds[i].revents & POLLOUT) {
+            // sleep(1); //
+            it->second.sendData(i);
           }
           /* socket doesn't exist */
         } else {

@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-#define BUFFERSIZE 32
+#define BUFFERSIZE 8
 #define MAXCONNECTIONS 10
 
 class Connection;
@@ -31,4 +31,5 @@ public:
   Server(std::vector<uint16_t> &ports);
 
   static void run();
+  void trace();
 };
