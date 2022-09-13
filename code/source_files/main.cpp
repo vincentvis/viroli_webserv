@@ -32,5 +32,6 @@ int main(int argc, char const *argv[]) {
 		activeServers.push_back(a_server);
 	} while (serverConfig != configsEnd);
 
+
 	return (0);
 }

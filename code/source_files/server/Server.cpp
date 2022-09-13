@@ -79,6 +79,13 @@ void Server::setFromParamFirstStringValue(
 }
 
 void Server::setFromParamLocations(std::vector<Param> params) {
+	std::vector<Param>::iterator p   = params.begin();
+	std::vector<Param>::iterator end = params.end();
+
+	do {
+		std::map<std::string, std::vector<Param> > map = *p;
+		p++;
+	} while (p != end);
 }
 
 Server::Server(const std::map<std::string, std::vector<Param> > config) {

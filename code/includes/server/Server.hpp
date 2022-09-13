@@ -6,6 +6,16 @@
 #include <stdint.h>
 #include <vector>
 
+class Location {
+	private:
+		std::string _match;
+		bool        _exactMatch;
+		std::string _root;
+		std::string _allow;
+		std::string _index;
+		bool        _autoIndex;
+};
+
 class Server {
 	private:
 		void setFromParamHostAndPort(std::vector<Param> params);

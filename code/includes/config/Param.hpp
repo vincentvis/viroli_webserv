@@ -54,7 +54,7 @@ class Param {
 
 		// children
 		void setChildren(std::map<std::string, std::vector<Param> > children);
-		std::map<std::string, std::vector<Param> > Param::getChildren() const;
+		std::map<std::string, std::vector<Param> > getChildren() const;
 
 		// conversions
 		int32_t                          convertToInt32(std::string source);
