@@ -26,10 +26,16 @@ int main(int argc, char const *argv[]) {
 	std::vector<Server *> activeServers;
 
 	do {
-		Server *a_server = new Server(*serverConfig);
-		std::cout << *a_server << std::endl; // FOR DEBUG
-		serverConfig++;
-		activeServers.push_back(a_server);
+		try {
+			Server *a_server = new Server(*serverConfig);
+			std::cout << *a_server << std::endl; // FOR DEBUG
+			serverConfig++;
+			activeServers.push_back(a_server);
+		} catch (const std::exception &e) {
+			// some cleanup required I guess?
+			std::cerr << "exception: \n" << e.what() << std::endl;
+			return (1);
+		}
 	} while (serverConfig != configsEnd);
 
 

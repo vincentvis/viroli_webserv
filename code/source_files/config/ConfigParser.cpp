@@ -33,8 +33,8 @@ ConfigParser::parseFromArgs(int argc, char const **argv) {
 	if (this->_fileStream.eof() == false || this->_currentLine.length() != 0) {
 		throw std::invalid_argument("Invalid configuration file");
 	}
-	Param x;
-	x.printVectorOfMaps(this->_parsed);
+	// Param x;
+	// x.printVectorOfMaps(this->_parsed);
 	return (this->_parsed);
 }
 
@@ -70,6 +70,7 @@ void ConfigParser::extract_server_block_info(
 		std::vector<Param> *params = &((*map)[directiveName]);
 		Param               param(directiveName);
 
+
 		while (!this->_currentLine.empty() && this->_currentLine.at(0) != ';' &&
 			   this->_currentLine.at(0) != '{' && this->_currentLine.at(0) != '}')
 		{
@@ -78,6 +79,10 @@ void ConfigParser::extract_server_block_info(
 		}
 		if (this->_currentLine.empty()) {
 			throw InvalidBlockConfigException();
+		}
+
+		if (this->_currentLine.at(0) != ';' && this->_currentLine.at(0) != '{') {
+			throw MissingSemicolonAfterDirective();
 		}
 
 		// simple directive (with directive name && = N>0 params)
@@ -105,20 +110,12 @@ void ConfigParser::extract_server_block_info(
 			param.setChildren(submap);
 
 			params->push_back(param);
-			if (line_at_end_of_config_block() == false) {
-				std::cout << "FOOOOOx" << std::endl;
-				throw InvalidBlockConfigException();
-			}
 		}
 	}
 }
 
 bool ConfigParser::line_needs_update() {
 	return (this->_currentLine.length() == 0 && this->_fileStream.eof() == false);
-}
-
-bool ConfigParser::line_at_end_of_config_block() {
-	return (this->_currentLine.length() > 0 && this->_currentLine.at(0) == '}');
 }
 
 void ConfigParser::skip_to_opening_after_n(std::string::size_type n) {

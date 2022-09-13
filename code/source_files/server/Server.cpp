@@ -79,13 +79,38 @@ void Server::setFromParamFirstStringValue(
 }
 
 void Server::setFromParamLocations(std::vector<Param> params) {
-	std::vector<Param>::iterator p   = params.begin();
-	std::vector<Param>::iterator end = params.end();
+	std::vector<Param>::iterator p           = params.begin();
+	std::vector<Param>::iterator locationEnd = params.end();
 
 	do {
-		std::map<std::string, std::vector<Param> > map = p->getChildren();
+		std::map<std::string, std::vector<Param> >           config = p->getChildren();
+		std::map<std::string, std::vector<Param> >::iterator it;
+		std::map<std::string, std::vector<Param> >::iterator end = config.end();
+
+		if (p->getNumValues() == 0) {
+			// Throw or skip ?? what to doooo
+			throw std::invalid_argument("Location block missing matching URI");
+		}
+
+		std::cout << "process locatoin block" << std::endl;
+		std::cout << *p << std::endl;
+
+		Location newLocation;
+
+		newLocation.setMatch(p->getNthValue(0));
+		if (p->getNumValues() == 2) {
+			newLocation.setMatch(p->getNthValue(1));
+			newLocation.setExactMatch(p->getNthValue(0) == "=");
+		}
+		if ((it = config.find("index")) != end) {
+			newLocation.addIndex(it->second.at(0).getNthValue(0));
+		}
+
+		_locations.push_back(newLocation);
+
+
 		p++;
-	} while (p != end);
+	} while (p != locationEnd);
 }
 
 Server::Server(const std::map<std::string, std::vector<Param> > config) {
@@ -116,16 +141,42 @@ std::ostream &operator<<(std::ostream &os, const Server &server) {
 	os << "Server info:" << std::endl;
 	// clang-format off
 
+
 	#define INF_ALIGN std::setw(14) << std::left
+	#define INF_AL_NST "    " << std::setw(10) << std::left
 
 	os << INF_ALIGN << "Port" << ": \"" << server._port << "\"" << std::endl;
 	os << INF_ALIGN << "Host" << ": \"" << server._hostName << "\"" << std::endl;
 	os << INF_ALIGN << "Name" << ": \"" << server._serverName << "\"" << std::endl;
 	os << INF_ALIGN << "Allow" << ": \"" << server._allow << "\"" << std::endl;
 	os << INF_ALIGN << "Root" << ": \"" << server._root << "\"" << std::endl;
-	os << INF_ALIGN << "Error_pages" << ": \"" << server._root << "\"" << std::endl;
+
+	if (server._errorPages.size() > 0) {
+		std::map<std::string, std::string>::const_iterator errorPage = server._errorPages.begin();
+		std::map<std::string, std::string>::const_iterator errorPageEnd = server._errorPages.end();
+		os<< INF_ALIGN << "Error pages:" << std::endl;
+		while (errorPage != errorPageEnd) {
+			os << INF_AL_NST << errorPage->first << ": \"" << errorPage->second << "\"" << std::endl;
+			errorPage++;
+		}
+	}
+
+	if (server._locations.size() > 0) {
+		std::vector<Location>::const_iterator location = server._locations.begin();
+		std::vector<Location>::const_iterator lastLocation = server._locations.end();
+		while (location != lastLocation)
+		{
+			os << INF_ALIGN << "Location" << std::endl;
+			os << INF_AL_NST << "Match" << ": \"" << location->getMatch() << "\"" << std::endl;
+			os << INF_AL_NST << "Exact match" << ": \"" << (location->getExactMatch() ? "yes" : "no") << "\"" << std::endl;
+			os << INF_AL_NST << "Index" << ": \"" << location->getIndex() << "\"" << std::endl;
+
+			location++;
+		}
+	}
 
 	#undef INF_ALIGN
+	#undef INF_AL_NST
 	// clang-format on
 
 	return os;

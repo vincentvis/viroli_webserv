@@ -29,7 +29,7 @@ class Server {
 		bool                               _allowUpload;
 		bool                               _autoIndex;
 		int                                _bufferSize;
-		//		std::vector<Locations>	_locations; // moet nog aangemaakt worden
+		std::vector<Location>              _locations; // moet nog aangemaakt worden
 
 	public:
 		Server(const std::map<std::string, std::vector<Param> > config);

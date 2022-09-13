@@ -53,10 +53,10 @@ class ConfigParser {
 				}
 		};
 
-		class InvalidTopLevelDirective : public std::exception {
+		class MissingSemicolonAfterDirective : public std::exception {
 			public:
 				virtual const char *what() const throw() {
-					return ("Only \"server\" directives allowed as top level directive");
+					return ("Missing semicolon after directive paramter");
 				}
 		};
 
@@ -85,7 +85,6 @@ class ConfigParser {
 		);
 		void maybeGetStreamContent();
 		bool line_needs_update();
-		bool line_at_end_of_config_block();
 		void skip_to_opening_after_n(std::string::size_type n);
 		void extract_server_block_info(std::map<std::string, std::vector<Param> > *map);
 };

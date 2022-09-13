@@ -1,6 +1,11 @@
 #include "server/Location.hpp"
 
 Location::Location() {
+	_match      = "";
+	_exactMatch = false;
+	_root       = "";
+	_allow      = "";
+	_autoIndex  = false;
 }
 Location::~Location() {
 }
@@ -33,11 +38,11 @@ void Location::setAllow(std::string value) {
 	_allow = value;
 }
 
-std::string Location::getIndex() const {
+std::vector<std::string> Location::getIndex() const {
 	return _index;
 }
-void Location::setIndex(std::string value) {
-	_index = value;
+void Location::addIndex(std::string value) {
+	_index.push_back(value);
 }
 
 bool Location::getAutoIndex() const {
