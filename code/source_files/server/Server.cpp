@@ -83,7 +83,7 @@ void Server::setFromParamLocations(std::vector<Param> params) {
 	std::vector<Param>::iterator end = params.end();
 
 	do {
-		std::map<std::string, std::vector<Param> > map = *p;
+		std::map<std::string, std::vector<Param> > map = p->getChildren();
 		p++;
 	} while (p != end);
 }

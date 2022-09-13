@@ -38,6 +38,7 @@ MAIN		:= $(SRC_DIR)main.cpp
 # a list of classes without the .cpp suffix!
 CLASSES		:= config/Param\
 				config/ConfigParser\
+				server/Location\
 				server/Server
 
 OBJECTS		:= $(CLASSES:%=$(OBJ_DIR)%.o)

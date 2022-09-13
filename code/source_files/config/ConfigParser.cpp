@@ -106,6 +106,7 @@ void ConfigParser::extract_server_block_info(
 
 			params->push_back(param);
 			if (line_at_end_of_config_block() == false) {
+				std::cout << "FOOOOOx" << std::endl;
 				throw InvalidBlockConfigException();
 			}
 		}
