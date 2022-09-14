@@ -2,7 +2,7 @@
 
 Server::Server() {
 	std::cout << "server default constructer is built" << std::endl;
-	this->_port             = -1;
+	this->_port             = 0;
 	this->_serverName       = "";
 	this->_root             = "html"; // default for this param is "html" (nginx)
 	this->_allow            = "";
@@ -17,6 +17,10 @@ Server::Server() {
 }
 
 Server::~Server() {
+}
+
+uint16_t Server::getPort() const {
+	return _port;
 }
 
 void Server::setFromParamHostAndPort(std::vector<Param> params) {

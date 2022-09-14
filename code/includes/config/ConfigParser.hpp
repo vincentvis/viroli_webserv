@@ -60,6 +60,21 @@ class ConfigParser {
 				}
 		};
 
+		class MissingRequiredDirectives : public std::exception {
+			public:
+				virtual const char *what() const throw() {
+					return ("Some required directives where missing from the config file"
+					);
+				}
+		};
+
+		class InvalidDirective : public std::exception {
+			public:
+				virtual const char *what() const throw() {
+					return ("A unsupported directive name was found");
+				}
+		};
+
 
 	private:
 		// disable copying
@@ -81,10 +96,24 @@ class ConfigParser {
 		std::string   _currentLine;
 		std::vector<std::map<std::string, std::vector<Param> > > _parsed;
 
-		void parseStream(std::vector<std::map<std::string, std::vector<Param> > > *parent
+
+	public:
+		typedef void (ConfigParser::*processDirective)(Server *);
+
+	private:
+		//
+		void processListen(Server *target);
+
+
+		// this is the new idea..
+		std::vector<Server *>                         _servers;
+		std::map<std::string, std::vector<Server *> > _ports;
+
+		void                                          parseStream();
+		void                                          maybeGetStreamContent();
+		bool                                          line_needs_update();
+		void skip_to_after_server_block_opening(std::string::size_type n);
+		void extract_server_block_info(
+			Server *target, const std::map<std::string, processDirective> &directives
 		);
-		void maybeGetStreamContent();
-		bool line_needs_update();
-		void skip_to_opening_after_n(std::string::size_type n);
-		void extract_server_block_info(std::map<std::string, std::vector<Param> > *map);
 };

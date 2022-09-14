@@ -21,6 +21,7 @@ class Server {
 
 	protected:
 		uint16_t    _port;
+		std::string _ip;
 		std::string _hostName;
 		std::string _serverName;
 		std::string _root;
@@ -40,4 +41,6 @@ class Server {
 		Server();
 		~Server();
 		friend std::ostream &operator<<(std::ostream &os, const Server &server);
+
+		uint16_t             getPort() const;
 };

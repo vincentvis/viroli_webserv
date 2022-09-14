@@ -29,7 +29,7 @@ ConfigParser::parseFromArgs(int argc, char const **argv) {
 		throw std::invalid_argument("Problem while reading file");
 	}
 
-	parseStream(&this->_parsed);
+	parseStream();
 	if (this->_fileStream.eof() == false || this->_currentLine.length() != 0) {
 		throw std::invalid_argument("Invalid configuration file");
 	}
@@ -38,79 +38,105 @@ ConfigParser::parseFromArgs(int argc, char const **argv) {
 	return (this->_parsed);
 }
 
-void ConfigParser::parseStream(
-	std::vector<std::map<std::string, std::vector<Param> > > *parent
-) {
+void ConfigParser::processListen(Server *target) {
+	(void)target;
+	std::cout << "Process listen directive" << std::endl;
+}
+
+void ConfigParser::parseStream() {
 	if (line_needs_update()) {
 		getNewLine();
 	}
 
+	std::map<std::string, processDirective> allowed_directives;
+	allowed_directives["listen"] = &ConfigParser::processListen;
+
 	// should be at first non-whitespace character here
 	while (this->_currentLine.find("server") == 0) {
-		skip_to_opening_after_n(sizeof("server") - 1);
-		std::map<std::string, std::vector<Param> > map;
-		extract_server_block_info(&map);
-		parent->push_back(map);
+		skip_to_after_server_block_opening(sizeof("server") - 1);
+
+		Server *newServer = new Server();
+		_servers.push_back(newServer);
+
+		extract_server_block_info(newServer, allowed_directives);
+
+		if (newServer->getPort() == 0) {
+			throw MissingRequiredDirectives();
+		}
 	}
 	return;
 }
 void ConfigParser::extract_server_block_info(
-	std::map<std::string, std::vector<Param> > *map
+	Server *target, const std::map<std::string, processDirective> &directiveHandlers
 ) {
 	while (true) {
 		if (this->_currentLine.at(0) == '}') {
 			skipNextChar();
 			return;
 		}
+
 		std::string directiveName = extractDirectiveName();
-		if (map->find(directiveName) == map->end()) {
-			std::vector<Param> params;
-			map->insert(std::make_pair(directiveName, params));
+
+		(void)target;
+		(void)directiveHandlers;
+
+		std::map<std::string, processDirective>::const_iterator handler =
+			directiveHandlers.find(directiveName);
+		std::cout << "dname: [" << directiveName << std::endl;
+		if (handler == directiveHandlers.end()) {
+			throw InvalidDirective();
 		}
-		std::vector<Param> *params = &((*map)[directiveName]);
-		Param               param(directiveName);
+		std::cout << "-- " << handler->second << std::endl;
+		(*handler->second)(target);
+
+		// if (map->find(directiveName) == map->end()) {
+		// 	std::vector<Param> params;
+		// 	map->insert(std::make_pair(directiveName, params));
+		// }
+		// std::vector<Param> *params = &((*map)[directiveName]);
+		// Param               param(directiveName);
 
 
-		while (!this->_currentLine.empty() && this->_currentLine.at(0) != ';' &&
-			   this->_currentLine.at(0) != '{' && this->_currentLine.at(0) != '}')
-		{
-			std::string newparam = extractParam();
-			param.addValue(newparam);
-		}
-		if (this->_currentLine.empty()) {
-			throw InvalidBlockConfigException();
-		}
+		// while (!this->_currentLine.empty() && this->_currentLine.at(0) != ';' &&
+		// 	   this->_currentLine.at(0) != '{' && this->_currentLine.at(0) != '}')
+		// {
+		// 	std::string newparam = extractParam();
+		// 	param.addValue(newparam);
+		// }
+		// if (this->_currentLine.empty()) {
+		// 	throw InvalidBlockConfigException();
+		// }
 
-		if (this->_currentLine.at(0) != ';' && this->_currentLine.at(0) != '{') {
-			throw MissingSemicolonAfterDirective();
-		}
+		// if (this->_currentLine.at(0) != ';' && this->_currentLine.at(0) != '{') {
+		// 	throw MissingSemicolonAfterDirective();
+		// }
 
-		// simple directive (with directive name && = N>0 params)
-		if (this->_currentLine.at(0) == ';') {
-			skipNextChar();
-			if (param.getNumValues() == 0) {
-				throw DirectiveWithoutValueException();
-			}
-			params->push_back(param);
-			continue;
-		}
+		// // simple directive (with directive name && = N>0 params)
+		// if (this->_currentLine.at(0) == ';') {
+		// 	skipNextChar();
+		// 	if (param.getNumValues() == 0) {
+		// 		throw DirectiveWithoutValueException();
+		// 	}
+		// 	params->push_back(param);
+		// 	continue;
+		// }
 
-		// complex directive with directive name && N>=0 params && directive children
-		if (this->_currentLine.at(0) == '{') {
-			skipNextChar();
+		// // complex directive with directive name && N>=0 params && directive children
+		// if (this->_currentLine.at(0) == '{') {
+		// 	skipNextChar();
 
-			// this would be an empty block.. usesless?
-			if (this->_currentLine.at(0) == '}') {
-				params->push_back(param);
-				continue;
-			}
+		// 	// this would be an empty block.. usesless?
+		// 	if (this->_currentLine.at(0) == '}') {
+		// 		params->push_back(param);
+		// 		continue;
+		// 	}
 
-			std::map<std::string, std::vector<Param> > submap;
-			extract_server_block_info(&submap);
-			param.setChildren(submap);
+		// 	std::map<std::string, std::vector<Param> > submap;
+		// 	extract_server_block_info(&submap);
+		// 	param.setChildren(submap);
 
-			params->push_back(param);
-		}
+		// 	params->push_back(param);
+		// }
 	}
 }
 
@@ -118,7 +144,7 @@ bool ConfigParser::line_needs_update() {
 	return (this->_currentLine.length() == 0 && this->_fileStream.eof() == false);
 }
 
-void ConfigParser::skip_to_opening_after_n(std::string::size_type n) {
+void ConfigParser::skip_to_after_server_block_opening(std::string::size_type n) {
 	this->_currentLine = trimLeadingWhitespace(this->_currentLine.substr(n));
 	if (this->_currentLine.length() == 0) {
 		getNewLine();
