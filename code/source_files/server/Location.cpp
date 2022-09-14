@@ -41,8 +41,25 @@ void Location::setAllow(std::string value) {
 std::vector<std::string> Location::getIndex() const {
 	return _index;
 }
+
+std::vector<std::string> *Location::getIndexVector() {
+	return &_index;
+}
+
 void Location::addIndex(std::string value) {
 	_index.push_back(value);
+}
+
+std::map<std::string, std::string> Location::getErrorPages() const {
+	return _errorPages;
+}
+
+std::map<std::string, std::string> *Location::getErrorPagesMap() {
+	return &_errorPages;
+}
+
+void Location::addErrorPages(std::string key, std::string value) {
+	_errorPages.insert(std::make_pair(key, value));
 }
 
 bool Location::getAutoIndex() const {

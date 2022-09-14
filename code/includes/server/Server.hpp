@@ -14,6 +14,8 @@ class Server {
 		void setFromParamLocations(std::vector<Param> params);
 		void setFromParamAllowedMethods(std::vector<Param> params, std::string *target);
 		void setFromParamFirstStringValue(std::vector<Param> params, std::string *target);
+		void
+		setAllValuesToVector(std::vector<Param> params, std::vector<std::string> *target);
 
 	protected:
 		uint16_t    _port;

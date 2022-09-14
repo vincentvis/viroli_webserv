@@ -78,6 +78,19 @@ void Server::setFromParamFirstStringValue(
 	*target = p.getNthValue(0);
 }
 
+void Server::setAllValuesToVector(
+	std::vector<Param> params, std::vector<std::string> *target
+) {
+	std::vector<Param>::iterator p     = params.begin();
+	std::vector<Param>::iterator p_end = params.end();
+	while (p != p_end) {
+		for (std::vector<std::string>::size_type i = 0; i < p->getNumValues(); i++) {
+			target->push_back(p->getNthValue(i));
+		}
+		p++;
+	}
+}
+
 void Server::setFromParamLocations(std::vector<Param> params) {
 	std::vector<Param>::iterator p           = params.begin();
 	std::vector<Param>::iterator locationEnd = params.end();
@@ -103,11 +116,10 @@ void Server::setFromParamLocations(std::vector<Param> params) {
 			newLocation.setExactMatch(p->getNthValue(0) == "=");
 		}
 		if ((it = config.find("index")) != end) {
-			newLocation.addIndex(it->second.at(0).getNthValue(0));
+			setAllValuesToVector(it->second, newLocation.getIndexVector());
 		}
 
 		_locations.push_back(newLocation);
-
 
 		p++;
 	} while (p != locationEnd);
@@ -142,8 +154,8 @@ std::ostream &operator<<(std::ostream &os, const Server &server) {
 	// clang-format off
 
 
-	#define INF_ALIGN std::setw(14) << std::left
-	#define INF_AL_NST "    " << std::setw(10) << std::left
+	#define INF_ALIGN std::setw(17) << std::left
+	#define INF_AL_NST " └ " << std::setw(14) << std::left
 
 	os << INF_ALIGN << "Port" << ": \"" << server._port << "\"" << std::endl;
 	os << INF_ALIGN << "Host" << ": \"" << server._hostName << "\"" << std::endl;
@@ -169,7 +181,26 @@ std::ostream &operator<<(std::ostream &os, const Server &server) {
 			os << INF_ALIGN << "Location" << std::endl;
 			os << INF_AL_NST << "Match" << ": \"" << location->getMatch() << "\"" << std::endl;
 			os << INF_AL_NST << "Exact match" << ": \"" << (location->getExactMatch() ? "yes" : "no") << "\"" << std::endl;
-			os << INF_AL_NST << "Index" << ": \"" << location->getIndex() << "\"" << std::endl;
+			os << INF_AL_NST << "Index" << ": ";
+				std::vector<std::string> locationIndex = location->getIndex();
+				for (std::vector<std::string>::iterator start = locationIndex.begin();
+					start != locationIndex.end();
+					++start)
+				{
+					os << "\"" << *start << "\" ";
+				}
+			os << std::endl;
+			OS << INF_AL_NST << "Error Pages:" << std::endl;
+			if (location._errorPages.size() > 0) {
+				std::map<std::string, std::string>::const_iterator errorPage = location._errorPages.begin();
+				std::map<std::string, std::string>::const_iterator errorPageEnd = location._errorPages.end();
+				os<< INF_ALIGN << "Error pages:" << std::endl;
+				while (errorPage != errorPageEnd) {
+					os << INF_AL_NST << errorPage->first << ": \"" << errorPage->second << "\"" << std::endl;
+					errorPage++;
+				}
+			}
+
 
 			location++;
 		}
