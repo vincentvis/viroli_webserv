@@ -4,7 +4,7 @@ Server::Server() {
 	std::cout << "server default constructer is built" << std::endl;
 	this->_port             = -1;
 	this->_serverName       = "";
-	this->_root             = "";
+	this->_root             = "html"; // default for this param is "html" (nginx)
 	this->_allow            = "";
 	this->_defaultIndexPage = "";
 	this->_defaultErrorPage = "";
@@ -32,7 +32,9 @@ void Server::setFromParamHostAndPort(std::vector<Param> params) {
 	this->_port     = data.second;
 }
 
-void Server::setFromParamErrorPages(std::vector<Param> params) {
+void Server::setFromParamErrorPages(
+	std::vector<Param> params, std::map<std::string, std::string> *target
+) {
 	std::vector<Param>::iterator currentParam = params.begin();
 	std::vector<Param>::iterator end          = params.end();
 
@@ -40,7 +42,7 @@ void Server::setFromParamErrorPages(std::vector<Param> params) {
 		if (currentParam->getNumValues() < 2) {
 			continue;
 		}
-		_errorPages.insert(
+		target->insert(
 			std::make_pair(currentParam->getNthValue(0), currentParam->getNthValue(1))
 		);
 		currentParam++;
@@ -105,9 +107,6 @@ void Server::setFromParamLocations(std::vector<Param> params) {
 			throw std::invalid_argument("Location block missing matching URI");
 		}
 
-		std::cout << "process locatoin block" << std::endl;
-		std::cout << *p << std::endl;
-
 		Location newLocation;
 
 		newLocation.setMatch(p->getNthValue(0));
@@ -117,6 +116,9 @@ void Server::setFromParamLocations(std::vector<Param> params) {
 		}
 		if ((it = config.find("index")) != end) {
 			setAllValuesToVector(it->second, newLocation.getIndexVector());
+		}
+		if ((it = config.find("error_page")) != end) {
+			setFromParamErrorPages(it->second, newLocation.getErrorPagesMap());
 		}
 
 		_locations.push_back(newLocation);
@@ -139,7 +141,7 @@ Server::Server(const std::map<std::string, std::vector<Param> > config) {
 		setFromParamFirstStringValue(it->second, &this->_root);
 	}
 	if ((it = config.find("error_page")) != end) {
-		setFromParamErrorPages(it->second);
+		setFromParamErrorPages(it->second, &_errorPages);
 	}
 	if ((it = config.find("allowed_methods")) != end) {
 		setFromParamAllowedMethods(it->second, &this->_allow);
@@ -154,21 +156,22 @@ std::ostream &operator<<(std::ostream &os, const Server &server) {
 	// clang-format off
 
 
-	#define INF_ALIGN std::setw(17) << std::left
-	#define INF_AL_NST " └ " << std::setw(14) << std::left
+	#define INF_ALIGN0 std::setw(17) << std::left
+	#define INF_ALIGN1 " └ " << std::setw(14) << std::left
+	#define INF_ALIGN2 "   └ " << std::setw(12) << std::left
 
-	os << INF_ALIGN << "Port" << ": \"" << server._port << "\"" << std::endl;
-	os << INF_ALIGN << "Host" << ": \"" << server._hostName << "\"" << std::endl;
-	os << INF_ALIGN << "Name" << ": \"" << server._serverName << "\"" << std::endl;
-	os << INF_ALIGN << "Allow" << ": \"" << server._allow << "\"" << std::endl;
-	os << INF_ALIGN << "Root" << ": \"" << server._root << "\"" << std::endl;
+	os << INF_ALIGN0 << "Port" << ": \"" << server._port << "\"" << std::endl;
+	os << INF_ALIGN0 << "Host" << ": \"" << server._hostName << "\"" << std::endl;
+	os << INF_ALIGN0 << "Name" << ": \"" << server._serverName << "\"" << std::endl;
+	os << INF_ALIGN0 << "Allow" << ": \"" << server._allow << "\"" << std::endl;
+	os << INF_ALIGN0 << "Root" << ": \"" << server._root << "\"" << std::endl;
 
 	if (server._errorPages.size() > 0) {
 		std::map<std::string, std::string>::const_iterator errorPage = server._errorPages.begin();
 		std::map<std::string, std::string>::const_iterator errorPageEnd = server._errorPages.end();
-		os<< INF_ALIGN << "Error pages:" << std::endl;
+		os<< INF_ALIGN0 << "Error pages:" << std::endl;
 		while (errorPage != errorPageEnd) {
-			os << INF_AL_NST << errorPage->first << ": \"" << errorPage->second << "\"" << std::endl;
+			os << INF_ALIGN1 << errorPage->first << ": \"" << errorPage->second << "\"" << std::endl;
 			errorPage++;
 		}
 	}
@@ -178,10 +181,10 @@ std::ostream &operator<<(std::ostream &os, const Server &server) {
 		std::vector<Location>::const_iterator lastLocation = server._locations.end();
 		while (location != lastLocation)
 		{
-			os << INF_ALIGN << "Location" << std::endl;
-			os << INF_AL_NST << "Match" << ": \"" << location->getMatch() << "\"" << std::endl;
-			os << INF_AL_NST << "Exact match" << ": \"" << (location->getExactMatch() ? "yes" : "no") << "\"" << std::endl;
-			os << INF_AL_NST << "Index" << ": ";
+			os << INF_ALIGN0 << "Location" << std::endl;
+			os << INF_ALIGN1 << "Match" << ": \"" << location->getMatch() << "\"" << std::endl;
+			os << INF_ALIGN1 << "Exact match" << ": \"" << (location->getExactMatch() ? "yes" : "no") << "\"" << std::endl;
+			os << INF_ALIGN1 << "Index" << ": ";
 				std::vector<std::string> locationIndex = location->getIndex();
 				for (std::vector<std::string>::iterator start = locationIndex.begin();
 					start != locationIndex.end();
@@ -190,13 +193,13 @@ std::ostream &operator<<(std::ostream &os, const Server &server) {
 					os << "\"" << *start << "\" ";
 				}
 			os << std::endl;
-			OS << INF_AL_NST << "Error Pages:" << std::endl;
-			if (location._errorPages.size() > 0) {
-				std::map<std::string, std::string>::const_iterator errorPage = location._errorPages.begin();
-				std::map<std::string, std::string>::const_iterator errorPageEnd = location._errorPages.end();
-				os<< INF_ALIGN << "Error pages:" << std::endl;
+			if (location->getErrorPages().size() > 0) {
+				std::map<std::string, std::string> locationErrorPages = location->getErrorPages();
+				std::map<std::string, std::string>::const_iterator errorPage = locationErrorPages.begin();
+				std::map<std::string, std::string>::const_iterator errorPageEnd = locationErrorPages.end();
+				os<< INF_ALIGN1 << "Error pages: (" << locationErrorPages.size() << ")" << std::endl;
 				while (errorPage != errorPageEnd) {
-					os << INF_AL_NST << errorPage->first << ": \"" << errorPage->second << "\"" << std::endl;
+					os << INF_ALIGN2 << errorPage->first << ": \"" << errorPage->second << "\"" << std::endl;
 					errorPage++;
 				}
 			}
@@ -206,8 +209,9 @@ std::ostream &operator<<(std::ostream &os, const Server &server) {
 		}
 	}
 
-	#undef INF_ALIGN
-	#undef INF_AL_NST
+	#undef INF_ALIGN0
+	#undef INF_ALIGN1
+	#undef INF_ALIGN2
 	// clang-format on
 
 	return os;

@@ -38,6 +38,5 @@ int main(int argc, char const *argv[]) {
 		}
 	} while (serverConfig != configsEnd);
 
-
 	return (0);
 }

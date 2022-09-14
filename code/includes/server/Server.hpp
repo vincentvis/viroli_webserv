@@ -10,7 +10,9 @@
 class Server {
 	private:
 		void setFromParamHostAndPort(std::vector<Param> params);
-		void setFromParamErrorPages(std::vector<Param> params);
+		void setFromParamErrorPages(
+			std::vector<Param> params, std::map<std::string, std::string> *target
+		);
 		void setFromParamLocations(std::vector<Param> params);
 		void setFromParamAllowedMethods(std::vector<Param> params, std::string *target);
 		void setFromParamFirstStringValue(std::vector<Param> params, std::string *target);
