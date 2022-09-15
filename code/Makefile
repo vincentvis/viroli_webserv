@@ -28,7 +28,8 @@ INC_DIR		:= includes/
 MAIN		:= $(SRC_DIR)main.cpp
 
 # a list of classes without the .cpp suffix!
-CLASSES		:= server/Server
+CLASSES		:= server/Server\
+				utils/Utils
 
 OBJECTS		:= $(CLASSES:%=$(OBJ_DIR)%.o)
 HEADERS		:= $(CLASSES:%=$(INC_DIR)%.hpp)
