@@ -1,5 +1,4 @@
 #include "utils/Utils.hpp"
-// utils?
 
 int64_t Utils::stol(const std::string &string) {
 	char *endptr = NULL;
