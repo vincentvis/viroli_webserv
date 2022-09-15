@@ -9,28 +9,31 @@
 
 class Server {
 	private:
-		void setFromParamHostAndPort(std::vector<Param> params);
-		void setFromParamErrorPages(
-			std::vector<Param> params, std::map<std::string, std::string> *target
-		);
-		void setFromParamLocations(std::vector<Param> params);
-		void setFromParamAllowedMethods(std::vector<Param> params, std::string *target);
-		void setFromParamFirstStringValue(std::vector<Param> params, std::string *target);
-		void
-		setAllValuesToVector(std::vector<Param> params, std::vector<std::string> *target);
+		// void setFromParamHostAndPort(std::vector<Param> params);
+		// void setFromParamErrorPages(
+		// 	std::vector<Param> params, std::map<std::string, std::string> *target
+		// );
+		// void setFromParamLocations(std::vector<Param> params);
+		// void setFromParamAllowedMethods(std::vector<Param> params, std::string
+		// *target); void setFromParamFirstStringValue(std::vector<Param> params,
+		// std::string *target); void setAllValuesToVector(std::vector<Param> params,
+		// std::vector<std::string> *target);
 
 	protected:
-		uint16_t                 _port;
-		std::string              _ip;
-		std::string              _hostName;
-		std::string              _serverName;
-		std::vector<std::string> _serverNames;
-		std::string              _root;
-		std::string              _allow;
-		std::string              _defaultIndexPage;
-		std::string              _defaultErrorPage;
-		//		std::vector<ErrorPage>	_errorPages; // moet nog aangemaakt worden
+		uint16_t                           _port;
+		std::vector<uint16_t>              _ports;
+		std::string                        _ip;
+		std::vector<std::string>           _ips;
+		std::string                        _hostName;
+		std::string                        _serverName;
+		std::vector<std::string>           _serverNames;
+		std::string                        _root;
+		std::vector<std::string>           _allow;
+
+		std::string                        _defaultIndexPage;
+		std::string                        _defaultErrorPage;
 		std::map<std::string, std::string> _errorPages;
+
 		std::string                        _routeType;
 		bool                               _allowUpload;
 		bool                               _autoIndex;
@@ -38,7 +41,7 @@ class Server {
 		std::vector<Location>              _locations; // moet nog aangemaakt worden
 
 	public:
-		Server(const std::map<std::string, std::vector<Param> > config);
+		// Server(const std::map<std::string, std::vector<Param> > config);
 		Server();
 		~Server();
 		friend std::ostream &operator<<(std::ostream &os, const Server &server);

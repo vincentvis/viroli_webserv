@@ -1,9 +1,14 @@
 #include "config/ConfigParser.hpp"
 
+std::map<std::string, ConfigParser::e_directives> ConfigParser::_directiveHandlers;
+
 ConfigParser::ConfigParser() {
 	if (_directiveHandlers.size() == 0) {
-		_directiveHandlers["listen"]      = ED_LISTEN;
-		_directiveHandlers["server_name"] = ED_STRINGVEC;
+		_directiveHandlers["listen"]          = ED_LISTEN;
+		_directiveHandlers["server_name"]     = ED_SERVERNAME;
+		_directiveHandlers["allowed_methods"] = ED_ALLOW;
+		_directiveHandlers["error_page"]      = ED_ERRPAGE;
+		_directiveHandlers["location"]        = ED_LOCATION;
 	}
 }
 
@@ -12,8 +17,6 @@ ConfigParser::~ConfigParser() {
 		this->_fileStream.close();
 	}
 }
-
-std::map<std::string, ConfigParser::e_directives> ConfigParser::_directiveHandlers;
 
 ConfigParser::ConfigParser(int argc, char const **argv) {
 	parseFromArgs(argc, argv);
@@ -35,6 +38,7 @@ ConfigParser::parseFromArgs(int argc, char const **argv) {
 		throw std::invalid_argument("Problem while reading file");
 	}
 
+	_linenum = 0;
 	parseStream();
 	if (this->_fileStream.eof() == false || this->_currentLine.length() != 0) {
 		throw std::invalid_argument("Invalid configuration file");
@@ -44,25 +48,118 @@ ConfigParser::parseFromArgs(int argc, char const **argv) {
 	return (this->_parsed);
 }
 
+void ConfigParser::check_and_skip_semicolon(std::string name) {
+	if (this->_currentLine.empty() == false && this->_currentLine.at(0) == ';') {
+		skipNextChar();
+	} else {
+		throw std::runtime_error(
+			"Missing semicolon after directive \"" + name + "\" in config file at line " +
+			std::to_string(_linenum)
+		);
+	}
+}
+
+uint16_t ConfigParser::stringToPort(std::string &string) {
+	char *endptr     = NULL;
+	errno            = 0;
+	long     longval = strtol(string.c_str(), &endptr, 10);
+	uint16_t intval  = longval;
+
+	if (errno == EINVAL || errno == ERANGE || string.c_str() == endptr ||
+		intval != longval || intval > 65535U)
+	{
+		throw std::runtime_error(
+			"the string \"" + string + "\" does not contain a valid port number"
+		);
+	}
+	string = string.substr(endptr - string.c_str());
+	return intval;
+}
+
 void ConfigParser::processListen(Server &target) {
-	(void)target;
-	std::cout << "Process listen directive (" << this->_currentLine << ")" << std::endl;
+	std::string param = extractParam();
+
+	while (param.empty() == false) {
+		std::string::size_type colon_position = param.find(":");
+
+		if (colon_position == std::string::npos) {
+			// it's either only a IP or only a port.. find (.) to check?
+			std::string::size_type fullstop_position = param.find(".");
+			if (fullstop_position == std::string::npos) {
+				// it's only a port
+				target._ports.push_back(stringToPort(param));
+			} else {
+				// it's only an ip
+				target._ips.push_back(param);
+			}
+		} else {
+			std::string before_colon = param.substr(0, colon_position);
+			std::string after_colon  = param.substr(colon_position + 1);
+			// should be {ip}:{port}
+			target._ips.push_back(before_colon);
+			target._ports.push_back(stringToPort(after_colon));
+		}
+		if (this->_currentLine.empty())
+			break;
+		param = extractParam();
+	}
+	check_and_skip_semicolon("listen");
+}
+
+void ConfigParser::processErrorPages(std::map<std::string, std::string> &target) {
+	std::vector<std::string> params;
+
+	while (1) {
+		std::string param = extractParam();
+		if (param.empty())
+			break;
+		params.push_back(param);
+		if (this->_currentLine.empty())
+			break;
+	}
+	std::vector<std::string>::size_type max = params.size();
+	if (max <= 1) {
+		throw std::runtime_error(
+			"Directive \"error_page\" needs at least 2 parameters, has " +
+			std::to_string(max) + " parameters in config file at line " +
+			std::to_string(_linenum)
+		);
+	}
+	std::vector<std::string>::size_type i         = 0;
+	std::string                         errorpage = params[max - 1];
+	while (i < max - 1) {
+		target[params[i]] = errorpage;
+		i++;
+	}
+	check_and_skip_semicolon("error_page");
 }
 
 void ConfigParser::processAddParamsToVector(
-	std::string name, std::vector<std::string> &target
+	std::string name, std::vector<std::string> &target,
+	std::vector<std::string>::size_type min
 ) {
-	while (std::isalnum(this->_currentLine.at(0))) {
+	while (1) {
 		std::string param = extractParam();
-		std::cout << "p: [" << param << "] [" << this->_currentLine << "]" << std::endl;
+		if (param.empty())
+			break;
+		target.push_back(param);
+		if (this->_currentLine.empty())
+			break;
 	}
-	std::string param2 = extractParam();
 
-	std::cout << "p: [" << param2 << "] [" << this->_currentLine << "]" << std::endl;
+	if (target.size() < min) {
+		throw std::runtime_error(
+			"Not enough parameters found for directive \"" + name + "\", found " +
+			std::to_string(target.size()) + " need (at least) " + std::to_string(min)
+		);
+	}
+	check_and_skip_semicolon(name);
+}
 
+void ConfigParser::processLocationBlock(std::vector<Location> &target) {
 	(void)target;
-	std::cout << "Process " << name << " directive, add all params to a vector ("
-			  << this->_currentLine << ")" << std::endl;
+
+	std::cout << "process location block [" << this->_currentLine << "]" << std::endl;
 }
 
 void ConfigParser::parseStream() {
@@ -79,8 +176,8 @@ void ConfigParser::parseStream() {
 
 		extract_server_block_info(*newServer);
 
-		if (newServer->getPort() == 0) {
-			throw MissingRequiredDirectives();
+		if (newServer->_ports.size() == 0) {
+			throw std::runtime_error("Missing required directives for server config");
 		}
 	}
 	return;
@@ -93,18 +190,31 @@ void ConfigParser::extract_server_block_info(Server &target) {
 		}
 
 		std::string directiveName = extractDirectiveName();
-
 		std::map<std::string, ConfigParser::e_directives>::const_iterator handler =
 			_directiveHandlers.find(directiveName);
+
 		if (handler == _directiveHandlers.end()) {
-			throw InvalidDirective();
+			throw std::runtime_error(
+				"Unsupported directive name \"" + directiveName +
+				"\" found in config file at line " + std::to_string(_linenum)
+			);
 		}
+
 		switch (handler->second) {
 			case ED_LISTEN:
 				processListen(target);
 				break;
-			case ED_STRINGVEC:
-				processAddParamsToVector(directiveName, target._serverNames);
+			case ED_SERVERNAME:
+				processAddParamsToVector(directiveName, target._serverNames, 1);
+				break;
+			case ED_ALLOW:
+				processAddParamsToVector(directiveName, target._allow, 0);
+				break;
+			case ED_ERRPAGE:
+				processErrorPages(target._errorPages);
+				break;
+			case ED_LOCATION:
+				processLocationBlock(target._locations);
 				break;
 			default:
 				break;
@@ -167,11 +277,15 @@ bool ConfigParser::line_needs_update() {
 
 void ConfigParser::skip_to_after_server_block_opening(std::string::size_type n) {
 	this->_currentLine = trimLeadingWhitespace(this->_currentLine.substr(n));
+	std::string::size_type server_line = _linenum;
 	if (this->_currentLine.length() == 0) {
 		getNewLine();
 	}
 	if (this->_currentLine.length() == 0 || this->_currentLine.at(0) != '{') {
-		throw InvalidDirectiveNameException();
+		throw std::runtime_error(
+			"No opening brace after server directive in config file at line " +
+			std::to_string(server_line)
+		);
 	}
 	this->_currentLine = trimLeadingWhitespace(this->_currentLine.substr(1));
 	if (this->_currentLine.length() == 0) {
@@ -211,11 +325,15 @@ std::string ConfigParser::extractDirectiveName() {
 std::string ConfigParser::extractParam() {
 	std::string str;
 
+	this->_currentLine = trimLeadingWhitespace(this->_currentLine);
 	if (this->_currentLine.at(0) == '"' || this->_currentLine.at(0) == '\'') {
 		str                                 = this->_currentLine.substr(1);
 		std::string::size_type closingQuote = str.find_first_of(this->_currentLine.at(0));
 		if (closingQuote == std::string::npos) {
-			throw UnclosedQuotedStringException();
+			throw std::runtime_error(
+				"Missing closing quote in directive parameter in config file at line " +
+				std::to_string(_linenum)
+			);
 		}
 		str                = str.substr(0, closingQuote);
 		this->_currentLine = this->_currentLine.substr(closingQuote + 2);
@@ -228,10 +346,6 @@ std::string ConfigParser::extractParam() {
 			str                = this->_currentLine.substr(0, end_of_word);
 			this->_currentLine = this->_currentLine.substr(end_of_word);
 		}
-	}
-	this->_currentLine = trimLeadingWhitespace(this->_currentLine);
-	if (this->_currentLine.length() == 0) {
-		getNewLine();
 	}
 	return (str);
 }
@@ -253,6 +367,7 @@ bool ConfigParser::getNewLine() {
 		partialResult = "";
 	}
 	getline(this->_fileStream, this->_currentLine);
+	_linenum++;
 	if (this->_fileStream.eof()) {
 		hasReachedEOF = true;
 	}

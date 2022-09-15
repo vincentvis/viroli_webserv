@@ -90,16 +90,32 @@ class ConfigParser {
 		std::string   extractDirectiveName();
 		std::string   extractParam();
 
+		int           _linenum;
 		std::string   _filePath;
 		std::ifstream _fileStream;
 		std::string   _currentLine;
 		std::vector<std::map<std::string, std::vector<Param> > > _parsed;
 
 		//
-		void processListen(Server &target);
-		void processAddParamsToVector(std::string name, std::vector<std::string> &target);
+		uint16_t stringToPort(std::string &string);
+		void     processListen(Server &target);
+		void     processErrorPages(std::map<std::string, std::string> &target);
+		void     processAddParamsToVector(
+				std::string name, std::vector<std::string> &target,
+				std::vector<std::string>::size_type min
+			);
+		void processLocationBlock(std::vector<Location> &);
 
-		enum e_directives { ED_UNKNOWN, ED_LISTEN, ED_STRINGVEC };
+		void check_and_skip_semicolon(std::string name);
+
+		enum e_directives {
+			ED_UNKNOWN,
+			ED_LISTEN,
+			ED_SERVERNAME,
+			ED_ERRPAGE,
+			ED_ALLOW,
+			ED_LOCATION
+		};
 
 		// this is the new idea..
 		std::vector<Server *>                         _servers;
