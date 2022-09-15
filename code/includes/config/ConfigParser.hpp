@@ -106,6 +106,11 @@ class ConfigParser {
 				std::vector<std::string>::size_type min
 			);
 		void processLocationBlock(std::vector<Location> &);
+		bool isValidConfigURI(std::string &match_str);
+		void processRoot(std::string &target);
+		void processBoolval(
+			std::string name, bool &target, std::string truthy, std::string falsy
+		);
 
 		void check_and_skip_semicolon(std::string name);
 
@@ -115,13 +120,17 @@ class ConfigParser {
 			ED_SERVERNAME,
 			ED_ERRPAGE,
 			ED_ALLOW,
-			ED_LOCATION
+			ED_LOCATION,
+			ED_ROOT,
+			ED_INDEX,
+			ED_AUTOINDEX
 		};
 
 		// this is the new idea..
 		std::vector<Server *>                         _servers;
 		std::map<std::string, std::vector<Server *> > _ports;
-		static std::map<std::string, e_directives>    _directiveHandlers;
+		static std::map<std::string, e_directives>    _serverDirectiveHandlers;
+		static std::map<std::string, e_directives>    _locationDirectiveHandlers;
 
 		void                                          parseStream();
 		void                                          maybeGetStreamContent();

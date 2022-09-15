@@ -1,14 +1,24 @@
 #include "config/ConfigParser.hpp"
 
-std::map<std::string, ConfigParser::e_directives> ConfigParser::_directiveHandlers;
+std::map<std::string, ConfigParser::e_directives> ConfigParser::_serverDirectiveHandlers;
+std::map<std::string, ConfigParser::e_directives>
+	ConfigParser::_locationDirectiveHandlers;
 
 ConfigParser::ConfigParser() {
-	if (_directiveHandlers.size() == 0) {
-		_directiveHandlers["listen"]          = ED_LISTEN;
-		_directiveHandlers["server_name"]     = ED_SERVERNAME;
-		_directiveHandlers["allowed_methods"] = ED_ALLOW;
-		_directiveHandlers["error_page"]      = ED_ERRPAGE;
-		_directiveHandlers["location"]        = ED_LOCATION;
+	if (_serverDirectiveHandlers.size() == 0) {
+		_serverDirectiveHandlers["listen"]          = ED_LISTEN;
+		_serverDirectiveHandlers["server_name"]     = ED_SERVERNAME;
+		_serverDirectiveHandlers["allowed_methods"] = ED_ALLOW;
+		_serverDirectiveHandlers["error_page"]      = ED_ERRPAGE;
+		_serverDirectiveHandlers["location"]        = ED_LOCATION;
+		_serverDirectiveHandlers["root"]            = ED_ROOT;
+	}
+	if (_locationDirectiveHandlers.size() == 0) {
+		_locationDirectiveHandlers["allowed_methods"] = ED_ALLOW;
+		_locationDirectiveHandlers["error_page"]      = ED_ERRPAGE;
+		_locationDirectiveHandlers["root"]            = ED_ROOT;
+		_locationDirectiveHandlers["autoindex"]       = ED_AUTOINDEX;
+		_locationDirectiveHandlers["index"]           = ED_INDEX;
 	}
 }
 
@@ -156,10 +166,136 @@ void ConfigParser::processAddParamsToVector(
 	check_and_skip_semicolon(name);
 }
 
-void ConfigParser::processLocationBlock(std::vector<Location> &target) {
-	(void)target;
+void ConfigParser::processBoolval(
+	std::string name, bool &target, std::string truthy, std::string falsy
+) {
+	std::string param = extractParam();
+	if (param.empty()) {
+		throw std::runtime_error(
+			"Not enough parameters found for directive \"" + name +
+			"\" in config file at line " + std::to_string(_linenum)
+		);
+	}
 
-	std::cout << "process location block [" << this->_currentLine << "]" << std::endl;
+	if (param == truthy) {
+		target = true;
+	} else if (param == falsy) {
+		target = false;
+	} else {
+		throw std::runtime_error(
+			"Value \"" + param + "\" does not match any of [\"" + truthy + "\",\"" +
+			falsy + "\"] for directive " + name + " in config file at line " +
+			std::to_string(_linenum)
+		);
+	}
+	check_and_skip_semicolon(name);
+}
+
+bool ConfigParser::isValidConfigURI(std::string &match_str) {
+	if (match_str.empty() || match_str.at(0) != '/') {
+		return (false);
+	}
+	std::string::size_type length = match_str.length();
+	std::string::size_type i      = 1;
+	std::string::size_type word   = 0;
+
+	while (i != length) {
+		if (match_str.at(i) == '/' && word == 0)
+			return (false);
+		if (std::isalnum(match_str.at(i)) || match_str.at(i) == '-' ||
+			match_str.at(i) == '_') {
+			word++;
+		} else if (match_str.at(i) == '/') {
+			word = 0;
+		} else {
+			return (false);
+		}
+		i++;
+	}
+	return (true);
+}
+
+void ConfigParser::processLocationBlock(std::vector<Location> &target) {
+	Location    location;
+
+	std::string param = extractParam();
+	if (param == "=") {
+		location._exactMatch = true;
+		location._sortWeight = 200;
+		param                = extractParam();
+	}
+	if (param == "{" || this->_currentLine.empty()) {
+		throw std::runtime_error(
+			"Not enough parameters in Location directive in config file at line " +
+			std::to_string(_linenum)
+		);
+	}
+	if (isValidConfigURI(param) == false) {
+		throw std::runtime_error(
+			"Invalid location_match param (\"" + param +
+			"\") in location directive at line " + std::to_string(_linenum)
+		);
+	}
+	location._match = param;
+	trimLeadingWhitespaceRef(this->_currentLine);
+	if (this->_currentLine.empty() == false || this->_currentLine.at(0) != '{') {
+		skipNextChar();
+	}
+
+	while (true) {
+		if (this->_currentLine.at(0) == '}') {
+			skipNextChar();
+			break;
+		}
+
+		std::cout << "try dirname (location): " << this->_currentLine << std::endl;
+		std::string directiveName = extractDirectiveName();
+		std::map<std::string, ConfigParser::e_directives>::const_iterator handler =
+			_locationDirectiveHandlers.find(directiveName);
+
+		if (handler == _locationDirectiveHandlers.end()) {
+			throw std::runtime_error(
+				"Unsupported directive name \"" + directiveName +
+				"\" found in location block in config file at line " +
+				std::to_string(_linenum)
+			);
+		}
+
+		switch (handler->second) {
+			case ED_ALLOW:
+				processAddParamsToVector(directiveName, location._allow, 0);
+				break;
+			case ED_INDEX:
+				processAddParamsToVector(directiveName, location._index, 0);
+				break;
+			case ED_AUTOINDEX:
+				processBoolval(directiveName, location._autoIndex, "on", "off");
+				break;
+			case ED_ERRPAGE:
+				processErrorPages(location._errorPages);
+				break;
+			case ED_ROOT:
+				processRoot(location._root);
+				break;
+			default:
+				break;
+		}
+	}
+
+	target.push_back(location);
+}
+
+void ConfigParser::processRoot(std::string &target) {
+	std::string param = extractParam();
+
+	if (isValidConfigURI(param) == false) {
+		throw std::runtime_error(
+			"Invalid value for root directive (\"" + param +
+			"\") in config file at line " + std::to_string(_linenum)
+		);
+	}
+	target = param;
+	check_and_skip_semicolon("root");
 }
 
 void ConfigParser::parseStream() {
@@ -182,6 +318,7 @@ void ConfigParser::parseStream() {
 	}
 	return;
 }
+
 void ConfigParser::extract_server_block_info(Server &target) {
 	while (true) {
 		if (this->_currentLine.at(0) == '}') {
@@ -189,11 +326,12 @@ void ConfigParser::extract_server_block_info(Server &target) {
 			return;
 		}
 
+		std::cout << "try dirname (server)  : " << this->_currentLine << std::endl;
 		std::string directiveName = extractDirectiveName();
 		std::map<std::string, ConfigParser::e_directives>::const_iterator handler =
-			_directiveHandlers.find(directiveName);
+			_serverDirectiveHandlers.find(directiveName);
 
-		if (handler == _directiveHandlers.end()) {
+		if (handler == _serverDirectiveHandlers.end()) {
 			throw std::runtime_error(
 				"Unsupported directive name \"" + directiveName +
 				"\" found in config file at line " + std::to_string(_linenum)
@@ -215,6 +353,9 @@ void ConfigParser::extract_server_block_info(Server &target) {
 				break;
 			case ED_LOCATION:
 				processLocationBlock(target._locations);
+				break;
+			case ED_ROOT:
+				processRoot(target._root);
 				break;
 			default:
 				break;

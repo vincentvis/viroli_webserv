@@ -8,6 +8,7 @@ class Location {
 	public:
 		Location();
 		~Location();
+		friend class ConfigParser;
 
 		std::string                         getMatch() const;
 		void                                setMatch(std::string value);
@@ -18,8 +19,8 @@ class Location {
 		std::string                         getRoot() const;
 		void                                setRoot(std::string value);
 
-		std::string                         getAllow() const;
-		void                                setAllow(std::string value);
+		std::vector<std::string>            getAllow() const;
+		void                                addAllow(std::string value);
 
 		std::vector<std::string>            getIndex() const;
 		std::vector<std::string>           *getIndexVector();
@@ -37,8 +38,9 @@ class Location {
 		std::string                        _match;
 		bool                               _exactMatch;
 		std::string                        _root;
-		std::string                        _allow;
+		std::vector<std::string>           _allow;
 		std::vector<std::string>           _index;
 		std::map<std::string, std::string> _errorPages;
 		bool                               _autoIndex;
+		int                                _sortWeight;
 };

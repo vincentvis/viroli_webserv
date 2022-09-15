@@ -4,8 +4,8 @@ Location::Location() {
 	_match      = "";
 	_exactMatch = false;
 	_root       = "";
-	_allow      = "";
 	_autoIndex  = false;
+	_sortWeight = 0;
 }
 Location::~Location() {
 }
@@ -31,11 +31,12 @@ void Location::setRoot(std::string value) {
 	_root = value;
 }
 
-std::string Location::getAllow() const {
+std::vector<std::string> Location::getAllow() const {
 	return _allow;
 }
-void Location::setAllow(std::string value) {
-	_allow = value;
+
+void Location::addAllow(std::string value) {
+	_allow.push_back(value);
 }
 
 std::vector<std::string> Location::getIndex() const {
