@@ -1,9 +1,9 @@
 #pragma once
 
 #include <cerrno>
-#include <cstdint>
 #include <exception>
 #include <stdexcept>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string>
 
