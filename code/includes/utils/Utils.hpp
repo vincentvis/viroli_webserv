@@ -7,13 +7,10 @@
 #include <stdlib.h>
 #include <string>
 
-class Utils {
-	public:
-		static int64_t     stol(const std::string &string);
-		static std::string trimLeadingWhitespaceCopy(std::string str);
-		static std::string trimTrailingWhitespaceCopy(std::string str);
-		static std::string trimWhitespaceCopy(std::string str);
-		static void        trimTrailingWhitespaceRef(std::string &str);
-		static void        trimLeadingWhitespaceRef(std::string &str);
-		static void        trimWhitespaceRef(std::string &str);
-};
+int64_t     stol(const std::string &string);
+std::string trimLeadingWhitespaceCopy(std::string str);
+std::string trimTrailingWhitespaceCopy(std::string str);
+std::string trimWhitespaceCopy(std::string str);
+void        trimTrailingWhitespaceRef(std::string &str);
+void        trimLeadingWhitespaceRef(std::string &str);
+void        trimWhitespaceRef(std::string &str);

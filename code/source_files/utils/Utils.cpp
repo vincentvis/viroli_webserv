@@ -1,6 +1,6 @@
 #include "utils/Utils.hpp"
 
-int64_t Utils::stol(const std::string &string) {
+int64_t stol(const std::string &string) {
 	char *endptr = NULL;
 	errno        = 0;
 	long longval = strtol(string.c_str(), &endptr, 10);
@@ -14,7 +14,7 @@ int64_t Utils::stol(const std::string &string) {
 	return (longval);
 }
 
-std::string Utils::trimLeadingWhitespaceCopy(std::string str) {
+std::string trimLeadingWhitespaceCopy(std::string str) {
 	std::string::iterator start = str.begin();
 	std::string::iterator end   = str.end();
 
@@ -24,7 +24,7 @@ std::string Utils::trimLeadingWhitespaceCopy(std::string str) {
 	return (std::string(start, end));
 }
 
-std::string Utils::trimTrailingWhitespaceCopy(std::string str) {
+std::string trimTrailingWhitespaceCopy(std::string str) {
 	std::string::iterator start = str.begin();
 	std::string::iterator end   = str.end();
 
@@ -34,11 +34,11 @@ std::string Utils::trimTrailingWhitespaceCopy(std::string str) {
 	return (std::string(start, end));
 }
 
-std::string Utils::trimWhitespaceCopy(std::string str) {
-	return (Utils::trimTrailingWhitespaceCopy(Utils::trimLeadingWhitespaceCopy(str)));
+std::string trimWhitespaceCopy(std::string str) {
+	return (trimTrailingWhitespaceCopy(trimLeadingWhitespaceCopy(str)));
 }
 
-void Utils::trimLeadingWhitespaceRef(std::string &str) {
+void trimLeadingWhitespaceRef(std::string &str) {
 	std::string::iterator start = str.begin();
 	std::string::iterator end   = str.end();
 
@@ -48,7 +48,7 @@ void Utils::trimLeadingWhitespaceRef(std::string &str) {
 	str = std::string(start, end);
 }
 
-void Utils::trimTrailingWhitespaceRef(std::string &str) {
+void trimTrailingWhitespaceRef(std::string &str) {
 	std::string::iterator start = str.begin();
 	std::string::iterator end   = str.end();
 
@@ -58,7 +58,7 @@ void Utils::trimTrailingWhitespaceRef(std::string &str) {
 	str = std::string(start, end);
 }
 
-void Utils::trimWhitespaceRef(std::string &str) {
-	Utils::trimLeadingWhitespaceRef(str);
-	Utils::trimTrailingWhitespaceRef(str);
+void trimWhitespaceRef(std::string &str) {
+	trimLeadingWhitespaceRef(str);
+	trimTrailingWhitespaceRef(str);
 }
