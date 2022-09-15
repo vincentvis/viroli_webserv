@@ -7,7 +7,8 @@ int64_t Utils::stol(const std::string &string) {
 
 	if (errno == EINVAL || errno == ERANGE || string.c_str() == endptr) {
 		throw std::runtime_error(
-			"The string \"" + string + "\" does not contain a number"
+			std::string("The string \"") + string +
+			std::string("\" does not contain a number")
 		);
 	}
 	return (longval);
