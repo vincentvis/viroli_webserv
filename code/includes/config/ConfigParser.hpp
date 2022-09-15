@@ -75,7 +75,6 @@ class ConfigParser {
 				}
 		};
 
-
 	private:
 		// disable copying
 		ConfigParser(const ConfigParser &other);
@@ -96,24 +95,20 @@ class ConfigParser {
 		std::string   _currentLine;
 		std::vector<std::map<std::string, std::vector<Param> > > _parsed;
 
-
-	public:
-		typedef void (ConfigParser::*processDirective)(Server *);
-
-	private:
 		//
-		void processListen(Server *target);
+		void processListen(Server &target);
+		void processAddParamsToVector(std::string name, std::vector<std::string> &target);
 
+		enum e_directives { ED_UNKNOWN, ED_LISTEN, ED_STRINGVEC };
 
 		// this is the new idea..
 		std::vector<Server *>                         _servers;
 		std::map<std::string, std::vector<Server *> > _ports;
+		static std::map<std::string, e_directives>    _directiveHandlers;
 
 		void                                          parseStream();
 		void                                          maybeGetStreamContent();
 		bool                                          line_needs_update();
 		void skip_to_after_server_block_opening(std::string::size_type n);
-		void extract_server_block_info(
-			Server *target, const std::map<std::string, processDirective> &directives
-		);
+		void extract_server_block_info(Server &target);
 };

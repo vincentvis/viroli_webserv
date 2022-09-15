@@ -20,14 +20,15 @@ class Server {
 		setAllValuesToVector(std::vector<Param> params, std::vector<std::string> *target);
 
 	protected:
-		uint16_t    _port;
-		std::string _ip;
-		std::string _hostName;
-		std::string _serverName;
-		std::string _root;
-		std::string _allow;
-		std::string _defaultIndexPage;
-		std::string _defaultErrorPage;
+		uint16_t                 _port;
+		std::string              _ip;
+		std::string              _hostName;
+		std::string              _serverName;
+		std::vector<std::string> _serverNames;
+		std::string              _root;
+		std::string              _allow;
+		std::string              _defaultIndexPage;
+		std::string              _defaultErrorPage;
 		//		std::vector<ErrorPage>	_errorPages; // moet nog aangemaakt worden
 		std::map<std::string, std::string> _errorPages;
 		std::string                        _routeType;
@@ -41,6 +42,7 @@ class Server {
 		Server();
 		~Server();
 		friend std::ostream &operator<<(std::ostream &os, const Server &server);
+		friend class ConfigParser;
 
-		uint16_t             getPort() const;
+		uint16_t getPort() const;
 };

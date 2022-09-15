@@ -1,6 +1,10 @@
 #include "config/ConfigParser.hpp"
 
 ConfigParser::ConfigParser() {
+	if (_directiveHandlers.size() == 0) {
+		_directiveHandlers["listen"]      = ED_LISTEN;
+		_directiveHandlers["server_name"] = ED_STRINGVEC;
+	}
 }
 
 ConfigParser::~ConfigParser() {
@@ -8,6 +12,8 @@ ConfigParser::~ConfigParser() {
 		this->_fileStream.close();
 	}
 }
+
+std::map<std::string, ConfigParser::e_directives> ConfigParser::_directiveHandlers;
 
 ConfigParser::ConfigParser(int argc, char const **argv) {
 	parseFromArgs(argc, argv);
@@ -38,18 +44,31 @@ ConfigParser::parseFromArgs(int argc, char const **argv) {
 	return (this->_parsed);
 }
 
-void ConfigParser::processListen(Server *target) {
+void ConfigParser::processListen(Server &target) {
 	(void)target;
-	std::cout << "Process listen directive" << std::endl;
+	std::cout << "Process listen directive (" << this->_currentLine << ")" << std::endl;
+}
+
+void ConfigParser::processAddParamsToVector(
+	std::string name, std::vector<std::string> &target
+) {
+	while (std::isalnum(this->_currentLine.at(0))) {
+		std::string param = extractParam();
+		std::cout << "p: [" << param << "] [" << this->_currentLine << "]" << std::endl;
+	}
+	std::string param2 = extractParam();
+
+	std::cout << "p: [" << param2 << "] [" << this->_currentLine << "]" << std::endl;
+
+	(void)target;
+	std::cout << "Process " << name << " directive, add all params to a vector ("
+			  << this->_currentLine << ")" << std::endl;
 }
 
 void ConfigParser::parseStream() {
 	if (line_needs_update()) {
 		getNewLine();
 	}
-
-	std::map<std::string, processDirective> allowed_directives;
-	allowed_directives["listen"] = &ConfigParser::processListen;
 
 	// should be at first non-whitespace character here
 	while (this->_currentLine.find("server") == 0) {
@@ -58,7 +77,7 @@ void ConfigParser::parseStream() {
 		Server *newServer = new Server();
 		_servers.push_back(newServer);
 
-		extract_server_block_info(newServer, allowed_directives);
+		extract_server_block_info(*newServer);
 
 		if (newServer->getPort() == 0) {
 			throw MissingRequiredDirectives();
@@ -66,9 +85,7 @@ void ConfigParser::parseStream() {
 	}
 	return;
 }
-void ConfigParser::extract_server_block_info(
-	Server *target, const std::map<std::string, processDirective> &directiveHandlers
-) {
+void ConfigParser::extract_server_block_info(Server &target) {
 	while (true) {
 		if (this->_currentLine.at(0) == '}') {
 			skipNextChar();
@@ -77,17 +94,21 @@ void ConfigParser::extract_server_block_info(
 
 		std::string directiveName = extractDirectiveName();
 
-		(void)target;
-		(void)directiveHandlers;
-
-		std::map<std::string, processDirective>::const_iterator handler =
-			directiveHandlers.find(directiveName);
-		std::cout << "dname: [" << directiveName << std::endl;
-		if (handler == directiveHandlers.end()) {
+		std::map<std::string, ConfigParser::e_directives>::const_iterator handler =
+			_directiveHandlers.find(directiveName);
+		if (handler == _directiveHandlers.end()) {
 			throw InvalidDirective();
 		}
-		std::cout << "-- " << handler->second << std::endl;
-		(*handler->second)(target);
+		switch (handler->second) {
+			case ED_LISTEN:
+				processListen(target);
+				break;
+			case ED_STRINGVEC:
+				processAddParamsToVector(directiveName, target._serverNames);
+				break;
+			default:
+				break;
+		}
 
 		// if (map->find(directiveName) == map->end()) {
 		// 	std::vector<Param> params;
