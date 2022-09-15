@@ -276,7 +276,7 @@ bool ConfigParser::line_needs_update() {
 }
 
 void ConfigParser::skip_to_after_server_block_opening(std::string::size_type n) {
-	this->_currentLine = trimLeadingWhitespace(this->_currentLine.substr(n));
+	this->_currentLine = trimLeadingWhitespaceCopy(this->_currentLine.substr(n));
 	std::string::size_type server_line = _linenum;
 	if (this->_currentLine.length() == 0) {
 		getNewLine();
@@ -287,7 +287,7 @@ void ConfigParser::skip_to_after_server_block_opening(std::string::size_type n) 
 			std::to_string(server_line)
 		);
 	}
-	this->_currentLine = trimLeadingWhitespace(this->_currentLine.substr(1));
+	this->_currentLine = trimLeadingWhitespaceCopy(this->_currentLine.substr(1));
 	if (this->_currentLine.length() == 0) {
 		getNewLine();
 	}
@@ -315,7 +315,7 @@ std::string ConfigParser::extractDirectiveName() {
 	}
 
 	std::string directiveName = this->_currentLine.substr(0, length);
-	this->_currentLine        = trimLeadingWhitespace(this->_currentLine.substr(length));
+	this->_currentLine = trimLeadingWhitespaceCopy(this->_currentLine.substr(length));
 	if (endOfName == end) {
 		getNewLine();
 	}
@@ -325,7 +325,7 @@ std::string ConfigParser::extractDirectiveName() {
 std::string ConfigParser::extractParam() {
 	std::string str;
 
-	this->_currentLine = trimLeadingWhitespace(this->_currentLine);
+	trimLeadingWhitespaceRef(this->_currentLine);
 	if (this->_currentLine.at(0) == '"' || this->_currentLine.at(0) == '\'') {
 		str                                 = this->_currentLine.substr(1);
 		std::string::size_type closingQuote = str.find_first_of(this->_currentLine.at(0));
@@ -351,7 +351,7 @@ std::string ConfigParser::extractParam() {
 }
 
 void ConfigParser::skipNextChar() {
-	this->_currentLine = trimLeadingWhitespace(this->_currentLine.substr(1));
+	this->_currentLine = trimLeadingWhitespaceCopy(this->_currentLine.substr(1));
 	if (this->_currentLine.length() == 0 && this->_fileStream.eof() == false) {
 		getNewLine();
 	}
@@ -371,7 +371,7 @@ bool ConfigParser::getNewLine() {
 	if (this->_fileStream.eof()) {
 		hasReachedEOF = true;
 	}
-	this->_currentLine = trimWhitespace(this->_currentLine);
+	trimWhitespaceRef(this->_currentLine);
 	if (this->_currentLine.empty() == false && this->_currentLine.at(0) == '#') {
 		this->_currentLine = partialResult;
 		return (getNewLine());
@@ -386,26 +386,26 @@ bool ConfigParser::getNewLine() {
 	return (true);
 }
 
-std::string ConfigParser::trimWhitespace(std::string str) {
-	return (trimTrailingWhitespace(trimLeadingWhitespace(str)));
-}
+// std::string ConfigParser::trimWhitespaceCopy(std::string str) {
+// 	return (trimTrailingWhitespaceCopy(trimLeadingWhitespaceCopy(str)));
+// }
 
-std::string ConfigParser::trimLeadingWhitespace(std::string str) {
-	std::string::iterator start = str.begin();
-	std::string::iterator end   = str.end();
+// std::string ConfigParser::trimLeadingWhitespaceCopy(std::string str) {
+// 	std::string::iterator start = str.begin();
+// 	std::string::iterator end   = str.end();
 
-	while (start != end && std::isspace(*start)) {
-		start++;
-	}
-	return (std::string(start, end));
-}
+// 	while (start != end && std::isspace(*start)) {
+// 		start++;
+// 	}
+// 	return (std::string(start, end));
+// }
 
-std::string ConfigParser::trimTrailingWhitespace(std::string str) {
-	std::string::iterator start = str.begin();
-	std::string::iterator end   = str.end();
+// std::string ConfigParser::trimTrailingWhitespaceCopy(std::string str) {
+// 	std::string::iterator start = str.begin();
+// 	std::string::iterator end   = str.end();
 
-	while (end - start > 0 && std::isspace(*end)) {
-		end--;
-	}
-	return (std::string(start, end));
-}
+// 	while (end - start > 0 && std::isspace(*end)) {
+// 		end--;
+// 	}
+// 	return (std::string(start, end));
+// }
