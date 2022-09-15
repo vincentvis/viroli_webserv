@@ -13,6 +13,7 @@ BreakBeforeConceptDeclarations: true
 BreakConstructorInitializers: 'AfterColon'
 BreakInheritanceList: 'AfterColon'
 IndentCaseLabels: true
+NamespaceIndentation: 'All'
 EmptyLineBeforeAccessModifier: 'Always'
 AllowShortIfStatementsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: false
