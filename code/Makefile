@@ -39,7 +39,8 @@ MAIN		:= $(SRC_DIR)main.cpp
 CLASSES		:= config/Param\
 				config/ConfigParser\
 				server/Location\
-				server/Server
+				server/Server\
+				utils/Utils
 
 OBJECTS		:= $(CLASSES:%=$(OBJ_DIR)%.o)
 HEADERS		:= $(CLASSES:%=$(INC_DIR)%.hpp)
