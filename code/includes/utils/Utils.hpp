@@ -9,8 +9,8 @@
 
 namespace Utils {
 
+	int64_t     stol(std::string &string, bool skip);
 	int64_t     stol(const std::string &string);
-	int64_t     stol_skip(std::string &string);
 	std::string trimLeadingWhitespaceCopy(std::string str);
 	std::string trimTrailingWhitespaceCopy(std::string str);
 	std::string trimWhitespaceCopy(std::string str);
