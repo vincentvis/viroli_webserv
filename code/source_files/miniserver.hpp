@@ -1,6 +1,6 @@
 #pragma once
 
-#include "connection.hpp"
+#include "pollable.hpp"
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <fstream>
@@ -18,11 +18,12 @@
 #define BUFFERSIZE 8
 #define MAXCONNECTIONS 10
 
-class Connection;
+class IPollable;
 
 class Server {
-public:                                          // temp
-  static std::map<int32_t, Connection> _sockets; // <key:fd, value:Connection>
+public: // temp
+  static std::map<int32_t, IPollable *>
+      _pollables; // <key:fd, value:Connection>
   static std::vector<struct pollfd> _pfds;
 
 public:
@@ -31,5 +32,4 @@ public:
   Server(std::vector<uint16_t> &ports);
 
   static void run();
-  void trace();
 };

@@ -19,6 +19,41 @@ class Server;
 
 /* buffer: with fixed size */
 /* data: to store the data receiveDatad thus far */
+
+/*
+
+class FDInterface {
+  virtual int readData() = 0;
+}
+
+class FileFD : FDInterface {
+  std::vector<char> _buffer(BUFFERSIZE, 0);
+  struct pollfd _pollfd;
+  int _bytes;
+  int _bytestotal;
+  int _bytesleft;
+
+  int readData() {
+    _bytes = read(_pollfd.fd, buffer.data(), buffer.size());
+  }
+}
+
+class SocketFD : FDInterface {
+  std::vector<char> _buffer(BUFFERSIZE, 0);
+  struct pollfd _pollfd;
+  int _bytes;
+  int _bytestotal;
+  int _bytesleft;
+
+  int readData() {
+    _bytes = recv(_pollfd.fd, buffer.data(), buffer.size());
+  }
+}
+
+static std::map<uint16_t, FDInterface*> _fds;
+
+*/
+
 class Connection {
 public:
   std::vector<char> _buffer;

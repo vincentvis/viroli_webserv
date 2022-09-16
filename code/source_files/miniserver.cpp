@@ -27,10 +27,11 @@ Server::Server(uint16_t port) {
     close(fd);
     throw(std::string("error on listen()")); // placeholder
   }
+
   struct pollfd pfd = {fd, POLLIN, 0};
   Server::_pfds.push_back(pfd);
-  Server::_sockets.insert(
-      std::pair<int32_t, Connection>(fd, Connection(*this, port, pfd, true)));
+  Server::_pollables.insert(
+      std::pair<int32_t, IPollable *>(fd, new ListenerPoll(*this, fd)));
 }
 
 Server::Server(std::vector<uint16_t> &ports) {
@@ -41,7 +42,7 @@ Server::Server(std::vector<uint16_t> &ports) {
 }
 
 void Server::run() {
-  std::map<int32_t, Connection>::iterator it;
+  std::map<int32_t, IPollable *>::iterator it;
   int events = 0;
 
   for (;;) {
@@ -52,37 +53,28 @@ void Server::run() {
     /* events reported: check all fds and at most the number of events */
     for (int i = 0, event = 0; i < Server::_pfds.size() && event < events;
          ++i) {
-
       /* incoming activity: new connection or ready to read */
       if (Server::_pfds[i].revents & POLLIN ||
           Server::_pfds[i].revents & POLLOUT) {
         ++event;
-        it = Server::_sockets.find(Server::_pfds[i].fd);
+        it = Server::_pollables.find(Server::_pfds[i].fd);
 
         /* socket exists */
-        if (it != _sockets.end()) {
+        if (it != _pollables.end()) {
           if (Server::_pfds[i].revents & POLLIN) {
-
-            /* is the socket a listening socket: accept new connection */
-            if (it->second.isListening()) {
-              it->second.newConnection();
-
-              /* socket is ready for read: receiveData data in buffer */
-            } else {
-              it->second.receiveData(i);
-            }
+            it->second->runPollin(i);
           } else if (Server::_pfds[i].revents & POLLOUT) {
-            // sleep(1); //
-            it->second.sendData(i);
+            it->second->runPollout(i);
           }
+
           /* socket doesn't exist */
         } else {
-          throw(std::string("error on _sockets.find()"));
+          throw(std::string("error on _pollables.find()"));
         }
       }
     }
   }
 }
 
-std::map<int32_t, Connection> Server::_sockets;
+std::map<int32_t, IPollable *> Server::_pollables;
 std::vector<struct pollfd> Server::_pfds;

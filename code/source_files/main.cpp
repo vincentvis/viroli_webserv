@@ -26,10 +26,10 @@ int main(int argc, char const *argv[]) {
     std::cout << "pfd: " << it->fd << std::endl;
   }
 
-  std::cout << "std::map<int32_t, Connection> _sockets: \n";
-  for (std::map<int32_t, Connection>::iterator it = Server::_sockets.begin();
-       it != Server::_sockets.end(); ++it) {
-    std::cout << "fd: " << it->first << " | pfd: " << it->second._pfd.fd
+  std::cout << "std::map<int32_t, Connection> _pollables: \n";
+  for (std::map<int32_t, IPollable *>::iterator it = Server::_pollables.begin();
+       it != Server::_pollables.end(); ++it) {
+    std::cout << "fd: " << it->first << " | pfd: " << it->second->getFD()
               << std::endl;
   }
 

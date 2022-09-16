@@ -1,4 +1,5 @@
-#include "connection.hpp"
+#include "miniserver.hpp"
+#include "pollable.hpp"`
 
 Connection::Connection(Server &server, int socket, struct pollfd pfd,
                        bool listening)
@@ -8,7 +9,7 @@ Connection::Connection(Server &server, int socket, struct pollfd pfd,
 void Connection::closeConnection(int index) {
   std::cout << "connection closed\n";
   close(_pfd.fd);
-  Server::_sockets.erase(_pfd.fd);
+  Server::_pollables.erase(_pfd.fd);
   Server::_pfds.erase(Server::_pfds.begin() + index);
 }
 
@@ -30,16 +31,17 @@ int Connection::receiveData(int index) {
     _data.append(_buffer.begin(), _buffer.begin() + _bytes);
   }
 
+  size_t crlfcrlf = 0;
   /* end of request header reached (parse header?) */
-  if (_data.find("\r\n\r\n") != std::string::npos) {
+  if ((crlfcrlf = _data.find("\r\n\r\n")) != std::string::npos) {
     initializeResponse(); // should be done after checking for a body
   }
 
   /* testing purposes: */
   std::cout << "===================================\n";
-  std::cout << "fd: " << _pfd.fd << std::endl;
-  std::cout << "data.size(): " << _data.size() << std::endl;
-  std::cout << "_data:\n";
+  std::cout << " -fd: " << _pfd.fd << std::endl;
+  std::cout << " -data.size(): " << _data.size() << std::endl;
+  std::cout << " -_data:\n";
   std::cout << _data;
   std::cout << "\n===================================\n";
 
@@ -95,6 +97,6 @@ void Connection::newConnection() {
   }
   struct pollfd pfd = {new_fd, POLLIN | POLLOUT, 0};
   Server::_pfds.push_back(pfd);
-  Server::_sockets.insert(std::pair<int32_t, Connection>(
+  Server::_pollables.insert(std::pair<int32_t, IPollable *>(
       new_fd, Connection(_server, new_fd, pfd, false)));
 }
