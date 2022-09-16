@@ -73,11 +73,11 @@ void ConfigParser::parseStream() {
 		_servers.push_back(newServer);
 
 		extract_server_block_info(*newServer);
+		sortServerLocations(*newServer);
 
 		if (newServer->_ports.size() == 0) {
 			throw std::runtime_error("Missing required directives for server config");
 		}
-		std::cout << *newServer << std::endl;
 	}
 	return;
 }

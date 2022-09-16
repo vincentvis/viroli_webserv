@@ -1,6 +1,5 @@
 #pragma once
 
-#include "config/Param.hpp"
 #include "server/Location.hpp"
 #include "utils/Utils.hpp"
 #include <iostream>
@@ -10,15 +9,6 @@
 
 class Server {
 	private:
-		// void setFromParamHostAndPort(std::vector<Param> params);
-		// void setFromParamErrorPages(
-		// 	std::vector<Param> params, std::map<std::string, std::string> *target
-		// );
-		// void setFromParamLocations(std::vector<Param> params);
-		// void setFromParamAllowedMethods(std::vector<Param> params, std::string
-		// *target); void setFromParamFirstStringValue(std::vector<Param> params,
-		// std::string *target); void setAllValuesToVector(std::vector<Param> params,
-		// std::vector<std::string> *target);
 
 	protected:
 		std::vector<uint16_t>              _ports;

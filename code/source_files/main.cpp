@@ -1,6 +1,5 @@
 
 #include "config/ConfigParser.hpp"
-#include "config/Directive.hpp"
 #include "server/Server.hpp"
 #include <iostream>
 #include <string>

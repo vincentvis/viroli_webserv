@@ -1,7 +1,7 @@
-#include "config/Param.hpp"
 #include "server/Server.hpp"
 #include "utils/Utils.hpp"
 
+#include <algorithm>
 #include <cctype>
 #include <exception>
 #include <fstream>
@@ -52,6 +52,7 @@ class ConfigParser {
 		);
 
 		void check_and_skip_semicolon(std::string name);
+		void sortServerLocations(Server &server);
 
 		enum e_directives {
 			ED_UNKNOWN,
