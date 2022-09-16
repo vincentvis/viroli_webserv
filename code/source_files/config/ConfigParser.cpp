@@ -81,6 +81,14 @@ void ConfigParser::parseStream() {
 	}
 	return;
 }
+bool locationSorter(const Location &a, const Location &b) {
+	return a.getSortWeight() < b.getSortWeight();
+}
+
+void ConfigParser::sortServerLocations(Server &server) {
+	std::sort(server._locations.begin(), server._locations.end(), locationSorter);
+}
+
 
 void ConfigParser::check_and_skip_semicolon(std::string name) {
 	if (this->_currentLine.empty() == false && this->_currentLine.at(0) == ';') {

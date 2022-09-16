@@ -32,6 +32,16 @@ namespace Utils {
 		}
 	}
 
+	template <typename T> void print_vector_deref(const std::vector<T> &vec) {
+		typename std::vector<T>::const_iterator it  = vec.begin();
+		typename std::vector<T>::const_iterator end = vec.end();
+
+		while (it != end) {
+			std::cout << **it << std::endl;
+			it++;
+		}
+	}
+
 	template <typename T>
 	void print_vector(const std::vector<T> &vec, const uint32_t depth) {
 		typename std::vector<T>::const_iterator it  = vec.begin();

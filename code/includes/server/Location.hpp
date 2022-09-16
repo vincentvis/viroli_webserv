@@ -37,6 +37,8 @@ class Location {
 		bool getAutoIndex() const;
 		void setAutoIndex(bool value);
 
+		int  getSortWeight() const;
+
 
 	private:
 		std::string                        _match;

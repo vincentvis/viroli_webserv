@@ -74,6 +74,10 @@ void Location::setAutoIndex(bool value) {
 	_autoIndex = value;
 }
 
+int Location::getSortWeight() const {
+	return _sortWeight;
+}
+
 std::ostream &operator<<(std::ostream &os, const Location &location) {
 #define INDENT  "    "
 #define INDENT2 "        "
