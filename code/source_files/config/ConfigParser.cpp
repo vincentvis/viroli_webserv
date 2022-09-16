@@ -31,6 +31,10 @@ ConfigParser::~ConfigParser() {
 	}
 }
 
+std::vector<std::map<std::string, std::vector<Param> > > ConfigParser::getParseResult() {
+	return _parsed;
+}
+
 ConfigParser::ConfigParser(int argc, char const **argv) {
 	parseFromArgs(argc, argv);
 }
@@ -258,7 +262,7 @@ void ConfigParser::processIntval(std::string name, int64_t &target) {
 	}
 	int64_t num;
 	try {
-		num = stol_skip(param);
+		num = Utils::stol(param, true);
 		if (num < 0) {
 			throw std::exception();
 		}
@@ -270,6 +274,18 @@ void ConfigParser::processIntval(std::string name, int64_t &target) {
 	}
 	target = num * multiplier;
 	check_and_skip_semicolon("root");
+}
+
+void ConfigParser::processReturn(Location &target) {
+	// can be one or 2 params
+	// With two params:
+	// 1 = redirect code
+	// 2 = url
+	// With one param:
+	// 1 = url
+	(void)target;
+	// std::string param = extractParam();
+	// if (param.size() && std::numeric(param.at(0)))
 }
 
 void ConfigParser::parseStream() {
@@ -340,7 +356,6 @@ void ConfigParser::extract_server_block_info(Server &target) {
 	}
 }
 
-
 void ConfigParser::processLocationBlock(std::vector<Location> &target) {
 	Location location;
 
@@ -369,7 +384,7 @@ void ConfigParser::processLocationBlock(std::vector<Location> &target) {
 	}
 	location._match = param;
 	location._sortWeight += location._match.length();
-	trimLeadingWhitespaceRef(this->_currentLine);
+	Utils::trimLeadingWhitespaceRef(this->_currentLine);
 	if (this->_currentLine.empty() == false || this->_currentLine.at(0) != '{') {
 		skipNextChar();
 	}
@@ -413,7 +428,7 @@ void ConfigParser::processLocationBlock(std::vector<Location> &target) {
 				processIntval(directiveName, location._maxBodySize);
 				break;
 			case ED_RETURN:
-				processReturn(directiveName, location); // <-------
+				processReturn(location);
 				break;
 			default:
 				break;
@@ -428,7 +443,7 @@ bool ConfigParser::line_needs_update() {
 }
 
 void ConfigParser::skip_to_after_server_block_opening(std::string::size_type n) {
-	this->_currentLine = trimLeadingWhitespaceCopy(this->_currentLine.substr(n));
+	this->_currentLine = Utils::trimLeadingWhitespaceCopy(this->_currentLine.substr(n));
 	std::string::size_type server_line = _linenum;
 	if (this->_currentLine.length() == 0) {
 		getNewLine();
@@ -439,15 +454,10 @@ void ConfigParser::skip_to_after_server_block_opening(std::string::size_type n) 
 			std::to_string(server_line)
 		);
 	}
-	this->_currentLine = trimLeadingWhitespaceCopy(this->_currentLine.substr(1));
+	this->_currentLine = Utils::trimLeadingWhitespaceCopy(this->_currentLine.substr(1));
 	if (this->_currentLine.length() == 0) {
 		getNewLine();
 	}
-}
-
-
-std::vector<std::map<std::string, std::vector<Param> > > ConfigParser::getParseResult() {
-	return _parsed;
 }
 
 std::string ConfigParser::extractDirectiveName() {
@@ -467,7 +477,8 @@ std::string ConfigParser::extractDirectiveName() {
 	}
 
 	std::string directiveName = this->_currentLine.substr(0, length);
-	this->_currentLine = trimLeadingWhitespaceCopy(this->_currentLine.substr(length));
+	this->_currentLine =
+		Utils::trimLeadingWhitespaceCopy(this->_currentLine.substr(length));
 	if (endOfName == end) {
 		getNewLine();
 	}
@@ -477,7 +488,7 @@ std::string ConfigParser::extractDirectiveName() {
 std::string ConfigParser::extractParam() {
 	std::string str;
 
-	trimLeadingWhitespaceRef(this->_currentLine);
+	Utils::trimLeadingWhitespaceRef(this->_currentLine);
 	if (this->_currentLine.at(0) == '"' || this->_currentLine.at(0) == '\'') {
 		str                                 = this->_currentLine.substr(1);
 		std::string::size_type closingQuote = str.find_first_of(this->_currentLine.at(0));
@@ -503,7 +514,7 @@ std::string ConfigParser::extractParam() {
 }
 
 void ConfigParser::skipNextChar() {
-	this->_currentLine = trimLeadingWhitespaceCopy(this->_currentLine.substr(1));
+	this->_currentLine = Utils::trimLeadingWhitespaceCopy(this->_currentLine.substr(1));
 	if (this->_currentLine.length() == 0 && this->_fileStream.eof() == false) {
 		getNewLine();
 	}
@@ -523,7 +534,7 @@ bool ConfigParser::getNewLine() {
 	if (this->_fileStream.eof()) {
 		hasReachedEOF = true;
 	}
-	trimWhitespaceRef(this->_currentLine);
+	Utils::trimWhitespaceRef(this->_currentLine);
 	if (this->_currentLine.empty() == false && this->_currentLine.at(0) == '#') {
 		this->_currentLine = partialResult;
 		return (getNewLine());

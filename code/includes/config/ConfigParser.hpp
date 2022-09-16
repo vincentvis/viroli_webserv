@@ -109,6 +109,7 @@ class ConfigParser {
 		bool isValidConfigURI(std::string &match_str);
 		void processRoot(std::string &target);
 		void processIntval(std::string name, int64_t &target);
+		void processReturn(Location &target);
 		void processBoolval(
 			std::string name, bool &target, std::string truthy, std::string falsy
 		);
