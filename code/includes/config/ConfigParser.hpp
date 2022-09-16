@@ -16,6 +16,7 @@ class ConfigParser {
 		ConfigParser(int argc, char const **argv);
 		std::vector<Server *> parseFromArgs(int argc, char const **argv);
 		std::vector<Server *> getParseResult();
+		std::map<uint16_t, std::vector<Server *> > getPortMap();
 		~ConfigParser();
 
 	private:
@@ -52,6 +53,7 @@ class ConfigParser {
 		);
 
 		void check_and_skip_semicolon(std::string name);
+		void addServerToPort(uint16_t port, Server &server);
 		void sortServerLocations(Server &server);
 
 		enum e_directives {
@@ -68,12 +70,12 @@ class ConfigParser {
 			ED_RETURN
 		};
 
-		std::vector<Server *>                         _servers;
-		std::map<std::string, std::vector<Server *> > _ports;
-		static std::map<std::string, e_directives>    _serverDirectiveHandlers;
-		static std::map<std::string, e_directives>    _locationDirectiveHandlers;
+		std::vector<Server *>                      _servers;
+		std::map<uint16_t, std::vector<Server *> > _ports;
+		static std::map<std::string, e_directives> _serverDirectiveHandlers;
+		static std::map<std::string, e_directives> _locationDirectiveHandlers;
 
-		void                                          parseStream();
+		void                                       parseStream();
 		void skip_to_after_server_block_opening(std::string::size_type n);
 		void extract_server_block_info(Server &target);
 };

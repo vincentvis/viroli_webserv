@@ -17,36 +17,50 @@ Server::~Server() {
 std::ostream &operator<<(std::ostream &os, const Server &server) {
 	os << "\033[1;4mServer info:\033[0m" << std::endl;
 
+#define PRINT_ALIGN std::setw(19) << std::left
 
-#define INDENT     "    "
-#define INDENTx(x) st::setw((x)*4) << ""
+	os << PRINT_ALIGN << "Ports"
+	   << "(" << server._ports.size() << "): [";
+	Utils::print_vector<uint16_t>(server._ports, "\"", "\"", ", ");
+	os << "]" << std::endl;
 
-	os << "Ports (" << server._ports.size() << "):" << std::endl;
-	Utils::print_vector<uint16_t>(server._ports, 1);
+	os << PRINT_ALIGN << "IPs"
+	   << "(" << server._ips.size() << "): [";
+	Utils::print_vector<std::string>(server._ips, "\"", "\"", ", ");
+	os << "]" << std::endl;
 
-	os << "IPs (" << server._ips.size() << "):" << std::endl;
-	Utils::print_vector<std::string>(server._ips, 1);
+	os << PRINT_ALIGN << "Root"
+	   << "   : " << server._root << std::endl;
 
-	os << "Root:" << std::endl << INDENT << server._root << std::endl;
+	os << PRINT_ALIGN << "Server names"
+	   << "(" << server._serverNames.size() << "): [";
+	Utils::print_vector<std::string>(server._serverNames, "\"", "\"", ", ");
+	os << "]" << std::endl;
 
-	os << "Server names (" << server._serverNames.size() << "):" << std::endl;
-	Utils::print_vector<std::string>(server._serverNames, 1);
+	os << PRINT_ALIGN << "Allow"
+	   << "(" << server._allow.size() << "): [";
+	Utils::print_vector<std::string>(server._allow, "\"", "\"", ", ");
+	os << "]" << std::endl;
 
-	os << "Allow (" << server._allow.size() << "):" << std::endl;
-	Utils::print_vector<std::string>(server._allow, 1);
+	os << PRINT_ALIGN << "Error pages"
+	   << "(" << server._errorPages.size() << "): [";
+	Utils::print_map<std::string, std::string>(
+		server._errorPages, "\n\t\t\t  {", ": ", "}", ", "
+	);
+	if (server._errorPages.size()) {
+		os << std::endl << "\t\t\t]" << std::endl;
+	} else {
+		os << "]" << std::endl;
+	}
 
-	os << "Error pages (" << server._errorPages.size() << "):" << std::endl;
-	Utils::print_map<std::string, std::string>(server._errorPages, 1);
+	os << PRINT_ALIGN << "Autoindex"
+	   << "   : " << std::boolalpha << server._autoIndex << std::endl;
 
-	os << "Autoindex:" << std::endl
-	   << INDENT << std::boolalpha << server._autoIndex << std::endl;
-
-	os << "Locations (" << server._locations.size() << "):" << std::endl;
+	os << PRINT_ALIGN << "Locations"
+	   << "(" << server._locations.size() << "):" << std::endl;
 	Utils::print_vector<Location>(server._locations);
 
-
-#undef INDENT
-#undef INDENTx
+#undef PRINT_ALIGN
 
 	return os;
 }

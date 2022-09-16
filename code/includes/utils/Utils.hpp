@@ -32,6 +32,23 @@ namespace Utils {
 		}
 	}
 
+	template <typename T>
+	void print_vector(
+		const std::vector<T> &vec, const std::string prefix, const std::string suffix,
+		const std::string delim
+	) {
+		typename std::vector<T>::const_iterator it  = vec.begin();
+		typename std::vector<T>::const_iterator end = vec.end();
+
+		while (it != end) {
+			std::cout << prefix << *it << suffix;
+			it++;
+			if (it != end) {
+				std::cout << delim;
+			}
+		}
+	}
+
 	template <typename T> void print_vector_deref(const std::vector<T> &vec) {
 		typename std::vector<T>::const_iterator it  = vec.begin();
 		typename std::vector<T>::const_iterator end = vec.end();
@@ -42,26 +59,20 @@ namespace Utils {
 		}
 	}
 
-	template <typename T>
-	void print_vector(const std::vector<T> &vec, const uint32_t depth) {
-		typename std::vector<T>::const_iterator it  = vec.begin();
-		typename std::vector<T>::const_iterator end = vec.end();
-
-		while (it != end) {
-			std::cout << std::setw(4 * depth) << "" << *it << std::endl;
-			it++;
-		}
-	}
-
 	template <typename M1, typename M2>
-	void print_map(const std::map<M1, M2> &vec, const uint32_t depth) {
+	void print_map(
+		const std::map<M1, M2> &vec, const std::string prefix, const std::string infix,
+		const std::string suffix, const std::string delim
+	) {
 		typename std::map<M1, M2>::const_iterator it  = vec.begin();
 		typename std::map<M1, M2>::const_iterator end = vec.end();
 
 		while (it != end) {
-			std::cout << std::setw(4 * depth) << "";
-			std::cout << it->first << ": " << it->second << std::endl;
+			std::cout << prefix << it->first << infix << it->second << suffix;
 			it++;
+			if (it != end) {
+				std::cout << delim;
+			}
 		}
 	}
 

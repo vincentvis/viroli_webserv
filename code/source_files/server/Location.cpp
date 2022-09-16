@@ -71,38 +71,52 @@ int Location::getSortWeight() const {
 }
 
 std::ostream &operator<<(std::ostream &os, const Location &location) {
-#define INDENT  "    "
-#define INDENT2 "        "
+#define PRINT_ALIGN "    " << std::setw(15) << std::left
 
+	os << "{" << std::endl;
 
-	os << INDENT << "Match: " << std::endl << INDENT2 << location._match << std::endl;
+	os << PRINT_ALIGN << "Match"
+	   << "   : " << location._match << std::endl;
 
-	os << INDENT << "Root: " << std::endl << INDENT2 << location._root << std::endl;
+	os << PRINT_ALIGN << "Root"
+	   << "   : " << location._root << std::endl;
 
-	os << INDENT << "Allow (" << location._allow.size() << "):" << std::endl;
-	Utils::print_vector<std::string>(location._allow, 2);
+	os << PRINT_ALIGN << "Allow"
+	   << "(" << location._allow.size() << "): [";
+	Utils::print_vector<std::string>(location._allow, "\"", "\"", ", ");
+	os << "]" << std::endl;
 
-	os << INDENT << "Index (" << location._index.size() << "):" << std::endl;
-	Utils::print_vector<std::string>(location._index, 2);
+	os << PRINT_ALIGN << "Index"
+	   << "(" << location._index.size() << "): [";
+	Utils::print_vector<std::string>(location._index, "\"", "\"", ", ");
+	os << "]" << std::endl;
 
-	os << INDENT << "Error pages (" << location._errorPages.size() << "):" << std::endl;
-	Utils::print_map<std::string, std::string>(location._errorPages, 2);
+	os << PRINT_ALIGN << "Error pages"
+	   << "(" << location._errorPages.size() << "): [";
+	Utils::print_map<std::string, std::string>(
+		location._errorPages, "\n\t\t\t  {", ": ", "}", ", "
+	);
+	if (location._errorPages.size()) {
+		os << std::endl << "\t\t\t]" << std::endl;
+	} else {
+		os << "]" << std::endl;
+	}
 
-	os << INDENT << "Autoindex:" << std::endl
-	   << INDENT2 << std::boolalpha << location._autoIndex << std::endl;
+	os << PRINT_ALIGN << "Autoindex"
+	   << "   : " << std::boolalpha << location._autoIndex << std::endl;
 
-	os << INDENT << "Client max body size:" << std::endl
-	   << INDENT2 << location._maxBodySize << std::endl;
+	os << PRINT_ALIGN << "max body size"
+	   << "   : " << location._maxBodySize << std::endl;
 
-	os << INDENT << "Redirect:" << std::endl
-	   << INDENT2 << location._redirect << std::endl;
+	os << PRINT_ALIGN << "Redirect"
+	   << "   : " << location._redirect << std::endl;
 
-	os << INDENT << "Redirect type:" << std::endl
-	   << INDENT2 << location._redirectType << std::endl;
+	os << PRINT_ALIGN << "Redirect type"
+	   << "   : " << location._redirectType << std::endl;
 
-	os << "----" << std::endl;
-#undef INDENT
-#undef INDENT2
+	os << "},";
+
+#undef PRINT_ALIGN
 
 	return os;
 }

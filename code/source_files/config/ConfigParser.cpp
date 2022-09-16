@@ -35,6 +35,10 @@ std::vector<Server *> ConfigParser::getParseResult() {
 	return _servers;
 }
 
+std::map<uint16_t, std::vector<Server *> > ConfigParser::getPortMap() {
+	return _ports;
+}
+
 ConfigParser::ConfigParser(int argc, char const **argv) {
 	parseFromArgs(argc, argv);
 }
@@ -118,6 +122,15 @@ uint16_t ConfigParser::stringToPort(std::string &string) {
 	return intval;
 }
 
+void ConfigParser::addServerToPort(uint16_t port, Server &server) {
+	std::map<uint16_t, std::vector<Server *> >::iterator el = _ports.find(port);
+	if (el == _ports.end()) {
+		std::vector<Server *> servers_for_port;
+		_ports.insert(std::make_pair(port, servers_for_port));
+	}
+	_ports[port].push_back(&server);
+}
+
 void ConfigParser::processListen(Server &target) {
 	std::string param = extractParam();
 
@@ -129,7 +142,9 @@ void ConfigParser::processListen(Server &target) {
 			std::string::size_type fullstop_position = param.find(".");
 			if (fullstop_position == std::string::npos) {
 				// it's only a port
-				target._ports.push_back(stringToPort(param));
+				uint16_t port = stringToPort(param);
+				target._ports.push_back(port);
+				addServerToPort(port, target);
 			} else {
 				// it's only an ip
 				target._ips.push_back(param);
@@ -139,7 +154,9 @@ void ConfigParser::processListen(Server &target) {
 			std::string after_colon  = param.substr(colon_position + 1);
 			// should be {ip}:{port}
 			target._ips.push_back(before_colon);
-			target._ports.push_back(stringToPort(after_colon));
+			int port = stringToPort(after_colon);
+			target._ports.push_back(port);
+			addServerToPort(port, target);
 		}
 		if (this->_currentLine.empty())
 			break;
@@ -474,6 +491,8 @@ void ConfigParser::processLocationBlock(
 	}
 	if (location._root == "") {
 		location._root = parent._root;
+	}
+	if (location._allow.size() == 0) {
 	}
 	target.push_back(location);
 }
