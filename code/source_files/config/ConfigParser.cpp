@@ -319,14 +319,6 @@ void ConfigParser::processIntval(std::string name, int64_t &target) {
 }
 
 void ConfigParser::processReturn(Location &target) {
-	// can be one or 2 params
-	// With two params:
-	// 1 = redirect code
-	// 2 = url
-	// With one param:
-	// 1 = url
-	(void)target;
-
 	std::vector<std::string> params;
 
 	while (1) {
@@ -371,6 +363,7 @@ void ConfigParser::processReturn(Location &target) {
 
 void ConfigParser::extract_server_block_info(Server &target) {
 	while (true) {
+		std::cerr << "TODO!!!!!! -- check EOF" << std::endl;
 		if (this->_currentLine.at(0) == '}') {
 			skipNextChar();
 			return;
@@ -395,7 +388,7 @@ void ConfigParser::extract_server_block_info(Server &target) {
 				processAddParamsToVector(directiveName, target._serverNames, 1);
 				break;
 			case ED_ALLOW:
-				processAddParamsToVector(directiveName, target._allow, 0);
+				processAddParamsToVector(directiveName, target._allow, 1);
 				break;
 			case ED_ERRPAGE:
 				processErrorPages(target._errorPages);
@@ -443,6 +436,7 @@ void ConfigParser::processLocationBlock(
 	}
 
 	while (true) {
+		std::cerr << "TODO!!!!!! -- check EOF" << std::endl;
 		if (this->_currentLine.at(0) == '}') {
 			skipNextChar();
 			break;
@@ -492,6 +486,8 @@ void ConfigParser::processLocationBlock(
 	if (location._root == "") {
 		location._root = parent._root;
 	}
+
+	std::cerr << "TODO!!!!!!" << std::endl;
 	if (location._allow.size() == 0) {
 	}
 	target.push_back(location);
