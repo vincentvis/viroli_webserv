@@ -404,16 +404,8 @@ void ConfigParser::processLocationBlock(
 	Location location;
 
 	location._sortWeight = target.size();
-	if (target.size() == 0) {
-		location._sortWeight = -1000;
-	}
 
-	std::string param = extractParam();
-	if (param == "=") {
-		location._sortWeight -= 400;
-		location._exactMatch = true;
-		param                = extractParam();
-	}
+	std::string param    = extractParam();
 	if (param == "{" || this->_currentLine.empty()) {
 		throw std::runtime_error(
 			"Not enough parameters in Location directive in config file at line " +

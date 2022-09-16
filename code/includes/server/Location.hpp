@@ -17,9 +17,6 @@ class Location {
 		std::string                         getMatch() const;
 		void                                setMatch(std::string value);
 
-		bool                                getExactMatch() const;
-		void                                setExactMatch(bool value);
-
 		std::string                         getRoot() const;
 		void                                setRoot(std::string value);
 
@@ -42,7 +39,6 @@ class Location {
 
 	private:
 		std::string                        _match;
-		bool                               _exactMatch;
 		std::string                        _root;
 		std::vector<std::string>           _allow;
 		std::vector<std::string>           _index;

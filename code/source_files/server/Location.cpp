@@ -2,7 +2,6 @@
 
 Location::Location() {
 	_match          = "";
-	_exactMatch     = false;
 	_root           = "";
 	_autoIndex      = false;
 	_sortWeight     = 0;
@@ -19,13 +18,6 @@ std::string Location::getMatch() const {
 }
 void Location::setMatch(std::string value) {
 	_match = value;
-}
-
-bool Location::getExactMatch() const {
-	return _exactMatch;
-}
-void Location::setExactMatch(bool value) {
-	_exactMatch = value;
 }
 
 std::string Location::getRoot() const {
@@ -84,8 +76,6 @@ std::ostream &operator<<(std::ostream &os, const Location &location) {
 
 
 	os << INDENT << "Match: " << std::endl << INDENT2 << location._match << std::endl;
-	os << INDENT << "Exact match:" << std::endl
-	   << INDENT2 << std::boolalpha << location._exactMatch << std::endl;
 
 	os << INDENT << "Root: " << std::endl << INDENT2 << location._root << std::endl;
 
