@@ -10,6 +10,8 @@ ConfigParser::ConfigParser() {
 		_serverDirectiveHandlers["server_name"]          = ED_SERVERNAME;
 		_serverDirectiveHandlers["allowed_methods"]      = ED_ALLOW;
 		_serverDirectiveHandlers["error_page"]           = ED_ERRPAGE;
+		_serverDirectiveHandlers["autoindex"]            = ED_AUTOINDEX;
+		_serverDirectiveHandlers["index"]                = ED_INDEX;
 		_serverDirectiveHandlers["location"]             = ED_LOCATION;
 		_serverDirectiveHandlers["root"]                 = ED_ROOT;
 		_serverDirectiveHandlers["client_max_body_size"] = ED_BODYSIZE;
@@ -363,7 +365,12 @@ void ConfigParser::processReturn(Location &target) {
 
 void ConfigParser::extract_server_block_info(Server &target) {
 	while (true) {
-		std::cerr << "TODO!!!!!! -- check EOF" << std::endl;
+		if (this->_fileStream.eof() || this->_currentLine.empty()) {
+			throw std::runtime_error(
+				"Unclosed serverblock found in configfile around line " +
+				std::to_string(_linenum)
+			);
+		}
 		if (this->_currentLine.at(0) == '}') {
 			skipNextChar();
 			return;
@@ -386,6 +393,12 @@ void ConfigParser::extract_server_block_info(Server &target) {
 				break;
 			case ED_SERVERNAME:
 				processAddParamsToVector(directiveName, target._serverNames, 1);
+				break;
+			case ED_INDEX:
+				processAddParamsToVector(directiveName, target._index, 1);
+				break;
+			case ED_AUTOINDEX:
+				processBoolval(directiveName, target._autoIndex, "on", "off");
 				break;
 			case ED_ALLOW:
 				processAddParamsToVector(directiveName, target._allow, 1);
@@ -435,9 +448,9 @@ void ConfigParser::processLocationBlock(
 		skipNextChar();
 	}
 
+	bool has_done_autoindex = false;
 	while (true) {
-		std::cerr << "TODO!!!!!! -- check EOF" << std::endl;
-		if (this->_currentLine.at(0) == '}') {
+		if (this->_currentLine.empty() || this->_currentLine.at(0) == '}') {
 			skipNextChar();
 			break;
 		}
@@ -463,6 +476,7 @@ void ConfigParser::processLocationBlock(
 				break;
 			case ED_AUTOINDEX:
 				processBoolval(directiveName, location._autoIndex, "on", "off");
+				has_done_autoindex = true;
 				break;
 			case ED_ERRPAGE:
 				processErrorPages(location._errorPages);
@@ -479,16 +493,6 @@ void ConfigParser::processLocationBlock(
 			default:
 				break;
 		}
-	}
-	if (location._maxBodySize == -1) {
-		location._maxBodySize = parent._maxBodySize;
-	}
-	if (location._root == "") {
-		location._root = parent._root;
-	}
-
-	std::cerr << "TODO!!!!!!" << std::endl;
-	if (location._allow.size() == 0) {
 	}
 	target.push_back(location);
 }

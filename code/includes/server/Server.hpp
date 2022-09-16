@@ -16,6 +16,7 @@ class Server {
 		std::vector<std::string>           _serverNames;
 		std::string                        _root;
 		std::vector<std::string>           _allow;
+		std::vector<std::string>           _index;
 		int64_t                            _maxBodySize;
 
 		std::string                        _defaultIndexPage;
