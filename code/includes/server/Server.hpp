@@ -2,6 +2,7 @@
 
 #include "config/Param.hpp"
 #include "server/Location.hpp"
+#include "utils/Utils.hpp"
 #include <iostream>
 #include <map>
 #include <stdint.h>
@@ -20,12 +21,8 @@ class Server {
 		// std::vector<std::string> *target);
 
 	protected:
-		uint16_t                           _port;
 		std::vector<uint16_t>              _ports;
-		std::string                        _ip;
 		std::vector<std::string>           _ips;
-		std::string                        _hostName;
-		std::string                        _serverName;
 		std::vector<std::string>           _serverNames;
 		std::string                        _root;
 		std::vector<std::string>           _allow;
@@ -35,18 +32,14 @@ class Server {
 		std::string                        _defaultErrorPage;
 		std::map<std::string, std::string> _errorPages;
 
-		std::string                        _routeType;
 		bool                               _allowUpload;
 		bool                               _autoIndex;
 		int                                _bufferSize;
 		std::vector<Location>              _locations; // moet nog aangemaakt worden
 
 	public:
-		// Server(const std::map<std::string, std::vector<Param> > config);
 		Server();
 		~Server();
 		friend std::ostream &operator<<(std::ostream &os, const Server &server);
 		friend class ConfigParser;
-
-		uint16_t getPort() const;
 };

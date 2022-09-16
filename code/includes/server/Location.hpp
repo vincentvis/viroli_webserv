@@ -1,5 +1,7 @@
 #pragma once
 
+#include "utils/Utils.hpp"
+#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
@@ -9,7 +11,9 @@ class Location {
 		Location();
 		~Location();
 		friend class ConfigParser;
+		friend std::ostream &operator<<(std::ostream &os, const Location &location);
 
+		//
 		std::string                         getMatch() const;
 		void                                setMatch(std::string value);
 
@@ -44,5 +48,7 @@ class Location {
 		bool                               _autoIndex;
 		int64_t                            _maxBodySize;
 		std::string                        _redirect;
+		std::string                        _redirectType;
+		bool                               _shouldRedirect;
 		int                                _sortWeight; // << _-- IMPLEMENT SORTING
 };

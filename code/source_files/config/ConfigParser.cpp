@@ -31,16 +31,15 @@ ConfigParser::~ConfigParser() {
 	}
 }
 
-std::vector<std::map<std::string, std::vector<Param> > > ConfigParser::getParseResult() {
-	return _parsed;
+std::vector<Server *> ConfigParser::getParseResult() {
+	return _servers;
 }
 
 ConfigParser::ConfigParser(int argc, char const **argv) {
 	parseFromArgs(argc, argv);
 }
 
-std::vector<std::map<std::string, std::vector<Param> > >
-ConfigParser::parseFromArgs(int argc, char const **argv) {
+std::vector<Server *> ConfigParser::parseFromArgs(int argc, char const **argv) {
 	if (argc > 1) {
 		this->_filePath = argv[1];
 	} else {
@@ -60,9 +59,27 @@ ConfigParser::parseFromArgs(int argc, char const **argv) {
 	if (this->_fileStream.eof() == false || this->_currentLine.length() != 0) {
 		throw std::invalid_argument("Invalid configuration file");
 	}
-	// Param x;
-	// x.printVectorOfMaps(this->_parsed);
-	return (this->_parsed);
+	return (this->_servers);
+}
+
+void ConfigParser::parseStream() {
+	getNewLine();
+
+	// should be at first non-whitespace character here
+	while (this->_currentLine.find("server") == 0) {
+		skip_to_after_server_block_opening(sizeof("server") - 1);
+
+		Server *newServer = new Server();
+		_servers.push_back(newServer);
+
+		extract_server_block_info(*newServer);
+
+		if (newServer->_ports.size() == 0) {
+			throw std::runtime_error("Missing required directives for server config");
+		}
+		std::cout << *newServer << std::endl;
+	}
+	return;
 }
 
 void ConfigParser::check_and_skip_semicolon(std::string name) {
@@ -198,7 +215,7 @@ void ConfigParser::processBoolval(
 	check_and_skip_semicolon(name);
 }
 
-bool ConfigParser::isValidConfigURI(std::string &match_str) {
+bool ConfigParser::isValidConfigURI(const std::string &match_str) {
 	if (match_str.empty() || match_str.at(0) != '/') {
 		return (false);
 	}
@@ -284,29 +301,47 @@ void ConfigParser::processReturn(Location &target) {
 	// With one param:
 	// 1 = url
 	(void)target;
-	// std::string param = extractParam();
-	// if (param.size() && std::numeric(param.at(0)))
-}
 
-void ConfigParser::parseStream() {
-	if (line_needs_update()) {
-		getNewLine();
+	std::vector<std::string> params;
+
+	while (1) {
+		std::string param = extractParam();
+		if (param.empty())
+			break;
+		params.push_back(param);
+		if (this->_currentLine.empty())
+			break;
 	}
 
-	// should be at first non-whitespace character here
-	while (this->_currentLine.find("server") == 0) {
-		skip_to_after_server_block_opening(sizeof("server") - 1);
-
-		Server *newServer = new Server();
-		_servers.push_back(newServer);
-
-		extract_server_block_info(*newServer);
-
-		if (newServer->_ports.size() == 0) {
-			throw std::runtime_error("Missing required directives for server config");
-		}
+	if (params.size() > 2 || params.size() == 0) {
+		throw std::runtime_error(
+			"Invalid amount of parameters given to \"return\" directive, has " +
+			std::to_string(params.size()) + " should be 1 or 2. In configfile at line " +
+			std::to_string(_linenum)
+		);
 	}
-	return;
+	std::string uriParam;
+	std::string typeParam = "";
+	if (params.size() == 1) {
+		uriParam = params.at(0);
+	} else {
+		uriParam  = params.at(1);
+		typeParam = params.at(0);
+	}
+
+	if (isValidConfigURI(uriParam)) {
+		target._redirect       = uriParam;
+		target._shouldRedirect = true;
+	} else {
+		throw std::runtime_error(
+			"Value \"" + uriParam +
+			"\" is not a valid value for directive \"return\" in configfile at "
+			"line " +
+			std::to_string(_linenum)
+		);
+	}
+	target._redirectType = typeParam;
+	check_and_skip_semicolon("root");
 }
 
 void ConfigParser::extract_server_block_info(Server &target) {
@@ -316,7 +351,6 @@ void ConfigParser::extract_server_block_info(Server &target) {
 			return;
 		}
 
-		std::cout << "try dirname (server)  : " << this->_currentLine << std::endl;
 		std::string directiveName = extractDirectiveName();
 		std::map<std::string, ConfigParser::e_directives>::const_iterator handler =
 			_serverDirectiveHandlers.find(directiveName);
@@ -342,7 +376,7 @@ void ConfigParser::extract_server_block_info(Server &target) {
 				processErrorPages(target._errorPages);
 				break;
 			case ED_LOCATION:
-				processLocationBlock(target._locations);
+				processLocationBlock(target._locations, target);
 				break;
 			case ED_ROOT:
 				processRoot(target._root);
@@ -356,7 +390,9 @@ void ConfigParser::extract_server_block_info(Server &target) {
 	}
 }
 
-void ConfigParser::processLocationBlock(std::vector<Location> &target) {
+void ConfigParser::processLocationBlock(
+	std::vector<Location> &target, const Server &parent
+) {
 	Location location;
 
 	location._sortWeight = target.size();
@@ -395,7 +431,6 @@ void ConfigParser::processLocationBlock(std::vector<Location> &target) {
 			break;
 		}
 
-		std::cout << "try dirname (location): " << this->_currentLine << std::endl;
 		std::string directiveName = extractDirectiveName();
 		std::map<std::string, ConfigParser::e_directives>::const_iterator handler =
 			_locationDirectiveHandlers.find(directiveName);
@@ -434,12 +469,13 @@ void ConfigParser::processLocationBlock(std::vector<Location> &target) {
 				break;
 		}
 	}
-
+	if (location._maxBodySize == -1) {
+		location._maxBodySize = parent._maxBodySize;
+	}
+	if (location._root == "") {
+		location._root = parent._root;
+	}
 	target.push_back(location);
-}
-
-bool ConfigParser::line_needs_update() {
-	return (this->_currentLine.length() == 0 && this->_fileStream.eof() == false);
 }
 
 void ConfigParser::skip_to_after_server_block_opening(std::string::size_type n) {
@@ -470,10 +506,15 @@ std::string ConfigParser::extractDirectiveName() {
 		length++;
 	}
 	if (length == 0) {
-		throw DirectiveNameNotFoundException();
+		throw std::runtime_error(
+			"No directive name found in config file at line " + std::to_string(_linenum)
+		);
 	}
 	if (endOfName != end && !(*endOfName == ' ' || *endOfName == '\t')) {
-		throw InvalidDirectiveNameException();
+		throw std::runtime_error(
+			"Invalid characters in directive name in config file at line " +
+			std::to_string(_linenum)
+		);
 	}
 
 	std::string directiveName = this->_currentLine.substr(0, length);
@@ -548,27 +589,3 @@ bool ConfigParser::getNewLine() {
 	}
 	return (true);
 }
-
-// std::string ConfigParser::trimWhitespaceCopy(std::string str) {
-// 	return (trimTrailingWhitespaceCopy(trimLeadingWhitespaceCopy(str)));
-// }
-
-// std::string ConfigParser::trimLeadingWhitespaceCopy(std::string str) {
-// 	std::string::iterator start = str.begin();
-// 	std::string::iterator end   = str.end();
-
-// 	while (start != end && std::isspace(*start)) {
-// 		start++;
-// 	}
-// 	return (std::string(start, end));
-// }
-
-// std::string ConfigParser::trimTrailingWhitespaceCopy(std::string str) {
-// 	std::string::iterator start = str.begin();
-// 	std::string::iterator end   = str.end();
-
-// 	while (end - start > 0 && std::isspace(*end)) {
-// 		end--;
-// 	}
-// 	return (std::string(start, end));
-// }
