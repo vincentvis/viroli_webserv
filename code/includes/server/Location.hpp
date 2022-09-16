@@ -42,5 +42,7 @@ class Location {
 		std::vector<std::string>           _index;
 		std::map<std::string, std::string> _errorPages;
 		bool                               _autoIndex;
-		int                                _sortWeight;
+		int64_t                            _maxBodySize;
+		std::string                        _redirect;
+		int                                _sortWeight; // << _-- IMPLEMENT SORTING
 };

@@ -6,19 +6,22 @@ std::map<std::string, ConfigParser::e_directives>
 
 ConfigParser::ConfigParser() {
 	if (_serverDirectiveHandlers.size() == 0) {
-		_serverDirectiveHandlers["listen"]          = ED_LISTEN;
-		_serverDirectiveHandlers["server_name"]     = ED_SERVERNAME;
-		_serverDirectiveHandlers["allowed_methods"] = ED_ALLOW;
-		_serverDirectiveHandlers["error_page"]      = ED_ERRPAGE;
-		_serverDirectiveHandlers["location"]        = ED_LOCATION;
-		_serverDirectiveHandlers["root"]            = ED_ROOT;
+		_serverDirectiveHandlers["listen"]               = ED_LISTEN;
+		_serverDirectiveHandlers["server_name"]          = ED_SERVERNAME;
+		_serverDirectiveHandlers["allowed_methods"]      = ED_ALLOW;
+		_serverDirectiveHandlers["error_page"]           = ED_ERRPAGE;
+		_serverDirectiveHandlers["location"]             = ED_LOCATION;
+		_serverDirectiveHandlers["root"]                 = ED_ROOT;
+		_serverDirectiveHandlers["client_max_body_size"] = ED_BODYSIZE;
 	}
 	if (_locationDirectiveHandlers.size() == 0) {
-		_locationDirectiveHandlers["allowed_methods"] = ED_ALLOW;
-		_locationDirectiveHandlers["error_page"]      = ED_ERRPAGE;
-		_locationDirectiveHandlers["root"]            = ED_ROOT;
-		_locationDirectiveHandlers["autoindex"]       = ED_AUTOINDEX;
-		_locationDirectiveHandlers["index"]           = ED_INDEX;
+		_locationDirectiveHandlers["allowed_methods"]      = ED_ALLOW;
+		_locationDirectiveHandlers["error_page"]           = ED_ERRPAGE;
+		_locationDirectiveHandlers["root"]                 = ED_ROOT;
+		_locationDirectiveHandlers["autoindex"]            = ED_AUTOINDEX;
+		_locationDirectiveHandlers["index"]                = ED_INDEX;
+		_locationDirectiveHandlers["client_max_body_size"] = ED_BODYSIZE;
+		_locationDirectiveHandlers["return"]               = ED_RETURN;
 	}
 }
 
@@ -215,76 +218,6 @@ bool ConfigParser::isValidConfigURI(std::string &match_str) {
 	return (true);
 }
 
-void ConfigParser::processLocationBlock(std::vector<Location> &target) {
-	Location    location;
-
-	std::string param = extractParam();
-	if (param == "=") {
-		location._exactMatch = true;
-		location._sortWeight = 200;
-		param                = extractParam();
-	}
-	if (param == "{" || this->_currentLine.empty()) {
-		throw std::runtime_error(
-			"Not enough parameters in Location directive in config file at line " +
-			std::to_string(_linenum)
-		);
-	}
-	if (isValidConfigURI(param) == false) {
-		throw std::runtime_error(
-			"Invalid location_match param (\"" + param +
-			"\") in location directive at line " + std::to_string(_linenum)
-		);
-	}
-	location._match = param;
-	trimLeadingWhitespaceRef(this->_currentLine);
-	if (this->_currentLine.empty() == false || this->_currentLine.at(0) != '{') {
-		skipNextChar();
-	}
-
-	while (true) {
-		if (this->_currentLine.at(0) == '}') {
-			skipNextChar();
-			break;
-		}
-
-		std::cout << "try dirname (location): " << this->_currentLine << std::endl;
-		std::string directiveName = extractDirectiveName();
-		std::map<std::string, ConfigParser::e_directives>::const_iterator handler =
-			_locationDirectiveHandlers.find(directiveName);
-
-		if (handler == _locationDirectiveHandlers.end()) {
-			throw std::runtime_error(
-				"Unsupported directive name \"" + directiveName +
-				"\" found in location block in config file at line " +
-				std::to_string(_linenum)
-			);
-		}
-
-		switch (handler->second) {
-			case ED_ALLOW:
-				processAddParamsToVector(directiveName, location._allow, 0);
-				break;
-			case ED_INDEX:
-				processAddParamsToVector(directiveName, location._index, 0);
-				break;
-			case ED_AUTOINDEX:
-				processBoolval(directiveName, location._autoIndex, "on", "off");
-				break;
-			case ED_ERRPAGE:
-				processErrorPages(location._errorPages);
-				break;
-			case ED_ROOT:
-				processRoot(location._root);
-				break;
-			default:
-				break;
-		}
-	}
-
-	target.push_back(location);
-}
-
 void ConfigParser::processRoot(std::string &target) {
 	std::string param = extractParam();
 
@@ -295,6 +228,47 @@ void ConfigParser::processRoot(std::string &target) {
 		);
 	}
 	target = param;
+	check_and_skip_semicolon("root");
+}
+
+void ConfigParser::processIntval(std::string name, int64_t &target) {
+	std::string param      = extractParam();
+	int32_t     multiplier = 1;
+
+	if (param.size() >= 2) {
+		char multiplierChar  = param.at(param.size() - 1);
+		char multiplierChar2 = param.at(param.size() - 2);
+		if ((std::string("bB").find(multiplierChar) != std::string::npos) &&
+			(std::string("kKmM").find(multiplierChar2) != std::string::npos))
+		{
+			multiplierChar = multiplierChar2;
+		}
+		if (std::isalpha(multiplierChar)) {
+			if (multiplierChar == 'k' || multiplierChar == 'K') {
+				multiplier = 1000;
+			} else if (multiplierChar == 'm' || multiplierChar == 'M') {
+				multiplier = 1000000;
+			} else {
+				throw std::runtime_error(
+					"Invalid size modifier character in " + name +
+					" directive in config file at line " + std::to_string(_linenum)
+				);
+			}
+		}
+	}
+	int64_t num;
+	try {
+		num = stol_skip(param);
+		if (num < 0) {
+			throw std::exception();
+		}
+	} catch (const std::exception &e) {
+		throw std::runtime_error(
+			"Invalid numeric value found in " + name +
+			" directive in config file at line " + std::to_string(_linenum)
+		);
+	}
+	target = num * multiplier;
 	check_and_skip_semicolon("root");
 }
 
@@ -357,59 +331,96 @@ void ConfigParser::extract_server_block_info(Server &target) {
 			case ED_ROOT:
 				processRoot(target._root);
 				break;
+			case ED_BODYSIZE:
+				processIntval(directiveName, target._maxBodySize);
+				break;
 			default:
 				break;
 		}
-
-		// if (map->find(directiveName) == map->end()) {
-		// 	std::vector<Param> params;
-		// 	map->insert(std::make_pair(directiveName, params));
-		// }
-		// std::vector<Param> *params = &((*map)[directiveName]);
-		// Param               param(directiveName);
-
-
-		// while (!this->_currentLine.empty() && this->_currentLine.at(0) != ';' &&
-		// 	   this->_currentLine.at(0) != '{' && this->_currentLine.at(0) != '}')
-		// {
-		// 	std::string newparam = extractParam();
-		// 	param.addValue(newparam);
-		// }
-		// if (this->_currentLine.empty()) {
-		// 	throw InvalidBlockConfigException();
-		// }
-
-		// if (this->_currentLine.at(0) != ';' && this->_currentLine.at(0) != '{') {
-		// 	throw MissingSemicolonAfterDirective();
-		// }
-
-		// // simple directive (with directive name && = N>0 params)
-		// if (this->_currentLine.at(0) == ';') {
-		// 	skipNextChar();
-		// 	if (param.getNumValues() == 0) {
-		// 		throw DirectiveWithoutValueException();
-		// 	}
-		// 	params->push_back(param);
-		// 	continue;
-		// }
-
-		// // complex directive with directive name && N>=0 params && directive children
-		// if (this->_currentLine.at(0) == '{') {
-		// 	skipNextChar();
-
-		// 	// this would be an empty block.. usesless?
-		// 	if (this->_currentLine.at(0) == '}') {
-		// 		params->push_back(param);
-		// 		continue;
-		// 	}
-
-		// 	std::map<std::string, std::vector<Param> > submap;
-		// 	extract_server_block_info(&submap);
-		// 	param.setChildren(submap);
-
-		// 	params->push_back(param);
-		// }
 	}
+}
+
+
+void ConfigParser::processLocationBlock(std::vector<Location> &target) {
+	Location location;
+
+	location._sortWeight = target.size();
+	if (target.size() == 0) {
+		location._sortWeight = -1000;
+	}
+
+	std::string param = extractParam();
+	if (param == "=") {
+		location._sortWeight -= 400;
+		location._exactMatch = true;
+		param                = extractParam();
+	}
+	if (param == "{" || this->_currentLine.empty()) {
+		throw std::runtime_error(
+			"Not enough parameters in Location directive in config file at line " +
+			std::to_string(_linenum)
+		);
+	}
+	if (isValidConfigURI(param) == false) {
+		throw std::runtime_error(
+			"Invalid location_match param (\"" + param +
+			"\") in location directive at line " + std::to_string(_linenum)
+		);
+	}
+	location._match = param;
+	location._sortWeight += location._match.length();
+	trimLeadingWhitespaceRef(this->_currentLine);
+	if (this->_currentLine.empty() == false || this->_currentLine.at(0) != '{') {
+		skipNextChar();
+	}
+
+	while (true) {
+		if (this->_currentLine.at(0) == '}') {
+			skipNextChar();
+			break;
+		}
+
+		std::cout << "try dirname (location): " << this->_currentLine << std::endl;
+		std::string directiveName = extractDirectiveName();
+		std::map<std::string, ConfigParser::e_directives>::const_iterator handler =
+			_locationDirectiveHandlers.find(directiveName);
+
+		if (handler == _locationDirectiveHandlers.end()) {
+			throw std::runtime_error(
+				"Unsupported directive name \"" + directiveName +
+				"\" found in location block in config file at line " +
+				std::to_string(_linenum)
+			);
+		}
+
+		switch (handler->second) {
+			case ED_ALLOW:
+				processAddParamsToVector(directiveName, location._allow, 1);
+				break;
+			case ED_INDEX:
+				processAddParamsToVector(directiveName, location._index, 1);
+				break;
+			case ED_AUTOINDEX:
+				processBoolval(directiveName, location._autoIndex, "on", "off");
+				break;
+			case ED_ERRPAGE:
+				processErrorPages(location._errorPages);
+				break;
+			case ED_ROOT:
+				processRoot(location._root);
+				break;
+			case ED_BODYSIZE:
+				processIntval(directiveName, location._maxBodySize);
+				break;
+			case ED_RETURN:
+				processReturn(directiveName, location); // <-------
+				break;
+			default:
+				break;
+		}
+	}
+
+	target.push_back(location);
 }
 
 bool ConfigParser::line_needs_update() {

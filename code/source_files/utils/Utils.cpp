@@ -1,16 +1,29 @@
 #include "utils/Utils.hpp"
 
-int64_t stol(const std::string &string) {
-	char *endptr = NULL;
-	errno        = 0;
-	long longval = strtol(string.c_str(), &endptr, 10);
+int64_t utils_stol(const std::string &string) {
+	char *endptr    = NULL;
+	errno           = 0;
+	int64_t longval = strtol(string.c_str(), &endptr, 10);
 
 	if (errno == EINVAL || errno == ERANGE || string.c_str() == endptr) {
 		throw std::runtime_error(
-			std::string("The string \"") + string +
-			std::string("\" does not contain a number")
+			"The string \"" + string + "\" does not contain a number"
 		);
 	}
+	return (longval);
+}
+
+int64_t stol_skip(std::string &string) {
+	char *endptr    = NULL;
+	errno           = 0;
+	int64_t longval = strtol(string.c_str(), &endptr, 10);
+
+	if (errno == EINVAL || errno == ERANGE || string.c_str() == endptr) {
+		throw std::runtime_error(
+			"The string \"" + string + "\" does not contain a number"
+		);
+	}
+	string = string.substr(endptr - string.c_str());
 	return (longval);
 }
 

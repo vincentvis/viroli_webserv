@@ -108,6 +108,7 @@ class ConfigParser {
 		void processLocationBlock(std::vector<Location> &);
 		bool isValidConfigURI(std::string &match_str);
 		void processRoot(std::string &target);
+		void processIntval(std::string name, int64_t &target);
 		void processBoolval(
 			std::string name, bool &target, std::string truthy, std::string falsy
 		);
@@ -123,7 +124,9 @@ class ConfigParser {
 			ED_LOCATION,
 			ED_ROOT,
 			ED_INDEX,
-			ED_AUTOINDEX
+			ED_AUTOINDEX,
+			ED_BODYSIZE,
+			ED_RETURN
 		};
 
 		// this is the new idea..

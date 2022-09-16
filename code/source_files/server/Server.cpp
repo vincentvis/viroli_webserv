@@ -7,6 +7,7 @@ Server::Server() {
 	this->_root             = "html"; // default for this param is "html" (nginx)
 	this->_defaultIndexPage = "/index.html";
 	this->_defaultErrorPage = "/err/default_error.html";
+	this->_maxBodySize      = 1000000;
 	//	this->_errorPages;
 	this->_routeType   = "";
 	this->_allowUpload = 0;
