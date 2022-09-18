@@ -31,7 +31,7 @@ Server::Server(uint16_t port) {
   struct pollfd pfd = {fd, POLLIN, 0};
   Server::_pfds.push_back(pfd);
   Server::_pollables.insert(
-      std::pair<int32_t, IPollable *>(fd, new ListenerPoll(*this, fd)));
+      std::pair<int32_t, IPollable *>(fd, new ServerFD(*this, fd)));
 }
 
 Server::Server(std::vector<uint16_t> &ports) {
@@ -53,21 +53,24 @@ void Server::run() {
     /* events reported: check all fds and at most the number of events */
     for (int i = 0, event = 0; i < Server::_pfds.size() && event < events;
          ++i) {
-      /* incoming activity: new connection or ready to read */
+      /* find on what file descriptor event occurred */
       if (Server::_pfds[i].revents & POLLIN ||
           Server::_pfds[i].revents & POLLOUT) {
         ++event;
         it = Server::_pollables.find(Server::_pfds[i].fd);
 
-        /* socket exists */
+        /* file descriptor exists */
         if (it != _pollables.end()) {
           if (Server::_pfds[i].revents & POLLIN) {
-            it->second->runPollin(i);
-          } else if (Server::_pfds[i].revents & POLLOUT) {
-            it->second->runPollout(i);
+		    // std::cout << "pollin event\n";
+            it->second->pollin(i);
+	  }
+	    if (Server::_pfds[i].revents & POLLOUT) {
+		    std::cout << "pollout event\n";
+            it->second->pollout(i);
           }
 
-          /* socket doesn't exist */
+          /* file descriptor doesn't exist */
         } else {
           throw(std::string("error on _pollables.find()"));
         }

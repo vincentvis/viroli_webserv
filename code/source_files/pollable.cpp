@@ -3,37 +3,39 @@
 
 IPollable::~IPollable() {}
 
-/* //////////////////////// ListenerPoll //////////////////////// */
+/* //////////////////////// ServerFD //////////////////////// */
 
-ListenerPoll::ListenerPoll(Server &server, int fd) : _server(server), _fd(fd) {}
+ServerFD::ServerFD(Server &server, int fd) : _server(server), _fd(fd) {}
 
-ListenerPoll::~ListenerPoll() {}
+ServerFD::~ServerFD() {}
 
-/* accept new SocketPoll */
-void ListenerPoll::runPollin(int index) {
+/* accept new ClientFD */
+void ServerFD::pollin(int index) {
   int newfd = 0;
   int opt = 1;
   struct sockaddr_in client = {0, 0, 0, 0, 0};
   socklen_t addrlen = sizeof(client);
 
+  std::cout << "A\n";
   if ((newfd = accept(_fd, reinterpret_cast<sockaddr *>(&client), &addrlen)) <
       0) {
-    throw(std::string("error on ListenerPoll::runPollin()")); // placeholder
+    throw(std::string("error on ServerFD::pollin()")); // placeholder
   }
   if (setsockopt(newfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
     close(newfd);
-    throw(std::string("error on ListenerPoll::setsockopt()")); // placeholder
+    throw(std::string("error on ServerFD::setsockopt()")); // placeholder
   }
   if (fcntl(newfd, F_SETFL, O_NONBLOCK) < 0) {
     close(newfd);
-    throw(std::string("error on ListenerPoll::fcntl()")); // placeholder
+    throw(std::string("error on ServerFD::fcntl()")); // placeholder
   }
 
+  std::cout << "new connection accepted\n";
   /* POLLIN or POLLIN | POLLOUT */
   struct pollfd pfd = {newfd, POLLIN, 0};
   Server::_pfds.push_back(pfd);
   Server::_pollables.insert(
-      std::pair<int32_t, IPollable *>(newfd, new SocketPoll(_server, newfd)));
+      std::pair<int32_t, IPollable *>(newfd, new ClientFD(_server, newfd)));
 
   /* debug */
   // char buff[16] = {0};
@@ -49,26 +51,27 @@ void ListenerPoll::runPollin(int index) {
 }
 
 /* do nothing on POLLOUT event */
-void ListenerPoll::runPollout(int index) {}
+void ServerFD::pollout(int index) {}
 
-int ListenerPoll::getFD() const { return _fd; }
+int ServerFD::getFD() const { return _fd; }
 
-/* //////////////////////// SocketPoll //////////////////////// */
+/* //////////////////////// ClientFD //////////////////////// */
 
-SocketPoll::SocketPoll(Server &server, int fd)
+ClientFD::ClientFD(Server &server, int fd)
     : _server(server), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
       _total(0), _fd(fd) {}
 
-SocketPoll::~SocketPoll() {}
+ClientFD::~ClientFD() {}
 
-void SocketPoll::closeFD(int index) {
+/* is this correct? deleting an object from its method */
+void ClientFD::closeFD(int index) {
   close(Server::_pfds[index].fd);
   delete Server::_pollables.find(Server::_pfds[index].fd)->second;
   Server::_pollables.erase(Server::_pfds[index].fd);
   Server::_pfds.erase(Server::_pfds.begin() + index);
 }
 
-void SocketPoll::initResponse(int index) {
+void ClientFD::initResponse(int index) {
   Server::_pfds[index].events = POLLOUT;
   _data =
       std::string("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
@@ -78,12 +81,14 @@ void SocketPoll::initResponse(int index) {
 }
 
 /* receive data */
-void SocketPoll::runPollin(int index) {
+/* need to know content-length */
+/* need to know connection status (keep-alive|close) */
+void ClientFD::pollin(int index) {
   _bytes = recv(_fd, _buffer.data(), BUFFERSIZE, 0);
 
-  if (_bytes == -1) {
-    std::cout << "SocketPoll::runPollin()\n";
-  }
+//  if (_bytes == -1) {
+//    std::cout << "ClientFD::pollin()\n";
+//  }
   if (_bytes == 0) {
     std::cout << "connection has been closed by client\n";
     closeFD(index);
@@ -94,13 +99,14 @@ void SocketPoll::runPollin(int index) {
   }
   /* test */
   if (_data.find("\r\n\r\n") != std::string::npos) {
+	  std::cout << "end of header\n";
     std::cout << _data << std::endl;
     initResponse(index);
   }
 }
 
 /* send data */
-void SocketPoll::runPollout(int index) {
+void ClientFD::pollout(int index) {
   _buffer.assign(_data.begin() + _total,
                  _data.begin() + _total +
                      (BUFFERSIZE > _left ? BUFFERSIZE : _left));
@@ -119,20 +125,21 @@ void SocketPoll::runPollout(int index) {
   }
 }
 
-int SocketPoll::getFD() const { return _fd; }
+int ClientFD::getFD() const { return _fd; }
 
-/* //////////////////////// FilePoll //////////////////////// */
+/* //////////////////////// FileFD //////////////////////// */
 
-FilePoll::FilePoll(Server &server, int fd)
+FileFD::FileFD(Server &server, int fd)
     : _server(server), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
       _total(0), _fd(fd) {}
 
-FilePoll::~FilePoll() {}
+FileFD::~FileFD() {}
 
 /* read file */
-void FilePoll::runPollin(int index) { // implement read(), placeholder
-  _bytes = read(_fd, _buffer.data(), BUFFERSIZE);
-
+void FileFD::pollin(int index) { // implement read(), placeholder
+  if ((_bytes = read(_fd, _buffer.data(), BUFFERSIZE)) < 0) {
+	  throw(std::string("FileFD::pollin() read() error")); // placeholder + cleanup
+  }
   if (_bytes > 0) {
     _total += _bytes;
     _data.append(_buffer.begin(), _buffer.begin() + _bytes);
@@ -140,6 +147,6 @@ void FilePoll::runPollin(int index) { // implement read(), placeholder
 }
 
 /* write file */
-void FilePoll::runPollout(int index) {} // implement write(), placeholder
+void FileFD::pollout(int index) {} // implement write(), placeholder
 
-int FilePoll::getFD() const { return _fd; }
+int FileFD::getFD() const { return _fd; }

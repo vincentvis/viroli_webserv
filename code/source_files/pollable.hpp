@@ -23,25 +23,25 @@ class IPollable {
 public:
   virtual ~IPollable() = 0;
 
-  virtual void runPollin(int index) = 0;
-  virtual void runPollout(int index) = 0;
+  virtual void pollin(int index) = 0;
+  virtual void pollout(int index) = 0;
   virtual int getFD() const = 0;
 };
 
-class ListenerPoll : public IPollable {
+class ServerFD : public IPollable {
 public:
   Server &_server;
   int _fd;
 
-  ListenerPoll(Server &server, int fd);
-  ~ListenerPoll();
+  ServerFD(Server &server, int fd);
+  ~ServerFD();
 
-  void runPollin(int index);
-  void runPollout(int index);
+  void pollin(int index);
+  void pollout(int index);
   int getFD() const;
 };
 
-class SocketPoll : public IPollable {
+class ClientFD : public IPollable {
 public:
   Server &_server;
   std::vector<char> _buffer;
@@ -51,18 +51,18 @@ public:
   int _total;
   int _fd;
 
-  SocketPoll(Server &server, int fd);
-  ~SocketPoll();
+  ClientFD(Server &server, int fd);
+  ~ClientFD();
 
-  void runPollin(int index);
-  void runPollout(int index);
+  void pollin(int index);
+  void pollout(int index);
   int getFD() const;
 
   void initResponse(int index);
   void closeFD(int index);
 };
 
-class FilePoll : public IPollable {
+class FileFD : public IPollable {
 public:
   Server &_server;
   std::vector<char> _buffer;
@@ -72,10 +72,10 @@ public:
   int _total;
   int _fd;
 
-  FilePoll(Server &server, int fd);
-  ~FilePoll();
+  FileFD(Server &server, int fd);
+  ~FileFD();
 
-  void runPollin(int index);
-  void runPollout(int index);
+  void pollin(int index);
+  void pollout(int index);
   int getFD() const;
 };
