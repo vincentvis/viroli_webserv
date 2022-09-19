@@ -44,7 +44,7 @@ class ConfigParser {
 		void     processErrorPages(std::map<std::string, std::string> &target);
 		void     processAddParamsToVector(
 				std::string name, std::vector<std::string> &target,
-				std::vector<std::string>::size_type min
+				std::vector<std::string>::size_type min, bool shouldBeUnique
 			);
 		void processLocationBlock(std::vector<Location> &target);
 		bool isValidConfigURI(const std::string &match_str);

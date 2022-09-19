@@ -12,13 +12,14 @@ int main(int argc, char const *argv[]) {
 	try {
 		config.parseFromArgs(argc, argv);
 	} catch (const std::exception &e) {
-		std::cerr << "exception: \n" << e.what() << std::endl;
+		std::cerr << "Exception caught during config file parsing: \n"
+				  << e.what() << std::endl;
 		return (1);
 	}
 
-	// std::vector<Server *> servers = config.getParseResult();
-	// Utils::print_vector_deref<Server *>(servers);
-
+	/*
+		Some boilerplate code to show how to iterator over servers
+	*/
 	std::map<uint16_t, std::vector<Config *> >           ports = config.getPortMap();
 	std::map<uint16_t, std::vector<Config *> >::iterator it    = ports.begin();
 	std::map<uint16_t, std::vector<Config *> >::iterator end   = ports.end();

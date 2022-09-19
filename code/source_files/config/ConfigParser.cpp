@@ -31,6 +31,12 @@ ConfigParser::~ConfigParser() {
 	if (this->_fileStream.is_open()) {
 		this->_fileStream.close();
 	}
+	std::vector<Config *>::iterator it  = _configs.begin();
+	std::vector<Config *>::iterator end = _configs.end();
+	while (it != end) {
+		delete *it;
+		it++;
+	}
 }
 
 std::vector<Config *> ConfigParser::getParseResult() {
@@ -49,7 +55,7 @@ std::vector<Config *> ConfigParser::parseFromArgs(int argc, char const **argv) {
 	if (argc > 1) {
 		this->_filePath = argv[1];
 	} else {
-		this->_filePath = "../data/config/incomplete.config";
+		this->_filePath = "../data/config/default.config";
 	}
 	this->_fileStream.open(this->_filePath.c_str(), std::ios_base::in);
 	if (this->_fileStream.is_open() == false) {
@@ -199,13 +205,21 @@ void ConfigParser::processErrorPages(std::map<std::string, std::string> &target)
 
 void ConfigParser::processAddParamsToVector(
 	std::string name, std::vector<std::string> &target,
-	std::vector<std::string>::size_type min
+	std::vector<std::string>::size_type min, bool shouldBeUnique
 ) {
 	while (1) {
 		std::string param = extractParam();
 		if (param.empty())
 			break;
-		target.push_back(param);
+		if (shouldBeUnique) {
+			std::vector<std::string>::iterator existing =
+				std::find(target.begin(), target.end(), param);
+			if (existing == target.end()) {
+				target.push_back(param);
+			}
+		} else {
+			target.push_back(param);
+		}
 		if (this->_currentLine.empty())
 			break;
 	}
@@ -394,16 +408,16 @@ void ConfigParser::extract_server_block_info(Config &target) {
 				processListen(target);
 				break;
 			case ED_SERVERNAME:
-				processAddParamsToVector(directiveName, target._serverNames, 1);
+				processAddParamsToVector(directiveName, target._serverNames, 1, true);
 				break;
 			case ED_INDEX:
-				processAddParamsToVector(directiveName, target._index, 1);
+				processAddParamsToVector(directiveName, target._index, 1, true);
 				break;
 			case ED_AUTOINDEX:
 				processBoolval(directiveName, target._autoIndex, "on", "off");
 				break;
 			case ED_ALLOW:
-				processAddParamsToVector(directiveName, target._allow, 1);
+				processAddParamsToVector(directiveName, target._allow, 1, true);
 				break;
 			case ED_ERRPAGE:
 				processErrorPages(target._errorPages);
@@ -469,10 +483,10 @@ void ConfigParser::processLocationBlock(std::vector<Location> &target) {
 
 		switch (handler->second) {
 			case ED_ALLOW:
-				processAddParamsToVector(directiveName, location._allow, 1);
+				processAddParamsToVector(directiveName, location._allow, 1, true);
 				break;
 			case ED_INDEX:
-				processAddParamsToVector(directiveName, location._index, 1);
+				processAddParamsToVector(directiveName, location._index, 1, true);
 				break;
 			case ED_AUTOINDEX:
 				processBoolval(directiveName, location._autoIndex, "on", "off");
