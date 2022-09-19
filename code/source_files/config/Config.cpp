@@ -1,0 +1,64 @@
+#include "config/Config.hpp"
+
+Config::Config() {
+	this->_root        = "/data/html";
+	this->_maxBodySize = 1000000;
+	this->_allowUpload = 0;
+	this->_autoIndex   = 0;
+	this->_bufferSize  = 0;
+}
+
+Config::~Config() {
+}
+
+
+std::ostream &operator<<(std::ostream &os, const Config &config) {
+	os << "\033[1;4mConfig info:\033[0m" << std::endl;
+
+#define PRINT_ALIGN std::setw(19) << std::left
+
+	os << PRINT_ALIGN << "Ports"
+	   << "(" << config._ports.size() << "): [";
+	Utils::print_vector<uint16_t>(config._ports, "\"", "\"", ", ");
+	os << "]" << std::endl;
+
+	os << PRINT_ALIGN << "IPs"
+	   << "(" << config._ips.size() << "): [";
+	Utils::print_vector<std::string>(config._ips, "\"", "\"", ", ");
+	os << "]" << std::endl;
+
+	os << PRINT_ALIGN << "Root"
+	   << "   : " << config._root << std::endl;
+
+	os << PRINT_ALIGN << "Server names"
+	   << "(" << config._serverNames.size() << "): [";
+	Utils::print_vector<std::string>(config._serverNames, "\"", "\"", ", ");
+	os << "]" << std::endl;
+
+	os << PRINT_ALIGN << "Allow"
+	   << "(" << config._allow.size() << "): [";
+	Utils::print_vector<std::string>(config._allow, "\"", "\"", ", ");
+	os << "]" << std::endl;
+
+	os << PRINT_ALIGN << "Error pages"
+	   << "(" << config._errorPages.size() << "): [";
+	Utils::print_map<std::string, std::string>(
+		config._errorPages, "\n\t\t\t  {", ": ", "}", ", "
+	);
+	if (config._errorPages.size()) {
+		os << std::endl << "\t\t\t]" << std::endl;
+	} else {
+		os << "]" << std::endl;
+	}
+
+	os << PRINT_ALIGN << "Autoindex"
+	   << "   : " << std::boolalpha << config._autoIndex << std::endl;
+
+	os << PRINT_ALIGN << "Locations"
+	   << "(" << config._locations.size() << "):" << std::endl;
+	Utils::print_vector<Location>(config._locations);
+
+#undef PRINT_ALIGN
+
+	return os;
+}

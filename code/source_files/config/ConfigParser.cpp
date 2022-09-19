@@ -33,11 +33,11 @@ ConfigParser::~ConfigParser() {
 	}
 }
 
-std::vector<Server *> ConfigParser::getParseResult() {
-	return _servers;
+std::vector<Config *> ConfigParser::getParseResult() {
+	return _configs;
 }
 
-std::map<uint16_t, std::vector<Server *> > ConfigParser::getPortMap() {
+std::map<uint16_t, std::vector<Config *> > ConfigParser::getPortMap() {
 	return _ports;
 }
 
@@ -45,7 +45,7 @@ ConfigParser::ConfigParser(int argc, char const **argv) {
 	parseFromArgs(argc, argv);
 }
 
-std::vector<Server *> ConfigParser::parseFromArgs(int argc, char const **argv) {
+std::vector<Config *> ConfigParser::parseFromArgs(int argc, char const **argv) {
 	if (argc > 1) {
 		this->_filePath = argv[1];
 	} else {
@@ -65,7 +65,7 @@ std::vector<Server *> ConfigParser::parseFromArgs(int argc, char const **argv) {
 	if (this->_fileStream.eof() == false || this->_currentLine.length() != 0) {
 		throw std::invalid_argument("Invalid configuration file");
 	}
-	return (this->_servers);
+	return (this->_configs);
 }
 
 void ConfigParser::parseStream() {
@@ -75,13 +75,14 @@ void ConfigParser::parseStream() {
 	while (this->_currentLine.find("server") == 0) {
 		skip_to_after_server_block_opening(sizeof("server") - 1);
 
-		Server *newServer = new Server();
-		_servers.push_back(newServer);
+		Config *newConfig    = new Config();
+		newConfig->_priority = _configs.size();
+		_configs.push_back(newConfig);
 
-		extract_server_block_info(*newServer);
-		sortServerLocations(*newServer);
+		extract_server_block_info(*newConfig);
+		sortLocations(*newConfig);
 
-		if (newServer->_ports.size() == 0) {
+		if (newConfig->_ports.size() == 0) {
 			throw std::runtime_error("Missing required directives for server config");
 		}
 	}
@@ -91,8 +92,8 @@ bool locationSorter(const Location &a, const Location &b) {
 	return a.getSortWeight() < b.getSortWeight();
 }
 
-void ConfigParser::sortServerLocations(Server &server) {
-	std::sort(server._locations.begin(), server._locations.end(), locationSorter);
+void ConfigParser::sortLocations(Config &config) {
+	std::sort(config._locations.begin(), config._locations.end(), locationSorter);
 }
 
 
@@ -124,16 +125,16 @@ uint16_t ConfigParser::stringToPort(std::string &string) {
 	return intval;
 }
 
-void ConfigParser::addServerToPort(uint16_t port, Server &server) {
-	std::map<uint16_t, std::vector<Server *> >::iterator el = _ports.find(port);
+void ConfigParser::addConfigToPort(uint16_t port, Config &config) {
+	std::map<uint16_t, std::vector<Config *> >::iterator el = _ports.find(port);
 	if (el == _ports.end()) {
-		std::vector<Server *> servers_for_port;
-		_ports.insert(std::make_pair(port, servers_for_port));
+		std::vector<Config *> configs_for_port;
+		_ports.insert(std::make_pair(port, configs_for_port));
 	}
-	_ports[port].push_back(&server);
+	_ports[port].push_back(&config);
 }
 
-void ConfigParser::processListen(Server &target) {
+void ConfigParser::processListen(Config &target) {
 	std::string param = extractParam();
 
 	while (param.empty() == false) {
@@ -146,9 +147,10 @@ void ConfigParser::processListen(Server &target) {
 				// it's only a port
 				uint16_t port = stringToPort(param);
 				target._ports.push_back(port);
-				addServerToPort(port, target);
+				addConfigToPort(port, target);
 			} else {
-				// it's only an ip
+				// it's only an ip so set default port
+				target._ports.push_back(DEFAULT_PORT);
 				target._ips.push_back(param);
 			}
 		} else {
@@ -158,7 +160,7 @@ void ConfigParser::processListen(Server &target) {
 			target._ips.push_back(before_colon);
 			int port = stringToPort(after_colon);
 			target._ports.push_back(port);
-			addServerToPort(port, target);
+			addConfigToPort(port, target);
 		}
 		if (this->_currentLine.empty())
 			break;
@@ -317,7 +319,7 @@ void ConfigParser::processIntval(std::string name, int64_t &target) {
 		);
 	}
 	target = num * multiplier;
-	check_and_skip_semicolon("root");
+	check_and_skip_semicolon(name);
 }
 
 void ConfigParser::processReturn(Location &target) {
@@ -360,10 +362,10 @@ void ConfigParser::processReturn(Location &target) {
 		);
 	}
 	target._redirectType = typeParam;
-	check_and_skip_semicolon("root");
+	check_and_skip_semicolon("return");
 }
 
-void ConfigParser::extract_server_block_info(Server &target) {
+void ConfigParser::extract_server_block_info(Config &target) {
 	while (true) {
 		if (this->_fileStream.eof() || this->_currentLine.empty()) {
 			throw std::runtime_error(
@@ -407,7 +409,7 @@ void ConfigParser::extract_server_block_info(Server &target) {
 				processErrorPages(target._errorPages);
 				break;
 			case ED_LOCATION:
-				processLocationBlock(target._locations, target);
+				processLocationBlock(target._locations);
 				break;
 			case ED_ROOT:
 				processRoot(target._root);
@@ -421,9 +423,7 @@ void ConfigParser::extract_server_block_info(Server &target) {
 	}
 }
 
-void ConfigParser::processLocationBlock(
-	std::vector<Location> &target, const Server &parent
-) {
+void ConfigParser::processLocationBlock(std::vector<Location> &target) {
 	Location location;
 
 	location._sortWeight = target.size();

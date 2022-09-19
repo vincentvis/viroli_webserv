@@ -1,3 +1,4 @@
+#include "config/Config.hpp"
 #include "server/Server.hpp"
 #include "utils/Utils.hpp"
 
@@ -10,13 +11,15 @@
 #include <map>
 #include <stdint.h>
 
+#define DEFAULT_PORT 80
+
 class ConfigParser {
 	public:
 		ConfigParser();
 		ConfigParser(int argc, char const **argv);
-		std::vector<Server *> parseFromArgs(int argc, char const **argv);
-		std::vector<Server *> getParseResult();
-		std::map<uint16_t, std::vector<Server *> > getPortMap();
+		std::vector<Config *> parseFromArgs(int argc, char const **argv);
+		std::vector<Config *> getParseResult();
+		std::map<uint16_t, std::vector<Config *> > getPortMap();
 		~ConfigParser();
 
 	private:
@@ -37,13 +40,13 @@ class ConfigParser {
 
 		//
 		uint16_t stringToPort(std::string &string);
-		void     processListen(Server &target);
+		void     processListen(Config &target);
 		void     processErrorPages(std::map<std::string, std::string> &target);
 		void     processAddParamsToVector(
 				std::string name, std::vector<std::string> &target,
 				std::vector<std::string>::size_type min
 			);
-		void processLocationBlock(std::vector<Location> &target, const Server &parent);
+		void processLocationBlock(std::vector<Location> &target);
 		bool isValidConfigURI(const std::string &match_str);
 		void processRoot(std::string &target);
 		void processIntval(std::string name, int64_t &target);
@@ -53,8 +56,8 @@ class ConfigParser {
 		);
 
 		void check_and_skip_semicolon(std::string name);
-		void addServerToPort(uint16_t port, Server &server);
-		void sortServerLocations(Server &server);
+		void addConfigToPort(uint16_t port, Config &config);
+		void sortLocations(Config &config);
 
 		enum e_directives {
 			ED_UNKNOWN,
@@ -70,12 +73,12 @@ class ConfigParser {
 			ED_RETURN
 		};
 
-		std::vector<Server *>                      _servers;
-		std::map<uint16_t, std::vector<Server *> > _ports;
+		std::vector<Config *>                      _configs;
+		std::map<uint16_t, std::vector<Config *> > _ports;
 		static std::map<std::string, e_directives> _serverDirectiveHandlers;
 		static std::map<std::string, e_directives> _locationDirectiveHandlers;
 
 		void                                       parseStream();
 		void skip_to_after_server_block_opening(std::string::size_type n);
-		void extract_server_block_info(Server &target);
+		void extract_server_block_info(Config &target);
 };

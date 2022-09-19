@@ -10,6 +10,7 @@ Location::Location() {
 	_redirectType   = "";
 	_maxBodySize    = -1;
 }
+
 Location::~Location() {
 }
 
