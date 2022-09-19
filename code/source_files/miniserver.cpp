@@ -54,19 +54,16 @@ void Server::run() {
     for (int i = 0, event = 0; i < Server::_pfds.size() && event < events;
          ++i) {
       /* find on what file descriptor event occurred */
-      if (Server::_pfds[i].revents & POLLIN ||
-          Server::_pfds[i].revents & POLLOUT) {
+      if (Server::_pfds[i].revents & (POLLIN | POLLOUT)) {
         ++event;
         it = Server::_pollables.find(Server::_pfds[i].fd);
 
         /* file descriptor exists */
         if (it != _pollables.end()) {
           if (Server::_pfds[i].revents & POLLIN) {
-		    // std::cout << "pollin event\n";
             it->second->pollin(i);
-	  }
-	    if (Server::_pfds[i].revents & POLLOUT) {
-		    std::cout << "pollout event\n";
+          }
+          if (Server::_pfds[i].revents & POLLOUT) {
             it->second->pollout(i);
           }
 
@@ -79,5 +76,22 @@ void Server::run() {
   }
 }
 
+void eraseFD(const int index) {
+  if (index < 0 || index > Server::_pfds.size()) {
+    throw(std::string("error on eraseFD()\n")); // placeholder
+  }
+  close(Server::_pfds[index].fd);
+  std::map<int32_t, IPollable *>::iterator it;
+  it = Server::_pollables.find(Server::_pfds[index].fd);
+  if (it != Server::_pollables.end()) {
+    delete it->second;
+    Server::_pollables.erase(it);
+  }
+  Server::_pfds.erase(Server::_pfds.begin() + index);
+}
+
 std::map<int32_t, IPollable *> Server::_pollables;
 std::vector<struct pollfd> Server::_pfds;
+
+/* is this correct? deleting an object from its method */
+void ClientFD::closeFD(int index) {}

@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-#define BUFFERSIZE 8
+#define BUFFERSIZE 1
 #define MAXCONNECTIONS 10
 
 class IPollable;
@@ -32,4 +32,5 @@ public:
   Server(std::vector<uint16_t> &ports);
 
   static void run();
+  static void eraseFD(const int index);
 };

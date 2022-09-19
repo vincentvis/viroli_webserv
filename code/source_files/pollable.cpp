@@ -1,9 +1,6 @@
 #include "pollable.hpp"
-/* //////////////////////// IPollable //////////////////////// */
 
 IPollable::~IPollable() {}
-
-/* //////////////////////// ServerFD //////////////////////// */
 
 ServerFD::ServerFD(Server &server, int fd) : _server(server), _fd(fd) {}
 
@@ -16,7 +13,6 @@ void ServerFD::pollin(int index) {
   struct sockaddr_in client = {0, 0, 0, 0, 0};
   socklen_t addrlen = sizeof(client);
 
-  std::cout << "A\n";
   if ((newfd = accept(_fd, reinterpret_cast<sockaddr *>(&client), &addrlen)) <
       0) {
     throw(std::string("error on ServerFD::pollin()")); // placeholder
@@ -55,26 +51,16 @@ void ServerFD::pollout(int index) {}
 
 int ServerFD::getFD() const { return _fd; }
 
-/* //////////////////////// ClientFD //////////////////////// */
-
 ClientFD::ClientFD(Server &server, int fd)
     : _server(server), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
       _total(0), _fd(fd) {}
 
 ClientFD::~ClientFD() {}
 
-/* is this correct? deleting an object from its method */
-void ClientFD::closeFD(int index) {
-  close(Server::_pfds[index].fd);
-  delete Server::_pollables.find(Server::_pfds[index].fd)->second;
-  Server::_pollables.erase(Server::_pfds[index].fd);
-  Server::_pfds.erase(Server::_pfds.begin() + index);
-}
-
 void ClientFD::initResponse(int index) {
   Server::_pfds[index].events = POLLOUT;
-  _data =
-      std::string("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+  _data = std::string("HTTP/1.1 200 OK\r\nContent-Length: 11\r\nContent-Type: "
+                      "text/plain\r\nConnection: Close\r\n\r\nhello world\r\n");
   _bytes = 0;
   _total = 0;
   _left = _data.size();
@@ -82,13 +68,9 @@ void ClientFD::initResponse(int index) {
 
 /* receive data */
 /* need to know content-length */
-/* need to know connection status (keep-alive|close) */
 void ClientFD::pollin(int index) {
   _bytes = recv(_fd, _buffer.data(), BUFFERSIZE, 0);
 
-//  if (_bytes == -1) {
-//    std::cout << "ClientFD::pollin()\n";
-//  }
   if (_bytes == 0) {
     std::cout << "connection has been closed by client\n";
     closeFD(index);
@@ -97,15 +79,17 @@ void ClientFD::pollin(int index) {
     _total += _bytes;
     _data.append(_buffer.begin(), _buffer.begin() + _bytes);
   }
-  /* test */
+  /* if header doesn't exist yet and end of header found, parse header */
   if (_data.find("\r\n\r\n") != std::string::npos) {
-	  std::cout << "end of header\n";
+    std::cout << "end of header\n";
     std::cout << _data << std::endl;
-    initResponse(index);
+    initResponse(index); // test
   }
+  /* if body is present or expected, keep recv() */
 }
 
 /* send data */
+/* need to know connection status (keep-alive|close) */
 void ClientFD::pollout(int index) {
   _buffer.assign(_data.begin() + _total,
                  _data.begin() + _total +
@@ -113,21 +97,25 @@ void ClientFD::pollout(int index) {
 
   _bytes =
       send(_fd, _buffer.data(), (BUFFERSIZE > _left ? BUFFERSIZE : _left), 0);
-
+  for (size_t i = 0; i < _buffer.size(); ++i) {
+    std::cout << _buffer[i];
+  }
   if (_bytes > 0) {
     _total += _bytes;
     _left -= _bytes;
   }
 
-  /* test */
+  /* what to do after all data is sent? */
   if (_left == 0) {
-    closeFD(index);
+    /* if connection: keep-alive */
+    // Server::_pfds[index].event = POLLIN
+    /* if connection: close */
+    // remove fd from both vector and map
+    Server::eraseFD(index);
   }
 }
 
 int ClientFD::getFD() const { return _fd; }
-
-/* //////////////////////// FileFD //////////////////////// */
 
 FileFD::FileFD(Server &server, int fd)
     : _server(server), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
@@ -135,10 +123,11 @@ FileFD::FileFD(Server &server, int fd)
 
 FileFD::~FileFD() {}
 
-/* read file */
-void FileFD::pollin(int index) { // implement read(), placeholder
-  if ((_bytes = read(_fd, _buffer.data(), BUFFERSIZE)) < 0) {
-	  throw(std::string("FileFD::pollin() read() error")); // placeholder + cleanup
+void FileFD::pollin(int index) {
+  _bytes = read(_fd, _buffer.data(), BUFFERSIZE);
+  if (_bytes == 0) {
+    Server::_pfds[index].events = 0; // remove the fd from the array
+    // signal the file has been read and _data can be included in a response.
   }
   if (_bytes > 0) {
     _total += _bytes;
@@ -146,7 +135,6 @@ void FileFD::pollin(int index) { // implement read(), placeholder
   }
 }
 
-/* write file */
 void FileFD::pollout(int index) {} // implement write(), placeholder
 
 int FileFD::getFD() const { return _fd; }
