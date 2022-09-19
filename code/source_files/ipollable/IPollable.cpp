@@ -1,4 +1,4 @@
-#include "pollable.hpp"
+#include "ipollable/IPollable.hpp"
 
 IPollable::~IPollable() {}
 
@@ -7,10 +7,10 @@ ServerFD::ServerFD(Server &server, int fd) : _server(server), _fd(fd) {}
 ServerFD::~ServerFD() {}
 
 /* accept new ClientFD */
-void ServerFD::pollin(int index) {
+void ServerFD::pollin(int) {
   int newfd = 0;
   int opt = 1;
-  struct sockaddr_in client = {0, 0, 0, 0, 0};
+  struct sockaddr_in client = {0, 0, 0, {0}, {0}};
   socklen_t addrlen = sizeof(client);
 
   if ((newfd = accept(_fd, reinterpret_cast<sockaddr *>(&client), &addrlen)) <
@@ -47,7 +47,7 @@ void ServerFD::pollin(int index) {
 }
 
 /* do nothing on POLLOUT event */
-void ServerFD::pollout(int index) {}
+void ServerFD::pollout(int) {}
 
 int ServerFD::getFD() const { return _fd; }
 
@@ -73,7 +73,7 @@ void ClientFD::pollin(int index) {
 
   if (_bytes == 0) {
     std::cout << "connection has been closed by client\n";
-    closeFD(index);
+    Server::eraseFD(index);
   }
   if (_bytes > 0) {
     _total += _bytes;
@@ -135,6 +135,7 @@ void FileFD::pollin(int index) {
   }
 }
 
-void FileFD::pollout(int index) {} // implement write(), placeholder
+void FileFD::pollout(int index) { (void)index; // tmp to bypass unused variable errors
+} // implement write(), placeholder
 
 int FileFD::getFD() const { return _fd; }

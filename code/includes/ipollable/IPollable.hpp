@@ -1,6 +1,6 @@
 #pragma once
 
-#include "miniserver.hpp"
+#include "server/Server.hpp"
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <fstream>
@@ -23,8 +23,8 @@ class IPollable {
 public:
   virtual ~IPollable() = 0;
 
-  virtual void pollin(int index) = 0;
-  virtual void pollout(int index) = 0;
+  virtual void pollin(int) = 0;
+  virtual void pollout(int) = 0;
   virtual int getFD() const = 0;
 };
 
@@ -36,8 +36,8 @@ public:
   ServerFD(Server &server, int fd);
   ~ServerFD();
 
-  void pollin(int index);
-  void pollout(int index);
+  void pollin(int);
+  void pollout(int);
   int getFD() const;
 };
 

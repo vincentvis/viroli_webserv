@@ -5,7 +5,15 @@
 NAME		:= webserv
 
 CXX			:= c++
-CFLAGS		:= -Wall -Werror -Wextra -pedantic -std=c++98
+CXXFLAGS	:= -Wall -Werror -Wextra -pedantic -g3 -std=c++98
+
+ifdef EXTRA_CFLAGS
+	CXXFLAGS += $(EXTRA_CFLAGS)
+endif
+
+ifdef CXX14
+	CXX := /Volumes/Data_v/utils/homebrew/opt/llvm/bin/clang++
+endif
 
 # # # # # # # # # # # # # # # # # # # #
 #			  MAKE HELPERS			  #
@@ -28,7 +36,12 @@ INC_DIR		:= includes/
 MAIN		:= $(SRC_DIR)main.cpp
 
 # a list of classes without the .cpp suffix!
-CLASSES		:= config/config
+CLASSES		:= config/ConfigParser\
+				config/Config\
+				server/Location\
+				server/Server\
+				utils/Utils\
+				ipollable/IPollable
 
 OBJECTS		:= $(CLASSES:%=$(OBJ_DIR)%.o)
 HEADERS		:= $(CLASSES:%=$(INC_DIR)%.hpp)
@@ -45,11 +58,14 @@ CPPFLAGS	+= $(foreach dir, $(UNIQ_DIRS), $(join -I$(INC_DIR),$(dir)))
 all: $(NAME)
 
 $(NAME): $(OBJECTS) $(MAIN)
-	$(CXX) $(CFLAGS) $(CPPFLAGS) $(OBJECTS) $(MAIN) -o $(NAME)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OBJECTS) $(MAIN) -o $(NAME)
 
 $(OBJ_DIR)%.o: $(SRC_DIR)%.cpp $(HEADERS)
 	mkdir -p $(OBJ_DIR) $(dir $@)
-	$(CXX) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
+
+tidy:
+	/Volumes/Data_v/utils/homebrew/opt/llvm/bin/clang-tidy $(CLASSES:%=$(SRC_DIR)%.cpp) -- $(CPPFLAGS)
 
 clean:
 	$(RM) -r $(OBJ_DIR)

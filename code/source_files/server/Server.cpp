@@ -1,9 +1,32 @@
-#include "miniserver.hpp"
+#include "server/Server.hpp"
 
-Server::Server() {}
+Server::Server() {
+	this->_port = 0;
+}
+
+Server::~Server() {
+}
+
+uint16_t Server::getPort() const {
+	return _port;
+}
+
+const Config Server::findConfig(struct tmp_request &request) const {
+	(void)request;
+	return *_configs[0];
+}
+
+std::ostream &operator<<(std::ostream &os, const Server &server) {
+	os << "\033[4mServer info for \033[1m;port " << server._port << ":\033[0m"
+	   << std::endl;
+
+	Utils::print_vector_deref<Config *>(server._configs);
+
+	return os;
+}
 
 Server::Server(uint16_t port) {
-  struct sockaddr_in server = {0, AF_INET, htons(port), INADDR_ANY};
+  struct sockaddr_in server = {0, AF_INET, htons(port), {INADDR_ANY}, {0}};
   int fd = 0;
   int opt = 1;
 
@@ -51,8 +74,8 @@ void Server::run() {
     }
 
     /* events reported: check all fds and at most the number of events */
-    for (int i = 0, event = 0; i < Server::_pfds.size() && event < events;
-         ++i) {
+    int event = 0;
+    for (size_t i = 0; i < Server::_pfds.size() && event < events; ++i) {
       /* find on what file descriptor event occurred */
       if (Server::_pfds[i].revents & (POLLIN | POLLOUT)) {
         ++event;
@@ -76,10 +99,11 @@ void Server::run() {
   }
 }
 
-void eraseFD(const int index) {
-  if (index < 0 || index > Server::_pfds.size()) {
+void Server::eraseFD(const int index) {
+  if (index < 0 || index > static_cast<int>(Server::_pfds.size())) {
     throw(std::string("error on eraseFD()\n")); // placeholder
   }
+
   close(Server::_pfds[index].fd);
   std::map<int32_t, IPollable *>::iterator it;
   it = Server::_pollables.find(Server::_pfds[index].fd);
@@ -92,6 +116,3 @@ void eraseFD(const int index) {
 
 std::map<int32_t, IPollable *> Server::_pollables;
 std::vector<struct pollfd> Server::_pfds;
-
-/* is this correct? deleting an object from its method */
-void ClientFD::closeFD(int index) {}

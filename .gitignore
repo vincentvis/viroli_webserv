@@ -31,4 +31,10 @@
 *.out
 *.app
 
+# Clion / Jetbrain IDE
+*.idea
+cmake-build-debug
+
 webserv
+*.dSYM
+valgrind-out.txt
