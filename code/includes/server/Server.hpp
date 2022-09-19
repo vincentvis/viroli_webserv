@@ -8,8 +8,8 @@
 
 // temporary object, should be replace by actuall Request class
 struct tmp_request {
-		std::string host;
-		std::string path;
+		std::string _host;
+		std::string _uri;
 };
 
 class Server {

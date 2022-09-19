@@ -12,6 +12,12 @@ uint16_t Server::getPort() const {
 }
 
 const Config Server::findConfig(struct tmp_request &request) const {
+	std::vector<Config *>::iterator begin = this->_configs.begin();
+	std::vector<Config *>::iterator end   = this->_configs.end();
+
+	(void)begin;
+	(void)end;
+	// std::vector<Config *>::iterator
 	(void)request;
 	return *_configs[0];
 }
