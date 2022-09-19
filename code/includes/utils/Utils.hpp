@@ -12,16 +12,24 @@
 #include <string>
 #include <vector>
 
+// temporary object, should be replace by actuall Request class
+struct tmp_request {
+		std::string _host;
+		std::string _uri;
+};
+// REMOVE THIS STRUCT
+
 namespace Utils {
 
-	int64_t                    stol(std::string &string, bool skip);
-	int64_t                    stol(const std::string &string);
-	std::string                trimLeadingWhitespaceCopy(std::string str);
-	std::string                trimTrailingWhitespaceCopy(std::string str);
-	std::string                trimWhitespaceCopy(std::string str);
-	void                       trimTrailingWhitespaceRef(std::string &str);
-	void                       trimLeadingWhitespaceRef(std::string &str);
-	void                       trimWhitespaceRef(std::string &str);
+	int64_t     stol(std::string &string, bool skip);
+	int64_t     stol(const std::string &string);
+	std::string trimLeadingWhitespaceCopy(std::string str);
+	std::string trimTrailingWhitespaceCopy(std::string str);
+	std::string trimWhitespaceCopy(std::string str);
+	void        trimTrailingWhitespaceRef(std::string &str);
+	void        trimLeadingWhitespaceRef(std::string &str);
+	void        trimWhitespaceRef(std::string &str);
+	bool        starts_with(const std::string &source, const std::string &prefix);
 
 	template <typename T> void print_vector(const std::vector<T> &vec) {
 		typename std::vector<T>::const_iterator it  = vec.begin();

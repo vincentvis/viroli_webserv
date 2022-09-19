@@ -6,15 +6,10 @@
 #include <stdint.h>
 #include <vector>
 
-// temporary object, should be replace by actuall Request class
-struct tmp_request {
-		std::string _host;
-		std::string _uri;
-};
-
 class Server {
 	public:
 		Server();
+		Server(uint16_t port, std::vector<Config *> configs);
 		~Server();
 
 		const Config         findConfig(struct tmp_request &request) const;

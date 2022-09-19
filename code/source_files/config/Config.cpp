@@ -11,8 +11,26 @@ Config::~Config() {
 }
 
 const Location Config::findLocation(struct tmp_request &request) const {
-	(void)request;
-	return _locations[0];
+	std::vector<Location>::const_iterator begin = this->_locations.begin();
+	std::vector<Location>::const_iterator end   = this->_locations.end();
+
+	std::vector<Location>::const_iterator loc;
+	for (; begin != end; ++begin) {
+		if (Utils::starts_with(request._uri, (*begin).getMatch())) {
+			loc = begin;
+		}
+	}
+	if (loc != end) {
+		return (*loc);
+	}
+	return (*(this->_locations.begin()));
+}
+
+bool Config::containsServerName(std::string search) {
+	return (
+		std::find(this->_serverNames.begin(), this->_serverNames.end(), search) !=
+		this->_serverNames.end()
+	);
 }
 
 // getters
