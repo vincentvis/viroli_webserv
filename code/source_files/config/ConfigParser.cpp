@@ -55,7 +55,7 @@ std::vector<Config *> ConfigParser::parseFromArgs(int argc, char const **argv) {
 	if (argc > 1) {
 		this->_filePath = argv[1];
 	} else {
-		this->_filePath = "../data/config/default.config";
+		this->_filePath = "../website/config/default.config";
 	}
 	this->_fileStream.open(this->_filePath.c_str(), std::ios_base::in);
 	if (this->_fileStream.is_open() == false) {
