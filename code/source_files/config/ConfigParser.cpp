@@ -94,6 +94,7 @@ void ConfigParser::parseStream() {
 	}
 	return;
 }
+
 bool locationSorter(const Location &a, const Location &b) {
 	return a.getSortWeight() < b.getSortWeight();
 }
@@ -102,6 +103,250 @@ void ConfigParser::sortLocations(Config &config) {
 	std::sort(config._locations.begin(), config._locations.end(), locationSorter);
 }
 
+
+void ConfigParser::extract_server_block_info(Config &target) {
+	while (true) {
+		if (this->_fileStream.eof() || this->_currentLine.empty()) {
+			throw std::runtime_error(
+				"Unclosed serverblock found in configfile around line " +
+				std::to_string(_linenum)
+			);
+		}
+		if (this->_currentLine.at(0) == '}') {
+			skipNextChar();
+			return;
+		}
+
+		std::string directiveName = extractDirectiveName();
+		std::map<std::string, ConfigParser::e_directives>::const_iterator handler =
+			_serverDirectiveHandlers.find(directiveName);
+
+		if (handler == _serverDirectiveHandlers.end()) {
+			throw std::runtime_error(
+				"Unsupported directive name \"" + directiveName +
+				"\" found in config file at line " + std::to_string(_linenum)
+			);
+		}
+
+		switch (handler->second) {
+			case ED_LISTEN:
+				processListen(target);
+				break;
+			case ED_SERVERNAME:
+				processAddParamsToVector(directiveName, target._serverNames, 1, true);
+				break;
+			case ED_INDEX:
+				processAddParamsToVector(directiveName, target._index, 1, true);
+				break;
+			case ED_AUTOINDEX:
+				processBoolval(directiveName, target._autoIndex, "on", "off");
+				break;
+			case ED_ALLOW:
+				processAddParamsToVector(directiveName, target._allow, 1, true);
+				break;
+			case ED_ERRPAGE:
+				processErrorPages(target._errorPages);
+				break;
+			case ED_LOCATION:
+				processLocationBlock(target._locations);
+				break;
+			case ED_ROOT:
+				processRoot(target._root);
+				break;
+			case ED_BODYSIZE:
+				processIntval(directiveName, target._maxBodySize);
+				break;
+			default:
+				break;
+		}
+	}
+}
+
+void ConfigParser::processLocationBlock(std::vector<Location> &target) {
+	Location location;
+
+	location._sortWeight = target.size();
+
+	std::string param    = extractParam();
+	if (param == "{" || this->_currentLine.empty()) {
+		throw std::runtime_error(
+			"Not enough parameters in Location directive in config file at line " +
+			std::to_string(_linenum)
+		);
+	}
+	if (isValidConfigURI(param) == false) {
+		throw std::runtime_error(
+			"Invalid location_match param (\"" + param +
+			"\") in location directive at line " + std::to_string(_linenum)
+		);
+	}
+	location._match = param;
+	location._sortWeight += location._match.length();
+	Utils::trimLeadingWhitespaceRef(this->_currentLine);
+	if (this->_currentLine.empty() == false || this->_currentLine.at(0) != '{') {
+		skipNextChar();
+	}
+
+	bool has_done_autoindex = false;
+	while (true) {
+		if (this->_currentLine.empty() || this->_currentLine.at(0) == '}') {
+			skipNextChar();
+			break;
+		}
+
+		std::string directiveName = extractDirectiveName();
+		std::map<std::string, ConfigParser::e_directives>::const_iterator handler =
+			_locationDirectiveHandlers.find(directiveName);
+
+		if (handler == _locationDirectiveHandlers.end()) {
+			throw std::runtime_error(
+				"Unsupported directive name \"" + directiveName +
+				"\" found in location block in config file at line " +
+				std::to_string(_linenum)
+			);
+		}
+
+		switch (handler->second) {
+			case ED_ALLOW:
+				processAddParamsToVector(directiveName, location._allow, 1, true);
+				break;
+			case ED_INDEX:
+				processAddParamsToVector(directiveName, location._index, 1, true);
+				break;
+			case ED_AUTOINDEX:
+				processBoolval(directiveName, location._autoIndex, "on", "off");
+				has_done_autoindex = true;
+				break;
+			case ED_ERRPAGE:
+				processErrorPages(location._errorPages);
+				break;
+			case ED_ROOT:
+				processRoot(location._root);
+				break;
+			case ED_BODYSIZE:
+				processIntval(directiveName, location._maxBodySize);
+				break;
+			case ED_RETURN:
+				processReturn(location);
+				break;
+			default:
+				break;
+		}
+	}
+	target.push_back(location);
+}
+
+void ConfigParser::skip_to_after_server_block_opening(std::string::size_type n) {
+	this->_currentLine = Utils::trimLeadingWhitespaceCopy(this->_currentLine.substr(n));
+	std::string::size_type server_line = _linenum;
+	if (this->_currentLine.length() == 0) {
+		getNewLine();
+	}
+	if (this->_currentLine.length() == 0 || this->_currentLine.at(0) != '{') {
+		throw std::runtime_error(
+			"No opening brace after server directive in config file at line " +
+			std::to_string(server_line)
+		);
+	}
+	this->_currentLine = Utils::trimLeadingWhitespaceCopy(this->_currentLine.substr(1));
+	if (this->_currentLine.length() == 0) {
+		getNewLine();
+	}
+}
+
+std::string ConfigParser::extractDirectiveName() {
+	std::string::iterator endOfName = this->_currentLine.begin();
+	std::string::iterator end       = this->_currentLine.end();
+	unsigned              length    = 0;
+
+	while (*endOfName && (std::islower(*endOfName) || *endOfName == '_')) {
+		endOfName++;
+		length++;
+	}
+	if (length == 0) {
+		throw std::runtime_error(
+			"No directive name found in config file at line " + std::to_string(_linenum)
+		);
+	}
+	if (endOfName != end && !(*endOfName == ' ' || *endOfName == '\t')) {
+		throw std::runtime_error(
+			"Invalid characters in directive name in config file at line " +
+			std::to_string(_linenum)
+		);
+	}
+
+	std::string directiveName = this->_currentLine.substr(0, length);
+	this->_currentLine =
+		Utils::trimLeadingWhitespaceCopy(this->_currentLine.substr(length));
+	if (endOfName == end) {
+		getNewLine();
+	}
+	return (directiveName);
+}
+
+std::string ConfigParser::extractParam() {
+	std::string str;
+
+	Utils::trimLeadingWhitespaceRef(this->_currentLine);
+	if (this->_currentLine.at(0) == '"' || this->_currentLine.at(0) == '\'') {
+		str                                 = this->_currentLine.substr(1);
+		std::string::size_type closingQuote = str.find_first_of(this->_currentLine.at(0));
+		if (closingQuote == std::string::npos) {
+			throw std::runtime_error(
+				"Missing closing quote in directive parameter in config file at line " +
+				std::to_string(_linenum)
+			);
+		}
+		str                = str.substr(0, closingQuote);
+		this->_currentLine = this->_currentLine.substr(closingQuote + 2);
+	} else {
+		std::string::size_type end_of_word = this->_currentLine.find_first_of(" \t;");
+		if (end_of_word == std::string::npos) {
+			str                = this->_currentLine;
+			this->_currentLine = "";
+		} else {
+			str                = this->_currentLine.substr(0, end_of_word);
+			this->_currentLine = this->_currentLine.substr(end_of_word);
+		}
+	}
+	return (str);
+}
+
+void ConfigParser::skipNextChar() {
+	this->_currentLine = Utils::trimLeadingWhitespaceCopy(this->_currentLine.substr(1));
+	if (this->_currentLine.length() == 0 && this->_fileStream.eof() == false) {
+		getNewLine();
+	}
+}
+
+bool ConfigParser::getNewLine() {
+	std::string partialResult;
+	bool        hasReachedEOF = false;
+
+	if (this->_currentLine.length() != 0) {
+		partialResult = this->_currentLine;
+	} else {
+		partialResult = "";
+	}
+	getline(this->_fileStream, this->_currentLine);
+	_linenum++;
+	if (this->_fileStream.eof()) {
+		hasReachedEOF = true;
+	}
+	Utils::trimWhitespaceRef(this->_currentLine);
+	if (this->_currentLine.empty() == false && this->_currentLine.at(0) == '#') {
+		this->_currentLine = partialResult;
+		return (getNewLine());
+	}
+	this->_currentLine = partialResult + this->_currentLine;
+	if (!hasReachedEOF && this->_currentLine.length() == 0) {
+		return (getNewLine());
+	}
+	if (hasReachedEOF && this->_currentLine.length() == 0) {
+		return (false);
+	}
+	return (true);
+}
 
 void ConfigParser::check_and_skip_semicolon(std::string name) {
 	if (this->_currentLine.empty() == false && this->_currentLine.at(0) == ';') {
@@ -377,248 +622,4 @@ void ConfigParser::processReturn(Location &target) {
 	}
 	target._redirectType = typeParam;
 	check_and_skip_semicolon("return");
-}
-
-void ConfigParser::extract_server_block_info(Config &target) {
-	while (true) {
-		if (this->_fileStream.eof() || this->_currentLine.empty()) {
-			throw std::runtime_error(
-				"Unclosed serverblock found in configfile around line " +
-				std::to_string(_linenum)
-			);
-		}
-		if (this->_currentLine.at(0) == '}') {
-			skipNextChar();
-			return;
-		}
-
-		std::string directiveName = extractDirectiveName();
-		std::map<std::string, ConfigParser::e_directives>::const_iterator handler =
-			_serverDirectiveHandlers.find(directiveName);
-
-		if (handler == _serverDirectiveHandlers.end()) {
-			throw std::runtime_error(
-				"Unsupported directive name \"" + directiveName +
-				"\" found in config file at line " + std::to_string(_linenum)
-			);
-		}
-
-		switch (handler->second) {
-			case ED_LISTEN:
-				processListen(target);
-				break;
-			case ED_SERVERNAME:
-				processAddParamsToVector(directiveName, target._serverNames, 1, true);
-				break;
-			case ED_INDEX:
-				processAddParamsToVector(directiveName, target._index, 1, true);
-				break;
-			case ED_AUTOINDEX:
-				processBoolval(directiveName, target._autoIndex, "on", "off");
-				break;
-			case ED_ALLOW:
-				processAddParamsToVector(directiveName, target._allow, 1, true);
-				break;
-			case ED_ERRPAGE:
-				processErrorPages(target._errorPages);
-				break;
-			case ED_LOCATION:
-				processLocationBlock(target._locations);
-				break;
-			case ED_ROOT:
-				processRoot(target._root);
-				break;
-			case ED_BODYSIZE:
-				processIntval(directiveName, target._maxBodySize);
-				break;
-			default:
-				break;
-		}
-	}
-}
-
-void ConfigParser::processLocationBlock(std::vector<Location> &target) {
-	Location location;
-
-	location._sortWeight = target.size();
-
-	std::string param    = extractParam();
-	if (param == "{" || this->_currentLine.empty()) {
-		throw std::runtime_error(
-			"Not enough parameters in Location directive in config file at line " +
-			std::to_string(_linenum)
-		);
-	}
-	if (isValidConfigURI(param) == false) {
-		throw std::runtime_error(
-			"Invalid location_match param (\"" + param +
-			"\") in location directive at line " + std::to_string(_linenum)
-		);
-	}
-	location._match = param;
-	location._sortWeight += location._match.length();
-	Utils::trimLeadingWhitespaceRef(this->_currentLine);
-	if (this->_currentLine.empty() == false || this->_currentLine.at(0) != '{') {
-		skipNextChar();
-	}
-
-	bool has_done_autoindex = false;
-	while (true) {
-		if (this->_currentLine.empty() || this->_currentLine.at(0) == '}') {
-			skipNextChar();
-			break;
-		}
-
-		std::string directiveName = extractDirectiveName();
-		std::map<std::string, ConfigParser::e_directives>::const_iterator handler =
-			_locationDirectiveHandlers.find(directiveName);
-
-		if (handler == _locationDirectiveHandlers.end()) {
-			throw std::runtime_error(
-				"Unsupported directive name \"" + directiveName +
-				"\" found in location block in config file at line " +
-				std::to_string(_linenum)
-			);
-		}
-
-		switch (handler->second) {
-			case ED_ALLOW:
-				processAddParamsToVector(directiveName, location._allow, 1, true);
-				break;
-			case ED_INDEX:
-				processAddParamsToVector(directiveName, location._index, 1, true);
-				break;
-			case ED_AUTOINDEX:
-				processBoolval(directiveName, location._autoIndex, "on", "off");
-				has_done_autoindex = true;
-				break;
-			case ED_ERRPAGE:
-				processErrorPages(location._errorPages);
-				break;
-			case ED_ROOT:
-				processRoot(location._root);
-				break;
-			case ED_BODYSIZE:
-				processIntval(directiveName, location._maxBodySize);
-				break;
-			case ED_RETURN:
-				processReturn(location);
-				break;
-			default:
-				break;
-		}
-	}
-	target.push_back(location);
-}
-
-void ConfigParser::skip_to_after_server_block_opening(std::string::size_type n) {
-	this->_currentLine = Utils::trimLeadingWhitespaceCopy(this->_currentLine.substr(n));
-	std::string::size_type server_line = _linenum;
-	if (this->_currentLine.length() == 0) {
-		getNewLine();
-	}
-	if (this->_currentLine.length() == 0 || this->_currentLine.at(0) != '{') {
-		throw std::runtime_error(
-			"No opening brace after server directive in config file at line " +
-			std::to_string(server_line)
-		);
-	}
-	this->_currentLine = Utils::trimLeadingWhitespaceCopy(this->_currentLine.substr(1));
-	if (this->_currentLine.length() == 0) {
-		getNewLine();
-	}
-}
-
-std::string ConfigParser::extractDirectiveName() {
-	std::string::iterator endOfName = this->_currentLine.begin();
-	std::string::iterator end       = this->_currentLine.end();
-	unsigned              length    = 0;
-
-	while (*endOfName && (std::islower(*endOfName) || *endOfName == '_')) {
-		endOfName++;
-		length++;
-	}
-	if (length == 0) {
-		throw std::runtime_error(
-			"No directive name found in config file at line " + std::to_string(_linenum)
-		);
-	}
-	if (endOfName != end && !(*endOfName == ' ' || *endOfName == '\t')) {
-		throw std::runtime_error(
-			"Invalid characters in directive name in config file at line " +
-			std::to_string(_linenum)
-		);
-	}
-
-	std::string directiveName = this->_currentLine.substr(0, length);
-	this->_currentLine =
-		Utils::trimLeadingWhitespaceCopy(this->_currentLine.substr(length));
-	if (endOfName == end) {
-		getNewLine();
-	}
-	return (directiveName);
-}
-
-std::string ConfigParser::extractParam() {
-	std::string str;
-
-	Utils::trimLeadingWhitespaceRef(this->_currentLine);
-	if (this->_currentLine.at(0) == '"' || this->_currentLine.at(0) == '\'') {
-		str                                 = this->_currentLine.substr(1);
-		std::string::size_type closingQuote = str.find_first_of(this->_currentLine.at(0));
-		if (closingQuote == std::string::npos) {
-			throw std::runtime_error(
-				"Missing closing quote in directive parameter in config file at line " +
-				std::to_string(_linenum)
-			);
-		}
-		str                = str.substr(0, closingQuote);
-		this->_currentLine = this->_currentLine.substr(closingQuote + 2);
-	} else {
-		std::string::size_type end_of_word = this->_currentLine.find_first_of(" \t;");
-		if (end_of_word == std::string::npos) {
-			str                = this->_currentLine;
-			this->_currentLine = "";
-		} else {
-			str                = this->_currentLine.substr(0, end_of_word);
-			this->_currentLine = this->_currentLine.substr(end_of_word);
-		}
-	}
-	return (str);
-}
-
-void ConfigParser::skipNextChar() {
-	this->_currentLine = Utils::trimLeadingWhitespaceCopy(this->_currentLine.substr(1));
-	if (this->_currentLine.length() == 0 && this->_fileStream.eof() == false) {
-		getNewLine();
-	}
-}
-
-bool ConfigParser::getNewLine() {
-	std::string partialResult;
-	bool        hasReachedEOF = false;
-
-	if (this->_currentLine.length() != 0) {
-		partialResult = this->_currentLine;
-	} else {
-		partialResult = "";
-	}
-	getline(this->_fileStream, this->_currentLine);
-	_linenum++;
-	if (this->_fileStream.eof()) {
-		hasReachedEOF = true;
-	}
-	Utils::trimWhitespaceRef(this->_currentLine);
-	if (this->_currentLine.empty() == false && this->_currentLine.at(0) == '#') {
-		this->_currentLine = partialResult;
-		return (getNewLine());
-	}
-	this->_currentLine = partialResult + this->_currentLine;
-	if (!hasReachedEOF && this->_currentLine.length() == 0) {
-		return (getNewLine());
-	}
-	if (hasReachedEOF && this->_currentLine.length() == 0) {
-		return (false);
-	}
-	return (true);
 }
