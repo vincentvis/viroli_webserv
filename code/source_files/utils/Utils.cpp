@@ -78,4 +78,5 @@ namespace Utils {
 		trimLeadingWhitespaceRef(str);
 		trimTrailingWhitespaceRef(str);
 	}
+
 } // namespace Utils
