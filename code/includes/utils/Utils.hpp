@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <sstream>
 #include <stdexcept>
 #include <stdint.h>
 #include <stdlib.h>
@@ -74,6 +75,12 @@ namespace Utils {
 				std::cout << delim;
 			}
 		}
+	}
+
+	template <typename T> std::string to_string(T val) {
+		std::stringstream s;
+		s << val;
+		return (s.str());
 	}
 
 } // namespace Utils
