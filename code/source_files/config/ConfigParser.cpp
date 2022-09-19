@@ -187,7 +187,6 @@ void ConfigParser::processLocationBlock(std::vector<Location> &target) {
 		skipNextChar();
 	}
 
-	bool has_done_autoindex = false;
 	while (true) {
 		if (this->_currentLine.empty() || this->_currentLine.at(0) == '}') {
 			skipNextChar();
@@ -215,7 +214,6 @@ void ConfigParser::processLocationBlock(std::vector<Location> &target) {
 				break;
 			case ED_AUTOINDEX:
 				processBoolval(directiveName, location._autoIndex, "on", "off");
-				has_done_autoindex = true;
 				break;
 			case ED_ERRPAGE:
 				processErrorPages(location._errorPages);
@@ -367,8 +365,7 @@ uint16_t ConfigParser::stringToPort(std::string &string) {
 	uint16_t intval  = longval;
 
 	if (errno == EINVAL || errno == ERANGE || string.c_str() == endptr ||
-		intval != longval || intval > 65535U)
-	{
+		intval != longval) {
 		throw std::runtime_error(
 			"the string \"" + string + "\" does not contain a valid port number"
 		);
