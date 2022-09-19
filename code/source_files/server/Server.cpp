@@ -7,16 +7,13 @@ Server::Server() {
 Server::~Server() {
 }
 
+uint16_t Server::getPort() const {
+	return _port;
+}
 
-/*
-	Try to find a matching server block in the _configs vector
-	Check with:
-		request.host => vector<config.serverNames>
-
- */
 const Config Server::findConfig(struct tmp_request &request) const {
 	(void)request;
-	return _configs[0];
+	return *_configs[0];
 }
 
 std::ostream &operator<<(std::ostream &os, const Server &server) {

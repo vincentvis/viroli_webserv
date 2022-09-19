@@ -5,13 +5,34 @@ Config::Config() {
 	this->_maxBodySize = 1000000;
 	this->_allowUpload = 0;
 	this->_autoIndex   = 0;
-	this->_bufferSize  = 0;
 }
 
 Config::~Config() {
 }
 
+const Location Config::findLocation(struct tmp_request &request) const {
+	(void)request;
+	return _locations[0];
+}
 
+// getters
+std::string Config::getRoot() const {
+	return _root;
+}
+std::vector<std::string> Config::getAllow() const {
+	return _allow;
+}
+int64_t Config::getMaxBodySize() const {
+	return _maxBodySize;
+}
+bool Config::getAllowUpload() const {
+	return _allowUpload;
+}
+bool Config::getAutoIndex() const {
+	return _autoIndex;
+}
+
+// stream output
 std::ostream &operator<<(std::ostream &os, const Config &config) {
 	os << "\033[1;4mConfig info:\033[0m" << std::endl;
 

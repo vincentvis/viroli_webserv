@@ -12,8 +12,17 @@ class Config {
 		Config();
 		~Config();
 
+		const Location       findLocation(struct tmp_request &request) const;
+
 		friend std::ostream &operator<<(std::ostream &os, const Config &config);
 		friend class ConfigParser;
+
+		// getters
+		std::string              getRoot() const;
+		std::vector<std::string> getAllow() const;
+		int64_t                  getMaxBodySize() const;
+		bool                     getAllowUpload() const;
+		bool                     getAutoIndex() const;
 
 	protected:
 		int32_t                            _priority;
@@ -27,7 +36,6 @@ class Config {
 		int64_t                            _maxBodySize;
 		bool                               _allowUpload;
 		bool                               _autoIndex;
-		int                                _bufferSize;
 		std::vector<Location>              _locations;
 
 	private:

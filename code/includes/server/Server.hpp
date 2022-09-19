@@ -13,13 +13,6 @@ struct tmp_request {
 };
 
 class Server {
-	private:
-
-	protected:
-		uint16_t              _port;
-		std::string           _ip;
-		std::vector<Config *> _configs;
-
 	public:
 		Server();
 		~Server();
@@ -28,4 +21,11 @@ class Server {
 
 		friend std::ostream &operator<<(std::ostream &os, const Server &server);
 		friend class ConfigParser;
+
+		// getters
+		uint16_t getPort() const;
+
+	protected:
+		uint16_t              _port;
+		std::vector<Config *> _configs;
 };
