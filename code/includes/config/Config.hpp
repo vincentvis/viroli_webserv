@@ -23,7 +23,7 @@ class Config {
 		int64_t                  getMaxBodySize() const;
 		bool                     getAllowUpload() const;
 		bool                     getAutoIndex() const;
-		bool                     containsServerName(std::string search);
+		bool                     containsServerName(std::string to_search);
 
 	protected:
 		int32_t                            _priority;

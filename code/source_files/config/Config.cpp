@@ -26,9 +26,9 @@ const Location Config::findLocation(struct tmp_request &request) const {
 	return (*(this->_locations.begin()));
 }
 
-bool Config::containsServerName(std::string search) {
+bool Config::containsServerName(std::string to_search) {
 	return (
-		std::find(this->_serverNames.begin(), this->_serverNames.end(), search) !=
+		std::find(this->_serverNames.begin(), this->_serverNames.end(), to_search) !=
 		this->_serverNames.end()
 	);
 }
