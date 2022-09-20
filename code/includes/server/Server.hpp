@@ -18,6 +18,7 @@
 #include <unistd.h>
 #include <utility>
 #include <vector>
+#include <cstring>
 
 #define BUFFERSIZE 1 // tmp
 #define MAXCONNECTIONS 10 // tmp
