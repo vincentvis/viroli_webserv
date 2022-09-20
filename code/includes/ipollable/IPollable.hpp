@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <utility>
 #include <vector>
+#include <cstring>
 /* when we use a reference for a server, its address must not change. The vector
  * it's stored in must not be modified (insert/erase) */
 

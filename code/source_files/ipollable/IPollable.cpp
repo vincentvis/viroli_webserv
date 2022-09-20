@@ -10,7 +10,10 @@ ServerFD::~ServerFD() {}
 void ServerFD::pollin(int) {
   int newfd = 0;
   int opt = 1;
-  struct sockaddr_in client = {0, 0, 0, {0}, {0}};
+  // struct sockaddr_in client = {0, 0, 0, {0}, {0}};
+  struct sockaddr_in client;
+  memset(&client, 0, sizeof(client));
+
   socklen_t addrlen = sizeof(client);
 
   if ((newfd = accept(_fd, reinterpret_cast<sockaddr *>(&client), &addrlen)) <
