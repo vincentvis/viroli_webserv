@@ -2,6 +2,7 @@
 
 #include "server/Location.hpp"
 #include "utils/Utils.hpp"
+#include <algorithm>
 #include <iostream>
 #include <map>
 #include <stdint.h>
