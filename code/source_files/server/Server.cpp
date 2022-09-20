@@ -28,7 +28,7 @@ std::ostream &operator<<(std::ostream &os, const Server &server) {
 Server::Server(uint16_t port) {
   // struct sockaddr_in server = {0, AF_INET, htons(port), INADDR_ANY, 0};
   struct sockaddr_in server;
-  std::memset(&server, 0, sizeof(server));
+  memset(&server, 0, sizeof(server));
   server.sin_addr.s_addr = INADDR_ANY;
   server.sin_family = AF_INET;
   server.sin_port = htons(port);
