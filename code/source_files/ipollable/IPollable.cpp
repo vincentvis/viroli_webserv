@@ -83,7 +83,6 @@ void ClientFD::pollin(int index) {
 	if (this->_request.contentLenAvailable() == true && this->_request.getContentLength() < BUFFERSIZE)
 		recvSize = this->_request.getContentLength();
 	_bytes = recv(_fd, _buffer.data(), recvSize, 0);
-
 	if (_bytes == 0) {
 		std::cout << "connection has been closed by client\n";
 		// set fd to -1 to ignore further polling and flush later.
@@ -103,7 +102,7 @@ void ClientFD::pollin(int index) {
 
 	/* if body is present or expected, keep recv() */
 
-	/* when you find end of file; body = ready, check chunked and setBody */
+	/* when you find end of file; body = ready, check chunked and setBody */      // not sure if end of request header is a '/0'
 	if (this->_request.getHeaderAvailable() == true && _data.find("\0") != std::string::npos) { // && if more bytes are red after \r\n\r\n// {
 		if (this->_request.getChunked() == true)
 			this->_request.setBody("this is a chunked body");
@@ -113,13 +112,13 @@ void ClientFD::pollin(int index) {
 //		initResponse(index); // test
 	}
 
-//	/* create CGIrequest or HTTPrequest */
-//	if (this->_request.getCgi() == true) {
-//		this->_requestInterface = new CGIRequest(this->_request, _server.findConfig(this->_request));
-//	} else {
-//		std::cout << "this goes well?" << std::cout;
-//		this->_requestInterface = new HttpRequest(this->_request, _server.findConfig(this->_request));
-//	}
+	/* create CGIrequest or HTTPrequest */
+	if (this->_request.getCgi() == true) {
+		this->_requestInterface = new CGIRequest(this->_request, _server.findConfig(this->_request));
+	} else {
+		std::cout << "this goes well?" << std::cout;
+		this->_requestInterface = new HttpRequest(this->_request, _server.findConfig(this->_request));
+	}
 
 }
 
