@@ -1,6 +1,7 @@
 #pragma once
 
 #include "server/Server.hpp"
+#include "request/Request.hpp"
 #include <arpa/inet.h>
 #include <cstring>
 #include <fcntl.h>
@@ -47,7 +48,7 @@ class ServerFD : public IPollable {
 
 class ClientFD : public IPollable {
 	public:
-		// Request 		_request;
+		Request 		_request;
 		Server           &_server;
 		std::vector<char> _buffer;
 		std::string       _data;

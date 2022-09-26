@@ -1,0 +1,40 @@
+#pragma once
+
+#include "config/Config.hpp"
+#include <algorithm>
+#include <iostream>
+#include <map>
+
+class Request {
+	private:
+		std::string                        _method;
+		std::string                        _requestTarget;
+		std::string                        _HTTPVersion;
+		std::string                        _body;
+		bool                               _CGI;
+		bool                               _TransferEncodingChunked;
+		bool                               _ContentLenAvailable;
+		long                               _ContentLength;
+		std::map<std::string, std::string> _header;
+
+	public:
+		Request();
+		~Request();
+
+		void printAttributesInRequestClass(); // used for testing; can be deleted later
+		void ParseRequest(std::string BUF, Config &server);
+		// clang-format off
+		std::map<std::string, std::string>::iterator _itr; // used to print string; can be deleted later
+		// clang-format on
+
+		void                               setBody(std::string NewBody);
+		std::map<std::string, std::string> getHeaderMap() const;
+		std::string                        getMethod() const;
+		std::string                        getRequestTarget() const;
+		std::string                        getHTTPVersion() const;
+		std::string                        getBody() const;
+		bool                               contentLenAvailable() const;
+		bool                               getChunked() const;
+		long                               getContentLength() const;
+		bool                               getCgi() const;
+};

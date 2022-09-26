@@ -92,8 +92,9 @@ void ClientFD::pollin(int index) {
 	}
 	/* if header doesn't exist yet and end of header found, parse header */
 	if (_data.find("\r\n\r\n") != std::string::npos) {
-		std::cout << "end of header\n";
-		std::cout << _data << std::endl;
+//		this->_request.ParseRequest(this->_data, server);
+//		std::cout << "end of header\n";
+//		std::cout << _data << std::endl;
 		initResponse(index); // test
 	}
 	/* if body is present or expected, keep recv() */
