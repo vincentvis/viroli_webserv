@@ -5,11 +5,12 @@
 HttpRequest::HttpRequest() {
 }
 
-HttpRequest::HttpRequest(const Request &Req, const Config &Serv) {
-	CheckMethod(Req, Serv);
+HttpRequest::HttpRequest(const Request &Req, const Config &Conf) {
+	std::cout << "this is a http-request" << std::endl;
+	CheckMethod(Req, Conf);
 }
 
-void HttpRequest::CheckMethod(const Request &Req, const Config &Serv) {
+void HttpRequest::CheckMethod(const Request &Req, const Config &Conf) {
 	std::map<std::string, RequestInterface::e_RequestType>::iterator itr =
 		_MethodKeys.find(Req.getMethod());
 
@@ -29,7 +30,7 @@ void HttpRequest::CheckMethod(const Request &Req, const Config &Serv) {
 			break;
 		case GET:
 			std::cout << "GET" << std::endl;
-			GETRequest(Req, Serv);
+			GETRequest(Req, Conf);
 			break;
 		case POST:
 			std::cout << "POST" << std::endl;
@@ -51,7 +52,8 @@ void HttpRequest::CheckMethod(const Request &Req, const Config &Serv) {
 
 // send a HTTP GET request to get the page from the server.
 
-void HttpRequest::GETRequest(const Request &Req, const Config &Serv) {
+void HttpRequest::GETRequest(const Request &Req, const Config &Conf) {
+	std::cout << "this is a GET request" << std::endl;
 }
 
 HttpRequest::~HttpRequest() {

@@ -3,11 +3,11 @@
 CGIRequest::CGIRequest() {
 }
 
-CGIRequest::CGIRequest(const Request &Req, const Config &Serv) {
-	CheckMethod(Req, Serv);
+CGIRequest::CGIRequest(const Request &Req, const Config &Conf) {
+	CheckMethod(Req, Conf);
 }
 
-void CGIRequest::CheckMethod(const Request &Req, const Config &Serv) {
+void CGIRequest::CheckMethod(const Request &Req, const Config &Conf) {
 	std::map<std::string, RequestInterface::e_RequestType>::iterator itr =
 		_MethodKeys.find(Req.getMethod());
 

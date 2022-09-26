@@ -7,7 +7,7 @@
 // class Request;
 class RequestInterface {
 	private:
-		virtual void CheckMethod(const Request &Req, const Config &Serv) = 0;
+		virtual void CheckMethod(const Request &Req, const Config &Conf) = 0;
 		//		virtual void GETRequest(const Request &Req, const Server &Serv) = 0;
 		//		virtual void POSTRequest(const Request &Req, const Server &Serv) = 0;
 		//		virtual void DELETERequest(const Request &Req, const Server &Serv) = 0;
@@ -18,6 +18,6 @@ class RequestInterface {
 		enum e_RequestType { GET, POST, DELETE };
 		static std::map<std::string, e_RequestType> _MethodKeys;
 		RequestInterface(); // should become private!
-		RequestInterface(const Request &Req, const Config &Serv);
+		RequestInterface(const Request &Req, const Config &Conf);
 		~RequestInterface();
 };

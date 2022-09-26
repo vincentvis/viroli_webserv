@@ -5,7 +5,7 @@
 
 class CGIRequest : public RequestInterface {
 	private:
-		void CheckMethod(const Request &Req, const Config &Serv);
+		void CheckMethod(const Request &Req, const Config &Conf);
 		//		void GETRequest(const Request &Req, const Server &Serv);
 		//		void POSTRequest(const Request &Req, const Server &Serv);
 		//		void DELETERequest(const Request &Req, const Server &Serv);
@@ -13,6 +13,6 @@ class CGIRequest : public RequestInterface {
 
 	public:
 		CGIRequest(); // should become private!
-		CGIRequest(const Request &Req, const Config &Serv);
+		CGIRequest(const Request &Req, const Config &Conf);
 		~CGIRequest();
 };

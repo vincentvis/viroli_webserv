@@ -9,6 +9,10 @@
 
 Request::Request() {
 	this->_headerAvailable = false;
+	this->_ContentLength = 0;
+	this->_CGI = false;
+	this->_TransferEncodingChunked = false;
+	this->_ContentLenAvailable = false;
 }
 
 void Request::ParseRequest(std::string BUF) {
@@ -60,6 +64,10 @@ void Request::ParseRequest(std::string BUF) {
 		} catch (const std::runtime_error &e) {
 			std::cerr << "stol failed: \n" << e.what() << std::endl;
 		}
+	}
+	if (this->_ContentLength < 0){
+		std::cout << "Invalid contenlen" << std::cout;
+//		change in throw error;
 	}
 
 	this->_itr = _header.find("Transfer-Encoding:");

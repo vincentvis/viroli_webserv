@@ -10,7 +10,7 @@ RequestInterface::RequestInterface() {
 	}
 }
 
-RequestInterface::RequestInterface(const Request &Req, const Config &Serv) {
+RequestInterface::RequestInterface(const Request &Req, const Config &Conf) {
 }
 
 RequestInterface::~RequestInterface() {

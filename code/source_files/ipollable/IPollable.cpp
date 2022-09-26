@@ -79,7 +79,10 @@ void ClientFD::initResponse(int index) {
 /* receive data */
 /* need to know content-length */
 void ClientFD::pollin(int index) {
-	_bytes = recv(_fd, _buffer.data(), BUFFERSIZE, 0);
+	size_t recvSize = BUFFERSIZE; //ronald je moet maar even kijken of je het hiermee eens bent
+	if (this->_request.contentLenAvailable() == true && this->_request.getContentLength() < BUFFERSIZE)
+		recvSize = this->_request.getContentLength();
+	_bytes = recv(_fd, _buffer.data(), recvSize, 0);
 
 	if (_bytes == 0) {
 		std::cout << "connection has been closed by client\n";
@@ -95,25 +98,29 @@ void ClientFD::pollin(int index) {
 		this->_request.ParseRequest(this->_data);
 		//		std::cout << "end of header\n";
 		//		std::cout << _data << std::endl;
-		//		initResponse(index); // test
+
 	}
 
 	/* if body is present or expected, keep recv() */
 
 	/* when you find end of file; body = ready, check chunked and setBody */
-	if (this->_request.getHeaderAvailable() == true) { // && if mor bytes read {
+	if (this->_request.getHeaderAvailable() == true && _data.find("\0") != std::string::npos) { // && if more bytes are red after \r\n\r\n// {
 		if (this->_request.getChunked() == true)
 			this->_request.setBody("this is a chunked body");
 		if (this->_request.contentLenAvailable() == true)
 			this->_request.setBody("this is a body with contentlen");
 		this->_request.printAttributesInRequestClass(); // used for testing;REMOVE later
+//		initResponse(index); // test
 	}
-	/* create CGIrequest or HTTPrequest */
-	if (this->_request.getCgi() == true) {
-		this->_requestInterface = new CGIRequest(this->_request, _server.findConfig(this->_request));
-	} else {
-		this->_requestInterface = new HttpRequest(this->_request, _server.findConfig(this->_request));
-	}
+
+//	/* create CGIrequest or HTTPrequest */
+//	if (this->_request.getCgi() == true) {
+//		this->_requestInterface = new CGIRequest(this->_request, _server.findConfig(this->_request));
+//	} else {
+//		std::cout << "this goes well?" << std::cout;
+//		this->_requestInterface = new HttpRequest(this->_request, _server.findConfig(this->_request));
+//	}
+
 }
 
 /* send data */
