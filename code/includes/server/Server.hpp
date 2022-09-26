@@ -25,12 +25,6 @@
 
 class IPollable; // forward declaration
 
-// temporary object, should be replace by actuall Request class
-struct tmp_request {
-		std::string host;
-		std::string path;
-};
-
 class Server {
 	public:
 		Server();
@@ -38,7 +32,7 @@ class Server {
 		Server(uint16_t port);                // tmp
 		Server(std::vector<uint16_t> &ports); // tmp
 
-		const Config         findConfig(struct tmp_request &request) const;
+		const Config         findConfig(const Request &request) const;
 
 		friend std::ostream &operator<<(std::ostream &os, const Server &server);
 		friend class ConfigParser;

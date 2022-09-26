@@ -1,10 +1,11 @@
 #pragma once
 
 #include "config/Config.hpp"
+//#include "server/Server.hpp"
 #include <algorithm>
 #include <iostream>
 #include <map>
-
+class Server;
 class Request {
 	private:
 		std::string                        _method;
@@ -14,6 +15,7 @@ class Request {
 		bool                               _CGI;
 		bool                               _TransferEncodingChunked;
 		bool                               _ContentLenAvailable;
+		bool                               _headerAvailable;
 		long                               _ContentLength;
 		std::map<std::string, std::string> _header;
 
@@ -22,7 +24,7 @@ class Request {
 		~Request();
 
 		void printAttributesInRequestClass(); // used for testing; can be deleted later
-		void ParseRequest(std::string BUF, Config &server);
+		void ParseRequest(std::string BUF);
 		// clang-format off
 		std::map<std::string, std::string>::iterator _itr; // used to print string; can be deleted later
 		// clang-format on
@@ -37,4 +39,5 @@ class Request {
 		bool                               getChunked() const;
 		long                               getContentLength() const;
 		bool                               getCgi() const;
+		bool                               getHeaderAvailable() const;
 };

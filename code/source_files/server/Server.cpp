@@ -11,8 +11,7 @@ uint16_t Server::getPort() const {
 	return _port;
 }
 
-const Config Server::findConfig(struct tmp_request &request) const {
-	(void)request;
+const Config Server::findConfig(const Request &request) const {
 	return *_configs[0];
 }
 

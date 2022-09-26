@@ -70,7 +70,7 @@ ClientFD::~ClientFD() {
 void ClientFD::initResponse(int index) {
 	Server::_pfds[index].events = POLLOUT;
 	_data  = std::string("HTTP/1.1 200 OK\r\nContent-Length: 11\r\nContent-Type: "
-                          "text/plain\r\nConnection: Close\r\n\r\nhello world\r\n");
+						  "text/plain\r\nConnection: Close\r\n\r\nhello world\r\n");
 	_bytes = 0;
 	_total = 0;
 	_left  = _data.size();
@@ -92,12 +92,28 @@ void ClientFD::pollin(int index) {
 	}
 	/* if header doesn't exist yet and end of header found, parse header */
 	if (_data.find("\r\n\r\n") != std::string::npos) {
-//		this->_request.ParseRequest(this->_data, server);
-//		std::cout << "end of header\n";
-//		std::cout << _data << std::endl;
-		initResponse(index); // test
+		this->_request.ParseRequest(this->_data);
+		//		std::cout << "end of header\n";
+		//		std::cout << _data << std::endl;
+		//		initResponse(index); // test
 	}
+
 	/* if body is present or expected, keep recv() */
+
+	/* when you find end of file; body = ready, check chunked and setBody */
+	if (this->_request.getHeaderAvailable() == true) { // && if mor bytes read {
+		if (this->_request.getChunked() == true)
+			this->_request.setBody("this is a chunked body");
+		if (this->_request.contentLenAvailable() == true)
+			this->_request.setBody("this is a body with contentlen");
+		this->_request.printAttributesInRequestClass(); // used for testing;REMOVE later
+	}
+	/* create CGIrequest or HTTPrequest */
+	if (this->_request.getCgi() == true) {
+		this->_requestInterface = new CGIRequest(this->_request, _server.findConfig(this->_request));
+	} else {
+		this->_requestInterface = new HttpRequest(this->_request, _server.findConfig(this->_request));
+	}
 }
 
 /* send data */

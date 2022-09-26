@@ -8,9 +8,10 @@
 // lengths of 8000 octets.
 
 Request::Request() {
+	this->_headerAvailable = false;
 }
 
-void Request::ParseRequest(std::string BUF, Config &server) {
+void Request::ParseRequest(std::string BUF) {
 	size_t startKey = 0;
 	size_t endKey   = 0;
 	size_t startVal = 0;
@@ -66,6 +67,7 @@ void Request::ParseRequest(std::string BUF, Config &server) {
 		if (this->_itr->second.find("chunked") != std::string::npos)
 			this->_TransferEncodingChunked = true;
 	}
+	this->_headerAvailable = true;
 }
 
 void Request::setBody(std::string NewBody) {
@@ -103,6 +105,15 @@ bool Request::getChunked() const {
 bool Request::getCgi() const {
 	return this->_CGI;
 }
+
+bool Request::getHeaderAvailable() const {
+	return this->_headerAvailable;
+}
+
+bool Request::contentLenAvailable() const{
+	return this->_ContentLenAvailable;
+}
+
 /* !REMOVE later, print function used for testing */
 void Request::printAttributesInRequestClass() {
 	std::cout << "--------------------------------------" << std::endl;
