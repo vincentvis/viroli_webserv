@@ -40,7 +40,8 @@ CLASSES		:= config/ConfigParser\
 				config/Config\
 				server/Location\
 				server/Server\
-				utils/Utils
+				utils/Utils\
+				ipollable/IPollable
 
 OBJECTS		:= $(CLASSES:%=$(OBJ_DIR)%.o)
 HEADERS		:= $(CLASSES:%=$(INC_DIR)%.hpp)
