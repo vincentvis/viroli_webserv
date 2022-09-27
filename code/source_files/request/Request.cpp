@@ -46,11 +46,7 @@ void Request::ParseRequest(std::string BUF) {
 			Utils::trimWhitespaceCopy(BUF.substr(startVal, endVal - startVal));
 	}
 
-	// !REMOVE later only used for tests own microserver
-	startVal    = BUF.find("\r\n\r\n") + 4;
-	this->_body = BUF.substr(startVal, BUF.length() - startVal);
-
-	/* set CGI for initalization reqeust interface */
+	/* set CGI for initialisation request interface */
 	if (this->_requestTarget.find(".html") == std::string::npos &&
 		this->_requestTarget.find("/") == std::string::npos)
 		this->_CGI = true;

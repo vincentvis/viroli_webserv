@@ -96,13 +96,16 @@ void ClientFD::pollin(int index) {
 		//		initResponse(index); // test -> can be removed?
 	}
 
-	/* check if contentLengthAvailable() or getChunked() are true if so read bytes and setBody */
-	// Ronalddd :) please add "body is present && no bytes left to read" to the if statement + put the body string in the setBody() functions + remove this sentence//
-	if (this->_request.getHeaderAvailable() == true) { // && body is present && no bytes left to read {
-		if (this->_request.getChunked() == true)
+	/* check if contentLengthAvailable() or getChunked() are true if so body exists read bytes and setBody */
+	if (this->_request.getHeaderAvailable() == true) { // this can be written shorter, with one setBody and fewer if statements etc, but since you might change a lot, these are the basics.
+		if (this->_request.getChunked() == true){
+			std::cout << "do something with chunked body" << std::endl;
 			this->_request.setBody("this is a chunked body");
-		if (this->_request.contentLenAvailable() == true)
+		}
+		if (this->_request.contentLenAvailable() == true){
+			std::cout << "do something with contentlen body" << std::endl;
 			this->_request.setBody("this is a body with contentlen");
+		}
 		this->_request.printAttributesInRequestClass(); // used for testing;REMOVE later
 	}
 
