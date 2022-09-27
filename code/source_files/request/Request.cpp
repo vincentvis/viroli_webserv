@@ -12,7 +12,7 @@ Request::Request() {
 	this->_ContentLength = 0;
 	this->_CGI = false;
 	this->_TransferEncodingChunked = false;
-	this->_ContentLenAvailable = false;
+	this->_ContentLengthAvailable = false;
 }
 
 void Request::ParseRequest(std::string BUF) {
@@ -58,7 +58,7 @@ void Request::ParseRequest(std::string BUF) {
 	/* set content length and chunked for body creation in connectionClass */
 	this->_itr = _header.find("Content-Length");
 	if (this->_itr != _header.end()) {
-		this->_ContentLenAvailable = true;
+		this->_ContentLengthAvailable = true;
 		try {
 			this->_ContentLength = Utils::stol(this->_itr->second);
 		} catch (const std::runtime_error &e) {
@@ -119,7 +119,7 @@ bool Request::getHeaderAvailable() const {
 }
 
 bool Request::contentLenAvailable() const{
-	return this->_ContentLenAvailable;
+	return this->_ContentLengthAvailable;
 }
 
 /* !REMOVE later, print function used for testing */
