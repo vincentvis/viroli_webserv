@@ -25,14 +25,13 @@ std::ostream &operator<<(std::ostream &os, const Server &server) {
 	return os;
 }
 
-Server::Server(uint16_t port) {
-	// struct sockaddr_in server = {0, AF_INET, htons(port), INADDR_ANY, 0};
+Server::Server(uint16_t port, std::vector<Config *> configs) :
+	_port(port), _configs(configs) {
 	struct sockaddr_in server;
 	memset(&server, 0, sizeof(server));
 	server.sin_addr.s_addr = INADDR_ANY;
 	server.sin_family      = AF_INET;
 	server.sin_port        = htons(port);
-
 
 	int fd                 = 0;
 	int opt                = 1;
@@ -60,23 +59,82 @@ Server::Server(uint16_t port) {
 	}
 
 	struct pollfd pfd = {fd, POLLIN, 0};
+	Server::_pollables.insert(std::pair<int32_t, IPollable *>(
+		fd, new ServerFD(*this, fd, Server::_pfds.size())));
 	Server::_pfds.push_back(pfd);
-	Server::_pollables.insert(
-		std::pair<int32_t, IPollable *>(fd, new ServerFD(*this, fd)));
 }
 
-Server::Server(std::vector<uint16_t> &ports) {
-	for (std::vector<uint16_t>::iterator it = ports.begin(); it != ports.end(); ++it) {
-		Server serv(*it);
+// Server::Server(uint16_t port) {
+// 	// struct sockaddr_in server = {0, AF_INET, htons(port), INADDR_ANY, 0};
+// 	struct sockaddr_in server;
+// 	memset(&server, 0, sizeof(server));
+// 	server.sin_addr.s_addr = INADDR_ANY;
+// 	server.sin_family      = AF_INET;
+// 	server.sin_port        = htons(port);
+
+// 	int fd                 = 0;
+// 	int opt                = 1;
+
+// 	if ((fd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+// 		throw(std::string("error on socket()")); // placeholder
+// 	}
+// 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+// 		close(fd);
+// 		throw(std::string("error on setsockopt()")); // placeholder
+// 	}
+// 	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0) {
+// 		close(fd);
+// 		throw(std::string("error on fcntl()")); // placeholder
+// 	}
+// 	if (bind(fd, reinterpret_cast<sockaddr *>(&server),
+// 			 static_cast<socklen_t>(sizeof(server))) < 0)
+// 	{
+// 		close(fd);
+// 		throw(std::string("error on bind()")); // placeholder
+// 	}
+// 	if (listen(fd, MAXCONNECTIONS) < 0) {
+// 		close(fd);
+// 		throw(std::string("error on listen()")); // placeholder
+// 	}
+
+// 	struct pollfd pfd = {fd, POLLIN, 0};
+// 	Server::_pollables.insert(std::pair<int32_t, IPollable *>(
+// 		fd, new ServerFD(*this, fd, Server::_pfds.size())));
+// 	Server::_pfds.push_back(pfd);
+// }
+
+// Server::Server(std::vector<uint16_t> &ports) {
+// 	for (std::vector<uint16_t>::iterator it = ports.begin(); it != ports.end(); ++it) {
+// 		Server serv(*it);
+// 	}
+// }
+
+/* test this with more connections */
+/* instead of doing after every poll iteration use a threshold */
+void Server::removePFDS() {
+	std::cout << "size _pfds: " << Server::_pfds.size() << std::endl;
+	std::vector<struct pollfd> tmp;
+
+	for (size_t i = 0; i < Server::_pfds.size(); ++i) {
+		if (Server::_pfds[i].fd != INVALID_FD) {
+			tmp.push_back(Server::_pfds[i]);
+		} else {
+			close(Server::_pfds[i].fd);
+			delete Server::_pollables.find(Server::_pfds[i].fd)->second;
+			Server::_pollables.erase(Server::_pfds[i].fd);
+		}
 	}
+
+	Server::_pfds.swap(tmp);
+	std::cout << "size _pfds: " << Server::_pfds.size() << std::endl;
 }
 
 void Server::run() {
 	std::map<int32_t, IPollable *>::iterator it;
 	int                                      events = 0;
 
-	for (;;) {
-		if ((events = poll(Server::_pfds.data(), Server::_pfds.size(), -1)) < 0) {
+	while (true) {
+		if ((events = poll(Server::_pfds.data(), Server::_pfds.size(), 0)) < 0) {
 			throw(std::string("error on poll()")); // placeholder
 		}
 
@@ -91,9 +149,9 @@ void Server::run() {
 				/* file descriptor exists */
 				if (it != _pollables.end()) {
 					if (Server::_pfds[i].revents & POLLIN) {
-						it->second->pollin(i);
+						it->second->pollin();
 					} else if (Server::_pfds[i].revents & POLLOUT) {
-						it->second->pollout(i);
+						it->second->pollout();
 					}
 
 					/* file descriptor doesn't exist */
@@ -101,6 +159,11 @@ void Server::run() {
 					throw(std::string("error on _pollables.find()")); // placholder
 				}
 			}
+
+			/* remove file descriptors that are no longer needed (implement threshold) */
+			// if (_pfds.size() > 1000) {
+			// 	Server::removePFDS();
+			// }
 		}
 	}
 }

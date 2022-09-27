@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-#define BUFFERSIZE     1  // tmp
+#define BUFFERSIZE     10 // tmp
 #define MAXCONNECTIONS 10 // tmp
 #define PFDS_THRESHOLD 1000
 
@@ -35,8 +35,11 @@ class Server {
 	public:
 		Server();
 		~Server();
-		Server(uint16_t port);                // tmp
-		Server(std::vector<uint16_t> &ports); // tmp
+
+		// Server(uint16_t port);                // tmp
+		// Server(std::vector<uint16_t> &ports); // tmp
+
+		Server(uint16_t port, std::vector<Config *> configs);
 
 		const Config         findConfig(struct tmp_request &request) const;
 
@@ -46,13 +49,13 @@ class Server {
 		// getters
 		uint16_t                              getPort() const;
 		static void                           run();
-		static void                           removeFD(const int index);
+		static void                           removePFDS();
 
 		static std::map<int32_t, IPollable *> _pollables;
 		static std::vector<struct pollfd>     _pfds;
-		static std::vector<int32_t>           _remove;
 
 	protected:
+		int32_t               _fd;
 		uint16_t              _port;
 		std::vector<Config *> _configs;
 };
