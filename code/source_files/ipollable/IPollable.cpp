@@ -112,14 +112,15 @@ void ClientFD::pollin(int index) {
 //		initResponse(index); // test
 	}
 
-	/* create CGIrequest or HTTPrequest */
-	if (this->_request.getCgi() == true) {
-		this->_requestInterface = new CGIRequest(this->_request, _server.findConfig(this->_request));
-	} else {
-		std::cout << "this goes well?" << std::cout;
-		this->_requestInterface = new HttpRequest(this->_request, _server.findConfig(this->_request));
-	}
-
+//	/* create CGIrequest or HTTPrequest */
+//	if (this->_request.getCgi() == true) {
+//		std::cout << "this should work with the new .findConfig() function" << std::endl;
+////		const Config conf = _server.findConfig(this->_request);
+////		this->_requestInterface = new CGIRequest(this->_request, _server.findConfig(this->_request));
+//	} else {
+//		std::cout << "this should work with the new .findConfig() function" << std::endl;
+////		this->_requestInterface = new HttpRequest(this->_request, _server.findConfig(this->_request));
+//	}
 }
 
 /* send data */
