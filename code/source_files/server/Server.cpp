@@ -11,10 +11,24 @@ uint16_t Server::getPort() const {
 	return _port;
 }
 
-const Config Server::findConfig(struct tmp_request &request) const {
+// temporary, can be swapped for vincents version
+const Config Server::findConfig(const Request &request) const {
 	(void)request;
-	return *_configs[0];
+	return **this->_configs.begin();
 }
+
+
+// const Config Server::findConfig(struct tmp_request &request) const {
+//	std::vector<Config *>::const_iterator begin = this->_configs.begin();
+//	std::vector<Config *>::const_iterator end   = this->_configs.end();
+//
+//	for (; begin != end; ++begin) {
+//		if ((*begin)->containsServerName(request._host)) {
+//			return **begin;
+//		}
+//	}
+//	return (**(this->_configs.begin()));
+// }
 
 std::ostream &operator<<(std::ostream &os, const Server &server) {
 	os << "\033[4mServer info for \033[1m;port " << server._port << ":\033[0m"

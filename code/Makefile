@@ -41,7 +41,12 @@ CLASSES		:= config/ConfigParser\
 				server/Location\
 				server/Server\
 				utils/Utils\
-				ipollable/IPollable
+				ipollable/IPollable\
+				request/CGIRequest\
+                request/HttpRequest\
+                request/Request\
+                request/RequestInterface\
+                response/Response
 
 OBJECTS		:= $(CLASSES:%=$(OBJ_DIR)%.o)
 HEADERS		:= $(CLASSES:%=$(INC_DIR)%.hpp)

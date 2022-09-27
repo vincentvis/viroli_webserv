@@ -70,7 +70,7 @@ ClientFD::~ClientFD() {
 void ClientFD::initResponse(int index) {
 	Server::_pfds[index].events = POLLOUT;
 	_data  = std::string("HTTP/1.1 200 OK\r\nContent-Length: 11\r\nContent-Type: "
-                          "text/plain\r\nConnection: Close\r\n\r\nhello world\r\n");
+						  "text/plain\r\nConnection: Close\r\n\r\nhello world\r\n");
 	_bytes = 0;
 	_total = 0;
 	_left  = _data.size();
@@ -80,10 +80,8 @@ void ClientFD::initResponse(int index) {
 /* need to know content-length */
 void ClientFD::pollin(int index) {
 	_bytes = recv(_fd, _buffer.data(), BUFFERSIZE, 0);
-
 	if (_bytes == 0) {
-		std::cout << "connection has been closed by client\n";
-		// set fd to -1 to ignore further polling and flush later.
+		std::cout << "connection has been closed by client\n"; // set fd to -1 to ignore further polling and flush later.
 		Server::_pfds[index].fd = INVALID_FD;
 	}
 	if (_bytes > 0) {
@@ -91,12 +89,36 @@ void ClientFD::pollin(int index) {
 		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
 	/* if header doesn't exist yet and end of header found, parse header */
-	if (_data.find("\r\n\r\n") != std::string::npos) {
-		std::cout << "end of header\n";
-		std::cout << _data << std::endl;
-		initResponse(index); // test
+	if (_data.find("\r\n\r\n") != std::string::npos && this->_request.getHeaderAvailable() == false) {
+		this->_request.ParseRequest(this->_data);
+		//		std::cout << "end of header\n"; -> can be removed?
+		//		std::cout << _data << std::endl; -> can be removed?
+		//		initResponse(index); // test -> can be removed?
 	}
-	/* if body is present or expected, keep recv() */
+
+	/* check if contentLengthAvailable() or getChunked() are true if so body exists read bytes and setBody */
+	if (this->_request.getHeaderAvailable() == true) { // this can be written shorter, with one setBody and fewer if statements etc, but since you might change a lot, these are the basics.
+		if (this->_request.getChunked() == true){
+			std::cout << "do something with chunked body" << std::endl;
+			this->_request.setBody("this is a chunked body");
+		}
+		if (this->_request.contentLenAvailable() == true){
+			std::cout << "do something with contentlen body" << std::endl;
+			this->_request.setBody("this is a body with contentlen");
+		}
+		this->_request.printAttributesInRequestClass(); // used for testing;REMOVE later
+		initResponse(index); // test -> can be removed?
+	}
+
+//	/* create CGIrequest or HTTPrequest */
+//	if (this->_request.getCgi() == true) {
+//		std::cout << "this should work with the new .findConfig() function" << std::endl;
+//		this->_requestInterface = new CGIRequest(this->_request, _server.findConfig(this->_request));
+//	} else {
+//		std::cout << "this should work with the new .findConfig() function" << std::endl;
+//		this->_requestInterface = new HttpRequest(this->_request, _server.findConfig(this->_request));
+//	}
+
 }
 
 /* send data */
