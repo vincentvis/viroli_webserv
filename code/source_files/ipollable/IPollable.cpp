@@ -107,6 +107,7 @@ void ClientFD::pollin(int index) {
 			this->_request.setBody("this is a body with contentlen");
 		}
 		this->_request.printAttributesInRequestClass(); // used for testing;REMOVE later
+		initResponse(index); // test -> can be removed?
 	}
 
 //	/* create CGIrequest or HTTPrequest */

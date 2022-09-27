@@ -11,15 +11,9 @@ uint16_t Server::getPort() const {
 	return _port;
 }
 
+// temporary, can be swapped for vincents version
 const Config Server::findConfig(const Request &request) const {
-	std::vector<Config *>::const_iterator begin = this->_configs.begin();
-	std::vector<Config *>::const_iterator end   = this->_configs.end();
-
-//	for (; begin != end; ++begin) {
-//		if ((*begin)->containsServerName(request._host)) {
-//			return **begin;
-//		}
-//	}
+	(void)request;
 	return **this->_configs.begin();
 }
 

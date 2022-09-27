@@ -18,6 +18,6 @@ class RequestInterface {
 		enum e_RequestType { GET, POST, DELETE };
 		static std::map<std::string, e_RequestType> _MethodKeys;
 		RequestInterface(); // should become private!
-		RequestInterface(const Request &Req, const Config &Conf);
+//		RequestInterface(const Request &Req, const Config &Conf);
 		~RequestInterface();
 };

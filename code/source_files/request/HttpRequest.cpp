@@ -12,7 +12,7 @@ HttpRequest::HttpRequest(const Request &Req, const Config &Conf) {
 void HttpRequest::CheckMethod(const Request &Req, const Config &Conf) {
 	std::map<std::string, RequestInterface::e_RequestType>::iterator itr =
 		_MethodKeys.find(Req.getMethod());
-
+	(void)Conf;
 	//		if (itr->second == std::string::npos) {
 	//			std::cout << "OTHER" << std::endl;
 	//			//				OTHERRequest();
