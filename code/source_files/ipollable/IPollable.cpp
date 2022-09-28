@@ -3,7 +3,7 @@
 IPollable::~IPollable() {
 }
 
-ServerFD::ServerFD(Server &server, int fd, int index) :
+ServerFD::ServerFD(Server *server, int fd, int index) :
 	_server(server), _fd(fd), _index(index) {
 }
 
@@ -55,15 +55,15 @@ void ServerFD::pollin() {
 void ServerFD::pollout() {
 }
 
-int ServerFD::getFD() const {
+int ServerFD::getFileDescriptor() const {
 	return _fd;
 }
 
-Server ServerFD::getServer() const {
+Server *ServerFD::getServer() const {
 	return _server;
 }
 
-ClientFD::ClientFD(Server &server, int fd, int index) :
+ClientFD::ClientFD(Server *server, int fd, int index) :
 	_server(server), _state(HEADER), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
 	_total(0), _fd(fd), _index(index) {
 }
@@ -84,8 +84,8 @@ void ClientFD::receive(int len) {
 	_bytes = recv(_fd, _buffer.data(), len, 0);
 
 	if (_bytes == 0) {
-		std::cout << "connection has been closed by client\n"; // placeholder
-		std::cout << "body:\n\n" << _body << "\n\n";
+		// std::cout << "connection has been closed by client\n"; // placeholder
+		// std::cout << "body:\n\n" << _body << "\n\n";
 		Server::_pfds[_index].fd = INVALID_FD;
 	}
 	if (_bytes > 0) {
@@ -105,36 +105,75 @@ size_t ClientFD::extractChunkedSize(size_t pos) {
 	return chunkedsize;
 }
 
+void ClientFD::resetBytes() {
+	_bytes = 0;
+	_left  = 0;
+	_total = 0;
+}
+
 void ClientFD::receive() {
-	size_t chunkedsize = 0;
-	size_t pos         = 0;
+	size_t size = 0;
+	size_t pos  = 0;
 
 	if ((pos = _data.find("\r\n")) != std::string::npos) {
-		std::cout << "receive() pos: " << pos << std::endl;
-		chunkedsize = extractChunkedSize(pos);
-		// _left       = chunkedsize;
-		std::cout << "receive() chunkedsize: " << chunkedsize << std::endl;
-		if (chunkedsize == 0) {
-			std::cout << "end of body\n";
+		std::stringstream stream;
+
+		stream << std::hex << _data.substr(0, pos);
+		stream >> size;
+		_data = _data.substr(pos + CRLF);
+		if (size == 0) {
 			_state = END;
-			// _body  = _data;
+			std::cout << _data << std::endl;
+			std::cout << "\nbody:\n\n";
+			std::cout << _body << std::endl;
 			return;
 		}
 	} else {
 		receive(BUFFERSIZE);
 	}
 
-	if (chunkedsize) {
-		if (chunkedsize + CRLF > _data.size()) {
-			receive((chunkedsize + CRLF) - _data.size());
+	if (size) {
+		if (size + CRLF <= _data.size()) {
+			if (_data.find("\r\n") == std::string::npos) {
+				throw(std::string("error on receive()"));
+			}
+			_body.append(_data.begin(), _data.begin() + size);
+			_data = _data.substr(size + CRLF);
+		} else {
+			receive(BUFFERSIZE);
 		}
-		if (_data.find("\r\n") == std::string::npos) {
-			throw(std::string("error on receive()")); // placeholder
-		}
-		_body.append(_data.begin(), _data.begin() + chunkedsize);
-		_data = _data.substr(chunkedsize + CRLF);
 	}
 }
+
+// void ClientFD::receive() {
+// 	size_t chunkedsize = 0;
+// 	size_t pos         = 0;
+
+// 	if ((pos = _data.find("\r\n")) != std::string::npos) {
+// 		std::cout << "receive() pos: " << pos << std::endl;
+// 		chunkedsize = extractChunkedSize(pos);
+// 		// _left       = chunkedsize;
+// 		std::cout << "receive() chunkedsize: " << chunkedsize << std::endl;
+// 		if (chunkedsize == 0) {
+// 			std::cout << "end of body\n";
+// 			_state = END;
+// 			// _body  = _data;
+// 			return;
+// 		}
+// 	} else {
+// 		receive(BUFFERSIZE);
+// 	}
+// 	if (chunkedsize) {
+// 		receive((chunkedsize + CRLF) - _data.size());
+// 		std::cout << "chunk: " << _data << std::endl;
+// 		// }
+// 		if (_data.find("\r\n") == std::string::npos) {
+// 			throw(std::string("error on receive()")); // placeholder
+// 		}
+// 		_body.append(_data.begin(), _data.begin() + chunkedsize);
+// 		_data = _data.substr(chunkedsize + CRLF);
+// 	}
+// }
 
 /* void ClientFD::receive() {
 	switch (_transfer) {
@@ -154,7 +193,7 @@ void ClientFD::getHeader() {
 		_header = _data.substr(0, end);
 		_data   = _data.substr(end + CRLFCRLF);
 		_state  = BODY;
-		std::cout << "header:\n\n" << _header << "\n\n";
+		std::cout << "\nheader:\n\n" << _header << "\n\n";
 
 		// initResponse(); // test
 	}
@@ -183,9 +222,12 @@ void ClientFD::pollin() {
 		case BODY:
 			return getBody();
 		case END: // not sure if this one is neccessary
-			Server::_pfds[_index].events = POLLOUT;
+				  // Server::_pfds[_index].events = POLLOUT;
+
+			Server::_pfds[_index].fd = INVALID_FD; // tmp
 			std::cout << _body;
 			std::cout << "end of request reached\n";
+			// exit(EXIT_SUCCESS);
 			// send response
 			return;
 	}
@@ -194,6 +236,7 @@ void ClientFD::pollin() {
 /* send data */
 /* need to know connection status (keep-alive|close) */
 void ClientFD::pollout() {
+	/* make sure to not go out of bounds with the buffer */
 	_buffer.assign(_data.begin() + _total,
 				   _data.begin() + _total + (BUFFERSIZE > _left ? BUFFERSIZE : _left));
 
@@ -216,15 +259,15 @@ void ClientFD::pollout() {
 	}
 }
 
-int ClientFD::getFD() const {
+int ClientFD::getFileDescriptor() const {
 	return _fd;
 }
 
-Server ClientFD::getServer() const {
+Server *ClientFD::getServer() const {
 	return _server;
 }
 
-FileFD::FileFD(Server &server, int fd, int index) :
+FileFD::FileFD(Server *server, int fd, int index) :
 	_server(server), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0), _total(0),
 	_fd(fd), _index(index) {
 }
@@ -248,10 +291,10 @@ void FileFD::pollin() {
 void FileFD::pollout() {
 } // implement write(), placeholder
 
-int FileFD::getFD() const {
+int FileFD::getFileDescriptor() const {
 	return _fd;
 }
 
-Server FileFD::getServer() const {
+Server *FileFD::getServer() const {
 	return _server;
 }

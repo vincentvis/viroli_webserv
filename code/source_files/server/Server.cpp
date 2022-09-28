@@ -29,89 +29,50 @@ Server::Server(uint16_t port, std::vector<Config *> configs) :
 	_port(port), _configs(configs) {
 	struct sockaddr_in server;
 	memset(&server, 0, sizeof(server));
-	server.sin_addr.s_addr = INADDR_ANY;
+	server.sin_addr.s_addr = INADDR_ANY; // lookup config directive
 	server.sin_family      = AF_INET;
 	server.sin_port        = htons(port);
-
-	int fd                 = 0;
 	int opt                = 1;
 
-	if ((fd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+	if ((_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
 		throw(std::string("error on socket()")); // placeholder
 	}
-	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
-		close(fd);
+	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+		close(_fd);
 		throw(std::string("error on setsockopt()")); // placeholder
 	}
-	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0) {
-		close(fd);
+	if (fcntl(_fd, F_SETFL, O_NONBLOCK) < 0) {
+		close(_fd);
 		throw(std::string("error on fcntl()")); // placeholder
 	}
-	if (bind(fd, reinterpret_cast<sockaddr *>(&server),
+	if (bind(_fd, reinterpret_cast<sockaddr *>(&server),
 			 static_cast<socklen_t>(sizeof(server))) < 0)
 	{
-		close(fd);
+		close(_fd);
 		throw(std::string("error on bind()")); // placeholder
 	}
-	if (listen(fd, MAXCONNECTIONS) < 0) {
-		close(fd);
+	if (listen(_fd, MAXCONNECTIONS) < 0) {
+		close(_fd);
 		throw(std::string("error on listen()")); // placeholder
 	}
+}
 
-	struct pollfd pfd = {fd, POLLIN, 0};
+int32_t Server::getFileDescriptor() const {
+	return _fd;
+}
+
+void Server::addPoll(Server *server) {
+	struct pollfd pfd = {server->getFileDescriptor(), POLLIN, 0};
+
 	Server::_pollables.insert(std::pair<int32_t, IPollable *>(
-		fd, new ServerFD(*this, fd, Server::_pfds.size())));
+		server->getFileDescriptor(),
+		new ServerFD(server, server->getFileDescriptor(), Server::_pfds.size())));
 	Server::_pfds.push_back(pfd);
 }
 
-// Server::Server(uint16_t port) {
-// 	// struct sockaddr_in server = {0, AF_INET, htons(port), INADDR_ANY, 0};
-// 	struct sockaddr_in server;
-// 	memset(&server, 0, sizeof(server));
-// 	server.sin_addr.s_addr = INADDR_ANY;
-// 	server.sin_family      = AF_INET;
-// 	server.sin_port        = htons(port);
-
-// 	int fd                 = 0;
-// 	int opt                = 1;
-
-// 	if ((fd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-// 		throw(std::string("error on socket()")); // placeholder
-// 	}
-// 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
-// 		close(fd);
-// 		throw(std::string("error on setsockopt()")); // placeholder
-// 	}
-// 	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0) {
-// 		close(fd);
-// 		throw(std::string("error on fcntl()")); // placeholder
-// 	}
-// 	if (bind(fd, reinterpret_cast<sockaddr *>(&server),
-// 			 static_cast<socklen_t>(sizeof(server))) < 0)
-// 	{
-// 		close(fd);
-// 		throw(std::string("error on bind()")); // placeholder
-// 	}
-// 	if (listen(fd, MAXCONNECTIONS) < 0) {
-// 		close(fd);
-// 		throw(std::string("error on listen()")); // placeholder
-// 	}
-
-// 	struct pollfd pfd = {fd, POLLIN, 0};
-// 	Server::_pollables.insert(std::pair<int32_t, IPollable *>(
-// 		fd, new ServerFD(*this, fd, Server::_pfds.size())));
-// 	Server::_pfds.push_back(pfd);
-// }
-
-// Server::Server(std::vector<uint16_t> &ports) {
-// 	for (std::vector<uint16_t>::iterator it = ports.begin(); it != ports.end(); ++it) {
-// 		Server serv(*it);
-// 	}
-// }
-
 /* test this with more connections */
 /* instead of doing after every poll iteration use a threshold */
-void Server::removePFDS() {
+void Server::removePoll() {
 	std::cout << "size _pfds: " << Server::_pfds.size() << std::endl;
 	std::vector<struct pollfd> tmp;
 
@@ -162,7 +123,7 @@ void Server::run() {
 
 			/* remove file descriptors that are no longer needed (implement threshold) */
 			// if (_pfds.size() > 1000) {
-			// 	Server::removePFDS();
+			// 	Server::removePoll();
 			// }
 		}
 	}

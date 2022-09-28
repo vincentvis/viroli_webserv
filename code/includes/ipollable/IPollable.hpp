@@ -27,27 +27,27 @@ class Server;
 
 class IPollable {
 	public:
-		virtual ~IPollable()             = 0;
+		virtual ~IPollable()                      = 0;
 
-		virtual void   pollin()          = 0;
-		virtual void   pollout()         = 0;
-		virtual int    getFD() const     = 0;
-		virtual Server getServer() const = 0;
+		virtual void    pollin()                  = 0;
+		virtual void    pollout()                 = 0;
+		virtual int     getFileDescriptor() const = 0;
+		virtual Server *getServer() const         = 0;
 };
 
 class ServerFD : public IPollable {
 	public:
-		Server &_server;
+		Server *_server;
 		int     _fd;
 		int     _index;
 
-		ServerFD(Server &server, int fd, int index);
+		ServerFD(Server *server, int fd, int index);
 		~ServerFD();
 
-		void   pollin();
-		void   pollout();
-		int    getFD() const;
-		Server getServer() const;
+		void    pollin();
+		void    pollout();
+		int     getFileDescriptor() const;
+		Server *getServer() const;
 };
 
 class ClientFD : public IPollable {
@@ -56,7 +56,7 @@ class ClientFD : public IPollable {
 		typedef enum { LENGTH, CHUNKED } transfer;
 
 		// Request 		_request;
-		Server           &_server;
+		Server           *_server;
 		transfer          _transfer;
 		state             _state;
 		std::vector<char> _buffer;
@@ -69,29 +69,30 @@ class ClientFD : public IPollable {
 		int               _fd;
 		int               _index;
 
-		ClientFD(Server &server, int fd, int index);
+		ClientFD(Server *server, int fd, int index);
 		~ClientFD();
 
-		void   pollin();
-		void   pollout();
-		int    getFD() const;
-		size_t extractChunkedSize(size_t pos);
-		void   getHeader();
-		void   getBody();
-		void   receiveChunked();
-		void   receiveLength(int length);
-		Server getServer() const;
+		void    pollin();
+		void    pollout();
+		void    resetBytes();
+		int     getFileDescriptor() const;
+		size_t  extractChunkedSize(size_t pos);
+		void    getHeader();
+		void    getBody();
+		void    receiveChunked();
+		void    receiveLength(int length);
+		Server *getServer() const;
 
-		void   receive();
-		void   receive(int len);
+		void    receive();
+		void    receive(int len);
 
-		void   initResponse();
-		void   closeFD();
+		void    initResponse();
+		void    closeFD();
 };
 
 class FileFD : public IPollable {
 	public:
-		Server           &_server;
+		Server           *_server;
 		std::vector<char> _buffer;
 		std::string       _data;
 		int               _bytes;
@@ -100,11 +101,11 @@ class FileFD : public IPollable {
 		int               _fd;
 		int               _index;
 
-		FileFD(Server &server, int fd, int index);
+		FileFD(Server *server, int fd, int index);
 		~FileFD();
 
-		void   pollin();
-		void   pollout();
-		int    getFD() const;
-		Server getServer() const;
+		void    pollin();
+		void    pollout();
+		int     getFileDescriptor() const;
+		Server *getServer() const;
 };

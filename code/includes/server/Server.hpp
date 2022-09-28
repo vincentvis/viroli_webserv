@@ -2,6 +2,7 @@
 
 #include "config/Config.hpp"
 #include "ipollable/IPollable.hpp"
+
 #include "utils/Utils.hpp"
 #include <arpa/inet.h>
 #include <cstring>
@@ -46,10 +47,12 @@ class Server {
 		friend std::ostream &operator<<(std::ostream &os, const Server &server);
 		friend class ConfigParser;
 
-		// getters
+
 		uint16_t                              getPort() const;
+		int32_t                               getFileDescriptor() const;
 		static void                           run();
-		static void                           removePFDS();
+		static void                           removePoll();
+		static void                           addPoll(Server *server);
 
 		static std::map<int32_t, IPollable *> _pollables;
 		static std::vector<struct pollfd>     _pfds;
