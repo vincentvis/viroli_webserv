@@ -39,17 +39,7 @@ void ServerFD::pollin(int) {
 	Server::_pollables.insert(std::pair<int32_t, IPollable *>(
 		newfd, new ClientFD(_server, newfd, Server::_pfds.size())));
 //	Server::_pfds.push_back(pfd);
-	/* debug */
-	// char buff[16] = {0};
-	// std::cout << "\n///////// new client /////////\n";
-	// std::cout << "activity on _fd: " << _fd << std::endl;
-	// std::cout << "new fd: " << newfd << std::endl;
-	// std::cout << "client ip: ";
-	// std::cout << inet_ntop(AF_INET, &(client.sin_addr), buff, addrlen);
-	// std::cout << std::endl;
-	// std::cout << "size IPollables: " << Server::_pollables.size() <<
-	// std::endl; std::cout << "size _pfds: " << Server::_pfds.size() <<
-	// std::endl; std::cout << "//////////////////////////////\n\n";
+
 }
 
 /* do nothing on POLLOUT event */
