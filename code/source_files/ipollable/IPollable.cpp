@@ -11,12 +11,14 @@ ServerFD::~ServerFD() {
 }
 
 /* accept new ClientFD */
+
 void ServerFD::pollin() {
 	int newfd = 0;
 	int opt   = 1;
 	// struct sockaddr_in client = {0, 0, 0, {0}, {0}};
 	struct sockaddr_in client;
 	memset(&client, 0, sizeof(client));
+
 	socklen_t addrlen = sizeof(client);
 
 	if ((newfd = accept(_fd, reinterpret_cast<sockaddr *>(&client), &addrlen)) < 0) {
@@ -34,6 +36,7 @@ void ServerFD::pollin() {
 	std::cout << "new connection accepted\n";
 	/* POLLIN or POLLIN | POLLOUT */
 	struct pollfd pfd = {newfd, POLLIN, 0};
+
 	Server::_pollables.insert(std::pair<int32_t, IPollable *>(
 		newfd, new ClientFD(_server, newfd, Server::_pfds.size())));
 	Server::_pfds.push_back(pfd);
@@ -255,6 +258,7 @@ void ClientFD::pollout() {
 		// Server::_pfds[index].event = POLLIN
 		/* if connection: close */
 		// set fd to -1 to ignore further polling and flush later.
+
 		Server::_pfds[_index].fd = INVALID_FD;
 	}
 }

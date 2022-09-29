@@ -1,18 +1,22 @@
 #pragma once
 
+#include "request/Request.hpp"
 #include "server/Location.hpp"
 #include "utils/Utils.hpp"
+#include <algorithm>
 #include <iostream>
 #include <map>
 #include <stdint.h>
 #include <vector>
+
+class Request;
 
 class Config {
 	public:
 		Config();
 		~Config();
 
-		const Location       findLocation(struct tmp_request &request) const;
+		const Location       findLocation(Request &request) const;
 
 		friend std::ostream &operator<<(std::ostream &os, const Config &config);
 		friend class ConfigParser;
@@ -23,6 +27,7 @@ class Config {
 		int64_t                  getMaxBodySize() const;
 		bool                     getAllowUpload() const;
 		bool                     getAutoIndex() const;
+		bool                     containsServerName(std::string to_search);
 
 	protected:
 		int32_t                            _priority;

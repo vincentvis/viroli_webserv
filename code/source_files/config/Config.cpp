@@ -10,9 +10,25 @@ Config::Config() {
 Config::~Config() {
 }
 
-const Location Config::findLocation(struct tmp_request &request) const {
-	(void)request;
-	return _locations[0];
+const Location Config::findLocation(Request &request) const {
+	std::vector<Location>::const_iterator begin = this->_locations.begin();
+	std::vector<Location>::const_iterator end   = this->_locations.end();
+
+	std::vector<Location>::const_iterator loc;
+	for (; begin != end; ++begin) {
+		if (Utils::starts_with(request.getRequestTarget(), (*begin).getMatch())) {
+			loc = begin;
+		}
+	}
+	if (loc != end) {
+		return (*loc);
+	}
+	return (*(this->_locations.begin()));
+}
+
+bool Config::containsServerName(std::string to_search) {
+	return (std::find(this->_serverNames.begin(), this->_serverNames.end(), to_search) !=
+			this->_serverNames.end());
 }
 
 // getters
@@ -63,9 +79,8 @@ std::ostream &operator<<(std::ostream &os, const Config &config) {
 
 	os << PRINT_ALIGN << "Error pages"
 	   << "(" << config._errorPages.size() << "): [";
-	Utils::print_map<std::string, std::string>(
-		config._errorPages, "\n\t\t\t  {", ": ", "}", ", "
-	);
+	Utils::print_map<std::string, std::string>(config._errorPages, "\n\t\t\t  {", ": ",
+											   "}", ", ");
 	if (config._errorPages.size()) {
 		os << std::endl << "\t\t\t]" << std::endl;
 	} else {

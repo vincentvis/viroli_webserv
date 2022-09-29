@@ -9,7 +9,6 @@
 int main(int argc, char const *argv[]) {
 	std::vector<Server *> servers;
 	servers.reserve(100); // placeholder
-	// Server       Default;
 	ConfigParser config;
 
 	try {
@@ -21,25 +20,16 @@ int main(int argc, char const *argv[]) {
 	}
 
 	Server *serv;
-
-	/*
-		Some boilerplate code to show how to iterator over servers
-	*/
+  //
 	std::map<uint16_t, std::vector<Config *> >           ports = config.getPortMap();
 	std::map<uint16_t, std::vector<Config *> >::iterator it    = ports.begin();
 	std::map<uint16_t, std::vector<Config *> >::iterator end   = ports.end();
 	while (it != end) {
-		// std::cout << "Servers for port " << it->first << ":" << std::endl;
-		// Utils::print_vector_deref<Config *>(it->second);
-		// std::cout << "------------------" << std::endl;
-		// std::cout << "port: " << it->first << std::endl;
-
 		serv = new Server(it->first, it->second);
 		Server::addPoll(serv);
 		servers.push_back(serv);
 		it++;
 	}
-
 
 	std::cout << "std::vector<uint16_t> _pfds: \n";
 	for (std::vector<struct pollfd>::iterator it = Server::_pfds.begin();
@@ -48,6 +38,7 @@ int main(int argc, char const *argv[]) {
 		std::cout << "pfd: " << it->fd << std::endl;
 	}
 
+
 	std::cout << "std::map<int32_t, IPollables> _pollables: \n";
 	for (std::map<int32_t, IPollable *>::iterator it = Server::_pollables.begin();
 		 it != Server::_pollables.end(); ++it)
@@ -55,7 +46,7 @@ int main(int argc, char const *argv[]) {
 		std::cout << "fd: " << it->first
 				  << " | IPollable fd: " << it->second->getFileDescriptor();
 		std::cout << " | port: " << it->second->getServer()->getPort() << std::endl;
-	}
+}
 
 	try {
 		Server::run();
