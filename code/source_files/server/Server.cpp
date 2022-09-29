@@ -3,10 +3,10 @@
 Server::Server() {
 	this->_port = 0;
 }
-Server::Server(uint16_t port, std::vector<Config *> configs) {
-	this->_port    = port;
-	this->_configs = configs;
-}
+//Server::Server(uint16_t port, std::vector<Config *> configs) {
+//	this->_port    = port;
+//	this->_configs = configs;
+//}
 
 Server::~Server() {
 }
@@ -47,7 +47,7 @@ std::ostream &operator<<(std::ostream &os, const Server &server) {
 }
 
 Server::Server(uint16_t port, std::vector<Config *> configs) :
-	_port(port), _configs(configs) {
+	_configs(configs), _port(port) {
 	struct sockaddr_in server;
 	memset(&server, 0, sizeof(server));
 	server.sin_addr.s_addr = INADDR_ANY; // lookup config directive

@@ -34,9 +34,9 @@ class Server {
 		// Server(uint16_t port);                // tmp
 		// Server(std::vector<uint16_t> &ports); // tmp
 
-		Server(uint16_t port, std::vector<Config *> configs);
+//		Server(uint16_t port, std::vector<Config *> configs);
 
-		const Config         findConfig(struct tmp_request &request) const;
+		const Config         findConfig(const Request &request) const;
 
 		friend std::ostream &operator<<(std::ostream &os, const Server &server);
 		friend class ConfigParser;
