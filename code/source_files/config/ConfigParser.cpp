@@ -394,8 +394,11 @@ void ConfigParser::processListen(Config &target) {
 			if (fullstop_position == std::string::npos) {
 				// it's only a port
 				uint16_t port = stringToPort(param);
-				target._ports.push_back(port);
-				addConfigToPort(port, target);
+				if (std::find(target._ports.begin(), target._ports.end(), port) ==
+					target._ports.end()) {
+					target._ports.push_back(port);
+					addConfigToPort(port, target);
+				}
 			} else {
 				// it's only an ip so set default port
 				target._ports.push_back(DEFAULT_PORT);
@@ -405,10 +408,16 @@ void ConfigParser::processListen(Config &target) {
 			std::string before_colon = param.substr(0, colon_position);
 			std::string after_colon  = param.substr(colon_position + 1);
 			// should be {ip}:{port}
-			target._ips.push_back(before_colon);
+			if (std::find(target._ips.begin(), target._ips.end(), before_colon) ==
+				target.ips.end()) {
+				target._ips.push_back(before_colon);
+			}
 			int port = stringToPort(after_colon);
-			target._ports.push_back(port);
-			addConfigToPort(port, target);
+			if (std::find(target._ports.begin(), target._ports.end(), port) ==
+				target._ports.end()) {
+				target._ports.push_back(port);
+				addConfigToPort(port, target);
+			}
 		}
 		if (this->_currentLine.empty())
 			break;
