@@ -12,7 +12,6 @@ class Request {
 		std::string                        _requestTarget;
 		std::string                        _HTTPVersion;
 		std::string                        _body;
-		std::string                        _host; // @lisa -- todo??
 		bool                               _CGI;
 		bool                               _TransferEncodingChunked;
 		bool                               _ContentLengthAvailable;
@@ -36,7 +35,6 @@ class Request {
 		std::string                        getRequestTarget() const;
 		std::string                        getHTTPVersion() const;
 		std::string                        getBody() const;
-		std::string                        getHost() const; // @lisa -- todo??
 		bool                               contentLenAvailable() const;
 		bool                               getChunked() const;
 		long                               getContentLength() const;

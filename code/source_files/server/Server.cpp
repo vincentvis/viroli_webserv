@@ -16,11 +16,21 @@ uint16_t Server::getPort() const {
 }
 
 const Config Server::findConfig(const Request &request) const {
-	std::vector<Config *>::const_iterator begin = this->_configs.begin();
-	std::vector<Config *>::const_iterator end   = this->_configs.end();
+	std::vector<Config *>::const_iterator        begin  = this->_configs.begin();
+	std::vector<Config *>::const_iterator        end    = this->_configs.end();
+
+	std::map<std::string, std::string>           header = request.getHeaderMap();
+	std::map<std::string, std::string>::iterator host   = header.find("host");
+	if (host == header.end()) {
+		// TODO
+		// check if this is correct,
+		// currently, if there is not host field in the header, we return the first config
+		return (**(this->_configs.begin()));
+	}
+
 
 	for (; begin != end; ++begin) {
-		if ((*begin)->containsServerName(request.getHost())) {
+		if ((*begin)->containsServerName(host->second)) {
 			return **begin;
 		}
 	}

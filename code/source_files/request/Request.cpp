@@ -98,10 +98,6 @@ std::string Request::getBody() const {
 	return this->_body;
 }
 
-std::string Request::getHost() const {
-	return this->_host;
-}
-
 long Request::getContentLength() const {
 	return this->_ContentLength;
 }
