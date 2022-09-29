@@ -8,7 +8,8 @@
 
 int main(int argc, char const *argv[]) {
 	std::vector<Server *> servers;
-	ConfigParser          config;
+	servers.reserve(100); // placeholder
+	ConfigParser config;
 
 	try {
 		config.parseFromArgs(argc, argv);
@@ -18,13 +19,14 @@ int main(int argc, char const *argv[]) {
 		return (1);
 	}
 
-	Server *serv;
-	//
+	Server                                              *serv;
+
 	std::map<uint16_t, std::vector<Config *> >           ports = config.getPortMap();
 	std::map<uint16_t, std::vector<Config *> >::iterator it    = ports.begin();
 	std::map<uint16_t, std::vector<Config *> >::iterator end   = ports.end();
 	while (it != end) {
 		serv = new Server(it->first, it->second);
+		Server::addPoll(serv);
 		servers.push_back(serv);
 		it++;
 	}
@@ -36,12 +38,13 @@ int main(int argc, char const *argv[]) {
 		std::cout << "pfd: " << it->fd << std::endl;
 	}
 
-	std::cout << "std::map<int32_t, Connection> _pollables: \n";
+	std::cout << "std::map<int32_t, IPollables> _pollables: \n";
 	for (std::map<int32_t, IPollable *>::iterator it = Server::_pollables.begin();
 		 it != Server::_pollables.end(); ++it)
 	{
-		std::cout << "fd: " << it->first << " | pfd: " << it->second->getFD()
-				  << std::endl;
+		std::cout << "fd: " << it->first
+				  << " | IPollable fd: " << it->second->getFileDescriptor();
+		std::cout << " | port: " << it->second->getServer()->getPort() << std::endl;
 	}
 
 	try {
