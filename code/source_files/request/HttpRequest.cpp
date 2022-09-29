@@ -47,8 +47,8 @@ void HttpRequest::GETRequest(const Request &Req, const Config &Conf, Response &R
 			Response = Req.getHTTPVersion();
 			Response + " 200 OK\r\n" + "Content-Length: " + std::to_string(Req.getBody().size()) +"\r\nContent-Type: text/plain\r\nConnection: Close\r\n\r\n" + Req.getBody() +"\r\n";
 			std::cout << "resp: " << Response << std::endl;
-//			Res.setResponse(Response);
-//			Res.setRespReady();
+			Res.setResponse(Response);
+			Res.setRespReady();
 		}
 
 	}

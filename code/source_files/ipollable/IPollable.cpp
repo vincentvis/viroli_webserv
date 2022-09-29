@@ -115,7 +115,7 @@ void ClientFD::pollin(int index) {
 			this->_request.setBody("this is a body with contentlen");
 		}
 		this->_request.printAttributesInRequestClass(); // used for testing;REMOVE later
-		initResponse(index); // test -> can be removed?
+
 	}
 
 	/* create CGIrequest or HTTPrequest */
@@ -127,6 +127,7 @@ void ClientFD::pollin(int index) {
 //        std::cout << "config size!: " << this->_server->_configs.size() << std::endl;
 		this->_requestInterface = new HttpRequest(this->_request, this->_server->findConfig(this->_request), this->_response);
 	}
+	initResponse(index); // test -> can be removed?
 
 }
 
