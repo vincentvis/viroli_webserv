@@ -7,8 +7,8 @@
 #include <string>
 
 int main(int argc, char const *argv[]) {
-	Server       Default;
-	ConfigParser config;
+	std::vector<Server *> servers;
+	ConfigParser          config;
 
 	try {
 		config.parseFromArgs(argc, argv);
@@ -18,25 +18,16 @@ int main(int argc, char const *argv[]) {
 		return (1);
 	}
 
-	/*
-		Some boilerplate code to show how to iterator over servers
-	*/
+	Server *serv;
+	//
 	std::map<uint16_t, std::vector<Config *> >           ports = config.getPortMap();
 	std::map<uint16_t, std::vector<Config *> >::iterator it    = ports.begin();
 	std::map<uint16_t, std::vector<Config *> >::iterator end   = ports.end();
 	while (it != end) {
-		std::cout << "Servers for port " << it->first << ":" << std::endl;
-		Utils::print_vector_deref<Config *>(it->second);
-		std::cout << "------------------" << std::endl;
-
+		serv = new Server(it->first, it->second);
+		servers.push_back(serv);
 		it++;
 	}
-
-	std::vector<Server> servers;
-
-	servers.push_back(Server(8080));
-	servers.push_back(Server(8081));
-	servers.push_back(Server(8082));
 
 	std::cout << "std::vector<uint16_t> _pfds: \n";
 	for (std::vector<struct pollfd>::iterator it = Server::_pfds.begin();
