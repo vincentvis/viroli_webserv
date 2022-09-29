@@ -28,26 +28,30 @@ class IPollable; // forward declaration
 class Server {
 	public:
 		Server();
-		Server(uint16_t port, std::vector<Config *> configs);
 		~Server();
-		Server(uint16_t port);                // tmp
-		Server(std::vector<uint16_t> &ports); // tmp
 
-		const Config         findConfig(const Request &request) const;
+		// Server(uint16_t port);                // tmp
+		// Server(std::vector<uint16_t> &ports); // tmp
+
+		Server(uint16_t port, std::vector<Config *> configs);
+
+		const Config         findConfig(struct tmp_request &request) const;
 
 		friend std::ostream &operator<<(std::ostream &os, const Server &server);
 		friend class ConfigParser;
 
-		// getters
+
 		uint16_t                              getPort() const;
+		int32_t                               getFileDescriptor() const;
 		static void                           run();
-		static void                           removeFD(const int index);
+		static void                           removePoll();
+		static void                           addPoll(Server *server);
 
 		static std::map<int32_t, IPollable *> _pollables;
 		static std::vector<struct pollfd>     _pfds;
-		static std::vector<int32_t>           _remove;
-
+    std::vector<Config *> _configs;
 	protected:
+		int32_t               _fd;
 		uint16_t              _port;
-		std::vector<Config *> _configs;
+
 };

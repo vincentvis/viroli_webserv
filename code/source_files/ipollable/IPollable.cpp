@@ -3,7 +3,8 @@
 IPollable::~IPollable() {
 }
 
-ServerFD::ServerFD(Server &server, int fd) : _server(server), _fd(fd) {
+ServerFD::ServerFD(Server *server, int fd, int index) :
+	_server(server), _fd(fd), _index(index) {
 }
 
 ServerFD::~ServerFD() {
@@ -35,9 +36,9 @@ void ServerFD::pollin(int) {
 	/* POLLIN or POLLIN | POLLOUT */
 	struct pollfd pfd = {newfd, POLLIN, 0};
 	Server::_pfds.push_back(pfd);
-	Server::_pollables.insert(
-		std::pair<int32_t, IPollable *>(newfd, new ClientFD(_server, newfd)));
-
+	Server::_pollables.insert(std::pair<int32_t, IPollable *>(
+		newfd, new ClientFD(_server, newfd, Server::_pfds.size())));
+//	Server::_pfds.push_back(pfd);
 	/* debug */
 	// char buff[16] = {0};
 	// std::cout << "\n///////// new client /////////\n";
@@ -55,13 +56,30 @@ void ServerFD::pollin(int) {
 void ServerFD::pollout(int) {
 }
 
-int ServerFD::getFD() const {
+int ServerFD::getFileDescriptor() const {
 	return _fd;
 }
 
-ClientFD::ClientFD(Server &server, int fd) :
-	_server(server), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0), _total(0),
-	_fd(fd) {
+Server *ServerFD::getServer() const {
+	return _server;
+}
+
+//Server *ServerFD::getServer() const {
+//	return _server;
+//}
+
+//int ServerFD::getFD() const {
+//	return _fd;
+//}
+
+//ClientFD::ClientFD(Server &server, int fd) :
+//	_server(server), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0), _total(0),
+//	_fd(fd) {
+//}
+
+ClientFD::ClientFD(Server *server, int fd, int index) :
+	_server(server), _state(HEADER), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
+	_total(0), _fd(fd), _index(index) {
 }
 
 ClientFD::~ClientFD() {
@@ -110,14 +128,15 @@ void ClientFD::pollin(int index) {
 		initResponse(index); // test -> can be removed?
 	}
 
-//	/* create CGIrequest or HTTPrequest */
-//	if (this->_request.getCgi() == true) {
-//		std::cout << "this should work with the new .findConfig() function" << std::endl;
+	/* create CGIrequest or HTTPrequest */
+	if (this->_request.getCgi() == true) {
+		std::cout << "this should work with the new .findConfig() function" << std::endl;
 //		this->_requestInterface = new CGIRequest(this->_request, _server.findConfig(this->_request));
-//	} else {
-//		std::cout << "this should work with the new .findConfig() function" << std::endl;
+	} else {
+		std::cout << "this should work with the new .findConfig() function" << std::endl;
+        std::cout << "config size!: " << this->_server->_configs.size() << std::endl;
 //		this->_requestInterface = new HttpRequest(this->_request, _server.findConfig(this->_request));
-//	}
+	}
 
 }
 
@@ -146,13 +165,21 @@ void ClientFD::pollout(int index) {
 	}
 }
 
-int ClientFD::getFD() const {
+//int ClientFD::getFD() const {
+//	return _fd;
+//}
+
+int ClientFD::getFileDescriptor() const {
 	return _fd;
 }
 
-FileFD::FileFD(Server &server, int fd) :
+Server *ClientFD::getServer() const {
+	return _server;
+}
+
+FileFD::FileFD(Server *server, int fd, int index) :
 	_server(server), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0), _total(0),
-	_fd(fd) {
+	_fd(fd), _index(index) {
 }
 
 FileFD::~FileFD() {
@@ -175,6 +202,14 @@ void FileFD::pollout(int index) {
 	(void)index; // tmp to bypass unused variable errors
 } // implement write(), placeholder
 
-int FileFD::getFD() const {
+//int FileFD::getFD() const {
+//	return _fd;
+//}
+
+int FileFD::getFileDescriptor() const {
 	return _fd;
+}
+
+Server *FileFD::getServer() const {
+	return _server;
 }
