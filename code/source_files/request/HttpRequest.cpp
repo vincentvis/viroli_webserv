@@ -41,7 +41,8 @@ void HttpRequest::GETRequest(const Request &Req, const Config &Conf, Response &R
 	for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
 		if (Req.getMethod() == Conf.getAllow()[i]) {
 			std::cout << "method " << Conf.getAllow()[i] << " is allowed" << std::endl;
-			Response = Req.getHTTPVersion() + " 200 OK\r\n";
+			Response = Req.getHTTPVersion() + " 200 OK\r\n" + "Content-Length: " + "23" +"\r\nContent-Type: text/plain\r\nConnection: Close\r\n\r\n" + "this is a test response" +"\r\n";
+			//			Response = Req.getHTTPVersion() + " 200 OK\r\n" + "Content-Length: " + std::to_string(Req.getBody().size()) +"\r\nContent-Type: text/plain\r\nConnection: Close\r\n\r\n" + Req.getBody() +"\r\n";
 			Res.setResponse(Response);
 			Res.setRespReady();
 		}

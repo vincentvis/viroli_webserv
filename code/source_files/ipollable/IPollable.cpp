@@ -175,8 +175,8 @@ void ClientFD::initResponse(int index) {
 	if (_response.respReady() == true) {
 		Server::_pfds[index].events = POLLOUT;
 		memset(&_data,0,sizeof(_data));
-//		_data  = _response.getResponse(); //this should work at a certain moment
-		_data  = "this is a response";
+		_data  = _response.getResponse(); //this should work at a certain moment
+//		_data  = "this is a response";
 		_bytes = 0;
 		_total = 0;
 		_left  = _data.size();
