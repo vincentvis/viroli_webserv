@@ -28,6 +28,7 @@ class IPollable; // forward declaration
 class Server {
 	public:
 		Server();
+		Server(uint16_t port, std::vector<Config *> configs);
 		~Server();
 
 		// Server(uint16_t port);                // tmp

@@ -3,6 +3,10 @@
 Server::Server() {
 	this->_port = 0;
 }
+Server::Server(uint16_t port, std::vector<Config *> configs) {
+	this->_port    = port;
+	this->_configs = configs;
+}
 
 Server::~Server() {
 }
@@ -11,13 +15,30 @@ uint16_t Server::getPort() const {
 	return _port;
 }
 
-const Config Server::findConfig(struct tmp_request &request) const {
-	(void)request;
-	return *_configs[0];
+const Config Server::findConfig(const Request &request) const {
+	std::vector<Config *>::const_iterator        begin  = this->_configs.begin();
+	std::vector<Config *>::const_iterator        end    = this->_configs.end();
+
+	std::map<std::string, std::string>           header = request.getHeaderMap();
+	std::map<std::string, std::string>::iterator host   = header.find("host");
+	if (host == header.end()) {
+		// TODO
+		// check if this is correct,
+		// currently, if there is not host field in the header, we return the first config
+		return (**(this->_configs.begin()));
+	}
+
+
+	for (; begin != end; ++begin) {
+		if ((*begin)->containsServerName(host->second)) {
+			return **begin;
+		}
+	}
+	return (**(this->_configs.begin()));
 }
 
 std::ostream &operator<<(std::ostream &os, const Server &server) {
-	os << "\033[4mServer info for \033[1m;port " << server._port << ":\033[0m"
+	os << "\033[4mServer info for \033[1mport " << server._port << ":\033[0m"
 	   << std::endl;
 
 	Utils::print_vector_deref<Config *>(server._configs);

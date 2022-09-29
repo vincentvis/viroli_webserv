@@ -22,24 +22,16 @@ int main(int argc, char const *argv[]) {
 
 	Server *serv;
 
-	/*
-		Some boilerplate code to show how to iterator over servers
-	*/
+	//
 	std::map<uint16_t, std::vector<Config *> >           ports = config.getPortMap();
 	std::map<uint16_t, std::vector<Config *> >::iterator it    = ports.begin();
 	std::map<uint16_t, std::vector<Config *> >::iterator end   = ports.end();
 	while (it != end) {
-		// std::cout << "Servers for port " << it->first << ":" << std::endl;
-		// Utils::print_vector_deref<Config *>(it->second);
-		// std::cout << "------------------" << std::endl;
-		// std::cout << "port: " << it->first << std::endl;
-
 		serv = new Server(it->first, it->second);
 		Server::addPoll(serv);
 		servers.push_back(serv);
 		it++;
 	}
-
 
 	std::cout << "std::vector<uint16_t> _pfds: \n";
 	for (std::vector<struct pollfd>::iterator it = Server::_pfds.begin();
