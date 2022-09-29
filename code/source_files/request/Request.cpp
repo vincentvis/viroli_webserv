@@ -133,6 +133,7 @@ void Request::printAttributesInRequestClass() {
 	std::cout << "--------------------------------------" << std::endl;
 	std::cout << "Body = [" << this->_body << "]" << std::endl;
 	std::cout << "CGI = [" << this->_CGI << "]" << std::endl;
+	std::cout << "--------------------------------------" << std::endl;
 }
 
 Request::~Request() {

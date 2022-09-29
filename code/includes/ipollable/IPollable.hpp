@@ -104,7 +104,7 @@ class ClientFD : public IPollable {
 		void    receive();
 		void    receive(int len);
 
-		void    initResponse();
+		void 	initResponse(int index);
 		void    closeFD();
 };
 

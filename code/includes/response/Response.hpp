@@ -4,7 +4,7 @@
 class Response {
 	private:
 		std::string _response;
-		bool		_respReady;
+		bool        _respReady;
 
 	public:
 		Response();
@@ -12,6 +12,6 @@ class Response {
 
 		std::string getResponse() const;
 		void        setResponse(std::string newRes);
-		bool		respReady();
-		void 		setRespReady();
+		bool        respReady();
+		void        setRespReady();
 };

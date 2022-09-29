@@ -14,10 +14,8 @@ void CGIRequest::CheckMethod(const Request &Req, const Config &Conf, Response &R
 
 	switch (itr->second) {
 		default:
-			// clang-format off
-			std::cout << "OTHER" << std::endl; // if above is correct we don't need this default case, BUT if the switch case also accepts std::string::npos its neater to get rid of the if statement above!
-			//				OTHERRequest();
-			// clang-format on
+			std::cout << "OTHER" << std::endl;
+			//				OTHERRequest(Req, Conf, Res);
 			break;
 		case GET:
 			std::cout << "GET" << std::endl;
@@ -25,11 +23,11 @@ void CGIRequest::CheckMethod(const Request &Req, const Config &Conf, Response &R
 			break;
 		case POST:
 			std::cout << "POST" << std::endl;
-			//				POSTRequest();
+			//				POSTRequest(Req, Conf, Res);
 			break;
 		case DELETE:
 			std::cout << "DELETE" << std::endl;
-			//			DELETERequest();
+			//			DELETERequest(Req, Conf, Res);
 			break;
 	}
 }
@@ -41,26 +39,25 @@ void CGIRequest::GETRequest(const Request &Req, const Config &Conf, Response &Re
 	std::cout << "this is a GET CGI Request" << std::endl; // REMOVE LATER
 }
 
-//
-// void CGIRequest::POSTRequest(const Request &Req, const Config &Conf, Response &Res) {
+//void CGIRequest::POSTRequest(const Request &Req, const Config &Conf, Response &Res) {
 //	(void)Req;
 //	(void)Conf;
 //	(void)Res;
-//	std::cout << "this is a POST CGI Request" << std::endl; //REMOVE LATER
+//	std::cout << "this is a POST CGI Request" << std::endl; // REMOVE LATER
 //}
 //
-// void CGIRequest::DELETERequest(const Request &Req, const Config &Conf, Response &Res) {
+//void CGIRequest::DELETERequest(const Request &Req, const Config &Conf, Response &Res) {
 //	(void)Req;
 //	(void)Conf;
 //	(void)Res;
-//	std::cout << "this is a DELETE CGI Request" << std::endl; //REMOVE LATER
+//	std::cout << "this is a DELETE CGI Request" << std::endl; // REMOVE LATER
 //}
 //
-// void CGIRequest::OTHERRequest(const Request &Req, const Config &Conf, Response &Res) {
+//void CGIRequest::OTHERRequest(const Request &Req, const Config &Conf, Response &Res) {
 //	(void)Req;
 //	(void)Conf;
 //	(void)Res;
-//	std::cout << "this is a OTHER CGI Request" << std::endl; //REMOVE LATER
+//	std::cout << "this is a OTHER CGI Request" << std::endl; // REMOVE LATER
 //}
 
 CGIRequest::~CGIRequest() {
