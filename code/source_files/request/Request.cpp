@@ -8,11 +8,11 @@
 // lengths of 8000 octets.
 
 Request::Request() {
-	this->_headerAvailable = false;
-	this->_ContentLength = 0;
-	this->_CGI = false;
+	this->_headerAvailable         = false;
+	this->_ContentLength           = 0;
+	this->_CGI                     = false;
 	this->_TransferEncodingChunked = false;
-	this->_ContentLengthAvailable = false;
+	this->_ContentLengthAvailable  = false;
 }
 
 void Request::ParseRequest(std::string BUF) {
@@ -61,9 +61,9 @@ void Request::ParseRequest(std::string BUF) {
 			std::cerr << "stol failed: \n" << e.what() << std::endl;
 		}
 	}
-	if (this->_ContentLength < 0){
+	if (this->_ContentLength < 0) {
 		std::cout << "Invalid contenlen" << std::cout;
-//		change in throw error;
+		//		change in throw error;
 	}
 
 	this->_itr = _header.find("Transfer-Encoding:");
@@ -98,6 +98,10 @@ std::string Request::getBody() const {
 	return this->_body;
 }
 
+std::string Request::getHost() const {
+	return this->_host;
+}
+
 long Request::getContentLength() const {
 	return this->_ContentLength;
 }
@@ -114,7 +118,7 @@ bool Request::getHeaderAvailable() const {
 	return this->_headerAvailable;
 }
 
-bool Request::contentLenAvailable() const{
+bool Request::contentLenAvailable() const {
 	return this->_ContentLengthAvailable;
 }
 
