@@ -35,7 +35,6 @@
 *.idea
 cmake-build-debug
 
-.DS_Store
 webserv
 *.dSYM
 valgrind-out.txt

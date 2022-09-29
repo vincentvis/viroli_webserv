@@ -55,7 +55,7 @@ std::vector<Config *> ConfigParser::parseFromArgs(int argc, char const **argv) {
 	if (argc > 1) {
 		this->_filePath = argv[1];
 	} else {
-		this->_filePath = "../website/config/default.config";
+		this->_filePath = "../data/config/default.config";
 	}
 	this->_fileStream.open(this->_filePath.c_str(), std::ios_base::in);
 	if (this->_fileStream.is_open() == false) {
@@ -109,7 +109,8 @@ void ConfigParser::extract_server_block_info(Config &target) {
 		if (this->_fileStream.eof() || this->_currentLine.empty()) {
 			throw std::runtime_error(
 				"Unclosed serverblock found in configfile around line " +
-				Utils::to_string(_linenum));
+				Utils::to_string<int>(_linenum)
+			);
 		}
 		if (this->_currentLine.at(0) == '}') {
 			skipNextChar();
@@ -121,9 +122,10 @@ void ConfigParser::extract_server_block_info(Config &target) {
 			_serverDirectiveHandlers.find(directiveName);
 
 		if (handler == _serverDirectiveHandlers.end()) {
-			throw std::runtime_error("Unsupported directive name \"" + directiveName +
-									 "\" found in config file at line " +
-									 Utils::to_string(_linenum));
+			throw std::runtime_error(
+				"Unsupported directive name \"" + directiveName +
+				"\" found in config file at line " + Utils::to_string<int>(_linenum)
+			);
 		}
 
 		switch (handler->second) {
@@ -169,12 +171,14 @@ void ConfigParser::processLocationBlock(std::vector<Location> &target) {
 	if (param == "{" || this->_currentLine.empty()) {
 		throw std::runtime_error(
 			"Not enough parameters in Location directive in config file at line " +
-			Utils::to_string(_linenum));
+			Utils::to_string<int>(_linenum)
+		);
 	}
 	if (isValidConfigURI(param) == false) {
-		throw std::runtime_error("Invalid location_match param (\"" + param +
-								 "\") in location directive at line " +
-								 Utils::to_string(_linenum));
+		throw std::runtime_error(
+			"Invalid location_match param (\"" + param +
+			"\") in location directive at line " + Utils::to_string<int>(_linenum)
+		);
 	}
 	location._match = param;
 	location._sortWeight += location._match.length();
@@ -197,7 +201,8 @@ void ConfigParser::processLocationBlock(std::vector<Location> &target) {
 			throw std::runtime_error(
 				"Unsupported directive name \"" + directiveName +
 				"\" found in location block in config file at line " +
-				Utils::to_string(_linenum));
+				Utils::to_string<int>(_linenum)
+			);
 		}
 
 		switch (handler->second) {
@@ -238,7 +243,8 @@ void ConfigParser::skip_to_after_server_block_opening(std::string::size_type n) 
 	if (this->_currentLine.length() == 0 || this->_currentLine.at(0) != '{') {
 		throw std::runtime_error(
 			"No opening brace after server directive in config file at line " +
-			Utils::to_string(server_line));
+			Utils::to_string<int>(server_line)
+		);
 	}
 	this->_currentLine = Utils::trimLeadingWhitespaceCopy(this->_currentLine.substr(1));
 	if (this->_currentLine.length() == 0) {
@@ -256,13 +262,16 @@ std::string ConfigParser::extractDirectiveName() {
 		length++;
 	}
 	if (length == 0) {
-		throw std::runtime_error("No directive name found in config file at line " +
-								 Utils::to_string(_linenum));
+		throw std::runtime_error(
+			"No directive name found in config file at line " +
+			Utils::to_string<int>(_linenum)
+		);
 	}
 	if (endOfName != end && !(*endOfName == ' ' || *endOfName == '\t')) {
 		throw std::runtime_error(
 			"Invalid characters in directive name in config file at line " +
-			Utils::to_string(_linenum));
+			Utils::to_string<int>(_linenum)
+		);
 	}
 
 	std::string directiveName = this->_currentLine.substr(0, length);
@@ -284,7 +293,8 @@ std::string ConfigParser::extractParam() {
 		if (closingQuote == std::string::npos) {
 			throw std::runtime_error(
 				"Missing closing quote in directive parameter in config file at line " +
-				Utils::to_string(_linenum));
+				Utils::to_string<int>(_linenum)
+			);
 		}
 		str                = str.substr(0, closingQuote);
 		this->_currentLine = this->_currentLine.substr(closingQuote + 2);
@@ -341,9 +351,10 @@ void ConfigParser::check_and_skip_semicolon(std::string name) {
 	if (this->_currentLine.empty() == false && this->_currentLine.at(0) == ';') {
 		skipNextChar();
 	} else {
-		throw std::runtime_error("Missing semicolon after directive \"" + name +
-								 "\" in config file at line " +
-								 Utils::to_string(_linenum));
+		throw std::runtime_error(
+			"Missing semicolon after directive \"" + name + "\" in config file at line " +
+			Utils::to_string<int>(_linenum)
+		);
 	}
 }
 
@@ -355,8 +366,9 @@ uint16_t ConfigParser::stringToPort(std::string &string) {
 
 	if (errno == EINVAL || errno == ERANGE || string.c_str() == endptr ||
 		intval != longval) {
-		throw std::runtime_error("the string \"" + string +
-								 "\" does not contain a valid port number");
+		throw std::runtime_error(
+			"the string \"" + string + "\" does not contain a valid port number"
+		);
 	}
 	string = string.substr(endptr - string.c_str());
 	return intval;
@@ -383,11 +395,8 @@ void ConfigParser::processListen(Config &target) {
 			if (fullstop_position == std::string::npos) {
 				// it's only a port
 				uint16_t port = stringToPort(param);
-				if (std::find(target._ports.begin(), target._ports.end(), port) ==
-					target._ports.end()) {
-					target._ports.push_back(port);
-					addConfigToPort(port, target);
-				}
+				target._ports.push_back(port);
+				addConfigToPort(port, target);
 			} else {
 				// it's only an ip so set default port
 				target._ports.push_back(DEFAULT_PORT);
@@ -397,16 +406,10 @@ void ConfigParser::processListen(Config &target) {
 			std::string before_colon = param.substr(0, colon_position);
 			std::string after_colon  = param.substr(colon_position + 1);
 			// should be {ip}:{port}
-			if (std::find(target._ips.begin(), target._ips.end(), before_colon) ==
-				target._ips.end()) {
-				target._ips.push_back(before_colon);
-			}
+			target._ips.push_back(before_colon);
 			int port = stringToPort(after_colon);
-			if (std::find(target._ports.begin(), target._ports.end(), port) ==
-				target._ports.end()) {
-				target._ports.push_back(port);
-				addConfigToPort(port, target);
-			}
+			target._ports.push_back(port);
+			addConfigToPort(port, target);
 		}
 		if (this->_currentLine.empty())
 			break;
@@ -430,8 +433,9 @@ void ConfigParser::processErrorPages(std::map<std::string, std::string> &target)
 	if (max <= 1) {
 		throw std::runtime_error(
 			"Directive \"error_page\" needs at least 2 parameters, has " +
-			Utils::to_string(max) + " parameters in config file at line " +
-			Utils::to_string(_linenum));
+			Utils::to_string<int>(max) + " parameters in config file at line " +
+			Utils::to_string<int>(_linenum)
+		);
 	}
 	std::vector<std::string>::size_type i         = 0;
 	std::string                         errorpage = params[max - 1];
@@ -442,10 +446,10 @@ void ConfigParser::processErrorPages(std::map<std::string, std::string> &target)
 	check_and_skip_semicolon("error_page");
 }
 
-void ConfigParser::processAddParamsToVector(std::string                         name,
-											std::vector<std::string>           &target,
-											std::vector<std::string>::size_type min,
-											bool shouldBeUnique) {
+void ConfigParser::processAddParamsToVector(
+	std::string name, std::vector<std::string> &target,
+	std::vector<std::string>::size_type min, bool shouldBeUnique
+) {
 	while (1) {
 		std::string param = extractParam();
 		if (param.empty())
@@ -464,20 +468,24 @@ void ConfigParser::processAddParamsToVector(std::string                         
 	}
 
 	if (target.size() < min) {
-		throw std::runtime_error("Not enough parameters found for directive \"" + name +
-								 "\", found " + Utils::to_string(target.size()) +
-								 " need (at least) " + Utils::to_string(min));
+		throw std::runtime_error(
+			"Not enough parameters found for directive \"" + name + "\", found " +
+			Utils::to_string<int>(target.size()) + " need (at least) " +
+			Utils::to_string<int>(min)
+		);
 	}
 	check_and_skip_semicolon(name);
 }
 
-void ConfigParser::processBoolval(std::string name, bool &target, std::string truthy,
-								  std::string falsy) {
+void ConfigParser::processBoolval(
+	std::string name, bool &target, std::string truthy, std::string falsy
+) {
 	std::string param = extractParam();
 	if (param.empty()) {
-		throw std::runtime_error("Not enough parameters found for directive \"" + name +
-								 "\" in config file at line " +
-								 Utils::to_string(_linenum));
+		throw std::runtime_error(
+			"Not enough parameters found for directive \"" + name +
+			"\" in config file at line " + Utils::to_string<int>(_linenum)
+		);
 	}
 
 	if (param == truthy) {
@@ -485,9 +493,11 @@ void ConfigParser::processBoolval(std::string name, bool &target, std::string tr
 	} else if (param == falsy) {
 		target = false;
 	} else {
-		throw std::runtime_error("Value \"" + param + "\" does not match any of [\"" +
-								 truthy + "\",\"" + falsy + "\"] for directive " + name +
-								 " in config file at line " + Utils::to_string(_linenum));
+		throw std::runtime_error(
+			"Value \"" + param + "\" does not match any of [\"" + truthy + "\",\"" +
+			falsy + "\"] for directive " + name + " in config file at line " +
+			Utils::to_string<int>(_linenum)
+		);
 	}
 	check_and_skip_semicolon(name);
 }
@@ -520,9 +530,10 @@ void ConfigParser::processRoot(std::string &target) {
 	std::string param = extractParam();
 
 	if (isValidConfigURI(param) == false) {
-		throw std::runtime_error("Invalid value for root directive (\"" + param +
-								 "\") in config file at line " +
-								 Utils::to_string(_linenum));
+		throw std::runtime_error(
+			"Invalid value for root directive (\"" + param +
+			"\") in config file at line " + Utils::to_string<int>(_linenum)
+		);
 	}
 	target = param;
 	check_and_skip_semicolon("root");
@@ -546,9 +557,10 @@ void ConfigParser::processIntval(std::string name, int64_t &target) {
 			} else if (multiplierChar == 'm' || multiplierChar == 'M') {
 				multiplier = 1000000;
 			} else {
-				throw std::runtime_error("Invalid size modifier character in " + name +
-										 " directive in config file at line " +
-										 Utils::to_string(_linenum));
+				throw std::runtime_error(
+					"Invalid size modifier character in " + name +
+					" directive in config file at line " + Utils::to_string<int>(_linenum)
+				);
 			}
 		}
 	}
@@ -559,9 +571,10 @@ void ConfigParser::processIntval(std::string name, int64_t &target) {
 			throw std::exception();
 		}
 	} catch (const std::exception &e) {
-		throw std::runtime_error("Invalid numeric value found in " + name +
-								 " directive in config file at line " +
-								 Utils::to_string(_linenum));
+		throw std::runtime_error(
+			"Invalid numeric value found in " + name +
+			" directive in config file at line " + Utils::to_string<int>(_linenum)
+		);
 	}
 	target = num * multiplier;
 	check_and_skip_semicolon(name);
@@ -582,8 +595,9 @@ void ConfigParser::processReturn(Location &target) {
 	if (params.size() > 2 || params.size() == 0) {
 		throw std::runtime_error(
 			"Invalid amount of parameters given to \"return\" directive, has " +
-			Utils::to_string(params.size()) +
-			" should be 1 or 2. In configfile at line " + Utils::to_string(_linenum));
+			Utils::to_string<int>(params.size()) +
+			" should be 1 or 2. In configfile at line " + Utils::to_string<int>(_linenum)
+		);
 	}
 	std::string uriParam;
 	std::string typeParam = "";
@@ -602,7 +616,8 @@ void ConfigParser::processReturn(Location &target) {
 			"Value \"" + uriParam +
 			"\" is not a valid value for directive \"return\" in configfile at "
 			"line " +
-			Utils::to_string(_linenum));
+			Utils::to_string<int>(_linenum)
+		);
 	}
 	target._redirectType = typeParam;
 	check_and_skip_semicolon("return");

@@ -11,28 +11,6 @@ add_executable(webserv
         code/source_files/main.cpp
         code/includes/server/Server.hpp
         code/source_files/server/Server.cpp
-        code/includes/utils/Utils.hpp
-        code/source_files/utils/Utils.cpp
-        code/includes/config/Config.hpp
-        code/source_files/config/Config.cpp
-        code/includes/config/ConfigParser.hpp
-        code/source_files/config/ConfigParser.cpp
-        code/includes/server/Location.hpp
-        code/source_files/server/Location.cpp
-        code/includes/ipollable/IPollable.hpp
-        code/source_files/ipollable/IPollable.cpp
-        code/source_files/request/Request.cpp
-        code/includes/request/Request.hpp
-        code/source_files/request/RequestInterface.cpp
-        code/includes/request/RequestInterface.hpp
-        code/source_files/request/CGIRequest.cpp
-        code/includes/request/CGIRequest.hpp
-        code/source_files/request/HttpRequest.cpp
-        code/includes/request/HttpRequest.hpp
-        code/source_files/utils/Utils.cpp
-        code/includes/utils/Utils.hpp
-        code/source_files/response/Response.cpp
-        code/includes/response/Response.hpp
-        )
+)
 
 #target_link_libraries(webserv PUBLIC libft)
