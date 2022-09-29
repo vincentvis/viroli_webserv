@@ -124,8 +124,8 @@ void ClientFD::pollin(int index) {
 //		this->_requestInterface = new CGIRequest(this->_request, _server.findConfig(this->_request));
 	} else {
 		std::cout << "this should work with the new .findConfig() function" << std::endl;
-        std::cout << "config size!: " << this->_server->_configs.size() << std::endl;
-//		this->_requestInterface = new HttpRequest(this->_request, _server.findConfig(this->_request));
+//        std::cout << "config size!: " << this->_server->_configs.size() << std::endl;
+		this->_requestInterface = new HttpRequest(this->_request, this->_server->findConfig(this->_request), this->_response);
 	}
 
 }

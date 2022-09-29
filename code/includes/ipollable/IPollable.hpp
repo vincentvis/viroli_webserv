@@ -30,12 +30,10 @@ class Server;
 
 class IPollable {
 	public:
-		virtual ~IPollable() = 0;
+		virtual ~IPollable()                      = 0;
 
-		virtual void pollin(int index)  = 0;
-		virtual void pollout(int index) = 0;
-		//		void    pollin(int index);
-		//		void    pollout(int index);
+		virtual void    pollin(int index)         = 0;
+		virtual void    pollout(int index)        = 0;
 		virtual int     getFileDescriptor() const = 0;
 		virtual Server *getServer() const         = 0;
 };
@@ -50,9 +48,9 @@ class ServerFD : public IPollable {
 		ServerFD(Server *server, int fd, int index);
 		~ServerFD();
 
-		void pollin(int index);
-		void pollout(int index);
-		int  getFileDescriptor() const;
+		void    pollin(int index);
+		void    pollout(int index);
+		int     getFileDescriptor() const;
 		Server *getServer() const;
 		//		int  getFD() const;
 };
@@ -60,8 +58,11 @@ class ServerFD : public IPollable {
 class ClientFD : public IPollable {
 	public:
 		typedef enum { HEADER, BODY, END } state;
+
 		typedef enum { LENGTH, CHUNKED } transfer;
+
 		Request           _request;
+		Response          _response;
 		RequestInterface *_requestInterface;
 		Server           *_server;
 
@@ -80,15 +81,15 @@ class ClientFD : public IPollable {
 		ClientFD(Server *server, int fd, int index);
 		~ClientFD();
 
-		void pollin(int index);
-		void pollout(int index);
+		void    pollin(int index);
+		void    pollout(int index);
 		int     getFileDescriptor() const;
 		Server *getServer() const;
 		//		int  getFD() const;
 
 
-		void    initResponse(int index);
-		void    closeFD(int index);
+		void initResponse(int index);
+		void closeFD(int index);
 };
 
 class FileFD : public IPollable {
@@ -105,8 +106,8 @@ class FileFD : public IPollable {
 		FileFD(Server *server, int fd, int index);
 		~FileFD();
 
-		void pollin(int index);
-		void pollout(int index);
+		void    pollin(int index);
+		void    pollout(int index);
 
 		int     getFileDescriptor() const;
 		Server *getServer() const;
