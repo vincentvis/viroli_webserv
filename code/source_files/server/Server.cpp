@@ -22,7 +22,7 @@ const Config Server::findConfig(const Request &request) const {
 	std::map<std::string, std::string>           header = request.getHeaderMap();
 	std::map<std::string, std::string>::iterator host   = header.find("host");
 	if (host == header.end()) {
-		// TODO
+		// TODO !
 		// check if this is correct,
 		// currently, if there is not host field in the header, we return the first config
 		return (**(this->_configs.begin()));
