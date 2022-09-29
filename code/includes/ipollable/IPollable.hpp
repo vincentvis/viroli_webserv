@@ -1,11 +1,10 @@
 #pragma once
 
-#include "request/CGIRequest.hpp"
-#include "request/HttpRequest.hpp"
 #include "request/Request.hpp"
 #include "request/RequestInterface.hpp"
-#include "response/Response.hpp"
 #include "server/Server.hpp"
+#include "request/CGIRequest.hpp"
+#include "request/HttpRequest.hpp"
 #include <arpa/inet.h>
 #include <cstring>
 #include <fcntl.h>
@@ -54,7 +53,6 @@ class ClientFD : public IPollable {
 	public:
 		Request           _request;
 		RequestInterface *_requestInterface;
-		Response          _response;
 		Server           &_server;
 		std::vector<char> _buffer;
 		std::string       _data;

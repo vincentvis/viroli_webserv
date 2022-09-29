@@ -38,6 +38,17 @@ void ServerFD::pollin(int) {
 	Server::_pollables.insert(
 		std::pair<int32_t, IPollable *>(newfd, new ClientFD(_server, newfd)));
 
+	/* debug */
+	// char buff[16] = {0};
+	// std::cout << "\n///////// new client /////////\n";
+	// std::cout << "activity on _fd: " << _fd << std::endl;
+	// std::cout << "new fd: " << newfd << std::endl;
+	// std::cout << "client ip: ";
+	// std::cout << inet_ntop(AF_INET, &(client.sin_addr), buff, addrlen);
+	// std::cout << std::endl;
+	// std::cout << "size IPollables: " << Server::_pollables.size() <<
+	// std::endl; std::cout << "size _pfds: " << Server::_pfds.size() <<
+	// std::endl; std::cout << "//////////////////////////////\n\n";
 }
 
 /* do nothing on POLLOUT event */
@@ -98,29 +109,23 @@ void ClientFD::pollin(int index) {
 		this->_request.printAttributesInRequestClass(); // used for testing;REMOVE later
 		initResponse(index); // test -> can be removed?
 	}
-	Config Empty;
-	/* create CGIrequest or HTTPrequest */
-	if (this->_request.getCgi() == true) {
-		std::cout << "this should work with the new .findConfig() function" << std::endl;
+
+//	/* create CGIrequest or HTTPrequest */
+//	if (this->_request.getCgi() == true) {
+//		std::cout << "this should work with the new .findConfig() function" << std::endl;
 //		this->_requestInterface = new CGIRequest(this->_request, _server.findConfig(this->_request));
-	} else {
-		std::cout << "this should work with the new .findConfig() function" << std::endl;
-		this->_requestInterface = new HttpRequest(this->_request, Empty, this->_response);
+//	} else {
+//		std::cout << "this should work with the new .findConfig() function" << std::endl;
 //		this->_requestInterface = new HttpRequest(this->_request, _server.findConfig(this->_request));
-	}
+//	}
 
 }
-
 
 /* send data */
 /* need to know connection status (keep-alive|close) */
 void ClientFD::pollout(int index) {
-	if (_response.respReady() == true) {
-
-	}
-
-//	_buffer.assign(_data.begin() + _total,
-//				   _data.begin() + _total + (BUFFERSIZE > _left ? BUFFERSIZE : _left));
+	_buffer.assign(_data.begin() + _total,
+				   _data.begin() + _total + (BUFFERSIZE > _left ? BUFFERSIZE : _left));
 
 	_bytes = send(_fd, _buffer.data(), (BUFFERSIZE > _left ? BUFFERSIZE : _left), 0);
 	for (size_t i = 0; i < _buffer.size(); ++i) {
@@ -140,31 +145,6 @@ void ClientFD::pollout(int index) {
 		Server::_pfds[index].fd = INVALID_FD;
 	}
 }
-
-///* send data */
-///* need to know connection status (keep-alive|close) */
-//void ClientFD::pollout(int index) {
-//	_buffer.assign(_data.begin() + _total,
-//				   _data.begin() + _total + (BUFFERSIZE > _left ? BUFFERSIZE : _left));
-//
-//	_bytes = send(_fd, _buffer.data(), (BUFFERSIZE > _left ? BUFFERSIZE : _left), 0);
-//	for (size_t i = 0; i < _buffer.size(); ++i) {
-//		std::cout << _buffer[i];
-//	}
-//	if (_bytes > 0) {
-//		_total += _bytes;
-//		_left -= _bytes;
-//	}
-//
-//	/* what to do after all data is sent? */
-//	if (_left == 0) {
-//		/* if connection: keep-alive */
-//		// Server::_pfds[index].event = POLLIN
-//		/* if connection: close */
-//		// set fd to -1 to ignore further polling and flush later.
-//		Server::_pfds[index].fd = INVALID_FD;
-//	}
-//}
 
 int ClientFD::getFD() const {
 	return _fd;

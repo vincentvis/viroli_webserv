@@ -5,11 +5,11 @@
 HttpRequest::HttpRequest() {
 }
 
-HttpRequest::HttpRequest(const Request &Req, const Config &Conf, Response &Res) {
-	CheckMethod(Req, Conf, Res);
+HttpRequest::HttpRequest(const Request &Req, const Config &Conf) {
+	CheckMethod(Req, Conf);
 }
 
-void HttpRequest::CheckMethod(const Request &Req, const Config &Conf, Response &Res) {
+void HttpRequest::CheckMethod(const Request &Req, const Config &Conf) {
 	std::map<std::string, RequestInterface::e_RequestType>::iterator itr =
 		_MethodKeys.find(Req.getMethod());
 	(void)Conf;
@@ -38,62 +38,6 @@ void HttpRequest::CheckMethod(const Request &Req, const Config &Conf, Response &
 			//			DELETERequest(Req, Serv);
 			break;
 	}
-}
-
-void HttpRequest::GETRequest(const Request &Req, const Config &Conf, Response &Res) {
-	std::string Response;
-	(void)Conf;
-	std::cout << "this is a GET HTTP Request" << std::endl; //REMOVE LATER
-	/* check if method is allowed */
-	for (int i = 0; i < Conf.getAllow().size(); i++){
-		if (Req.getMethod() == Conf.getAllow()[i]){
-			std::cout << "method is allowed" << std::endl;
-			Response = Req.getHTTPVersion();
-			Response + " 200 OK\r\n" + "Content-Length: " + std::to_string(Req.getBody().size()) +"\r\nContent-Type: text/plain\r\nConnection: Close\r\n\r\n" + Req.getBody() +"\r\n";
-			std::cout << "resp: " << Response << std::endl;
-			Res.setResponse(Response);
-			Res.setRespReady();
-
-
-		}
-
-	}
-	/* method is not allowed */
-
-	//	std::cout << Req.getRequestTarget() << std::endl;
-	//	std::cout << Conf.getRoot() <<std::endl;
-}
-
-//void ClientFD::initResponse(int index) {
-//	Server::_pfds[index].events = POLLOUT;
-//	_data  = std::string("HTTP/1.1 200 OK\r\nContent-Length: 11\r\nContent-Type: "
-//																	"text/plain\r\nConnection: Close\r\n\r\nhello world\r\n");
-//	_bytes = 0;
-//	_total = 0;
-//	_left  = _data.size();
-//}
-
-void HttpRequest::POSTRequest(const Request &Req, const Config &Conf, Response &Res) {
-	(void)Req;
-	(void)Conf;
-	(void)Res;
-	std::cout << "this is a POST HTTP Request" << std::endl; //REMOVE LATER
-	//	bool                     getAllowUpload() const;
-	//	int64_t                  getMaxBodySize() const;
-}
-
-void HttpRequest::DELETERequest(const Request &Req, const Config &Conf, Response &Res) {
-	(void)Req;
-	(void)Conf;
-	(void)Res;
-	std::cout << "this is a DELETE HTTP Request" << std::endl; //REMOVE LATER
-}
-
-void HttpRequest::OTHERRequest(const Request &Req, const Config &Conf, Response &Res) {
-	(void)Req;
-	(void)Conf;
-	(void)Res;
-	std::cout << "this is a OTHER HTTP Request" << std::endl; //REMOVE LATER
 }
 
 HttpRequest::~HttpRequest() {
