@@ -25,6 +25,7 @@
 
 enum { INVALID_FD = -1 };
 
+// enum { INVALID_FD = -1 };
 /* when we use a reference for a server, its address must not change. The vector
  * it's stored in must not be modified (insert/erase) */
 
@@ -32,10 +33,12 @@ class Server;
 
 class IPollable {
 	public:
-		virtual ~IPollable()                      = 0;
+		virtual ~IPollable()   = 0;
 
-		virtual void    pollin()                  = 0;
-		virtual void    pollout()                 = 0;
+		virtual void pollin()  = 0;
+		virtual void pollout() = 0;
+		// virtual void    pollin(int index)         = 0;
+		// virtual void    pollout(int index)        = 0;
 		virtual int     getFileDescriptor() const = 0;
 		virtual Server *getServer() const         = 0;
 };
@@ -49,8 +52,10 @@ class ServerFD : public IPollable {
 		ServerFD(Server *server, int fd, int index);
 		~ServerFD();
 
-		void    pollin();
-		void    pollout();
+		void pollin();
+		void pollout();
+		// void    pollin(int index);
+		// void    pollout(int index);
 		int     getFileDescriptor() const;
 		Server *getServer() const;
 };
@@ -62,10 +67,13 @@ class ClientFD : public IPollable {
 		typedef enum { LENGTH, CHUNKED } transfer;
 
 		Request           _request;
+		Response          _response;
 		RequestInterface *_requestInterface;
-		// Request 		_request;
+
 		Server           *_server;
 		transfer          _transfer;
+
+		//		transfer          _transfer;
 		state             _state;
 		std::vector<char> _buffer;
 		std::string       _data;
@@ -80,8 +88,10 @@ class ClientFD : public IPollable {
 		ClientFD(Server *server, int fd, int index);
 		~ClientFD();
 
-		void    pollin();
-		void    pollout();
+		void pollin();
+		void pollout();
+		// void    pollin(int index);
+		// void    pollout(int index);
 		void    resetBytes();
 		int     getFileDescriptor() const;
 		size_t  extractChunkedSize(size_t pos);
@@ -112,8 +122,10 @@ class FileFD : public IPollable {
 		FileFD(Server *server, int fd, int index);
 		~FileFD();
 
-		void    pollin();
-		void    pollout();
+		void pollin();
+		void pollout();
+		// void    pollin(int index);
+		// void    pollout(int index);
 		int     getFileDescriptor() const;
 		Server *getServer() const;
 };

@@ -38,17 +38,9 @@ void ServerFD::pollin() {
 		newfd, new ClientFD(_server, newfd, Server::_pfds.size())));
 	Server::_pfds.push_back(pfd);
 
-	/* debug */
-	// char buff[16] = {0};
-	// std::cout << "\n///////// new client /////////\n";
-	// std::cout << "activity on _fd: " << _fd << std::endl;
-	// std::cout << "new fd: " << newfd << std::endl;
-	// std::cout << "client ip: ";
-	// std::cout << inet_ntop(AF_INET, &(client.sin_addr), buff, addrlen);
-	// std::cout << std::endl;
-	// std::cout << "size IPollables: " << Server::_pollables.size() <<
-	// std::endl; std::cout << "size _pfds: " << Server::_pfds.size() <<
-	// std::endl; std::cout << "//////////////////////////////\n\n";
+	Server::_pollables.insert(std::pair<int32_t, IPollable *>(
+		newfd, new ClientFD(_server, newfd, Server::_pfds.size())));
+	//	Server::_pfds.push_back(pfd);
 }
 
 /* do nothing on POLLOUT event */
@@ -74,7 +66,7 @@ ClientFD::~ClientFD() {
 void ClientFD::initResponse() {
 	Server::_pfds[_index].events = POLLOUT;
 	_data  = std::string("HTTP/1.1 200 OK\r\nContent-Length: 11\r\nContent-Type: "
-                          "text/plain\r\nConnection: Close\r\n\r\nhello world\r\n");
+						  "text/plain\r\nConnection: Close\r\n\r\nhello world\r\n");
 	_bytes = 0;
 	_total = 0;
 	_left  = _data.size();
@@ -142,6 +134,8 @@ void ClientFD::receive() {
 		} else {
 			receive(BUFFERSIZE);
 		}
+
+		this->_request.printAttributesInRequestClass(); // used for testing;REMOVE later
 	}
 }
 
@@ -195,7 +189,22 @@ void ClientFD::getHeader() {
 		_state  = BODY;
 		std::cout << "\nheader:\n\n" << _header << "\n\n";
 
-		// initResponse(); // test
+		/* create CGIrequest or HTTPrequest */
+		if (this->_request.getCgi() == true) {
+			std::cout << "this should work with the new .findConfig() function"
+					  << std::endl;
+			//		this->_requestInterface = new CGIRequest(this->_request,
+			//_server.findConfig(this->_request));
+		} else {
+			std::cout << "this should work with the new .findConfig() function"
+					  << std::endl;
+			//        std::cout << "config size!: " << this->_server->_configs.size() <<
+			//        std::endl;
+			this->_requestInterface =
+				new HttpRequest(this->_request, this->_server->findConfig(this->_request),
+								this->_response);
+		}
+		// initResponse(index); // test -> can be removed?
 	}
 }
 

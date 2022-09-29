@@ -19,8 +19,10 @@ int main(int argc, char const *argv[]) {
 		return (1);
 	}
 
-	Server                                              *serv;
 
+	Server *serv;
+
+	//
 	std::map<uint16_t, std::vector<Config *> >           ports = config.getPortMap();
 	std::map<uint16_t, std::vector<Config *> >::iterator it    = ports.begin();
 	std::map<uint16_t, std::vector<Config *> >::iterator end   = ports.end();

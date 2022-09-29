@@ -57,8 +57,9 @@ class Server {
 		static std::map<int32_t, IPollable *> _pollables;
 		static std::vector<struct pollfd>     _pfds;
 
+		std::vector<Config *>                 _configs;
+
 	protected:
-		int32_t               _fd;
-		uint16_t              _port;
-		std::vector<Config *> _configs;
+		int32_t  _fd;
+		uint16_t _port;
 };

@@ -43,7 +43,7 @@ std::ostream &operator<<(std::ostream &os, const Server &server) {
 }
 
 Server::Server(uint16_t port, std::vector<Config *> configs) :
-	_port(port), _configs(configs) {
+	_configs(configs), _port(port) {
 	struct sockaddr_in server;
 	memset(&server, 0, sizeof(server));
 	server.sin_addr.s_addr = INADDR_ANY; // lookup config directive
