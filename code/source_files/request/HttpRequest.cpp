@@ -20,11 +20,11 @@ void HttpRequest::CheckMethod(const Request &Req, const Config &Conf, Response &
 			//				OTHERRequest(Req, Conf, Res);
 			break;
 		case GET:
-			//			std::cout << "GET" << std::endl;
+			std::cout << "GET" << std::endl;
 			GETRequest(Req, Conf, Res);
 			break;
 		case POST:
-			//			std::cout << "POST" << std::endl;
+			std::cout << "POST" << std::endl;
 			POSTRequest(Req, Conf, Res);
 			break;
 		case DELETE:
@@ -35,18 +35,19 @@ void HttpRequest::CheckMethod(const Request &Req, const Config &Conf, Response &
 }
 
 bool HttpRequest::methodsAllowed(const Request &Req, const Config &Conf) {
-	/* if both location.getAllow() and Config.getAllow don't exist "default fallback" rules apply: all methods are allowed*/
+	/* if both location.getAllow() and Config.getAllow don't exist "default fallback"
+	 * rules apply: all methods are allowed*/
 	Location here = Conf.findLocation(Req);
 	if (here.getAllow().size() == 0 && Conf.getAllow().size() == 0)
 		return true;
-	/* check if location.getAllow() exists it overrules the fallback rules, else "config fallback" rules should be applied */
+	/* check if location.getAllow() exists it overrules the fallback rules, else "config
+	 * fallback" rules should be applied */
 	if (here.getAllow().size() != 0) {
 		for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
 			if (Req.getMethod() == here.getAllow()[i])
 				return true;
 		}
-	}
-	else {
+	} else {
 		for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
 			if (Req.getMethod() == Conf.getAllow()[i])
 				return true;
@@ -62,53 +63,32 @@ void HttpRequest::GETRequest(const Request &Req, const Config &Conf, Response &R
 	}
 	/* else method is not allowed */
 	if (Req.getHTTPVersion() != "HTTP/1.1")
-		std::cout << "505 HTTP Version Not Supported" << std::endl; //should become response
-
+		std::cout << "505 HTTP Version Not Supported"
+				  << std::endl; // should become response
+	std::string Response;
+	Response = Req.getHTTPVersion() + " 200 OK\r\n" + "Content-Length: " + "23" +
+			   "\r\nContent-Type: text/plain\r\nConnection: Close\r\n\r\n" +
+			   "this is a test response" + "\r\n";
+	Res.setResponse(Response);
+	Res.setRespReady();
 }
-
-/* check if method is allowed */
-//	if (Conf.getAllow().size() == 0){
-//	Location here =  Conf.findLocation(Req);
-//	for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++){
-//		if (Req.getMethod() == here.getAllow()[i]) {
-//			return (true);
-//		}
-//	}
-//
-//	//	}
-//	/* check if method is allowed */
-//	for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
-//		if (Req.getMethod() == Conf.getAllow()[i]) {
-//			std::cout << "method " << Conf.getAllow()[i] << " is allowed" << std::endl;
-//			Response = Req.getHTTPVersion() + " 200 OK\r\n" + "Content-Length: " + "23"
-//+"\r\nContent-Type: text/plain\r\nConnection: Close\r\n\r\n" + "this is a test response"
-//+"\r\n";
-//			//			Response = Req.getHTTPVersion() + " 200 OK\r\n" + "Content-Length:
-//"
-//+ std::to_string(Req.getBody().size()) +"\r\nContent-Type: text/plain\r\nConnection:
-// Close\r\n\r\n" + Req.getBody() +"\r\n"; 			Res.setResponse(Response);
-// Res.setRespReady();
-//		}
-//	}
-//}
 
 void HttpRequest::POSTRequest(const Request &Req, const Config &Conf, Response &Res) {
 	(void)Res;
-	if (HttpRequest::methodAllowed(Req, Conf) == true) {
+	if (HttpRequest::methodsAllowed(Req, Conf) == true) {
 		std::cout << "method is allowed" << std::endl;
 	} else
 		std::cout << "method is not allowed" << std::endl;
 	std::cout << "this is a POST HTTP Request" << std::endl; // REMOVE LATER
 }
 
-//
 // void HttpRequest::DELETERequest(const Request &Req, const Config &Conf, Response &Res)
 // { 	(void)Req; 	(void)Conf; 	(void)Res; 	std::cout << "this is a DELETE HTTP
 // Request"
 // <<
 // std::endl; // REMOVE LATER
 // }
-//
+
 // void HttpRequest::OTHERRequest(const Request &Req, const Config &Conf, Response &Res) {
 //	(void)Req;
 //	(void)Conf;

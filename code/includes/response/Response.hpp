@@ -11,7 +11,7 @@ class Response {
 		~Response();
 
 		std::string getResponse() const;
-		void        setResponse(std::string newRes);
+		void        setResponse(std::string newRes); //Quick and dirty should be removed later
 		bool        respReady();
 		void        setRespReady();
 };

@@ -39,26 +39,26 @@ void CGIRequest::GETRequest(const Request &Req, const Config &Conf, Response &Re
 	std::cout << "this is a GET CGI Request" << std::endl; // REMOVE LATER
 }
 
-//void CGIRequest::POSTRequest(const Request &Req, const Config &Conf, Response &Res) {
+// void CGIRequest::POSTRequest(const Request &Req, const Config &Conf, Response &Res) {
 //	(void)Req;
 //	(void)Conf;
 //	(void)Res;
 //	std::cout << "this is a POST CGI Request" << std::endl; // REMOVE LATER
-//}
-//
-//void CGIRequest::DELETERequest(const Request &Req, const Config &Conf, Response &Res) {
+// }
+
+// void CGIRequest::DELETERequest(const Request &Req, const Config &Conf, Response &Res) {
 //	(void)Req;
 //	(void)Conf;
 //	(void)Res;
 //	std::cout << "this is a DELETE CGI Request" << std::endl; // REMOVE LATER
-//}
-//
-//void CGIRequest::OTHERRequest(const Request &Req, const Config &Conf, Response &Res) {
+// }
+
+// void CGIRequest::OTHERRequest(const Request &Req, const Config &Conf, Response &Res) {
 //	(void)Req;
 //	(void)Conf;
 //	(void)Res;
 //	std::cout << "this is a OTHER CGI Request" << std::endl; // REMOVE LATER
-//}
+// }
 
 CGIRequest::~CGIRequest() {
 }

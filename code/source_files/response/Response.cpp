@@ -8,7 +8,7 @@ std::string Response::getResponse() const {
 	return this->_response;
 }
 
-void Response::setResponse(std::string newRes) {
+void Response::setResponse(std::string newRes) { //Quick and dirty should be removed later
 	this->_response = newRes;
 }
 
