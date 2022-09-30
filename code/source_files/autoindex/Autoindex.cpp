@@ -1,20 +1,22 @@
 #include "autoindex/Autoindex.hpp"
 
-Autoindex::Autoindex() {
-	this->_template = std::string(AUTOINDEX_TEMPLATE);
-}
-
 Autoindex::Autoindex(const std::string &root) : _root(root) {
 	this->_template = std::string(AUTOINDEX_TEMPLATE);
+	template_replace("${ROOT}", _root);
+	template_replace("${TITLE}", _root);
+
+	DIR           *dir_stream = opendir(this->_root);
+	struct dirent *dir;
 }
 
 Autoindex::~Autoindex() {
 }
 
-void Autoindex::setTitle(std::string &title) {
-	std::string::size_type title_pos = this->_template.find("${TITLE}");
-	if (title_pos == std::string::npos) {
-		return;
+bool Autoindex::template_replace(std::string match, const std::string &value) {
+	std::string::size_type pos = this->_template.find(match);
+	if (pos == std::string::npos) {
+		return (false);
 	}
-	this->_template.replace(title_pos, title_pos + 8, title);
+	this->_template.replace(pos, match.length(), value);
+	return (true);
 }
