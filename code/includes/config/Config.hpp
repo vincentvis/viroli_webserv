@@ -16,7 +16,7 @@ class Config {
 		Config();
 		~Config();
 
-		const Location       findLocation(Request &request) const;
+		const Location       findLocation(const Request &request) const;
 
 		friend std::ostream &operator<<(std::ostream &os, const Config &config);
 		friend class ConfigParser;
