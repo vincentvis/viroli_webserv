@@ -36,7 +36,13 @@ void HttpRequest::CheckMethod(const Request &Req, const Config &Conf, Response &
 
 void HttpRequest::GETRequest(const Request &Req, const Config &Conf, Response &Res) {
 	std::string Response;
-	(void)Conf;
+	std::cout << "this is a GET HTTP Request" << std::endl; //REMOVE LATER
+	/* check if method is allowed */
+	//	if (Conf.getAllow().size() == 0){
+	Location here =  Conf.findLocation(Req);
+	std::cout << here << std::endl;
+	//		std::cout << here.getAllow()[0] << std::endl;
+	//	}
 	/* check if method is allowed */
 	for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
 		if (Req.getMethod() == Conf.getAllow()[i]) {
