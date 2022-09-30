@@ -197,17 +197,18 @@ void ClientFD::getHeader() {
 		/* check if contentLengthAvailable() or getChunked() are true if so body exists
 		 * read bytes and setBody */
 		//		if (this->_request.getHeaderAvailable() == true) { // this can be written
-		//shorter, with one setBody and fewer if statements etc, but since you might
-		//change a lot, these are the basics. 			if (this->_request.getChunked() == true){
-		//				std::cout << "do something with chunked body" << std::endl;
+		// shorter, with one setBody and fewer if statements etc, but since you might
+		// change a lot, these are the basics. 			if (this->_request.getChunked() ==
+		// true){ 				std::cout << "do something with chunked body" <<
+		// std::endl;
 		//				this->_request.setBody("this is a chunked body");
 		//			}
 		//			if (this->_request.contentLenAvailable() == true){
 		//				std::cout << "do something with contentlen body" << std::endl;
 		//				this->_request.setBody("this is a body with contentlen");
 		//			}
-		//			this->_request.printAttributesInRequestClass(); // used for testing;REMOVE
-		//later
+		//			this->_request.printAttributesInRequestClass(); // used for
+		// testing;REMOVE later
 
 		/* create CGIrequest or HTTPrequest */
 		if (this->_request.getCgi() == true) {
@@ -310,6 +311,8 @@ void FileFD::pollin() {
 	if (_bytes == 0) {
 		// set fd to -1 to ignore further polling and flush later.
 		Server::_pfds[_index].fd = INVALID_FD;
+		std::cout << "file contents:" << std::endl;
+		std::cout << _data << std::endl;
 		// signal the file has been read and _data can be included in a response.
 	}
 	if (_bytes > 0) {

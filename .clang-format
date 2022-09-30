@@ -31,4 +31,3 @@ MaxEmptyLinesToKeep: 2
 IndentAccessModifiers: true
 ColumnLimit: 90
 Standard: c++03
-SeparateDefinitionBlocks: 'Always'
