@@ -171,12 +171,12 @@ void ClientFD::receive() {
  */
 
 void ClientFD::initResponse(int index) {
-	/* check is response is created with _response.respReady() + receive response with _response.getResponse() */
+	/* check is response is created with _response.respReady() + receive response with
+	 * _response.getResponse() */
 	if (_response.respReady() == true) {
 		Server::_pfds[index].events = POLLOUT;
-		memset(&_data,0,sizeof(_data));
-		_data  = _response.getResponse(); //this should work at a certain moment
-//		_data  = "this is a response";
+		_data = _response.getResponse(); // this should work at a certain moment
+		//		_data  = "this is a response";
 		_bytes = 0;
 		_total = 0;
 		_left  = _data.size();
@@ -194,33 +194,38 @@ void ClientFD::getHeader() {
 		_state  = BODY;
 		std::cout << "\nheader:\n\n" << _header << "\n\n";
 
-		/* check if contentLengthAvailable() or getChunked() are true if so body exists read bytes and setBody */
-//		if (this->_request.getHeaderAvailable() == true) { // this can be written shorter, with one setBody and fewer if statements etc, but since you might change a lot, these are the basics.
-//			if (this->_request.getChunked() == true){
-//				std::cout << "do something with chunked body" << std::endl;
-//				this->_request.setBody("this is a chunked body");
-//			}
-//			if (this->_request.contentLenAvailable() == true){
-//				std::cout << "do something with contentlen body" << std::endl;
-//				this->_request.setBody("this is a body with contentlen");
-//			}
-//			this->_request.printAttributesInRequestClass(); // used for testing;REMOVE later
+		/* check if contentLengthAvailable() or getChunked() are true if so body exists
+		 * read bytes and setBody */
+		//		if (this->_request.getHeaderAvailable() == true) { // this can be written
+		//shorter, with one setBody and fewer if statements etc, but since you might
+		//change a lot, these are the basics. 			if (this->_request.getChunked() == true){
+		//				std::cout << "do something with chunked body" << std::endl;
+		//				this->_request.setBody("this is a chunked body");
+		//			}
+		//			if (this->_request.contentLenAvailable() == true){
+		//				std::cout << "do something with contentlen body" << std::endl;
+		//				this->_request.setBody("this is a body with contentlen");
+		//			}
+		//			this->_request.printAttributesInRequestClass(); // used for testing;REMOVE
+		//later
 
 		/* create CGIrequest or HTTPrequest */
 		if (this->_request.getCgi() == true) {
 			std::cout << "CGI: this should work with the new .findConfig() function"
 					  << std::endl;
-			this->_requestInterface = new CGIRequest(this->_request, this->_server->findConfig(this->_request),this->_response);
+			this->_requestInterface =
+				new CGIRequest(this->_request, this->_server->findConfig(this->_request),
+							   this->_response);
 		} else {
 			std::cout << "HTTP: this should work with the new .findConfig() function"
 					  << std::endl;
-			        std::cout << "config size!: " << this->_server->_configs.size() <<
-			        std::endl;
-					this->_request.printAttributesInRequestClass(); // REMOVE LATER
-			this->_requestInterface = new HttpRequest(this->_request, this->_server->findConfig(this->_request),this->_response);
+			std::cout << "config size!: " << this->_server->_configs.size() << std::endl;
+			this->_request.printAttributesInRequestClass(); // REMOVE LATER
+			this->_requestInterface =
+				new HttpRequest(this->_request, this->_server->findConfig(this->_request),
+								this->_response);
 			initResponse(_index);
 		}
-
 	}
 }
 
