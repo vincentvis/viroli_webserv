@@ -24,8 +24,8 @@ void HttpRequest::CheckMethod(const Request &Req, const Config &Conf, Response &
 			GETRequest(Req, Conf, Res);
 			break;
 		case POST:
-			std::cout << "POST" << std::endl;
-			//				POSTRequest(Req, Conf, Res);
+			//			std::cout << "POST" << std::endl;
+			POSTRequest(Req, Conf, Res);
 			break;
 		case DELETE:
 			std::cout << "DELETE" << std::endl;
@@ -34,49 +34,87 @@ void HttpRequest::CheckMethod(const Request &Req, const Config &Conf, Response &
 	}
 }
 
+bool HttpRequest::methodAllowed(const Request &Req, const Config &Conf) {
+	/* if both location.getAllow() and Config.getAllow don't exist "default fallback" rules apply: all methods are allowed*/
+	Location here = Conf.findLocation(Req);
+	if (here.getAllow().size() == 0 && Conf.getAllow().size() == 0)
+		return true;
+	/* check if location.getAllow() exists it overrules the fallback rules, else "config fallback" rules should be applied */
+	if (here.getAllow().size() != 0) {
+		for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
+			if (Req.getMethod() == here.getAllow()[i])
+				return true;
+		}
+	}
+	else {
+		for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
+			if (Req.getMethod() == Conf.getAllow()[i])
+				return true;
+		}
+	}
+	return false;
+}
+
 void HttpRequest::GETRequest(const Request &Req, const Config &Conf, Response &Res) {
-	std::string Response;
-	std::cout << "this is a GET HTTP Request" << std::endl; //REMOVE LATER
-	/* check if method is allowed */
-	//	if (Conf.getAllow().size() == 0){
-	Location here =  Conf.findLocation(Req);
-	std::cout << Req.getMethod() << std::endl;
-	std::cout << here << std::endl;
-	//		std::cout << here.getAllow()[0] << std::endl;
-	//	}
-	/* check if method is allowed */
+	/*check if method is allowed */
+	if (HttpRequest::methodAllowed(Req, Conf) == true) {
+		std::cout << "method is allowed" << std::endl;
+	}
+	/* else method is not allowed */
+	if (Req.getHTTPVersion() != "HTTP/1.1")
+		std::cout << "505 HTTP Version Not Supported" << std::endl; //should become response
+
+}
+
+/* check if method is allowed */
+//	if (Conf.getAllow().size() == 0){
+//	Location here =  Conf.findLocation(Req);
+//	for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++){
+//		if (Req.getMethod() == here.getAllow()[i]) {
+//			return (true);
+//		}
+//	}
+//
+//	//	}
+//	/* check if method is allowed */
 //	for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
 //		if (Req.getMethod() == Conf.getAllow()[i]) {
 //			std::cout << "method " << Conf.getAllow()[i] << " is allowed" << std::endl;
-			Response = Req.getHTTPVersion() + " 200 OK\r\n" + "Content-Length: " + "23" +"\r\nContent-Type: text/plain\r\nConnection: Close\r\n\r\n" + "this is a test response" +"\r\n";
-			//			Response = Req.getHTTPVersion() + " 200 OK\r\n" + "Content-Length: " + std::to_string(Req.getBody().size()) +"\r\nContent-Type: text/plain\r\nConnection: Close\r\n\r\n" + Req.getBody() +"\r\n";
-			Res.setResponse(Response);
-			Res.setRespReady();
+//			Response = Req.getHTTPVersion() + " 200 OK\r\n" + "Content-Length: " + "23"
+//+"\r\nContent-Type: text/plain\r\nConnection: Close\r\n\r\n" + "this is a test response"
+//+"\r\n";
+//			//			Response = Req.getHTTPVersion() + " 200 OK\r\n" + "Content-Length:
+//"
+//+ std::to_string(Req.getBody().size()) +"\r\nContent-Type: text/plain\r\nConnection:
+// Close\r\n\r\n" + Req.getBody() +"\r\n"; 			Res.setResponse(Response);
+// Res.setRespReady();
 //		}
 //	}
-	/* else method is not allowed */
+//}
+
+void HttpRequest::POSTRequest(const Request &Req, const Config &Conf, Response &Res) {
+	(void)Res;
+	if (HttpRequest::methodAllowed(Req, Conf) == true) {
+		std::cout << "method is allowed" << std::endl;
+	} else
+		std::cout << "method is not allowed" << std::endl;
+	std::cout << "this is a POST HTTP Request" << std::endl; // REMOVE LATER
 }
 
-//void HttpRequest::POSTRequest(const Request &Req, const Config &Conf, Response &Res) {
-//	(void)Req;
-//	(void)Conf;
-//	(void)Res;
-//	std::cout << "this is a POST HTTP Request" << std::endl; // REMOVE LATER
-//}
 //
-//void HttpRequest::DELETERequest(const Request &Req, const Config &Conf, Response &Res) {
-//	(void)Req;
-//	(void)Conf;
-//	(void)Res;
-//	std::cout << "this is a DELETE HTTP Request" << std::endl; // REMOVE LATER
-//}
+// void HttpRequest::DELETERequest(const Request &Req, const Config &Conf, Response &Res)
+// { 	(void)Req; 	(void)Conf; 	(void)Res; 	std::cout << "this is a DELETE HTTP
+// Request"
+// <<
+// std::endl; // REMOVE LATER
+// }
 //
-//void HttpRequest::OTHERRequest(const Request &Req, const Config &Conf, Response &Res) {
+// void HttpRequest::OTHERRequest(const Request &Req, const Config &Conf, Response &Res) {
 //	(void)Req;
 //	(void)Conf;
 //	(void)Res;
 //	std::cout << "this is a OTHER HTTP Request" << std::endl; // REMOVE LATER
-//}
+// }
 
 HttpRequest::~HttpRequest() {
 }
