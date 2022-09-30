@@ -26,19 +26,10 @@
 
 class IPollable; // forward declaration
 
-// temporary object, should be replace by actuall Request class
-struct tmp_request {
-		std::string host;
-		std::string path;
-};
-
 class Server {
 	public:
 		Server();
 		~Server();
-
-		// Server(uint16_t port);                // tmp
-		// Server(std::vector<uint16_t> &ports); // tmp
 
 		Server(uint16_t port, std::vector<Config *> configs);
 
