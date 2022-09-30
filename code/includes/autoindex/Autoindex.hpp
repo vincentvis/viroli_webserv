@@ -2,8 +2,8 @@
 
 #include <dirent.h>
 #include <iostream>
-#include <sstream>
-#include <string>
+#include <sys/dir.h>
+#include <sys/types.h>
 #include <vector>
 
 #define AUTOINDEX_TEMPLATE \
@@ -18,13 +18,19 @@
 	<h1>Index of ${ROOT}</h1>\n\
 	<hr>\n\
 	<ul>\n\
-	${LIST}\n\
+${LIST}\
 	</ul>\n\
 	<hr>\n\
 	<p><i>We think directory listings are a bad idea</i></p>\n\
     \n\
 </body>\n\
 </html>"
+
+#define LIST_START   "\t\t<li>"
+#define LIST_END     "</li></a>\n"
+#define A_HREF_OPEN  "<a href=\""
+#define A_HREF_CLOSE "\">"
+#define A_CLOSE      "</a>"
 
 class Autoindex {
 	public:
@@ -36,6 +42,7 @@ class Autoindex {
 		Autoindex(const Autoindex &other);
 		Autoindex        &operator=(const Autoindex &other);
 		bool              template_replace(std::string match, const std::string &value);
+		std::string       createListItem(std::string name, bool append_slash);
 
 		const std::string _root;
 		std::string       _template;
