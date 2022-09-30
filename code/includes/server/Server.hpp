@@ -39,11 +39,12 @@ class Server {
 		friend class ConfigParser;
 
 
-		uint16_t                              getPort() const;
-		int32_t                               getFileDescriptor() const;
-		static void                           run();
-		static void                           removePoll();
-		static void                           addPoll(Server *server);
+		uint16_t    getPort() const;
+		int32_t     getFileDescriptor() const;
+		static void run();
+		static void removePoll();
+		static void addPoll(Server *server);
+		static void addPollable(struct pollfd pfd, IPollable *pollable);
 
 		static std::map<int32_t, IPollable *> _pollables;
 		static std::vector<struct pollfd>     _pfds;

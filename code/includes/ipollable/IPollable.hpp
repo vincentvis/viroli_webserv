@@ -39,8 +39,6 @@ class IPollable {
 		virtual void    pollout()                 = 0;
 		virtual int     getFileDescriptor() const = 0;
 		virtual Server *getServer() const         = 0;
-
-		virtual void    addPollable()             = 0;
 };
 
 class ServerFD : public IPollable {
@@ -56,19 +54,16 @@ class ServerFD : public IPollable {
 		void    pollout();
 		int     getFileDescriptor() const;
 		Server *getServer() const;
-		void    addPollable();
 };
 
 class ClientFD : public IPollable {
 	public:
 		typedef enum { HEADER, BODY, END } state;
-
 		typedef enum { LENGTH, CHUNKED } transfer;
 
 		Request           _request;
 		Response          _response;
 		RequestInterface *_requestInterface;
-
 		Server           *_server;
 		transfer          _transfer;
 		state             _state;
@@ -95,7 +90,6 @@ class ClientFD : public IPollable {
 		void    receiveChunked();
 		void    receiveLength(int length);
 		Server *getServer() const;
-		void    addPollable();
 		void    receive();
 		void    receive(int len);
 		void    initResponse(int index);
@@ -120,5 +114,4 @@ class FileFD : public IPollable {
 		void    pollout();
 		int     getFileDescriptor() const;
 		Server *getServer() const;
-		void    addPollable();
 };

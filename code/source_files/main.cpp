@@ -27,9 +27,12 @@ int main(int argc, char const *argv[]) {
 	std::map<uint16_t, std::vector<Config *> >::iterator it    = ports.begin();
 	std::map<uint16_t, std::vector<Config *> >::iterator end   = ports.end();
 	while (it != end) {
-		serv = new Server(it->first, it->second);
-		Server::addPoll(serv);
-		servers.push_back(serv);
+		serv              = new Server(it->first, it->second);
+		struct pollfd pfd = {serv->getFileDescriptor(), POLLIN, 0};
+		Server::addPollable(pfd, new ServerFD(serv, pfd.fd, Server::_pfds.size()));
+
+		// Server::addPoll(serv);
+		// servers.push_back(serv);
 		it++;
 	}
 

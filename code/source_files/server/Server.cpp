@@ -78,15 +78,6 @@ int32_t Server::getFileDescriptor() const {
 	return _fd;
 }
 
-void Server::addPoll(Server *server) {
-	struct pollfd pfd = {server->getFileDescriptor(), POLLIN, 0};
-
-	Server::_pollables.insert(std::pair<int32_t, IPollable *>(
-		server->getFileDescriptor(),
-		new ServerFD(server, server->getFileDescriptor(), Server::_pfds.size())));
-	Server::_pfds.push_back(pfd);
-}
-
 /* test this with more connections */
 /* instead of doing after every poll iteration use a threshold */
 void Server::removePoll() {
@@ -144,6 +135,17 @@ void Server::run() {
 			// }
 		}
 	}
+}
+
+void Server::createPollable(int fd) {
+	struct pollfd pfd = {fd, POLLIN, 0};
+
+	// todo
+}
+
+void Server::addPollable(struct pollfd pfd, IPollable *pollable) {
+	Server::_pollables.insert(std::pair<int32_t, IPollable *>(pfd.fd, pollable));
+	Server::_pfds.push_back(pfd);
 }
 
 std::map<int32_t, IPollable *> Server::_pollables;
