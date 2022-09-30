@@ -7,6 +7,9 @@ Autoindex::Autoindex(const std::string &root) : _root(root) {
 
 	DIR           *dir_stream = opendir(this->_root);
 	struct dirent *dir;
+
+	if (dir_stream == NULL) {
+	}
 }
 
 Autoindex::~Autoindex() {
