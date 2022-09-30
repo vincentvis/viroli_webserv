@@ -34,7 +34,7 @@ void HttpRequest::CheckMethod(const Request &Req, const Config &Conf, Response &
 	}
 }
 
-bool HttpRequest::methodAllowed(const Request &Req, const Config &Conf) {
+bool HttpRequest::methodsAllowed(const Request &Req, const Config &Conf) {
 	/* if both location.getAllow() and Config.getAllow don't exist "default fallback" rules apply: all methods are allowed*/
 	Location here = Conf.findLocation(Req);
 	if (here.getAllow().size() == 0 && Conf.getAllow().size() == 0)
@@ -57,7 +57,7 @@ bool HttpRequest::methodAllowed(const Request &Req, const Config &Conf) {
 
 void HttpRequest::GETRequest(const Request &Req, const Config &Conf, Response &Res) {
 	/*check if method is allowed */
-	if (HttpRequest::methodAllowed(Req, Conf) == true) {
+	if (HttpRequest::methodsAllowed(Req, Conf) == true) {
 		std::cout << "method is allowed" << std::endl;
 	}
 	/* else method is not allowed */
