@@ -18,7 +18,6 @@ ConfigParser::ConfigParser() {
 	}
 	if (_locationDirectiveHandlers.size() == 0) {
 		_locationDirectiveHandlers["allowed_methods"]      = ED_ALLOW;
-		_locationDirectiveHandlers["error_page"]           = ED_ERRPAGE;
 		_locationDirectiveHandlers["root"]                 = ED_ROOT;
 		_locationDirectiveHandlers["autoindex"]            = ED_AUTOINDEX;
 		_locationDirectiveHandlers["index"]                = ED_INDEX;
@@ -102,7 +101,6 @@ bool locationSorter(const Location &a, const Location &b) {
 void ConfigParser::sortLocations(Config &config) {
 	std::sort(config._locations.begin(), config._locations.end(), locationSorter);
 }
-
 
 void ConfigParser::extract_server_block_info(Config &target) {
 	while (true) {
@@ -209,9 +207,6 @@ void ConfigParser::processLocationBlock(std::vector<Location> &target) {
 				break;
 			case ED_AUTOINDEX:
 				processBoolval(directiveName, location._autoIndex, "on", "off");
-				break;
-			case ED_ERRPAGE:
-				processErrorPages(location._errorPages);
 				break;
 			case ED_ROOT:
 				processRoot(location._root);
