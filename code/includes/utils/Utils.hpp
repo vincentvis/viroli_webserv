@@ -13,6 +13,7 @@
 #include <vector>
 
 namespace Utils {
+
 int64_t     stol(std::string &string, bool skip);
 int64_t     stol(const std::string &string);
 std::string trimLeadingWhitespaceCopy(std::string str);

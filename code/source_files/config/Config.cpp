@@ -10,20 +10,19 @@ Config::Config() {
 Config::~Config() {
 }
 
-const Location Config::findLocation(Request &request) const {
+// This function relies on the requirement that the first location block
+// is a location matching only a single backslash
+const Location Config::findLocation(const Request &request) const {
 	std::vector<Location>::const_iterator begin = this->_locations.begin();
 	std::vector<Location>::const_iterator end   = this->_locations.end();
 
-	std::vector<Location>::const_iterator loc;
+	std::vector<Location>::const_iterator loc   = begin;
 	for (; begin != end; ++begin) {
 		if (Utils::starts_with(request.getRequestTarget(), (*begin).getMatch())) {
 			loc = begin;
 		}
 	}
-	if (loc != end) {
-		return (*loc);
-	}
-	return (*(this->_locations.begin()));
+	return (*loc);
 }
 
 bool Config::containsServerName(std::string to_search) {
@@ -35,15 +34,19 @@ bool Config::containsServerName(std::string to_search) {
 std::string Config::getRoot() const {
 	return _root;
 }
+
 std::vector<std::string> Config::getAllow() const {
 	return _allow;
 }
+
 int64_t Config::getMaxBodySize() const {
 	return _maxBodySize;
 }
+
 bool Config::getAllowUpload() const {
 	return _allowUpload;
 }
+
 bool Config::getAutoIndex() const {
 	return _autoIndex;
 }
