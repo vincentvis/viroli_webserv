@@ -79,4 +79,9 @@ namespace Utils {
 		trimTrailingWhitespaceRef(str);
 	}
 
+	bool starts_with(const std::string &source, const std::string &prefix) {
+		return (source.find(prefix) == 0);
+	}
+
+
 } // namespace Utils

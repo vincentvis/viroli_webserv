@@ -13,7 +13,6 @@ BreakBeforeConceptDeclarations: true
 BreakConstructorInitializers: 'AfterColon'
 BreakInheritanceList: 'AfterColon'
 IndentCaseLabels: true
-NamespaceIndentation: 'All'
 EmptyLineBeforeAccessModifier: 'Always'
 AllowShortIfStatementsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: false
@@ -22,7 +21,6 @@ AllowShortBlocksOnASingleLine: 'Empty'
 AllowShortLoopsOnASingleLine: false
 AccessModifierOffset: 0
 SpaceInEmptyBlock: true
-AlignAfterOpenBracket: 'BlockIndent'
 AlignConsecutiveAssignments: 'AcrossEmptyLines'
 AlignConsecutiveMacros: 'AcrossEmptyLines'
 AlignConsecutiveDeclarations: 'AcrossEmptyLines'
@@ -33,3 +31,4 @@ MaxEmptyLinesToKeep: 2
 IndentAccessModifiers: true
 ColumnLimit: 90
 Standard: c++03
+SeparateDefinitionBlocks: 'Always'

@@ -41,6 +41,12 @@ CLASSES		:= config/ConfigParser\
 				server/Location\
 				server/Server\
 				utils/Utils\
+				ipollable/IPollable\
+				request/CGIRequest\
+                request/HttpRequest\
+                request/Request\
+                request/RequestInterface\
+                response/Response\
 				autoindex/Autoindex
 
 OBJECTS		:= $(CLASSES:%=$(OBJ_DIR)%.o)
