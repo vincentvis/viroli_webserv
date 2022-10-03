@@ -50,7 +50,7 @@ Autoindex::Autoindex(const std::string &root) : _root(root) {
 Autoindex::~Autoindex() {
 }
 
-std::string Autoindex::getTemplate() {
+std::string Autoindex::getHtml() {
 	return _template;
 }
 

@@ -39,7 +39,7 @@ class Autoindex {
 	public:
 		Autoindex(const std::string &root);
 		~Autoindex();
-		std::string getTemplate();
+		std::string getHtml();
 
 	private:
 		Autoindex();
