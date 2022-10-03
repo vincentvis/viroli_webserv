@@ -5,41 +5,53 @@ Autoindex::Autoindex(const std::string &root) : _root(root) {
 	template_replace("${ROOT}", _root);
 	template_replace("${TITLE}", _root);
 
-	DIR           *dir_stream = opendir(this->_root.c_str());
-	struct dirent *dir;
+	DIR *dir_stream = opendir(this->_root.c_str());
 
 	if (dir_stream == NULL) {
 		throw std::runtime_error("Unable to open directory");
 	}
 
-	std::string list;
-	std::string currentString(".");
-	while (true) {
-		dir = readdir(dir_stream);
-		if (dir == nullptr) {
-			break;
-		}
-		if (std::string(dir->d_name) == currentString) {
-			continue;
-		}
-		list += createListItem(dir->d_name, dir->d_type == DT_DIR);
+	struct dirent **namelist = NULL;
+	int             n        = scandir(_root.c_str(), &namelist, NULL, alphasort);
+	if (n < 0) {
+		throw Utils::AutoindexException("Failed to create directory list");
 	}
-	template_replace("${LIST}", list);
-	std::cout << this->_template << std::endl;
-}
 
-std::string Autoindex::createListItem(std::string name, bool isdir) {
-	if (isdir) {
-		if (name.at(0) == '.') {
-			return (LIST_START + A_HREF_OPEN + name + A_HREF_CLOSE + name + LIST_END);
+	int         i = 0;
+	std::string currentDir(".");
+	std::string slash("/");
+	std::string list;
+
+	while (i < n) {
+		if (namelist[i]->d_name != currentDir) {
+			std::string dir_str  = this->_root;
+			std::string dir_name = slash + namelist[i]->d_name + slash;
+			dir_str += dir_name;
+			errno       = 0;
+			DIR *is_dir = opendir(dir_str.c_str());
+			if (is_dir) {
+				closedir(is_dir);
+			}
+
+			if (errno == ENOTDIR) {
+				list += AUTOINDEX_LI(namelist[i]->d_name);
+			} else {
+				list += AUTOINDEX_LI_DIR(namelist[i]->d_name);
+			}
 		}
-		return (LIST_START + A_HREF_OPEN + "/" + name + A_HREF_CLOSE + name + LIST_END);
+		free(namelist[i]);
+		i++;
 	}
-	return ("\t\t<li><a href=\"" + name + "\">" + name + (append_slash ? "/" : "") +
-			"</a></li>\n");
+	free(namelist);
+	template_replace("${LIST}", list);
+	closedir(dir_stream);
 }
 
 Autoindex::~Autoindex() {
+}
+
+std::string Autoindex::getTemplate() {
+	return _template;
 }
 
 bool Autoindex::template_replace(std::string match, const std::string &value) {
