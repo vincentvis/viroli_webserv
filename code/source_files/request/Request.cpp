@@ -35,10 +35,6 @@ void Request::ParseRequest(std::string BUF) {
 		std::cout << "throw error en create response 400"
 				  << std::endl; // No whitespace is allowed in the request-target. 400
 								// (Bad Request) error
-	/* check HTTP version */
-	if (this->_HTTPVersion != "HTTP/1.1")
-		std::cout << "505 HTTP Version Not Supported"
-				  << std::endl; // should become response
 
 	/* create header map */
 	endVal = BUF.find("\r\n");
@@ -57,19 +53,21 @@ void Request::ParseRequest(std::string BUF) {
 			Utils::trimWhitespaceCopy(BUF.substr(startVal, endVal - startVal));
 	}
 
-	/* check query and fragments */
-	startVal = _uri.find("?");
-	if (startVal != std::string::npos)
-		endVal = _uri.find("#", startVal);
-	if (endVal != std::string::npos) {
-		this->_query.substr(startVal + 1, endVal);
-		if (startVal < this->_uri.size())
-			this->_fragments.substr(endVal + 1, this->_uri.size());
-	} else
-		std::cout << "throw fragments are missing, query is there"
-				  << std::cout; // later ombouwen
+	/* check HTTP version */
+	if (this->_HTTPVersion != "HTTP/1.1")
+		std::cout << "505 HTTP Version Not Supported"
+				  << std::endl; // should become response
 
-	/* set CGI for initialisation request interface */
+	/* check query */
+	startVal = _uri.find("?", 0);
+	if (startVal != std::string::npos) {
+		if (this->_uri.length() > startVal + 1) {
+			this->_query = this->_uri.substr(startVal + 1, this->_uri.length() - (startVal + 1));
+			this->_uri.erase(startVal);
+		}
+	}
+
+	/* set CGI for initialisation request interface */ // SHOULD BE EXTENDED
 	if (this->_uri.find(".html") == std::string::npos &&
 		this->_uri.find("/") == std::string::npos)
 		this->_CGI = true;
@@ -94,6 +92,8 @@ void Request::ParseRequest(std::string BUF) {
 		if (this->_itr->second.find("chunked") != std::string::npos)
 			this->_TransferEncodingChunked = true;
 	}
+
+	/* set header available */
 	this->_headerAvailable = true;
 }
 
@@ -147,7 +147,6 @@ void Request::printAttributesInRequestClass() {
 	std::cout << "method = [" << this->_method << "]" << std::endl;
 	std::cout << "uri = [" << this->_uri << "]" << std::endl;
 	std::cout << "query = [" << this->_query << "]" << std::endl;
-	std::cout << "fragments = [" << this->_fragments << "]" << std::endl;
 	std::cout << "HTTPVersion = [" << this->_HTTPVersion << "]" << std::endl;
 	std::cout << "--------------------------------------" << std::endl;
 	std::cout << "map = \n";
