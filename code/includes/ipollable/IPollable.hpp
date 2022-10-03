@@ -98,6 +98,9 @@ class ClientFD : public IPollable {
 
 class FileFD : public IPollable {
 	public:
+		typedef enum { READ, END } state;
+
+		state             _state;
 		Server           *_server;
 		std::vector<char> _buffer;
 		std::string       _data;
@@ -113,5 +116,6 @@ class FileFD : public IPollable {
 		void    pollin();
 		void    pollout();
 		int     getFileDescriptor() const;
+		void    readFile();
 		Server *getServer() const;
 };
