@@ -8,16 +8,6 @@
 #include <string>
 
 int main(int argc, char const *argv[]) {
-	try {
-		Autoindex autoindex(
-			"/Users/vvissche/Codam/projects/23_webserv/github/website/html");
-		std::cout << autoindex.getTemplate() << std::endl;
-	} catch (const std::exception &e) {
-		std::cerr << e.what() << std::endl;
-	}
-	return (0);
-
-
 	std::vector<Server *> servers;
 	servers.reserve(100); // placeholder
 	ConfigParser config;
