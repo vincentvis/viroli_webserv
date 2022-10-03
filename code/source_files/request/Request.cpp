@@ -93,7 +93,7 @@ void Request::ParseRequest(std::string BUF) {
 			this->_TransferEncodingChunked = true;
 	}
 
-	/* set header available */
+	/* after parsing header, set header available */
 	this->_headerAvailable = true;
 }
 
