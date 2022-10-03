@@ -9,7 +9,9 @@ class Server;
 class Request {
 	private:
 		std::string                        _method;
-		std::string                        _requestTarget;
+		std::string                        _uri;
+		std::string                        _query;
+		std::string                        _fragments;
 		std::string                        _HTTPVersion;
 		std::string                        _body;
 		bool                               _CGI;

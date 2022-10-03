@@ -23,16 +23,23 @@ void Request::ParseRequest(std::string BUF) {
 	size_t endVal   = 0;
 
 	/* set method, requestTarget, HttpVersion */
-	this->_method        = BUF.substr(startVal, BUF.find(' '));
-	startVal             = BUF.find(' ') + 1;
-	endVal               = BUF.find(' ', startVal);
-	this->_requestTarget = BUF.substr(startVal, endVal - startVal);
-	startVal             = endVal + 1;
-	this->_HTTPVersion   = BUF.substr(startVal, BUF.find("\r\n") - startVal);
+	this->_method      = BUF.substr(startVal, BUF.find(' '));
+	startVal           = BUF.find(' ') + 1;
+	endVal             = BUF.find(' ', startVal);
+	this->_uri         = BUF.substr(startVal, endVal - startVal);
+	startVal           = endVal + 1;
+	this->_HTTPVersion = BUF.substr(startVal, BUF.find("\r\n") - startVal);
 
-	/* check _requestTarget */
-		if (_requestTarget.find(" ") != std::string::npos)
-			std::cout << "throw error en create response 400" << std::endl; //No whitespace is allowed in the request-target. 400 (Bad Request) error
+	/* check _uri */
+	if (_uri.find(" ") != std::string::npos)
+		std::cout << "throw error en create response 400"
+				  << std::endl; // No whitespace is allowed in the request-target. 400
+								// (Bad Request) error
+	/* check HTTP version */
+	if (this->_HTTPVersion != "HTTP/1.1")
+		std::cout << "505 HTTP Version Not Supported"
+				  << std::endl; // should become response
+
 	/* create header map */
 	endVal = BUF.find("\r\n");
 	while (endVal < BUF.length() && startKey < BUF.length() && endKey < BUF.length() &&
@@ -50,9 +57,21 @@ void Request::ParseRequest(std::string BUF) {
 			Utils::trimWhitespaceCopy(BUF.substr(startVal, endVal - startVal));
 	}
 
+	/* check query and fragments */
+	startVal = _uri.find("?");
+	if (startVal != std::string::npos)
+		endVal = _uri.find("#", startVal);
+	if (endVal != std::string::npos) {
+		this->_query.substr(startVal + 1, endVal);
+		if (startVal < this->_uri.size())
+			this->_fragments.substr(endVal + 1, this->_uri.size());
+	} else
+		std::cout << "throw fragments are missing, query is there"
+				  << std::cout; // later ombouwen
+
 	/* set CGI for initialisation request interface */
-	if (this->_requestTarget.find(".html") == std::string::npos &&
-		this->_requestTarget.find("/") == std::string::npos)
+	if (this->_uri.find(".html") == std::string::npos &&
+		this->_uri.find("/") == std::string::npos)
 		this->_CGI = true;
 
 	/* set content length and chunked for body creation in connectionClass */
@@ -91,7 +110,7 @@ std::string Request::getMethod() const {
 }
 
 std::string Request::getRequestTarget() const {
-	return this->_requestTarget;
+	return this->_uri;
 }
 
 std::string Request::getHTTPVersion() const {
@@ -126,7 +145,9 @@ bool Request::contentLenAvailable() const {
 void Request::printAttributesInRequestClass() {
 	std::cout << "--------------------------------------" << std::endl;
 	std::cout << "method = [" << this->_method << "]" << std::endl;
-	std::cout << "requestTarget = [" << this->_requestTarget << "]" << std::endl;
+	std::cout << "uri = [" << this->_uri << "]" << std::endl;
+	std::cout << "query = [" << this->_query << "]" << std::endl;
+	std::cout << "fragments = [" << this->_fragments << "]" << std::endl;
 	std::cout << "HTTPVersion = [" << this->_HTTPVersion << "]" << std::endl;
 	std::cout << "--------------------------------------" << std::endl;
 	std::cout << "map = \n";
