@@ -25,10 +25,6 @@
 
 enum { INVALID_FD = -1 };
 
-// enum { INVALID_FD = -1 };
-/* when we use a reference for a server, its address must not change. The vector
- * it's stored in must not be modified (insert/erase) */
-
 class Server;
 
 class IPollable {

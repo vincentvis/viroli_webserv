@@ -42,11 +42,14 @@ CLASSES		:= config/ConfigParser\
 				server/Server\
 				utils/Utils\
 				ipollable/IPollable\
+				ipollable/ServerFD\
+				ipollable/ClientFD\
+				ipollable/FileFD\
 				request/CGIRequest\
-                request/HttpRequest\
-                request/Request\
-                request/RequestInterface\
-                response/Response
+				request/HttpRequest\
+				request/Request\
+				request/RequestInterface\
+				response/Response\
 
 OBJECTS		:= $(CLASSES:%=$(OBJ_DIR)%.o)
 HEADERS		:= $(CLASSES:%=$(INC_DIR)%.hpp)

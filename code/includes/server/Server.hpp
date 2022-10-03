@@ -1,9 +1,12 @@
 #pragma once
 
 #include "config/Config.hpp"
+// #include "ipollable/ClientFD.hpp"
+// #include "ipollable/FileFD.hpp"
 #include "ipollable/IPollable.hpp"
-
+// #include "ipollable/ServerFD.hpp"
 #include "utils/Utils.hpp"
+
 #include <arpa/inet.h>
 #include <cstring>
 #include <fcntl.h>
@@ -24,7 +27,7 @@
 #define MAXCONNECTIONS 10 // tmp
 #define PFDS_THRESHOLD 1000
 
-class IPollable; // forward declaration
+class IPollable;
 
 class Server {
 	public:
