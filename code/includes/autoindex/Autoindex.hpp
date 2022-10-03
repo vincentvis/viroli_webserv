@@ -1,6 +1,8 @@
 #pragma once
 
 #include "utils/Exception.hpp"
+#include <cerrno>
+#include <cstdlib>
 #include <dirent.h>
 #include <iostream>
 #include <sys/dir.h>
