@@ -11,14 +11,12 @@ FileFD::~FileFD() {
 void FileFD::readFile() {
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
 	if (_bytes == 0) {
-		// set fd to -1 to ignore further polling and flush later.
 		Server::_pfds[_index].fd = INVALID_FD;
-
-		// signal the file has been read and _data can be included in a response.
-		_state = END;
+		_state                   = END;
 	}
 	if (_bytes > 0) {
 		_total += _bytes;
+		_left -= _bytes;
 		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
 }
@@ -33,7 +31,34 @@ void FileFD::pollin() {
 	}
 }
 
+int32_t FileFD::getRemainingBytes() const {
+	return BUFFERSIZE > _left ? BUFFERSIZE : _left;
+}
+
+void FileFD::writeFile() {
+	_bytes = write(_fd, _buffer.data(), getRemainingBytes());
+	if (_bytes == 0) {
+		// set fd to -1 to ignore further polling and flush later.
+		Server::_pfds[_index].fd = INVALID_FD;
+
+		// signal the file has been read and _data can be included in a response.
+		_state = END;
+	}
+	if (_bytes > 0) {
+		_total += _bytes;
+		_left -= _bytes;
+		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
+	}
+}
+
 void FileFD::pollout() {
+	switch (_state) {
+		case WRITE:
+			writeFile();
+		case END:
+			std::cout << "file contents:" << std::endl;
+			std::cout << _data << std::endl;
+	}
 } // implement write(), placeholder
 
 int FileFD::getFileDescriptor() const {

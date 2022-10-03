@@ -62,7 +62,7 @@ void Request::ParseRequest(std::string BUF) {
 		}
 	}
 	if (this->_ContentLength < 0) {
-		std::cout << "Invalid contenlen" << std::cout;
+		std::cout << "Invalid contenlen" << std::endl;
 		//		change in throw error;
 	}
 

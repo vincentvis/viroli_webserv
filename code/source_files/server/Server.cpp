@@ -102,28 +102,26 @@ void Server::run() {
 	std::map<int32_t, IPollable *>::iterator it;
 	int                                      events = 0;
 
-	/* test FileFD */
-	int fd =
-		open("/Users/rheuts/codam/webserv/code/includes/server/Server.hpp", O_RDONLY);
-	struct pollfd pfd = {fd, POLLIN, 0};
-	std::cout << ">>>\n" << fd << "\n";
-	FileFD *ffd = new FileFD((Server::_pollables.find(4)->second->getServer()), fd,
-							 Server::_pfds.size());
-	std::cout << ">>>\n";
-	Server::addPollable(pfd, ffd);
-	/* end test */
+	// /* test FileFD */
+	// int fd =
+	// 	open("/Users/rheuts/codam/webserv/code/includes/server/Server.hpp", O_RDONLY);
+	// struct pollfd pfd = {fd, POLLIN, 0};
+	// std::cout << ">>>\n" << fd << "\n";
+	// FileFD *ffd = new FileFD((Server::_pollables.find(4)->second->getServer()), fd,
+	// 						 Server::_pfds.size());
+	// std::cout << ">>>\n";
+	// Server::addPollable(pfd, ffd);
+	// /* end test */
 
 	while (true) {
 		if ((events = poll(Server::_pfds.data(), Server::_pfds.size(), 0)) < 0) {
 			throw(std::string("error on poll()")); // placeholder
 		}
 
-		/* events reported: check all fds and at most the number of events */
-		int event = 0;
-		for (size_t i = 0; i < Server::_pfds.size() && event < events; ++i) {
+		/* check events and timeout */
+		for (size_t i = 0; i < Server::_pfds.size(); ++i) {
 			/* find on what file descriptor event occurred */
 			if (Server::_pfds[i].revents & (POLLIN | POLLOUT)) {
-				++event;
 				it = Server::_pollables.find(Server::_pfds[i].fd);
 
 				/* file descriptor exists */

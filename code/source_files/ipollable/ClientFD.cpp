@@ -190,7 +190,6 @@ void ClientFD::getBody() {
 }
 
 /* receive data */
-/* need some states to process different parts of the request: HEADER | BODY */
 void ClientFD::pollin() {
 	switch (_state) {
 		case HEADER:
@@ -209,17 +208,21 @@ void ClientFD::pollin() {
 	}
 }
 
+int32_t ClientFD::getRemainderBytes() const {
+	return BUFFERSIZE > _left ? BUFFERSIZE : _left;
+}
+
 /* send data */
 /* need to know connection status (keep-alive|close) */
 void ClientFD::pollout() {
 	/* make sure to not go out of bounds with the buffer */
-	_buffer.assign(_data.begin() + _total,
-				   _data.begin() + _total + (BUFFERSIZE > _left ? BUFFERSIZE : _left));
+	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
+	_bytes = send(_fd, _buffer.data(), getRemainderBytes(), 0);
 
-	_bytes = send(_fd, _buffer.data(), (BUFFERSIZE > _left ? BUFFERSIZE : _left), 0);
-	for (size_t i = 0; i < _buffer.size(); ++i) {
-		std::cout << _buffer[i];
-	}
+	// for (size_t i = 0; i < _buffer.size(); ++i) {
+	// 	std::cout << _buffer[i];
+	// }
+
 	if (_bytes > 0) {
 		_total += _bytes;
 		_left -= _bytes;

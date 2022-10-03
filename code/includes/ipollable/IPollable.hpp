@@ -90,11 +90,12 @@ class ClientFD : public IPollable {
 		void    receive(int len);
 		void    initResponse(int index);
 		void    closeFD();
+		int32_t getRemainderBytes() const;
 };
 
 class FileFD : public IPollable {
 	public:
-		typedef enum { READ, END } state;
+		typedef enum { READ, WRITE, END } state;
 
 		state             _state;
 		Server           *_server;
@@ -113,5 +114,7 @@ class FileFD : public IPollable {
 		void    pollout();
 		int     getFileDescriptor() const;
 		void    readFile();
+		void    writeFile();
 		Server *getServer() const;
+		int32_t getRemainingBytes() const;
 };
