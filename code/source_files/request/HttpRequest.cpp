@@ -62,6 +62,7 @@ void HttpRequest::GETRequest(const Request &Req, const Config &Conf, Response &R
 		std::cout << "method is allowed" << std::endl;
 	}
 	/* else method is not allowed */
+//	405 (Method Not Allowed)
 	if (Req.getHTTPVersion() != "HTTP/1.1")
 		std::cout << "505 HTTP Version Not Supported"
 				  << std::endl; // should become response

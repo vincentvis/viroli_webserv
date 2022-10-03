@@ -30,6 +30,9 @@ void Request::ParseRequest(std::string BUF) {
 	startVal             = endVal + 1;
 	this->_HTTPVersion   = BUF.substr(startVal, BUF.find("\r\n") - startVal);
 
+	/* check _requestTarget */
+		if (_requestTarget.find(" ") != std::string::npos)
+			std::cout << "throw error en create response 400" << std::endl; //No whitespace is allowed in the request-target. 400 (Bad Request) error
 	/* create header map */
 	endVal = BUF.find("\r\n");
 	while (endVal < BUF.length() && startKey < BUF.length() && endKey < BUF.length() &&
