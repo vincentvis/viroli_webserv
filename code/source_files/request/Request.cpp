@@ -27,7 +27,7 @@ void Request::ParseRequest(std::string BUF) {
 	size_t startVal = 0;
 	size_t endVal   = 0;
 
-	/* set method, requestTarget, HttpVersion */
+	/* set method, uri, HttpVersion */
 	this->_method      = BUF.substr(startVal, BUF.find(' '));
 	startVal           = BUF.find(' ') + 1;
 	endVal             = BUF.find(' ', startVal);
@@ -37,7 +37,7 @@ void Request::ParseRequest(std::string BUF) {
 
 	/* check if there are white spaces in the _uri */
 	if (_uri.find(" ") != std::string::npos)
-		throw Utils::ParseException("400");
+		throw Utils::ErrorPageException("400");
 
 	/* create header map */
 	endVal = BUF.find("\r\n");
@@ -73,9 +73,8 @@ void Request::ParseRequest(std::string BUF) {
 		this->_connection          = this->_itr->second;
 	}
 
-	/* set CGI for initialisation request interface */ // SHOULD BE EXTENDED and maybe specific for the one and only config?
-	if (this->_uri.find(".html") == std::string::npos &&
-		this->_uri.find("/") == std::string::npos)
+	/* set CGI for initialisation request interface */
+	if (this->_uri.find(".py") == this->_uri.length() - 3) // should be tested
 		this->_CGI = true;
 
 	/* set content length and chunked for body creation in connectionClass */
@@ -87,10 +86,10 @@ void Request::ParseRequest(std::string BUF) {
 		} catch (const std::runtime_error &e) {
 			std::cerr << "stol failed: \n" << e.what() << std::endl;
 		}
-		throw Utils::ParseException("000"); // right error message should be implemented -> Invalid contenlen;
+		throw Utils::ErrorPageException("400");
 	}
 	if (this->_ContentLength < 0) {
-		throw Utils::ParseException("000"); // right error message should be implemented -> Invalid contenlen;
+		throw Utils::ErrorPageException("400");
 	}
 
 	this->_itr = _header.find("Transfer-Encoding:");
@@ -141,18 +140,18 @@ bool Request::checkValidMethod(const Request &Req) {
 void Request::ValidateRequest(const Config &Conf) {
 	/* check method */
 	if (checkValidMethod(*this) == false) {
-		throw Utils::ValidationException("405"); // not sure if this is the right number; the method given by the client could be "DOG"
+		throw Utils::ErrorPageException("405"); // not sure if this is the right number; the method given by the client could be "DOG"
 	}
 	if (methodsAllowed(*this, Conf) == false) {
-		throw Utils::ValidationException("405");
+		throw Utils::ErrorPageException("405");
 	};
 
 	/* check uri */
 	// is always true, because of fallback? // remove if you agree :)
 
 	/* check if HTTP version is 1.1 */
-	if (this->_HTTPVersion != "HTTP/1.1")
-		throw Utils::ValidationException("505");
+	if (this->_HTTPVersion != std::string("HTTP/1.1"))
+		throw Utils::ErrorPageException("505");
 }
 
 void Request::setBody(std::string NewBody) {
@@ -171,7 +170,7 @@ std::string Request::getMethod() const {
 	return this->_method;
 }
 
-std::string Request::getRequestTarget() const {
+std::string Request::getUri() const {
 	return this->_uri;
 }
 
@@ -181,6 +180,10 @@ std::string Request::getHTTPVersion() const {
 
 std::string Request::getBody() const {
 	return this->_body;
+}
+
+std::string Request::getQuery() const {
+	return this->_query;
 }
 
 long Request::getContentLength() const {

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "config/Config.hpp"
-#include "utils/Utils.hpp"
 #include "utils/Exception.hpp"
+#include "utils/Utils.hpp"
 #include <algorithm>
 #include <iostream>
 #include <map>
@@ -47,9 +47,10 @@ class Request {
 		std::map<std::string, std::string> getHeaderMap() const;
 		std::string                        getConnectionInfo() const;
 		std::string                        getMethod() const;
-		std::string                        getRequestTarget() const;
+		std::string                        getUri() const;
 		std::string                        getHTTPVersion() const;
 		std::string                        getBody() const;
+		std::string                        getQuery() const;
 		bool                               contentLenAvailable() const;
 		bool                               getConnectionAvailable() const;
 		bool                               getChunked() const;

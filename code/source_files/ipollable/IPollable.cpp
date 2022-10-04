@@ -192,14 +192,14 @@ void ClientFD::getHeader() {
 	if ((end = _data.find("\r\n\r\n")) != std::string::npos) {
 		try{
 			this->_request.ParseRequest(this->_data);
-		}catch (const Utils::ParseException &e) {
-			this->_response.createErrorResponse(e.what(), this->_server->findConfig(this->_request));
-		}
-		try{
+			this->_config = this->_server->findConfig(this->_request);
+			this->_location = this->_config.findLocation(this->_request);
 			this->_request.ValidateRequest(this->_server->findConfig(this->_request));
 		}
-		catch (const Utils::ValidationException &e) {
-			this->_response.createErrorResponse(e.what(), this->_server->findConfig(this->_request));
+		catch (const Utils::ErrorPageException &e) {
+			this->_response.createErrorResponse(e.what(), this->_config);
+		} catch (const std::exception &e) {
+			// other exceptions like std::string! should be finished later/how?
 		}
 		_header = _data.substr(0, end);
 		_data   = _data.substr(end + CRLFCRLF);
@@ -224,12 +224,12 @@ void ClientFD::getHeader() {
 		/* create CGIrequest or HTTPrequest */
 		if (this->_request.getCgi() == true) {
 			this->_requestInterface =
-				new CGIRequest(this->_request, this->_server->findConfig(this->_request),
+				new CGIRequest(this->_request, this->_config,
 							   this->_response);
 		} else {
 			this->_request.printAttributesInRequestClass(); // REMOVE LATER
 			this->_requestInterface =
-				new HttpRequest(this->_request, this->_server->findConfig(this->_request),
+				new HttpRequest(this->_request, this->_config,
 								this->_response);
 			initResponse(_index);
 		}
