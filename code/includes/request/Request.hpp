@@ -32,6 +32,7 @@ class Request {
 		~Request();
 
 		enum e_RequestType { GET, POST, DELETE }; // make static
+
 		static std::map<std::string, e_RequestType> _MethodKeys; // make static
 		void printAttributesInRequestClass(); // !used for testing; REMOVE later
 		void ParseRequest(std::string BUF);

@@ -35,7 +35,7 @@ void HttpRequest::CheckMethod(const Request &Req, const Config &Conf, Response &
 }
 
 void HttpRequest::GETRequest(const Request &Req, const Config &Conf, Response &Res) {
-
+	(void)Conf;
 	std::string Response;
 	Response = Req.getHTTPVersion() + " 200 OK\r\n" + "Content-Length: " + "23" +
 			   "\r\nContent-Type: text/plain\r\nConnection: Close\r\n\r\n" +
