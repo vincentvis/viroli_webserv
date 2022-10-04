@@ -116,7 +116,8 @@ bool Request::methodsAllowed(const Request &Req, const Config &Conf) {
 		tryFind =
 			std::find(Loc.getAllow().begin(), Loc.getAllow().end(), Req.getMethod());
 		return (tryFind != Loc.getAllow().end());
-	} else {
+	}
+	else {
 		tryFind =
 			std::find(Conf.getAllow().begin(), Conf.getAllow().end(), Req.getMethod());
 		return (tryFind != Conf.getAllow().end());
