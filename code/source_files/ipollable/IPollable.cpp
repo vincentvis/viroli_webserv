@@ -198,13 +198,13 @@ void ClientFD::getHeader() {
 		try{
 			this->_request.ValidateRequest(this->_server->findConfig(this->_request));
 		}
-		catch (const Utils::MethodNotAllowedException &e) {
+		catch (const Utils::ValidationException &e) {
 			this->_response.createErrorResponse(e.what(), this->_server->findConfig(this->_request));
 		}
 		_header = _data.substr(0, end);
 		_data   = _data.substr(end + CRLFCRLF);
 		_state  = BODY;
-		std::cout << "\nheader:\n\n" << _header << "\n\n";
+//		std::cout << "\nheader:\n\n" << _header << "\n\n";
 
 		/* check if contentLengthAvailable() or getChunked() are true if so body exists
 		 * read bytes and setBody */
@@ -223,15 +223,10 @@ void ClientFD::getHeader() {
 
 		/* create CGIrequest or HTTPrequest */
 		if (this->_request.getCgi() == true) {
-			std::cout << "CGI: this should work with the new .findConfig() function"
-					  << std::endl;
 			this->_requestInterface =
 				new CGIRequest(this->_request, this->_server->findConfig(this->_request),
 							   this->_response);
 		} else {
-			std::cout << "HTTP: this should work with the new .findConfig() function"
-					  << std::endl;
-			std::cout << "config size!: " << this->_server->_configs.size() << std::endl;
 			this->_request.printAttributesInRequestClass(); // REMOVE LATER
 			this->_requestInterface =
 				new HttpRequest(this->_request, this->_server->findConfig(this->_request),

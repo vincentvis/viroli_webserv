@@ -10,8 +10,9 @@ std::string Response::getResponse() const {
 
 void Response::createErrorResponse(std::string Error, const Config &conf){
 //	conf.getErrorPages
-	setResponse("error Page" + Error);
-	setRespReady();
+	std::cout << "this is an error response " << Error << std::endl;
+//	setResponse("error Page" + Error);
+//	setRespReady();
 }
 
 void Response::setResponse(std::string newRes) { //Quick and dirty should be removed later

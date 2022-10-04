@@ -14,7 +14,7 @@ void CGIRequest::CheckMethod(const Request &Req, const Config &Conf, Response &R
 
 	switch (itr->second) {
 		default:
-			std::cout << "OTHER" << std::endl;
+			std::cout << "OTHER" << std::endl; // can be removed since we check early on!
 			//				OTHERRequest(Req, Conf, Res);
 			break;
 		case GET:

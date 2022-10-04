@@ -14,8 +14,8 @@ class RequestInterface {
 
 
 	public:
-		enum e_RequestType { GET, POST, DELETE };
-		static std::map<std::string, e_RequestType> _MethodKeys;
+		enum e_RequestType { GET, POST, DELETE }; // make static
+		static std::map<std::string, e_RequestType> _MethodKeys; // make static
 		RequestInterface(); // should become private!
 		RequestInterface(const Request &Req, const Config &Conf, Response &Res);
 		~RequestInterface();

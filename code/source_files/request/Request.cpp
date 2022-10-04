@@ -16,9 +16,9 @@ Request::Request() {
 	this->_TransferEncodingChunked = false;
 	this->_ContentLengthAvailable  = false;
 	this->_ConnectionAvailable     = false;
-	_MethodKeys["GET"]             = GET;
-	_MethodKeys["DELETE"]          = DELETE;
-	_MethodKeys["POST"]            = POST;
+	_MethodKeys["GET"]             = GET; // make static
+	_MethodKeys["DELETE"]          = DELETE; // make static
+	_MethodKeys["POST"]            = POST; // make static
 }
 
 void Request::ParseRequest(std::string BUF) {
@@ -37,9 +37,7 @@ void Request::ParseRequest(std::string BUF) {
 
 	/* check if there are white spaces in the _uri */
 	if (_uri.find(" ") != std::string::npos)
-		std::cout << "throw error en create response 400"
-				  << std::endl; // No whitespace is allowed in the request-target. 400
-								// (Bad Request) error
+		throw Utils::ParseException("400");
 
 	/* create header map */
 	endVal = BUF.find("\r\n");
@@ -89,10 +87,10 @@ void Request::ParseRequest(std::string BUF) {
 		} catch (const std::runtime_error &e) {
 			std::cerr << "stol failed: \n" << e.what() << std::endl;
 		}
-		throw std::runtime_error("Invalid contenlen");
+		throw Utils::ParseException("000"); // right error message should be implemented -> Invalid contenlen;
 	}
 	if (this->_ContentLength < 0) {
-		throw std::runtime_error("Invalid contenlen");
+		throw Utils::ParseException("000"); // right error message should be implemented -> Invalid contenlen;
 	}
 
 	this->_itr = _header.find("Transfer-Encoding:");
@@ -142,19 +140,18 @@ bool Request::checkValidMethod(const Request &Req) {
 void Request::ValidateRequest(const Config &Conf) {
 	/* check method */
 	if (checkValidMethod(*this) == false) {
-		throw Utils::MethodNotAllowedException("405");
+		throw Utils::ValidationException("405"); // not sure if this is the right number; the method given by the client could be "DOG"
 	}
 	if (methodsAllowed(*this, Conf) == false) {
-		throw std::runtime_error("405 (Method Not Allowed)");
+		throw Utils::ValidationException("405");
 	};
 
 	/* check uri */
-	// is always true, because of fallback?
+	// is always true, because of fallback? // remove if you agree :)
 
 	/* check if HTTP version is 1.1 */
 	if (this->_HTTPVersion != "HTTP/1.1")
-		std::cout << "505 HTTP Version Not Supported"
-				  << std::endl; // should become response
+		throw Utils::ValidationException("505");
 }
 
 void Request::setBody(std::string NewBody) {
