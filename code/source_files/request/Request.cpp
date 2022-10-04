@@ -14,6 +14,7 @@ Request::Request() {
 	this->_CGI                     = false;
 	this->_TransferEncodingChunked = false;
 	this->_ContentLengthAvailable  = false;
+	this->_ConnectionAvailable     = false;
 }
 
 void Request::ParseRequest(std::string BUF) {
@@ -58,13 +59,21 @@ void Request::ParseRequest(std::string BUF) {
 		std::cout << "505 HTTP Version Not Supported"
 				  << std::endl; // should become response
 
-	/* check query */
+	/* check and set query */
 	startVal = _uri.find("?", 0);
 	if (startVal != std::string::npos) {
 		if (this->_uri.length() > startVal + 1) {
-			this->_query = this->_uri.substr(startVal + 1, this->_uri.length() - (startVal + 1));
+			this->_query =
+				this->_uri.substr(startVal + 1, this->_uri.length() - (startVal + 1));
 			this->_uri.erase(startVal);
 		}
+	}
+
+	/* check and set connection */
+	this->_itr = _header.find("Connection");
+	if (this->_itr != _header.end()) {
+		this->_ConnectionAvailable = true;
+		this->_connection          = this->_itr->second;
 	}
 
 	/* set CGI for initialisation request interface */ // SHOULD BE EXTENDED
@@ -105,6 +114,10 @@ std::map<std::string, std::string> Request::getHeaderMap() const {
 	return this->_header;
 }
 
+std::string Request::getConnectionInfo() const {
+	return this->_connection;
+}
+
 std::string Request::getMethod() const {
 	return this->_method;
 }
@@ -127,6 +140,10 @@ long Request::getContentLength() const {
 
 bool Request::getChunked() const {
 	return this->_TransferEncodingChunked;
+}
+
+bool Request::getConnectionAvailable() const {
+	return this->_ConnectionAvailable;
 }
 
 bool Request::getCgi() const {

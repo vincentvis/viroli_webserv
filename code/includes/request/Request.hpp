@@ -6,6 +6,7 @@
 #include <map>
 
 class Server;
+
 class Request {
 	private:
 		std::string                        _method;
@@ -13,6 +14,8 @@ class Request {
 		std::string                        _query;
 		std::string                        _HTTPVersion;
 		std::string                        _body;
+		std::string                        _connection;
+		bool                               _ConnectionAvailable;
 		bool                               _CGI;
 		bool                               _TransferEncodingChunked;
 		bool                               _ContentLengthAvailable;
@@ -32,11 +35,13 @@ class Request {
 
 		void                               setBody(std::string NewBody);
 		std::map<std::string, std::string> getHeaderMap() const;
+		std::string                        getConnectionInfo() const;
 		std::string                        getMethod() const;
 		std::string                        getRequestTarget() const;
 		std::string                        getHTTPVersion() const;
 		std::string                        getBody() const;
 		bool                               contentLenAvailable() const;
+		bool                               getConnectionAvailable() const;
 		bool                               getChunked() const;
 		long                               getContentLength() const;
 		bool                               getCgi() const;
