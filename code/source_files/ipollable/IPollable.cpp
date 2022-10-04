@@ -183,6 +183,8 @@ void ClientFD::initResponse(int index) {
 	}
 }
 
+// Shall I combine try and catch block Parserequest and validation? incl exception? since they create error response;
+
 void ClientFD::getHeader() {
 	size_t end = 0;
 
@@ -190,11 +192,15 @@ void ClientFD::getHeader() {
 	if ((end = _data.find("\r\n\r\n")) != std::string::npos) {
 		try{
 			this->_request.ParseRequest(this->_data);
-		}catch (const std::runtime_error &e) {
-//			this->_response.createErrorResponse(e.what);
-			std::cerr << "Invalid request: \n" << e.what() << std::endl;
+		}catch (const Utils::ParseException &e) {
+			this->_response.createErrorResponse(e.what(), this->_server->findConfig(this->_request));
 		}
-		this->_request.ValidateRequest(this->_server->findConfig(this->_request));
+		try{
+			this->_request.ValidateRequest(this->_server->findConfig(this->_request));
+		}
+		catch (const Utils::MethodNotAllowedException &e) {
+			this->_response.createErrorResponse(e.what(), this->_server->findConfig(this->_request));
+		}
 		_header = _data.substr(0, end);
 		_data   = _data.substr(end + CRLFCRLF);
 		_state  = BODY;

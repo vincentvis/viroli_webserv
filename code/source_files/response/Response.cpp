@@ -8,6 +8,12 @@ std::string Response::getResponse() const {
 	return this->_response;
 }
 
+void Response::createErrorResponse(std::string Error, const Config &conf){
+//	conf.getErrorPages
+	setResponse("error Page" + Error);
+	setRespReady();
+}
+
 void Response::setResponse(std::string newRes) { //Quick and dirty should be removed later
 	this->_response = newRes;
 }

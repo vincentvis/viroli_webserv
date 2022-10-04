@@ -142,7 +142,7 @@ bool Request::checkValidMethod(const Request &Req) {
 void Request::ValidateRequest(const Config &Conf) {
 	/* check method */
 	if (checkValidMethod(*this) == false) {
-		throw std::runtime_error("error response invalid method");
+		throw Utils::MethodNotAllowedException("405");
 	}
 	if (methodsAllowed(*this, Conf) == false) {
 		throw std::runtime_error("405 (Method Not Allowed)");

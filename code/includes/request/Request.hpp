@@ -2,6 +2,7 @@
 
 #include "config/Config.hpp"
 #include "utils/Utils.hpp"
+#include "utils/Exception.hpp"
 #include <algorithm>
 #include <iostream>
 #include <map>
