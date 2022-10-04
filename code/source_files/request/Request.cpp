@@ -31,7 +31,7 @@ void Request::ParseRequest(std::string BUF) {
 	startVal           = endVal + 1;
 	this->_HTTPVersion = BUF.substr(startVal, BUF.find("\r\n") - startVal);
 
-	/* check _uri */
+	/* check if there are white spaces in the _uri */
 	if (_uri.find(" ") != std::string::npos)
 		std::cout << "throw error en create response 400"
 				  << std::endl; // No whitespace is allowed in the request-target. 400
@@ -54,7 +54,7 @@ void Request::ParseRequest(std::string BUF) {
 			Utils::trimWhitespaceCopy(BUF.substr(startVal, endVal - startVal));
 	}
 
-	/* check HTTP version */
+	/* check if HTTP version is 1.1 */
 	if (this->_HTTPVersion != "HTTP/1.1")
 		std::cout << "505 HTTP Version Not Supported"
 				  << std::endl; // should become response
@@ -76,7 +76,7 @@ void Request::ParseRequest(std::string BUF) {
 		this->_connection          = this->_itr->second;
 	}
 
-	/* set CGI for initialisation request interface */ // SHOULD BE EXTENDED
+	/* set CGI for initialisation request interface */ // SHOULD BE EXTENDED?
 	if (this->_uri.find(".html") == std::string::npos &&
 		this->_uri.find("/") == std::string::npos)
 		this->_CGI = true;
@@ -92,8 +92,7 @@ void Request::ParseRequest(std::string BUF) {
 		}
 	}
 	if (this->_ContentLength < 0) {
-		std::cout << "Invalid contenlen" << std::cout;
-		//		change in throw error;
+		std::cout << "Invalid contenlen" << std::cout; //		change in throw error;
 	}
 
 	this->_itr = _header.find("Transfer-Encoding:");
