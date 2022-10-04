@@ -1,6 +1,6 @@
 #include "request/Request.hpp"
 //#include "server/Server.hpp"
-#include "config/Config.hpp"
+//#include "config/Config.hpp"
 #include "utils/Utils.hpp"
 
 // Various ad hoc limitations on request-line length are found in practice. It is
@@ -90,9 +90,14 @@ void Request::ParseRequest(std::string BUF) {
 		} catch (const std::runtime_error &e) {
 			std::cerr << "stol failed: \n" << e.what() << std::endl;
 		}
+		throw std::runtime_error(
+			"Invalid contenlen"
+		);
 	}
 	if (this->_ContentLength < 0) {
-		std::cout << "Invalid contenlen" << std::cout; //		change in throw error;
+		throw std::runtime_error(
+			"Invalid contenlen"
+		);
 	}
 
 	this->_itr = _header.find("Transfer-Encoding:");
@@ -103,6 +108,42 @@ void Request::ParseRequest(std::string BUF) {
 
 	/* after parsing header, set header available */
 	this->_headerAvailable = true;
+}
+
+bool Request::methodsAllowed(const Request &Req, const Config &Conf) {
+	/* if both location.getAllow() and Config.getAllow don't exist "default fallback"
+	 * rules apply: all methods are allowed*/
+	Location here = Conf.findLocation(Req);
+	if (here.getAllow().size() == 0 && Conf.getAllow().size() == 0)
+		return true;
+	/* check if location.getAllow() exists it overrules the fallback rules, else "config
+	 * fallback" rules should be applied */
+	if (here.getAllow().size() != 0) {
+		for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
+			if (Req.getMethod() == here.getAllow()[i])
+				return true;
+		}
+	} else {
+		for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
+			if (Req.getMethod() == Conf.getAllow()[i])
+				return true;
+		}
+	}
+	return false;
+}
+
+void Request::ValidateRequest(const Config &Conf){
+	/* check method */
+	if (methodsAllowed(*this, Conf) == true)
+		std::cout << "this is oke" << std::endl;
+//	else
+//	/* else method is not allowed */
+	////	405 (Method Not Allowed)
+
+	/* check uri */
+
+	/* check http */
+
 }
 
 void Request::setBody(std::string NewBody) {

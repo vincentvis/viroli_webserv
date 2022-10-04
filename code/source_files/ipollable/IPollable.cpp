@@ -188,7 +188,12 @@ void ClientFD::getHeader() {
 
 	receive(BUFFERSIZE);
 	if ((end = _data.find("\r\n\r\n")) != std::string::npos) {
-		this->_request.ParseRequest(this->_data);
+		try{
+			this->_request.ParseRequest(this->_data);
+		}catch (const std::runtime_error &e) {
+			std::cerr << "Invalid request: \n" << e.what() << std::endl;
+		}
+		this->_request.ValidateRequest(this->_server->findConfig(this->_request));
 		_header = _data.substr(0, end);
 		_data   = _data.substr(end + CRLFCRLF);
 		_state  = BODY;

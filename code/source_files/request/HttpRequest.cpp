@@ -34,35 +34,35 @@ void HttpRequest::CheckMethod(const Request &Req, const Config &Conf, Response &
 	}
 }
 
-bool HttpRequest::methodsAllowed(const Request &Req, const Config &Conf) {
-	/* if both location.getAllow() and Config.getAllow don't exist "default fallback"
-	 * rules apply: all methods are allowed*/
-	Location here = Conf.findLocation(Req);
-	if (here.getAllow().size() == 0 && Conf.getAllow().size() == 0)
-		return true;
-	/* check if location.getAllow() exists it overrules the fallback rules, else "config
-	 * fallback" rules should be applied */
-	if (here.getAllow().size() != 0) {
-		for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
-			if (Req.getMethod() == here.getAllow()[i])
-				return true;
-		}
-	} else {
-		for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
-			if (Req.getMethod() == Conf.getAllow()[i])
-				return true;
-		}
-	}
-	return false;
-}
+//bool HttpRequest::methodsAllowed(const Request &Req, const Config &Conf) {
+//	/* if both location.getAllow() and Config.getAllow don't exist "default fallback"
+//	 * rules apply: all methods are allowed*/
+//	Location here = Conf.findLocation(Req);
+//	if (here.getAllow().size() == 0 && Conf.getAllow().size() == 0)
+//		return true;
+//	/* check if location.getAllow() exists it overrules the fallback rules, else "config
+//	 * fallback" rules should be applied */
+//	if (here.getAllow().size() != 0) {
+//		for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
+//			if (Req.getMethod() == here.getAllow()[i])
+//				return true;
+//		}
+//	} else {
+//		for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
+//			if (Req.getMethod() == Conf.getAllow()[i])
+//				return true;
+//		}
+//	}
+//	return false;
+//}
 
 void HttpRequest::GETRequest(const Request &Req, const Config &Conf, Response &Res) {
-	/*check if method is allowed */
-	if (HttpRequest::methodsAllowed(Req, Conf) == true) {
-		std::cout << "method is allowed" << std::endl;
-	}
-	/* else method is not allowed */
-//	405 (Method Not Allowed)
+//	/*check if method is allowed */
+//	if (HttpRequest::methodsAllowed(Req, Conf) == true) {
+//		std::cout << "method is allowed" << std::endl;
+//	}
+//	/* else method is not allowed */
+////	405 (Method Not Allowed)
 
 	std::string Response;
 	Response = Req.getHTTPVersion() + " 200 OK\r\n" + "Content-Length: " + "23" +

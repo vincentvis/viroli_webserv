@@ -29,6 +29,7 @@ class Request {
 
 		void printAttributesInRequestClass(); // !used for testing; REMOVE later
 		void ParseRequest(std::string BUF);
+		void ValidateRequest(const Config &conf);
 		// clang-format off
 		std::map<std::string, std::string>::iterator _itr; // !used to print string; REMOVE later
 		// clang-format on
@@ -46,4 +47,5 @@ class Request {
 		long                               getContentLength() const;
 		bool                               getCgi() const;
 		bool                               getHeaderAvailable() const;
+		bool methodsAllowed(const Request &Req, const Config &Conf);
 };
