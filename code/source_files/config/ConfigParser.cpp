@@ -78,6 +78,7 @@ void ConfigParser::parseStream() {
 
 	// should be at first non-whitespace character here
 	while (this->_currentLine.find("server") == 0) {
+		int line_of_server = _linenum;
 		skip_to_after_server_block_opening(sizeof("server") - 1);
 
 		Config *newConfig    = new Config();
@@ -85,7 +86,17 @@ void ConfigParser::parseStream() {
 		_configs.push_back(newConfig);
 
 		extract_server_block_info(*newConfig);
+		if ((*newConfig)._locations.size() == 0) {
+			throw std::runtime_error(
+				"No location blocks found for server block from line " +
+				Utils::to_string(line_of_server) + " to " + Utils::to_string(_linenum));
+		}
 		sortLocations(*newConfig);
+		if ((*newConfig)._locations[0].getMatch() != std::string("/")) {
+			throw std::runtime_error(
+				"Please supply a '/' location for the server block from line " +
+				Utils::to_string(line_of_server) + " to " + Utils::to_string(_linenum));
+		}
 
 		if (newConfig->_ports.size() == 0) {
 			throw std::runtime_error("Missing required directives for server config");
@@ -104,7 +115,7 @@ void ConfigParser::sortLocations(Config &config) {
 
 void ConfigParser::extract_server_block_info(Config &target) {
 	while (true) {
-		if (this->_fileStream.eof() || this->_currentLine.empty()) {
+		if (this->_fileStream.eof() && this->_currentLine.empty()) {
 			throw std::runtime_error(
 				"Unclosed serverblock found in configfile around line " +
 				Utils::to_string(_linenum));
