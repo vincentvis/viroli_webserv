@@ -117,13 +117,11 @@ void Server::run() {
 		if ((events = poll(Server::_pfds.data(), Server::_pfds.size(), 0)) < 0) {
 			throw(std::string("error on poll()")); // placeholder
 		}
-
 		/* check events and timeout */
 		for (size_t i = 0; i < Server::_pfds.size(); ++i) {
 			/* find on what file descriptor event occurred */
 			if (Server::_pfds[i].revents & (POLLIN | POLLOUT)) {
 				it = Server::_pollables.find(Server::_pfds[i].fd);
-
 				/* file descriptor exists */
 				if (it != _pollables.end()) {
 					if (Server::_pfds[i].revents & POLLIN) {
@@ -131,7 +129,6 @@ void Server::run() {
 					} else if (Server::_pfds[i].revents & POLLOUT) {
 						it->second->pollout();
 					}
-
 					/* file descriptor doesn't exist */
 				} else {
 					throw(std::string("error on _pollables.find()")); // placholder
@@ -146,9 +143,32 @@ void Server::run() {
 	}
 }
 
-void Server::addPollable(struct pollfd pfd, IPollable *pollable) {
-	Server::_pollables.insert(std::pair<int32_t, IPollable *>(pfd.fd, pollable));
-	Server::_pfds.push_back(pfd);
+// void Server::addPollable(struct pollfd pfd, IPollable *pollable) {
+// 	Server::_pollables.insert(std::pair<int32_t, IPollable *>(pfd.fd, pollable));
+// 	Server::_pfds.push_back(pfd);
+// }
+
+void Server::addPollable(Server *server, int32_t fd, Pollable type, int16_t event) {
+	struct pollfd pfd = {fd, event, 0};
+	IPollable    *pollable;
+
+	switch (type) {
+		case SERVERPOLL:
+			pollable = new ServerFD(server, fd, Server::_pfds.size());
+			Server::_pollables.insert(std::pair<int32_t, IPollable *>(fd, pollable));
+			Server::_pfds.push_back(pfd);
+			break;
+		case CLIENTPOLL:
+			pollable = new ClientFD(server, fd, Server::_pfds.size());
+			Server::_pollables.insert(std::pair<int32_t, IPollable *>(fd, pollable));
+			Server::_pfds.push_back(pfd);
+			break;
+		case FILEPOLL:
+			pollable = new FileFD(server, fd, Server::_pfds.size());
+			Server::_pollables.insert(std::pair<int32_t, IPollable *>(fd, pollable));
+			Server::_pfds.push_back(pfd);
+			break;
+	}
 }
 
 std::map<int32_t, IPollable *> Server::_pollables;

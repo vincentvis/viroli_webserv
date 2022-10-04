@@ -41,8 +41,12 @@ void HttpRequest::GETRequest(const Request &Req, const Config &Conf, Response &R
 	for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
 		if (Req.getMethod() == Conf.getAllow()[i]) {
 			std::cout << "method " << Conf.getAllow()[i] << " is allowed" << std::endl;
-			Response = Req.getHTTPVersion() + " 200 OK\r\n" + "Content-Length: " + "23" +"\r\nContent-Type: text/plain\r\nConnection: Close\r\n\r\n" + "this is a test response" +"\r\n";
-			//			Response = Req.getHTTPVersion() + " 200 OK\r\n" + "Content-Length: " + std::to_string(Req.getBody().size()) +"\r\nContent-Type: text/plain\r\nConnection: Close\r\n\r\n" + Req.getBody() +"\r\n";
+			Response = Req.getHTTPVersion() + " 200 OK\r\n" + "Content-Length: " + "23" +
+					   "\r\nContent-Type: text/plain\r\nConnection: Close\r\n\r\n" +
+					   "this is a test response" + "\r\n";
+			//			Response = Req.getHTTPVersion() + " 200 OK\r\n" + "Content-Length: " +
+			//std::to_string(Req.getBody().size()) +"\r\nContent-Type:
+			//text/plain\r\nConnection: Close\r\n\r\n" + Req.getBody() +"\r\n";
 			Res.setResponse(Response);
 			Res.setRespReady();
 		}
@@ -50,26 +54,24 @@ void HttpRequest::GETRequest(const Request &Req, const Config &Conf, Response &R
 	/* else method is not allowed */
 }
 
-//void HttpRequest::POSTRequest(const Request &Req, const Config &Conf, Response &Res) {
+// void HttpRequest::POSTRequest(const Request &Req, const Config &Conf, Response &Res) {
 //	(void)Req;
 //	(void)Conf;
 //	(void)Res;
 //	std::cout << "this is a POST HTTP Request" << std::endl; // REMOVE LATER
-//}
+// }
 //
-//void HttpRequest::DELETERequest(const Request &Req, const Config &Conf, Response &Res) {
-//	(void)Req;
-//	(void)Conf;
-//	(void)Res;
-//	std::cout << "this is a DELETE HTTP Request" << std::endl; // REMOVE LATER
-//}
+// void HttpRequest::DELETERequest(const Request &Req, const Config &Conf, Response &Res)
+// { 	(void)Req; 	(void)Conf; 	(void)Res; 	std::cout << "this is a DELETE HTTP Request" <<
+//std::endl; // REMOVE LATER
+// }
 //
-//void HttpRequest::OTHERRequest(const Request &Req, const Config &Conf, Response &Res) {
+// void HttpRequest::OTHERRequest(const Request &Req, const Config &Conf, Response &Res) {
 //	(void)Req;
 //	(void)Conf;
 //	(void)Res;
 //	std::cout << "this is a OTHER HTTP Request" << std::endl; // REMOVE LATER
-//}
+// }
 
 HttpRequest::~HttpRequest() {
 }

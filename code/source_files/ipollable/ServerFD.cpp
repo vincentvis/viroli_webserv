@@ -29,8 +29,9 @@ void ServerFD::pollin() {
 	}
 
 	std::cout << "new connection accepted\n";
-	struct pollfd pfd = {newfd, POLLIN, 0};
-	Server::addPollable(pfd, new ClientFD(_server, newfd, Server::_pfds.size()));
+	Server::addPollable(_server, newfd, CLIENTPOLL, POLLIN);
+	// struct pollfd pfd = {newfd, POLLIN, 0};
+	// Server::addPollable(pfd, new ClientFD(_server, newfd, Server::_pfds.size()));
 }
 
 /* do nothing on POLLOUT event */

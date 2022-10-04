@@ -23,9 +23,11 @@
 #include <utility>
 #include <vector>
 
-#define BUFFERSIZE     10 // tmp
+#define BUFFERSIZE     4  // tmp
 #define MAXCONNECTIONS 10 // tmp
 #define PFDS_THRESHOLD 1000
+
+enum Pollable { SERVERPOLL, CLIENTPOLL, FILEPOLL };
 
 class IPollable;
 
@@ -46,8 +48,7 @@ class Server {
 		int32_t     getFileDescriptor() const;
 		static void run();
 		static void removePoll();
-		static void addPoll(Server *server);
-		static void addPollable(struct pollfd pfd, IPollable *pollable);
+		static void addPollable(Server *server, int fd, Pollable type, int16_t event);
 
 		static std::map<int32_t, IPollable *> _pollables;
 		static std::vector<struct pollfd>     _pfds;

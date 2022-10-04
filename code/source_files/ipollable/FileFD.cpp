@@ -24,7 +24,9 @@ void FileFD::readFile() {
 void FileFD::pollin() {
 	switch (_state) {
 		case READ:
-			readFile();
+			return readFile();
+		case WRITE:
+			break;
 		case END:
 			std::cout << "file contents:" << std::endl;
 			std::cout << _data << std::endl;
@@ -53,13 +55,15 @@ void FileFD::writeFile() {
 
 void FileFD::pollout() {
 	switch (_state) {
+		case READ:
+			break;
 		case WRITE:
-			writeFile();
+			return writeFile();
 		case END:
 			std::cout << "file contents:" << std::endl;
 			std::cout << _data << std::endl;
 	}
-} // implement write(), placeholder
+}
 
 int FileFD::getFileDescriptor() const {
 	return _fd;

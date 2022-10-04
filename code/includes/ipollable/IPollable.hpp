@@ -54,15 +54,15 @@ class ServerFD : public IPollable {
 
 class ClientFD : public IPollable {
 	public:
-		typedef enum { HEADER, BODY, END } state;
-		typedef enum { LENGTH, CHUNKED } transfer;
+		enum State { HEADER, BODY, END };
+		enum Transfer { LENGTH, CHUNKED };
 
 		Request           _request;
 		Response          _response;
 		RequestInterface *_requestInterface;
 		Server           *_server;
-		transfer          _transfer;
-		state             _state;
+		Transfer          _transfer;
+		State             _state;
 		std::vector<char> _buffer;
 		std::string       _data;
 		std::string       _header;
@@ -95,9 +95,9 @@ class ClientFD : public IPollable {
 
 class FileFD : public IPollable {
 	public:
-		typedef enum { READ, WRITE, END } state;
+		enum State { READ, WRITE, END };
 
-		state             _state;
+		State             _state;
 		Server           *_server;
 		std::vector<char> _buffer;
 		std::string       _data;
