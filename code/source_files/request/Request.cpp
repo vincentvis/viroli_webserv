@@ -75,7 +75,7 @@ void Request::ParseRequest(std::string BUF) {
 		this->_connection          = this->_itr->second;
 	}
 
-	/* set CGI for initialisation request interface */ // SHOULD BE EXTENDED?
+	/* set CGI for initialisation request interface */ // SHOULD BE EXTENDED and maybe specific for the one and only config?
 	if (this->_uri.find(".html") == std::string::npos &&
 		this->_uri.find("/") == std::string::npos)
 		this->_CGI = true;
@@ -106,6 +106,7 @@ void Request::ParseRequest(std::string BUF) {
 }
 
 bool Request::methodsAllowed(const Request &Req, const Config &Conf) {
+	std::vector<std::string>::iterator tryFind;
 	/* if both location.getAllow() and Config.getAllow don't exist "default fallback
 	 * rules" apply: all methods are allowed*/
 	Location Loc = Conf.findLocation(Req);
@@ -113,47 +114,16 @@ bool Request::methodsAllowed(const Request &Req, const Config &Conf) {
 		return true;
 	/* check if location.getAllow() exists it overrules the fallback rules, else "config
 	 * fallback" rules should be applied */
-		if (!Loc.getAllow().empty()) {
-			std::vector<std::string>::iterator tryFind =
-				std::find(Loc.getAllow().begin(), Loc.getAllow().end(), Req.getMethod());
-			return (tryFind != Loc.getAllow().end());
-		}
-		else {
-			std::vector<std::string>::iterator tryFind =
-				std::find(Conf.getAllow().begin(), Conf.getAllow().end(), Req.getMethod());
-			return (tryFind != Conf.getAllow().end());
-		}
-
-
-
-
-
-//		if (Loc.getAllow().size() != 0) {
-//			for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
-//				if (Req.getMethod() == Loc.getAllow()[i])
-//					return true;
-//			}
-//		else {
-//			for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
-//				if (Req.getMethod() == Conf.getAllow()[i])
-//					return true;
-//			}
-//
-//
-//	return false;
+	if (!Loc.getAllow().empty()) {
+		tryFind =
+			std::find(Loc.getAllow().begin(), Loc.getAllow().end(), Req.getMethod());
+		return (tryFind != Loc.getAllow().end());
+	} else {
+		tryFind =
+			std::find(Conf.getAllow().begin(), Conf.getAllow().end(), Req.getMethod());
+		return (tryFind != Conf.getAllow().end());
+	}
 }
-	//	if (here.getAllow().size() != 0) {
-	//		for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
-	//			if (Req.getMethod() == here.getAllow()[i])
-	//				return true;
-	//		}
-	//	} else {
-	//		for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
-	//			if (Req.getMethod() == Conf.getAllow()[i])
-	//				return true;
-	//		}
-	//	}
-
 
 bool Request::checkValidMethod(const Request &Req) {
 	std::map<std::string, Request::e_RequestType>::iterator itr =

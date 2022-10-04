@@ -191,6 +191,7 @@ void ClientFD::getHeader() {
 		try{
 			this->_request.ParseRequest(this->_data);
 		}catch (const std::runtime_error &e) {
+//			this->_response.createErrorResponse(e.what);
 			std::cerr << "Invalid request: \n" << e.what() << std::endl;
 		}
 		this->_request.ValidateRequest(this->_server->findConfig(this->_request));
