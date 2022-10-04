@@ -74,11 +74,13 @@ void HttpRequest::GETRequest(const Request &Req, const Config &Conf, Response &R
 
 void HttpRequest::POSTRequest(const Request &Req, const Config &Conf, Response &Res) {
 	(void)Res;
-	if (HttpRequest::methodsAllowed(Req, Conf) == true) {
-		std::cout << "method is allowed" << std::endl;
-	} else
-		std::cout << "method is not allowed" << std::endl;
-	std::cout << "this is a POST HTTP Request" << std::endl; // REMOVE LATER
+	(void)Conf;
+	(void)Req;
+//	if (HttpRequest::methodsAllowed(Req, Conf) == true) {
+//		std::cout << "method is allowed" << std::endl;
+//	} else
+//		std::cout << "method is not allowed" << std::endl;
+//	std::cout << "this is a POST HTTP Request" << std::endl; // REMOVE LATER
 }
 
 // void HttpRequest::DELETERequest(const Request &Req, const Config &Conf, Response &Res)

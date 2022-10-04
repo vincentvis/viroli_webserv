@@ -1,7 +1,7 @@
 #include "request/Request.hpp"
 //#include "server/Server.hpp"
-//#include "config/Config.hpp"
-#include "utils/Utils.hpp"
+#include "config/Config.hpp"
+//#include "utils/Utils.hpp"
 
 // Various ad hoc limitations on request-line length are found in practice. It is
 // RECOMMENDED that all HTTP senders and recipients support, at a minimum, request-line
@@ -53,11 +53,6 @@ void Request::ParseRequest(std::string BUF) {
 		this->_header[BUF.substr(startKey, endKey - startKey)] =
 			Utils::trimWhitespaceCopy(BUF.substr(startVal, endVal - startVal));
 	}
-
-	/* check if HTTP version is 1.1 */
-	if (this->_HTTPVersion != "HTTP/1.1")
-		std::cout << "505 HTTP Version Not Supported"
-				  << std::endl; // should become response
 
 	/* check and set query */
 	startVal = _uri.find("?", 0);
@@ -134,15 +129,16 @@ bool Request::methodsAllowed(const Request &Req, const Config &Conf) {
 
 void Request::ValidateRequest(const Config &Conf){
 	/* check method */
-	if (methodsAllowed(*this, Conf) == true)
-		std::cout << "this is oke" << std::endl;
-//	else
-//	/* else method is not allowed */
-	////	405 (Method Not Allowed)
-
+	if (methodsAllowed(*this, Conf) == false)
+	throw {
+			405 (Method Not Allowed)
+	};
 	/* check uri */
-
-	/* check http */
+		//is always true, because of
+	/* check if HTTP version is 1.1 */
+	if (this->_HTTPVersion != "HTTP/1.1")
+		std::cout << "505 HTTP Version Not Supported"
+				  << std::endl; // should become response
 
 }
 

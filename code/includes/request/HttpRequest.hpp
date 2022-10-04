@@ -16,5 +16,5 @@ class HttpRequest : public RequestInterface {
 		HttpRequest(); // should become private!
 		HttpRequest(const Request &Req, const Config &Serv, Response &Res);
 		~HttpRequest();
-		bool methodsAllowed(const Request &Req, const Config &Conf);
+//		bool methodsAllowed(const Request &Req, const Config &Conf);
 };

@@ -5,6 +5,7 @@
 #include "request/Request.hpp"
 #include "request/RequestInterface.hpp"
 #include "server/Server.hpp"
+#include "config/Config.hpp"
 #include <arpa/inet.h>
 #include <cstring>
 #include <fcntl.h>

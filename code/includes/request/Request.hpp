@@ -1,11 +1,14 @@
 #pragma once
 
+#include "utils/Utils.hpp"
 #include "config/Config.hpp"
 #include <algorithm>
 #include <iostream>
 #include <map>
 
 class Server;
+
+class Config;
 
 class Request {
 	private:
@@ -35,6 +38,7 @@ class Request {
 		// clang-format on
 
 		void                               setBody(std::string NewBody);
+		bool 								methodsAllowed(const Request &Req, const Config &Conf);
 		std::map<std::string, std::string> getHeaderMap() const;
 		std::string                        getConnectionInfo() const;
 		std::string                        getMethod() const;
@@ -47,5 +51,5 @@ class Request {
 		long                               getContentLength() const;
 		bool                               getCgi() const;
 		bool                               getHeaderAvailable() const;
-		bool methodsAllowed(const Request &Req, const Config &Conf);
+
 };
