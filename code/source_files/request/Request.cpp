@@ -7,7 +7,7 @@
 // RECOMMENDED that all HTTP senders and recipients support, at a minimum, request-line
 // lengths of 8000 octets.
 
-std::map<std::string, Request::e_RequestType> Request::_MethodKeys; //make static
+std::map<std::string, Request::e_RequestType> Request::_MethodKeys; // make static
 
 Request::Request() {
 	this->_headerAvailable         = false;
@@ -16,9 +16,9 @@ Request::Request() {
 	this->_TransferEncodingChunked = false;
 	this->_ContentLengthAvailable  = false;
 	this->_ConnectionAvailable     = false;
-	_MethodKeys["GET"]    = GET;
-	_MethodKeys["DELETE"] = DELETE;
-	_MethodKeys["POST"]   = POST;
+	_MethodKeys["GET"]             = GET;
+	_MethodKeys["DELETE"]          = DELETE;
+	_MethodKeys["POST"]            = POST;
 }
 
 void Request::ParseRequest(std::string BUF) {
@@ -89,14 +89,10 @@ void Request::ParseRequest(std::string BUF) {
 		} catch (const std::runtime_error &e) {
 			std::cerr << "stol failed: \n" << e.what() << std::endl;
 		}
-		throw std::runtime_error(
-			"Invalid contenlen"
-		);
+		throw std::runtime_error("Invalid contenlen");
 	}
 	if (this->_ContentLength < 0) {
-		throw std::runtime_error(
-			"Invalid contenlen"
-		);
+		throw std::runtime_error("Invalid contenlen");
 	}
 
 	this->_itr = _header.find("Transfer-Encoding:");
@@ -110,64 +106,85 @@ void Request::ParseRequest(std::string BUF) {
 }
 
 bool Request::methodsAllowed(const Request &Req, const Config &Conf) {
-	/* if both location.getAllow() and Config.getAllow don't exist "default fallback"
-	 * rules apply: all methods are allowed*/
-	Location here = Conf.findLocation(Req);
-	if (here.getAllow().size() == 0 && Conf.getAllow().size() == 0)
+	/* if both location.getAllow() and Config.getAllow don't exist "default fallback
+	 * rules" apply: all methods are allowed*/
+	Location Loc = Conf.findLocation(Req);
+	if (Loc.getAllow().empty() && Conf.getAllow().empty())
 		return true;
 	/* check if location.getAllow() exists it overrules the fallback rules, else "config
 	 * fallback" rules should be applied */
-	if (here.getAllow().size() != 0) {
-		for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
-			if (Req.getMethod() == here.getAllow()[i])
-				return true;
+		if (!Loc.getAllow().empty()) {
+			std::vector<std::string>::iterator tryFind =
+				std::find(Loc.getAllow().begin(), Loc.getAllow().end(), Req.getMethod());
+			return (tryFind != Loc.getAllow().end());
 		}
-	} else {
-		for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
-			if (Req.getMethod() == Conf.getAllow()[i])
-				return true;
+		else {
+			std::vector<std::string>::iterator tryFind =
+				std::find(Conf.getAllow().begin(), Conf.getAllow().end(), Req.getMethod());
+			return (tryFind != Conf.getAllow().end());
 		}
-	}
-	return false;
-}
 
-bool Request::checkValidMethod(const Request &Req)
-{
+
+
+
+
+//		if (Loc.getAllow().size() != 0) {
+//			for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
+//				if (Req.getMethod() == Loc.getAllow()[i])
+//					return true;
+//			}
+//		else {
+//			for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
+//				if (Req.getMethod() == Conf.getAllow()[i])
+//					return true;
+//			}
+//
+//
+//	return false;
+}
+	//	if (here.getAllow().size() != 0) {
+	//		for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
+	//			if (Req.getMethod() == here.getAllow()[i])
+	//				return true;
+	//		}
+	//	} else {
+	//		for (std::vector<std::string>::size_type i = 0; i < Conf.getAllow().size(); i++) {
+	//			if (Req.getMethod() == Conf.getAllow()[i])
+	//				return true;
+	//		}
+	//	}
+
+
+bool Request::checkValidMethod(const Request &Req) {
 	std::map<std::string, Request::e_RequestType>::iterator itr =
 		_MethodKeys.find(Req.getMethod());
 
 	switch (itr->second) {
-		default:
-			return false;
 		case GET:
-			return true;
 		case POST:
-			return true;
 		case DELETE:
 			return true;
+		default:
+			return false;
 	}
-
 }
 
-void Request::ValidateRequest(const Config &Conf){
+void Request::ValidateRequest(const Config &Conf) {
 	/* check method */
-	if (checkValidMethod(*this) == false){
-		throw std::runtime_error(
-			"error response invalid method"
-		);}
-	if (methodsAllowed(*this, Conf) == false){
-		throw std::runtime_error(
-			"405 (Method Not Allowed)");
+	if (checkValidMethod(*this) == false) {
+		throw std::runtime_error("error response invalid method");
+	}
+	if (methodsAllowed(*this, Conf) == false) {
+		throw std::runtime_error("405 (Method Not Allowed)");
 	};
 
 	/* check uri */
-		//is always true, because of fallback?
+	// is always true, because of fallback?
 
 	/* check if HTTP version is 1.1 */
 	if (this->_HTTPVersion != "HTTP/1.1")
 		std::cout << "505 HTTP Version Not Supported"
 				  << std::endl; // should become response
-
 }
 
 void Request::setBody(std::string NewBody) {
