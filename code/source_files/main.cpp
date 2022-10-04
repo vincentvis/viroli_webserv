@@ -1,4 +1,5 @@
 
+#include "autoindex/Autoindex.hpp"
 #include "config/ConfigParser.hpp"
 #include "ipollable/IPollable.hpp"
 #include "server/Server.hpp"
@@ -48,6 +49,7 @@ int main(int argc, char const *argv[]) {
 				  << " | IPollable fd: " << it->second->getFileDescriptor();
 		std::cout << " | port: " << it->second->getServer()->getPort() << std::endl;
 	}
+
 
 	try {
 		Server::run();

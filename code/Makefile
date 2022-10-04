@@ -46,7 +46,8 @@ CLASSES		:= config/ConfigParser\
                 request/HttpRequest\
                 request/Request\
                 request/RequestInterface\
-                response/Response
+                response/Response\
+				autoindex/Autoindex
 
 OBJECTS		:= $(CLASSES:%=$(OBJ_DIR)%.o)
 HEADERS		:= $(CLASSES:%=$(INC_DIR)%.hpp)
