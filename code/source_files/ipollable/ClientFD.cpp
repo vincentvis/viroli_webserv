@@ -150,6 +150,7 @@ void ClientFD::getBody() {
 }
 
 /* receive data */
+/* need some states to process different parts of the request: HEADER | BODY */
 void ClientFD::pollin() {
 	switch (_state) {
 		case HEADER:
@@ -166,10 +167,6 @@ void ClientFD::pollin() {
 			// send response
 			return;
 	}
-}
-
-int32_t ClientFD::getRemainderBytes() const {
-	return BUFFERSIZE > _left ? BUFFERSIZE : _left;
 }
 
 /* send data */

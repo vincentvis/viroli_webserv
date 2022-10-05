@@ -116,5 +116,4 @@ class FileFD : public IPollable {
 		void    readFile();
 		void    writeFile();
 		Server *getServer() const;
-		int32_t getRemainingBytes() const;
 };
