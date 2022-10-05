@@ -133,11 +133,6 @@ void Server::run() {
 	}
 }
 
-// void Server::addPollable(struct pollfd pfd, IPollable *pollable) {
-// 	Server::_pollables.insert(std::pair<int32_t, IPollable *>(pfd.fd, pollable));
-// 	Server::_pfds.push_back(pfd);
-// }
-
 IPollable *Server::addPollable(Server *server, int32_t fd, Pollable type, int16_t event) {
 	struct pollfd pfd = {fd, event, 0};
 	IPollable    *pollable;

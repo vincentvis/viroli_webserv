@@ -10,12 +10,10 @@ FileFD::~FileFD() {
 
 void FileFD::readFile() {
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
-	if (_bytes == 0) {
-		// set fd to -1 to ignore further polling and flush later.
-		Server::_pfds[_index].fd = INVALID_FD;
 
-		// signal the file has been read and _data can be included in a response.
-		_state = END;
+	if (_bytes == 0) {
+		Server::_pfds[_index].fd = INVALID_FD;
+		_state                   = END;
 	}
 	if (_bytes > 0) {
 		_total += _bytes;
@@ -29,6 +27,7 @@ void FileFD::pollin() {
 			readFile();
 			break;
 		case END:
+			close(_fd);
 			break;
 	}
 }
@@ -38,26 +37,16 @@ int32_t FileFD::getRemainderBytes() const {
 }
 
 void FileFD::writeFile() {
-	// std::cout << "luid\n";
-	// std::cout << "data: " << _data << "$" << std::endl;
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
 	_bytes = write(_fd, _buffer.data(), getRemainderBytes());
-	// std::cout << _bytes << std::endl;
 
-	for (int i = 0; i < getRemainderBytes(); ++i) {
-		std::cout << _buffer[i];
-	}
-	std::cout << std::endl;
 	if (_bytes) {
 		_total += _bytes;
 		_left -= _bytes;
 	}
 	if (_left == 0) {
-		// set fd to -1 to ignore further polling and flush later.
 		Server::_pfds[_index].fd = INVALID_FD;
-
-		// signal the file has been read and _data can be included in a response.
-		_state = END;
+		_state                   = END;
 	}
 }
 
