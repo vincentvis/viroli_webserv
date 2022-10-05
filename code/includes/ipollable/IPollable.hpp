@@ -95,7 +95,7 @@ class ClientFD : public IPollable {
 
 class FileFD : public IPollable {
 	public:
-		enum State { READ, WRITE, END };
+		enum State { PROCESS, END };
 
 		State             _state;
 		Server           *_server;
@@ -115,5 +115,7 @@ class FileFD : public IPollable {
 		int     getFileDescriptor() const;
 		void    readFile();
 		void    writeFile();
+		void    setData(std::string data);
 		Server *getServer() const;
+		int32_t getRemainderBytes() const;
 };

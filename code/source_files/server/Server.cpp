@@ -106,6 +106,7 @@ void Server::run() {
 		if ((events = poll(Server::_pfds.data(), Server::_pfds.size(), 0)) < 0) {
 			throw(std::string("error on poll()")); // placeholder
 		}
+
 		/* check events and timeout */
 		for (size_t i = 0; i < Server::_pfds.size(); ++i) {
 			/* find on what file descriptor event occurred */
@@ -137,7 +138,7 @@ void Server::run() {
 // 	Server::_pfds.push_back(pfd);
 // }
 
-void Server::addPollable(Server *server, int32_t fd, Pollable type, int16_t event) {
+IPollable *Server::addPollable(Server *server, int32_t fd, Pollable type, int16_t event) {
 	struct pollfd pfd = {fd, event, 0};
 	IPollable    *pollable;
 
@@ -146,17 +147,17 @@ void Server::addPollable(Server *server, int32_t fd, Pollable type, int16_t even
 			pollable = new ServerFD(server, fd, Server::_pfds.size());
 			Server::_pollables.insert(std::pair<int32_t, IPollable *>(fd, pollable));
 			Server::_pfds.push_back(pfd);
-			break;
+			return pollable;
 		case CLIENTPOLL:
 			pollable = new ClientFD(server, fd, Server::_pfds.size());
 			Server::_pollables.insert(std::pair<int32_t, IPollable *>(fd, pollable));
 			Server::_pfds.push_back(pfd);
-			break;
+			return pollable;
 		case FILEPOLL:
 			pollable = new FileFD(server, fd, Server::_pfds.size());
 			Server::_pollables.insert(std::pair<int32_t, IPollable *>(fd, pollable));
 			Server::_pfds.push_back(pfd);
-			break;
+			return pollable;
 	}
 }
 
