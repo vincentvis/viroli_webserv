@@ -2,15 +2,16 @@ import socket
 import requests
 
 HOST = "127.0.0.1"  # The server's hostname or IP address
-PORT = 8080  # The port used by the server
+PORT = 8248  # The port used by the server
 
 def gen():
   yield b'hello'
   yield b'frankrijk'
+  yield b'this is an emergency'
 
 def sendRequest(host, port):
-  # requests.get(f'http://{host}:{port}')
-  requests.post(f'http://{host}:{port}', data=gen())
+  requests.get(f'http://{host}:{port}')
+  # requests.post(f'http://{host}:{port}', data=gen())
   # print(r)
 
   # print(r)
@@ -20,4 +21,4 @@ def sendRequest(host, port):
   #     data = s.recv(1024)
 
 if  __name__ == '__main__':
-  sendRequest(HOST, 8080)
+  sendRequest(HOST, PORT)

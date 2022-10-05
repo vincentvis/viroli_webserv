@@ -78,15 +78,6 @@ int32_t Server::getFileDescriptor() const {
 	return _fd;
 }
 
-void Server::addPoll(Server *server) {
-	struct pollfd pfd = {server->getFileDescriptor(), POLLIN, 0};
-
-	Server::_pollables.insert(std::pair<int32_t, IPollable *>(
-		server->getFileDescriptor(),
-		new ServerFD(server, server->getFileDescriptor(), Server::_pfds.size())));
-	Server::_pfds.push_back(pfd);
-}
-
 /* test this with more connections */
 /* instead of doing after every poll iteration use a threshold */
 void Server::removePoll() {
@@ -116,14 +107,11 @@ void Server::run() {
 			throw(std::string("error on poll()")); // placeholder
 		}
 
-		/* events reported: check all fds and at most the number of events */
-		int event = 0;
-		for (size_t i = 0; i < Server::_pfds.size() && event < events; ++i) {
+		/* check events and timeout */
+		for (size_t i = 0; i < Server::_pfds.size(); ++i) {
 			/* find on what file descriptor event occurred */
 			if (Server::_pfds[i].revents & (POLLIN | POLLOUT)) {
-				++event;
 				it = Server::_pollables.find(Server::_pfds[i].fd);
-
 				/* file descriptor exists */
 				if (it != _pollables.end()) {
 					if (Server::_pfds[i].revents & POLLIN) {
@@ -131,7 +119,6 @@ void Server::run() {
 					} else if (Server::_pfds[i].revents & POLLOUT) {
 						it->second->pollout();
 					}
-
 					/* file descriptor doesn't exist */
 				} else {
 					throw(std::string("error on _pollables.find()")); // placholder
@@ -143,6 +130,29 @@ void Server::run() {
 			// 	Server::removePoll();
 			// }
 		}
+	}
+}
+
+IPollable *Server::addPollable(Server *server, int32_t fd, Pollable type, int16_t event) {
+	struct pollfd pfd = {fd, event, 0};
+	IPollable    *pollable;
+
+	switch (type) {
+		case SERVERPOLL:
+			pollable = new ServerFD(server, fd, Server::_pfds.size());
+			Server::_pollables.insert(std::pair<int32_t, IPollable *>(fd, pollable));
+			Server::_pfds.push_back(pfd);
+			return pollable;
+		case CLIENTPOLL:
+			pollable = new ClientFD(server, fd, Server::_pfds.size());
+			Server::_pollables.insert(std::pair<int32_t, IPollable *>(fd, pollable));
+			Server::_pfds.push_back(pfd);
+			return pollable;
+		case FILEPOLL:
+			pollable = new FileFD(server, fd, Server::_pfds.size());
+			Server::_pollables.insert(std::pair<int32_t, IPollable *>(fd, pollable));
+			Server::_pfds.push_back(pfd);
+			return pollable;
 	}
 }
 

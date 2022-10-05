@@ -27,20 +27,14 @@
 
 enum { INVALID_FD = -1 };
 
-// enum { INVALID_FD = -1 };
-/* when we use a reference for a server, its address must not change. The vector
- * it's stored in must not be modified (insert/erase) */
-
 class Server;
 
 class IPollable {
 	public:
-		virtual ~IPollable()   = 0;
+		virtual ~IPollable()                      = 0;
 
-		virtual void pollin()  = 0;
-		virtual void pollout() = 0;
-		// virtual void    pollin(int index)         = 0;
-		// virtual void    pollout(int index)        = 0;
+		virtual void    pollin()                  = 0;
+		virtual void    pollout()                 = 0;
 		virtual int     getFileDescriptor() const = 0;
 		virtual Server *getServer() const         = 0;
 };
@@ -54,31 +48,25 @@ class ServerFD : public IPollable {
 		ServerFD(Server *server, int fd, int index);
 		~ServerFD();
 
-		void pollin();
-		void pollout();
-		// void    pollin(int index);
-		// void    pollout(int index);
+		void    pollin();
+		void    pollout();
 		int     getFileDescriptor() const;
 		Server *getServer() const;
 };
 
 class ClientFD : public IPollable {
 	public:
-		typedef enum { HEADER, BODY, END } state;
-
-		typedef enum { LENGTH, CHUNKED } transfer;
+		enum State { HEADER, BODY, END };
+		enum Transfer { LENGTH, CHUNKED };
 
 		Request           _request;
 		Response          _response;
 		RequestInterface *_requestInterface;
 		Config           _config;
 		Location         _location;
-
 		Server           *_server;
-		transfer          _transfer;
-
-		//		transfer          _transfer;
-		state             _state;
+		Transfer          _transfer;
+		State             _state;
 		std::vector<char> _buffer;
 		std::string       _data;
 		std::string       _header;
@@ -92,10 +80,8 @@ class ClientFD : public IPollable {
 		ClientFD(Server *server, int fd, int index);
 		~ClientFD();
 
-		void pollin();
-		void pollout();
-		// void    pollin(int index);
-		// void    pollout(int index);
+		void    pollin();
+		void    pollout();
 		void    resetBytes();
 		int     getFileDescriptor() const;
 		size_t  extractChunkedSize(size_t pos);
@@ -104,16 +90,18 @@ class ClientFD : public IPollable {
 		void    receiveChunked();
 		void    receiveLength(int length);
 		Server *getServer() const;
-
 		void    receive();
 		void    receive(int len);
-
 		void    initResponse(int index);
 		void    closeFD();
+		int32_t getRemainderBytes() const;
 };
 
 class FileFD : public IPollable {
 	public:
+		enum State { PROCESS, END };
+
+		State             _state;
 		Server           *_server;
 		std::vector<char> _buffer;
 		std::string       _data;
@@ -126,10 +114,12 @@ class FileFD : public IPollable {
 		FileFD(Server *server, int fd, int index);
 		~FileFD();
 
-		void pollin();
-		void pollout();
-		// void    pollin(int index);
-		// void    pollout(int index);
+		void    pollin();
+		void    pollout();
 		int     getFileDescriptor() const;
+		void    readFile();
+		void    writeFile();
+		void    setData(std::string data);
 		Server *getServer() const;
+		int32_t getRemainderBytes() const;
 };

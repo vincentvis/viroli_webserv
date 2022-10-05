@@ -42,6 +42,9 @@ CLASSES		:= config/ConfigParser\
 				server/Server\
 				utils/Utils\
 				ipollable/IPollable\
+				ipollable/ClientFD\
+				ipollable/ServerFD\
+				ipollable/FileFD\
 				request/CGIRequest\
                 request/HttpRequest\
                 request/Request\

@@ -1,9 +1,12 @@
 #pragma once
 
 #include "config/Config.hpp"
+// #include "ipollable/ClientFD.hpp"
+// #include "ipollable/FileFD.hpp"
 #include "ipollable/IPollable.hpp"
-
+// #include "ipollable/ServerFD.hpp"
 #include "utils/Utils.hpp"
+
 #include <arpa/inet.h>
 #include <cstring>
 #include <fcntl.h>
@@ -20,11 +23,13 @@
 #include <utility>
 #include <vector>
 
-#define BUFFERSIZE     10 // tmp
+#define BUFFERSIZE     4  // tmp
 #define MAXCONNECTIONS 10 // tmp
 #define PFDS_THRESHOLD 1000
 
-class IPollable; // forward declaration
+enum Pollable { SERVERPOLL, CLIENTPOLL, FILEPOLL };
+
+class IPollable;
 
 class Server {
 	public:
@@ -39,11 +44,12 @@ class Server {
 		friend class ConfigParser;
 
 
-		uint16_t                              getPort() const;
-		int32_t                               getFileDescriptor() const;
-		static void                           run();
-		static void                           removePoll();
-		static void                           addPoll(Server *server);
+		uint16_t          getPort() const;
+		int32_t           getFileDescriptor() const;
+		static void       run();
+		static void       removePoll();
+		static IPollable *addPollable(Server *server, int fd, Pollable type,
+									  int16_t event);
 
 		static std::map<int32_t, IPollable *> _pollables;
 		static std::vector<struct pollfd>     _pfds;
