@@ -10,28 +10,12 @@ HttpRequest::HttpRequest(const Request &Req, const Config &Conf, Response &Res) 
 }
 
 void HttpRequest::CheckMethod(const Request &Req, const Config &Conf, Response &Res) {
-	std::map<std::string, RequestInterface::e_RequestType>::iterator itr =
-		_MethodKeys.find(Req.getMethod());
-	(void)Conf;
-
-	switch (itr->second) {
-		default:
-			std::cout << "OTHER" << std::endl; // can be removed since we check early on!
-			//				OTHERRequest(Req, Conf, Res);
-			break;
-		case GET:
-			std::cout << "GET" << std::endl;
-			GETRequest(Req, Conf, Res);
-			break;
-		case POST:
-			std::cout << "POST" << std::endl;
-			POSTRequest(Req, Conf, Res);
-			break;
-		case DELETE:
-			std::cout << "DELETE" << std::endl;
-			//			DELETERequest(Req, Conf, Res);
-			break;
-	}
+	if (Req.getMethod() == std::string("GET"))
+		GETRequest(Req, Conf, Res);
+	else if (Req.getMethod() == std::string("POST"))
+		POSTRequest(Req, Conf, Res);
+	else
+		DELETERequest(Req, Conf, Res);
 }
 
 void HttpRequest::GETRequest(const Request &Req, const Config &Conf, Response &Res) {
@@ -48,21 +32,15 @@ void HttpRequest::POSTRequest(const Request &Req, const Config &Conf, Response &
 	(void)Res;
 	(void)Conf;
 	(void)Req;
+	std::cout << "this is a POST HTTP Request " << std::endl; // REMOVE LATER
 }
 
-// void HttpRequest::DELETERequest(const Request &Req, const Config &Conf, Response &Res)
-// { 	(void)Req; 	(void)Conf; 	(void)Res; 	std::cout << "this is a DELETE HTTP
-// Request"
-// <<
-// std::endl; // REMOVE LATER
-// }
-
-// void HttpRequest::OTHERRequest(const Request &Req, const Config &Conf, Response &Res) {
-//	(void)Req;
-//	(void)Conf;
-//	(void)Res;
-//	std::cout << "this is a OTHER HTTP Request" << std::endl; // REMOVE LATER
-// }
+void HttpRequest::DELETERequest(const Request &Req, const Config &Conf, Response &Res) {
+	(void)Req;
+	(void)Conf;
+	(void)Res;
+	std::cout << "this is a DELETE HTTP Request " << std::endl; // REMOVE LATER
+}
 
 HttpRequest::~HttpRequest() {
 }
