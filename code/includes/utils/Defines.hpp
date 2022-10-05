@@ -1,10 +1,12 @@
 #pragma once
 
 #include <iostream>
-#include <map>
+#include <string>
 
 namespace Utils {
 
-// can be used for all the static defines/functions etc */
+const std::string get_string("GET");
+const std::string post_string("POST");
+const std::string delete_string("DELETE");
 
 } // namespace Utils

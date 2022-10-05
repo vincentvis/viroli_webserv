@@ -10,9 +10,9 @@ HttpRequest::HttpRequest(const Request &Req, const Config &Conf, Response &Res) 
 }
 
 void HttpRequest::CheckMethod(const Request &Req, const Config &Conf, Response &Res) {
-	if (Req.getMethod() == std::string("GET"))
+	if (Req.getMethod() == Utils::get_string)
 		GETRequest(Req, Conf, Res);
-	else if (Req.getMethod() == std::string("POST"))
+	else if (Req.getMethod() == Utils::post_string)
 		POSTRequest(Req, Conf, Res);
 	else
 		DELETERequest(Req, Conf, Res);

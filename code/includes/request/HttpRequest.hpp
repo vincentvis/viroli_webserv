@@ -2,6 +2,7 @@
 
 #include "request/RequestInterface.hpp"
 #include "response/Response.hpp"
+#include "utils/Defines.hpp"
 #include <iostream>
 
 class HttpRequest : public RequestInterface {
