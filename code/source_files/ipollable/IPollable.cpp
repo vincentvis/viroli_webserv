@@ -183,16 +183,28 @@ void ClientFD::initResponse(int index) {
 	}
 }
 
+// Shall I combine try and catch block Parserequest and validation? incl exception? since they create error response;
+
 void ClientFD::getHeader() {
 	size_t end = 0;
 
 	receive(BUFFERSIZE);
 	if ((end = _data.find("\r\n\r\n")) != std::string::npos) {
-		this->_request.ParseRequest(this->_data);
+		try{
+			this->_request.ParseRequest(this->_data);
+			this->_config = this->_server->findConfig(this->_request);
+			this->_location = this->_config.findLocation(this->_request);
+			this->_request.ValidateRequest(this->_server->findConfig(this->_request));
+		}
+		catch (const Utils::ErrorPageException &e) {
+			this->_response.createErrorResponse(e.what(), this->_config);
+		} catch (const std::exception &e) {
+			// other exceptions like std::string! should be finished later/how?
+		}
 		_header = _data.substr(0, end);
 		_data   = _data.substr(end + CRLFCRLF);
 		_state  = BODY;
-		std::cout << "\nheader:\n\n" << _header << "\n\n";
+//		std::cout << "\nheader:\n\n" << _header << "\n\n";
 
 		/* check if contentLengthAvailable() or getChunked() are true if so body exists
 		 * read bytes and setBody */
@@ -211,21 +223,17 @@ void ClientFD::getHeader() {
 
 		/* create CGIrequest or HTTPrequest */
 		if (this->_request.getCgi() == true) {
-			std::cout << "CGI: this should work with the new .findConfig() function"
-					  << std::endl;
 			this->_requestInterface =
-				new CGIRequest(this->_request, this->_server->findConfig(this->_request),
+				new CGIRequest(this->_request, this->_config,
 							   this->_response);
 		} else {
-			std::cout << "HTTP: this should work with the new .findConfig() function"
-					  << std::endl;
-			std::cout << "config size!: " << this->_server->_configs.size() << std::endl;
 			this->_request.printAttributesInRequestClass(); // REMOVE LATER
 			this->_requestInterface =
-				new HttpRequest(this->_request, this->_server->findConfig(this->_request),
+				new HttpRequest(this->_request, this->_config,
 								this->_response);
 			initResponse(_index);
 		}
+
 	}
 }
 

@@ -1,10 +1,12 @@
 #pragma once
 
+#include "config/Config.hpp"
 #include "request/CGIRequest.hpp"
 #include "request/HttpRequest.hpp"
 #include "request/Request.hpp"
 #include "request/RequestInterface.hpp"
 #include "server/Server.hpp"
+#include "utils/Exception.hpp"
 #include <arpa/inet.h>
 #include <cstring>
 #include <fcntl.h>
@@ -69,6 +71,8 @@ class ClientFD : public IPollable {
 		Request           _request;
 		Response          _response;
 		RequestInterface *_requestInterface;
+		Config           _config;
+		Location         _location;
 
 		Server           *_server;
 		transfer          _transfer;
@@ -104,7 +108,7 @@ class ClientFD : public IPollable {
 		void    receive();
 		void    receive(int len);
 
-		void 	initResponse(int index);
+		void    initResponse(int index);
 		void    closeFD();
 };
 
