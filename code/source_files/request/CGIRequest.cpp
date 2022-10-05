@@ -10,7 +10,7 @@ CGIRequest::CGIRequest(const Request &Req, const Config &Conf, Response &Res) {
 void CGIRequest::CheckMethod(const Request &Req, const Config &Conf, Response &Res) {
 	if (Req.getMethod() == Utils::get_string)
 		GETRequest(Req, Conf, Res);
-	else if (Req.getMethod() == Utils::post_string)
+	if (Req.getMethod() == Utils::post_string)
 		POSTRequest(Req, Conf, Res);
 	DELETERequest(Req, Conf, Res);
 }
