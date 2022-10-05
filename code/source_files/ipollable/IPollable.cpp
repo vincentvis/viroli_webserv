@@ -197,7 +197,7 @@ void ClientFD::getHeader() {
 			this->_request.ValidateRequest(this->_server->findConfig(this->_request));
 		}
 		catch (const Utils::ErrorPageException &e) {
-			this->_response.createErrorResponse(e.what(), this->_config);
+			this->_response.initResponse(e.what(), this->_config, this->_request); // make sure if error it sets it immidiately to create response and stops here
 		} catch (const std::exception &e) {
 			// other exceptions like std::string! should be finished later/how?
 		}

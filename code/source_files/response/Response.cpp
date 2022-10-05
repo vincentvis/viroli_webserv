@@ -2,30 +2,61 @@
 
 Response::Response() {
 	this->_respReady = false;
+
 }
 
 std::string Response::getResponse() const {
 	return this->_response;
 }
 
-void Response::createErrorResponse(std::string Error, const Config &Conf) {
-	(void)Conf;
-	//	conf.getErrorPages
-	std::cout << "this is an error response " << Error << std::endl;
-	//	setResponse("error Page" + Error);
-	//	setRespReady();
+std::string 	Response::getDate(){
+	//do something to get date and time;
+	return "Thu, 09 Dec 2004 12:07:48 GMT";
 }
 
-void Response::setResponse(std::string newRes) { // Quick and dirty should be removed
-												 // later
-	this->_response = newRes;
+std::string 	Response::getContentType(){
+	//do something to get contentType;
+	return "text/plain";
 }
 
-void Response::setRespReady() {
+std::string 	Response::CalcContentLen(std::string str){
+	//.length and than to str
+	return "23";
+}
+
+void Response::initResponse(std::string status, const Config &Conf, const Request &Req) {
+	/*Status Line */
+	this->_httpVersion = Req.getHTTPVersion();
+	this->_statusCode = status;
+	this->_reasonPhrase = "OK";  //should work with status
+
+	/* Http Header */
+	this->_date = "Date: " + getDate();
+	this->_serverType = "Server: VIROLI_Server/1.0"; // or is this the servername in the config?
+
+	this->_contentType = "Content-type: " + getContentType();
+	if (Req.getConnectionAvailable())
+		this->_connection =  "Connection: " + Req.getConnectionInfo();
+	else
+		this->_connection =  "Connection: Close"; //is this correct?
+
+	/*		Message Body */
+	this->_messageBody = "this is a test Response";
+	this->_contentLen = "Content-Length: " + CalcContentLen(this->_messageBody);
+}
+
+void Response::createResponseHeader() {
+	//checks around these
+	std::string StatusLine = this->_httpVersion + " " + this->_statusCode + " " + this->_reasonPhrase + "\r\n";
+	std::string HTTPHeader = this->_date + "\r\n" + this->_serverType + "\r\n" + this->_contentLen + "\r\n" + this->_contentType + "\r\n" + this->_connection + "\r\n\r\n";
+	std::string MessageBody = this->_messageBody + "\r\n";
+
+	this->_response = StatusLine + HTTPHeader + MessageBody;
+	/* Response Ready to Send */
 	this->_respReady = true;
 }
 
-bool Response::respReady() {
+bool Response::respReady() const{
 	return this->_respReady;
 }
 
