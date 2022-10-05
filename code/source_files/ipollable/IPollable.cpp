@@ -234,9 +234,6 @@ void ClientFD::getHeader() {
 			initResponse(_index);
 		}
 
-		/* check connection status */
-		if (this->_request.getConnectionAvailable() == true)
-			std::cout << "THIS is the connection info: " << this->_request.getConnectionInfo() << std::endl;
 	}
 }
 

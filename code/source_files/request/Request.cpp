@@ -146,9 +146,6 @@ void Request::ValidateRequest(const Config &Conf) {
 		throw Utils::ErrorPageException("405");
 	};
 
-	/* check uri */
-	// is always true, because of fallback? // remove if you agree :)
-
 	/* check if HTTP version is 1.1 */
 	if (this->_HTTPVersion != std::string("HTTP/1.1"))
 		throw Utils::ErrorPageException("505");

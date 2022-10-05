@@ -6,7 +6,10 @@ class Response {
 	private:
 		std::string _response;
 		bool        _respReady;
-		std::string _statuscode; //(200 OK etc);
+		std::string _httpVersion;
+		std::string _statusCode; //or int?
+		std::string _reasonPhrase;
+
 		//		_timestamp;
 
 

@@ -34,16 +34,13 @@ class Request {
 		enum e_RequestType { GET, POST, DELETE }; // make static
 
 		static std::map<std::string, e_RequestType> _MethodKeys; // make static
+		std::map<std::string, std::string>::iterator _itr;
 		void printAttributesInRequestClass(); // !used for testing; REMOVE later
 		void ParseRequest(std::string BUF);
 		void ValidateRequest(const Config &conf);
-
-		// clang-format off
-		std::map<std::string, std::string>::iterator _itr; // !used to print string; REMOVE later
-		// clang-format on
+		bool methodsAllowed(const Request &Req, const Config &Conf);
 
 		void setBody(std::string NewBody);
-		bool methodsAllowed(const Request &Req, const Config &Conf);
 		std::map<std::string, std::string> getHeaderMap() const;
 		std::string                        getConnectionInfo() const;
 		std::string                        getMethod() const;
