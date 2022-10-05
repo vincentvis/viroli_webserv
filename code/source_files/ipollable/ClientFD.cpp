@@ -87,13 +87,14 @@ void ClientFD::getHeader() {
 
 	receive(BUFFERSIZE);
 	if ((end = _data.find("\r\n\r\n")) != std::string::npos) {
-		try {
+		try{
 			this->_request.ParseRequest(this->_data);
-			this->_config   = this->_server->findConfig(this->_request);
+			this->_config = this->_server->findConfig(this->_request);
 			this->_location = this->_config.findLocation(this->_request);
 			this->_request.ValidateRequest(this->_server->findConfig(this->_request));
-		} catch (const Utils::ErrorPageException &e) {
-			this->_response.createErrorResponse(e.what(), this->_config);
+		}
+		catch (const Utils::ErrorPageException &e) {
+			this->_response.initResponse(e.what(), this->_config, this->_request); // make sure if error it sets it immidiately to create response and stops here
 		} catch (const std::exception &e) {
 			// other exceptions like std::string! should be finished later/how?
 		}
@@ -105,28 +106,31 @@ void ClientFD::getHeader() {
 		/* check if contentLengthAvailable() or getChunked() are true if so body exists
 		 * read bytes and setBody */
 		//		if (this->_request.getHeaderAvailable() == true) { // this can be written
-		// shorter, with one setBody and fewer if statements etc, but since you might
-		// change a lot, these are the basics. 			if (this->_request.getChunked() ==
-		// true){ 				std::cout << "do something with chunked body" << std::endl;
+		//shorter, with one setBody and fewer if statements etc, but since you might
+		//change a lot, these are the basics. 			if (this->_request.getChunked() == true){
+		//				std::cout << "do something with chunked body" << std::endl;
 		//				this->_request.setBody("this is a chunked body");
 		//			}
 		//			if (this->_request.contentLenAvailable() == true){
 		//				std::cout << "do something with contentlen body" << std::endl;
 		//				this->_request.setBody("this is a body with contentlen");
 		//			}
-		//			this->_request.printAttributesInRequestClass(); // used for
-		//testing;REMOVE later
+		//			this->_request.printAttributesInRequestClass(); // used for testing;REMOVE
+		//later
 
 		/* create CGIrequest or HTTPrequest */
 		if (this->_request.getCgi() == true) {
 			this->_requestInterface =
-				new CGIRequest(this->_request, this->_config, this->_response);
+				new CGIRequest(this->_request, this->_config,
+							   this->_response);
 		} else {
 			this->_request.printAttributesInRequestClass(); // REMOVE LATER
 			this->_requestInterface =
-				new HttpRequest(this->_request, this->_config, this->_response);
+				new HttpRequest(this->_request, this->_config,
+								this->_response);
 			initResponse(_index);
 		}
+
 	}
 }
 

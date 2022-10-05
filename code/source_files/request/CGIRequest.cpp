@@ -12,8 +12,7 @@ void CGIRequest::CheckMethod(const Request &Req, const Config &Conf, Response &R
 		GETRequest(Req, Conf, Res);
 	else if (Req.getMethod() == Utils::post_string)
 		POSTRequest(Req, Conf, Res);
-	else
-		DELETERequest(Req, Conf, Res);
+	DELETERequest(Req, Conf, Res);
 }
 
 void CGIRequest::GETRequest(const Request &Req, const Config &Conf, Response &Res) {

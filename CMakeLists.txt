@@ -21,6 +21,9 @@ add_executable(webserv
         code/source_files/server/Location.cpp
         code/includes/ipollable/IPollable.hpp
         code/source_files/ipollable/IPollable.cpp
+        code/source_files/ipollable/FileFD.cpp
+        code/source_files/ipollable/ClientFD.cpp
+        code/source_files/ipollable/ServerFD.cpp
         code/source_files/request/Request.cpp
         code/includes/request/Request.hpp
         code/source_files/request/RequestInterface.cpp
