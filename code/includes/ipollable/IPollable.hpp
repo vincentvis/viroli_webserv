@@ -1,10 +1,12 @@
 #pragma once
 
+#include "config/Config.hpp"
 #include "request/CGIRequest.hpp"
 #include "request/HttpRequest.hpp"
 #include "request/Request.hpp"
 #include "request/RequestInterface.hpp"
 #include "server/Server.hpp"
+#include "utils/Exception.hpp"
 #include <arpa/inet.h>
 #include <cstring>
 #include <fcntl.h>

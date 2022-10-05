@@ -18,7 +18,7 @@ const Location Config::findLocation(const Request &request) const {
 
 	std::vector<Location>::const_iterator loc   = begin;
 	for (; begin != end; ++begin) {
-		if (Utils::starts_with(request.getRequestTarget(), (*begin).getMatch())) {
+		if (Utils::starts_with(request.getUri(), (*begin).getMatch())) {
 			loc = begin;
 		}
 	}

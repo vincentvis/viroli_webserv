@@ -1,11 +1,13 @@
 #include "request/Request.hpp"
 //#include "server/Server.hpp"
 #include "config/Config.hpp"
-#include "utils/Utils.hpp"
+//#include "utils/Utils.hpp"
 
 // Various ad hoc limitations on request-line length are found in practice. It is
 // RECOMMENDED that all HTTP senders and recipients support, at a minimum, request-line
 // lengths of 8000 octets.
+
+std::map<std::string, Request::e_RequestType> Request::_MethodKeys; // make static
 
 Request::Request() {
 	this->_headerAvailable         = false;
@@ -13,6 +15,10 @@ Request::Request() {
 	this->_CGI                     = false;
 	this->_TransferEncodingChunked = false;
 	this->_ContentLengthAvailable  = false;
+	this->_ConnectionAvailable     = false;
+	_MethodKeys["GET"]             = GET;    // make static
+	_MethodKeys["DELETE"]          = DELETE; // make static
+	_MethodKeys["POST"]            = POST;   // make static
 }
 
 void Request::ParseRequest(std::string BUF) {
@@ -21,13 +27,17 @@ void Request::ParseRequest(std::string BUF) {
 	size_t startVal = 0;
 	size_t endVal   = 0;
 
-	/* set method, requestTarget, HttpVersion */
-	this->_method        = BUF.substr(startVal, BUF.find(' '));
-	startVal             = BUF.find(' ') + 1;
-	endVal               = BUF.find(' ', startVal);
-	this->_requestTarget = BUF.substr(startVal, endVal - startVal);
-	startVal             = endVal + 1;
-	this->_HTTPVersion   = BUF.substr(startVal, BUF.find("\r\n") - startVal);
+	/* set method, uri, HttpVersion */
+	this->_method      = BUF.substr(startVal, BUF.find(' '));
+	startVal           = BUF.find(' ') + 1;
+	endVal             = BUF.find(' ', startVal);
+	this->_uri         = BUF.substr(startVal, endVal - startVal);
+	startVal           = endVal + 1;
+	this->_HTTPVersion = BUF.substr(startVal, BUF.find("\r\n") - startVal);
+
+	/* check if there are white spaces in the _uri */
+	if (_uri.find(" ") != std::string::npos)
+		throw Utils::ErrorPageException("400");
 
 	/* create header map */
 	endVal = BUF.find("\r\n");
@@ -46,9 +56,25 @@ void Request::ParseRequest(std::string BUF) {
 			Utils::trimWhitespaceCopy(BUF.substr(startVal, endVal - startVal));
 	}
 
+	/* check and set query */
+	startVal = _uri.find("?", 0);
+	if (startVal != std::string::npos) {
+		if (this->_uri.length() > startVal + 1) {
+			this->_query =
+				this->_uri.substr(startVal + 1, this->_uri.length() - (startVal + 1));
+			this->_uri.erase(startVal);
+		}
+	}
+
+	/* check and set connection */
+	this->_itr = _header.find("Connection");
+	if (this->_itr != _header.end()) {
+		this->_ConnectionAvailable = true;
+		this->_connection          = this->_itr->second;
+	}
+
 	/* set CGI for initialisation request interface */
-	if (this->_requestTarget.find(".html") == std::string::npos &&
-		this->_requestTarget.find("/") == std::string::npos)
+	if (this->_uri.find(".py") == this->_uri.length() - 3) // should be tested
 		this->_CGI = true;
 
 	/* set content length and chunked for body creation in connectionClass */
@@ -60,10 +86,10 @@ void Request::ParseRequest(std::string BUF) {
 		} catch (const std::runtime_error &e) {
 			std::cerr << "stol failed: \n" << e.what() << std::endl;
 		}
+		throw Utils::ErrorPageException("400");
 	}
 	if (this->_ContentLength < 0) {
-		std::cout << "Invalid contenlen" << std::endl;
-		//		change in throw error;
+		throw Utils::ErrorPageException("400");
 	}
 
 	this->_itr = _header.find("Transfer-Encoding:");
@@ -71,7 +97,59 @@ void Request::ParseRequest(std::string BUF) {
 		if (this->_itr->second.find("chunked") != std::string::npos)
 			this->_TransferEncodingChunked = true;
 	}
+
+	/* after parsing header, set header available */
 	this->_headerAvailable = true;
+}
+
+bool Request::methodsAllowed(const Request &Req, const Config &Conf) {
+	std::vector<std::string>::iterator tryFind;
+	/* if both location.getAllow() and Config.getAllow don't exist "default fallback
+	 * rules" apply: all methods are allowed*/
+	Location Loc = Conf.findLocation(Req);
+	if (Loc.getAllow().empty() && Conf.getAllow().empty())
+		return true;
+	/* check if location.getAllow() exists it overrules the fallback rules, else "config
+	 * fallback" rules should be applied */
+	if (!Loc.getAllow().empty()) {
+		tryFind =
+			std::find(Loc.getAllow().begin(), Loc.getAllow().end(), Req.getMethod());
+		return (tryFind != Loc.getAllow().end());
+	} else {
+		tryFind =
+			std::find(Conf.getAllow().begin(), Conf.getAllow().end(), Req.getMethod());
+		return (tryFind != Conf.getAllow().end());
+	}
+}
+
+bool Request::checkValidMethod(const Request &Req) {
+	std::map<std::string, Request::e_RequestType>::iterator itr =
+		_MethodKeys.find(Req.getMethod());
+
+	switch (itr->second) {
+		case GET:
+		case POST:
+		case DELETE:
+			return true;
+		default:
+			return false;
+	}
+}
+
+void Request::ValidateRequest(const Config &Conf) {
+	/* check method */
+	if (checkValidMethod(*this) == false) {
+		throw Utils::ErrorPageException(
+			"405"); // not sure if this is the right number; the method given by the
+					// client could be "DOG"
+	}
+	if (methodsAllowed(*this, Conf) == false) {
+		throw Utils::ErrorPageException("405");
+	};
+
+	/* check if HTTP version is 1.1 */
+	if (this->_HTTPVersion != std::string("HTTP/1.1"))
+		throw Utils::ErrorPageException("505");
 }
 
 void Request::setBody(std::string NewBody) {
@@ -82,12 +160,16 @@ std::map<std::string, std::string> Request::getHeaderMap() const {
 	return this->_header;
 }
 
+std::string Request::getConnectionInfo() const {
+	return this->_connection;
+}
+
 std::string Request::getMethod() const {
 	return this->_method;
 }
 
-std::string Request::getRequestTarget() const {
-	return this->_requestTarget;
+std::string Request::getUri() const {
+	return this->_uri;
 }
 
 std::string Request::getHTTPVersion() const {
@@ -98,12 +180,20 @@ std::string Request::getBody() const {
 	return this->_body;
 }
 
+std::string Request::getQuery() const {
+	return this->_query;
+}
+
 long Request::getContentLength() const {
 	return this->_ContentLength;
 }
 
 bool Request::getChunked() const {
 	return this->_TransferEncodingChunked;
+}
+
+bool Request::getConnectionAvailable() const {
+	return this->_ConnectionAvailable;
 }
 
 bool Request::getCgi() const {
@@ -122,7 +212,8 @@ bool Request::contentLenAvailable() const {
 void Request::printAttributesInRequestClass() {
 	std::cout << "--------------------------------------" << std::endl;
 	std::cout << "method = [" << this->_method << "]" << std::endl;
-	std::cout << "requestTarget = [" << this->_requestTarget << "]" << std::endl;
+	std::cout << "uri = [" << this->_uri << "]" << std::endl;
+	std::cout << "query = [" << this->_query << "]" << std::endl;
 	std::cout << "HTTPVersion = [" << this->_HTTPVersion << "]" << std::endl;
 	std::cout << "--------------------------------------" << std::endl;
 	std::cout << "map = \n";
