@@ -7,8 +7,8 @@ on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+#  pull_request:
+#    branches: [ "main" ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -26,8 +26,8 @@ jobs:
       - uses: actions/checkout@v3
 
       # Runs make, since our minimum requirement is that it makes
-      - name: Run a one-line script
-        run: make -C code/
+ #     - name: Run a one-line script
+ #       run: make -C code/
 
       # Runs a set tests for the github workflow test defined in the makefile
       - name: Run a multi-line script
