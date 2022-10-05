@@ -5,11 +5,6 @@
 
 namespace Utils {
 
-enum e_RequestType { GET, POST, DELETE }; // make static
-
-static std::map<std::string, e_RequestType> _MethodKeys; // make static
-//_MethodKeys["GET"]    = GET;
-//_MethodKeys["POST"]   = POST;
-//_MethodKeys["DELETE"] = DELETE;
+// can be used for all the static defines/functions etc */
 
 } // namespace Utils

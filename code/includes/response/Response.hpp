@@ -6,7 +6,9 @@ class Response {
 	private:
 		std::string _response;
 		bool        _respReady;
+		std::string _statuscode; //(200 OK etc);
 		//		_timestamp;
+
 
 	public:
 		Response();
