@@ -1,87 +1,85 @@
 #include "utils/Utils.hpp"
 
 namespace Utils {
-	int64_t stol(std::string &string, bool skip) {
-		char *endptr    = NULL;
-		errno           = 0;
-		int64_t longval = strtol(string.c_str(), &endptr, 10);
+int64_t stol(std::string &string, bool skip) {
+	char *endptr    = NULL;
+	errno           = 0;
+	int64_t longval = strtol(string.c_str(), &endptr, 10);
 
-		if (errno == EINVAL || errno == ERANGE || string.c_str() == endptr) {
-			throw std::runtime_error(
-				"The string \"" + string + "\" does not contain a number"
-			);
-		}
-		if (skip) {
-			string = string.substr(endptr - string.c_str());
-		}
-		return (longval);
+	if (errno == EINVAL || errno == ERANGE || string.c_str() == endptr) {
+		throw std::runtime_error("The string \"" + string +
+								 "\" does not contain a number");
 	}
-
-	int64_t stol(const std::string &string) {
-		char *endptr    = NULL;
-		errno           = 0;
-		int64_t longval = strtol(string.c_str(), &endptr, 10);
-
-		if (errno == EINVAL || errno == ERANGE || string.c_str() == endptr) {
-			throw std::runtime_error(
-				"The string \"" + string + "\" does not contain a number"
-			);
-		}
-		return (longval);
+	if (skip) {
+		string = string.substr(endptr - string.c_str());
 	}
+	return (longval);
+}
 
-	std::string trimLeadingWhitespaceCopy(std::string str) {
-		std::string::iterator start = str.begin();
-		std::string::iterator end   = str.end();
+int64_t stol(const std::string &string) {
+	char *endptr    = NULL;
+	errno           = 0;
+	int64_t longval = strtol(string.c_str(), &endptr, 10);
 
-		while (start != end && std::isspace(*start)) {
-			start++;
-		}
-		return (std::string(start, end));
+	if (errno == EINVAL || errno == ERANGE || string.c_str() == endptr) {
+		throw std::runtime_error("The string \"" + string +
+								 "\" does not contain a number");
 	}
+	return (longval);
+}
 
-	std::string trimTrailingWhitespaceCopy(std::string str) {
-		std::string::iterator start = str.begin();
-		std::string::iterator end   = str.end();
+std::string trimLeadingWhitespaceCopy(std::string str) {
+	std::string::iterator start = str.begin();
+	std::string::iterator end   = str.end();
 
-		while (end - start > 0 && std::isspace(*end)) {
-			end--;
-		}
-		return (std::string(start, end));
+	while (start != end && std::isspace(*start)) {
+		start++;
 	}
+	return (std::string(start, end));
+}
 
-	std::string trimWhitespaceCopy(std::string str) {
-		return (trimTrailingWhitespaceCopy(trimLeadingWhitespaceCopy(str)));
+std::string trimTrailingWhitespaceCopy(std::string str) {
+	std::string::iterator start = str.begin();
+	std::string::iterator end   = str.end();
+
+	while (end - start > 0 && std::isspace(*end)) {
+		end--;
 	}
+	return (std::string(start, end));
+}
 
-	void trimLeadingWhitespaceRef(std::string &str) {
-		std::string::iterator start = str.begin();
-		std::string::iterator end   = str.end();
+std::string trimWhitespaceCopy(std::string str) {
+	return (trimTrailingWhitespaceCopy(trimLeadingWhitespaceCopy(str)));
+}
 
-		while (start != end && std::isspace(*start)) {
-			start++;
-		}
-		str = std::string(start, end);
+void trimLeadingWhitespaceRef(std::string &str) {
+	std::string::iterator start = str.begin();
+	std::string::iterator end   = str.end();
+
+	while (start != end && std::isspace(*start)) {
+		start++;
 	}
+	str = std::string(start, end);
+}
 
-	void trimTrailingWhitespaceRef(std::string &str) {
-		std::string::iterator start = str.begin();
-		std::string::iterator end   = str.end();
+void trimTrailingWhitespaceRef(std::string &str) {
+	std::string::iterator start = str.begin();
+	std::string::iterator end   = str.end();
 
-		while (end - start > 0 && std::isspace(*end)) {
-			end--;
-		}
-		str = std::string(start, end);
+	while (end - start > 0 && std::isspace(*end)) {
+		end--;
 	}
+	str = std::string(start, end);
+}
 
-	void trimWhitespaceRef(std::string &str) {
-		trimLeadingWhitespaceRef(str);
-		trimTrailingWhitespaceRef(str);
-	}
+void trimWhitespaceRef(std::string &str) {
+	trimLeadingWhitespaceRef(str);
+	trimTrailingWhitespaceRef(str);
+}
 
-	bool starts_with(const std::string &source, const std::string &prefix) {
-		return (source.find(prefix) == 0);
-	}
+bool starts_with(const std::string &source, const std::string &prefix) {
+	return (source.find(prefix) == 0);
+}
 
 
 } // namespace Utils

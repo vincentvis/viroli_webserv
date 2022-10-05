@@ -49,7 +49,8 @@ CLASSES		:= config/ConfigParser\
                 request/HttpRequest\
                 request/Request\
                 request/RequestInterface\
-                response/Response
+                response/Response\
+				autoindex/Autoindex
 
 OBJECTS		:= $(CLASSES:%=$(OBJ_DIR)%.o)
 HEADERS		:= $(CLASSES:%=$(INC_DIR)%.hpp)
@@ -74,6 +75,10 @@ $(OBJ_DIR)%.o: $(SRC_DIR)%.cpp $(HEADERS)
 
 tidy:
 	/Volumes/Data_v/utils/homebrew/opt/llvm/bin/clang-tidy $(CLASSES:%=$(SRC_DIR)%.cpp) -- $(CPPFLAGS)
+
+errorpages:
+	cd utilities && $(CC) html_errorpage_generator.c && ./a.out
+	$(RM) ./utilities/a.out
 
 clean:
 	$(RM) -r $(OBJ_DIR)

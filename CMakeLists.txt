@@ -33,6 +33,6 @@ add_executable(webserv
         code/includes/utils/Utils.hpp
         code/source_files/response/Response.cpp
         code/includes/response/Response.hpp
-        )
+        code/includes/utils/Defines.hpp)
 
 #target_link_libraries(webserv PUBLIC libft)
