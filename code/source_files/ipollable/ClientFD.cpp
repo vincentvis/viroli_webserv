@@ -1,5 +1,5 @@
 #include "ipollable/IPollable.hpp"
-
+#include <algorithm>
 ClientFD::ClientFD(Server *server, int fd, int index) :
 	_server(server), _state(HEADER), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
 	_total(0), _fd(fd), _index(index) {
@@ -22,11 +22,16 @@ void ClientFD::receive(int len) {
 
 	if (_bytes == 0) {
 		Server::_pfds[_index].fd = INVALID_FD;
+		std::cout << "done receiving data\n";
 	}
 	if (_bytes > 0) {
+		// std::cout << "buffer count: " << std::count(_buffer.begin(), _buffer.end(),
+		// '\n')
+		// << std::endl;
 		_total += _bytes;
 		// _left -= _bytes; // overflows/underflows
 		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
+		// std::cout << "data2.sie(): " << _data.size() << std::endl;
 	}
 }
 
@@ -36,36 +41,82 @@ void ClientFD::resetBytes() {
 	_total = 0;
 }
 
-void ClientFD::receive() {
-	size_t pos = 0;
+// void ClientFD::receive() {
+// 	size_t pos = 0;
 
-	if (_left == 0) {
-		if ((pos = _data.find("\r\n")) != std::string::npos) {
-			std::stringstream stream;
+// 	// check chunk size
+// 	std::cout << "waddup\n";
+// 	if (_left == 0) {
+// 		// look for chunk size in data already received
+// 		if ((pos = _data.find("\r\n")) != std::string::npos) {
+// 			std::stringstream stream;
+// 			stream << std::hex << _data.substr(0, pos);
+// 			stream >> _left;
+// 			_data = _data.substr(pos + CRLF);
+// 			std::cout << "chunk: " << _left << std::endl;
+// 			// zero chunk size denotes end of transfer
+// 			if (_left == 0) {
+// 				// std::cout << _body << "$" << std::endl;
+// 				// std::cout << "count: " << std::count(_body.begin(), _body.end(), '\n')
+// 				// 		  << std::endl;
+// 				_state = END;
+// 				return;
+// 			}
+// 			// receive more data to check
+// 		} else {
+// 			receive(BUFFERSIZE);
+// 		}
+// 	}
+// 	// chunk size is known
+// 	if (_left) {
+// 		// check if size is in data already received
+// 		if (_left + CRLF <= _data.size()) {
+// 			// check if chunk size ends in CRLF
+// 			if (_data.substr(_left, CRLF).find("\r\n") == std::string::npos) {
+// 				throw(std::string("expected CRLF not found"));
+// 			}
+// 			std::cout << "chunk2: " << _left << std::endl;
+// 			_body.append(_data.begin(), _data.begin() + _left);
+// 			_data = _data.substr(_left + CRLF);
+// 			_left = 0;
+// 			// receive more data for chunk
+// 		} else {
+// 			receive(BUFFERSIZE);
+// 			std::cout << "chunk1: " << _left << std::endl;
+// 			std::cout << "data.size(): " << _data.size() << std::endl;
+// 		}
+// 	}
+// }
+
+void ClientFD::receive() {
+	std::stringstream stream;
+	size_t            pos = 0;
+
+	if (_data.size() > 0) {
+		if (_left) {
+			if (_left + CRLF <= _data.size()) {
+				if (_data.substr(_left, CRLF).find("\r\n") == std::string::npos) {
+					throw(std::string("expected CRLF not found"));
+				}
+				_body.append(_data.begin(), _data.begin() + _left);
+				_data = _data.substr(_left + CRLF);
+				_left = 0;
+			} else {
+				receive(BUFFERSIZE);
+			}
+		} else if ((pos = _data.find("\r\n")) != std::string::npos) {
 			stream << std::hex << _data.substr(0, pos);
 			stream >> _left;
 			_data = _data.substr(pos + CRLF);
-			std::cout << "chunk: " << _left << std::endl;
 			if (_left == 0) {
-				std::cout << _body << "$" << std::endl;
 				_state = END;
 				return;
 			}
 		} else {
 			receive(BUFFERSIZE);
 		}
-	}
-	if (_left) {
-		if (_left + CRLF <= _data.size()) {
-			if (_data.substr(_left, CRLF).find("\r\n") == std::string::npos) {
-				throw(std::string("expected CRLF not found"));
-			}
-			_body.append(_data.begin(), _data.begin() + _left);
-			_data = _data.substr(_left + CRLF);
-			_left = 0;
-		} else {
-			receive(BUFFERSIZE);
-		}
+	} else {
+		receive(BUFFERSIZE);
 	}
 }
 
@@ -95,12 +146,12 @@ void ClientFD::getHeader() {
 		std::cout << _data << std::endl;
 		std::cout << "\nheader:\n\n-----------\n" << _header << "\n-----------\n\n";
 
-		/* check if contentLengthAvailable() or getChunked() are true if so body exists
-		 * read bytes and setBody */
-		// 		if (this->_request.getHeaderAvailable() == true) { // this can be written
-		// shorter, with one setBody and fewer if statements etc, but since you might
-		// change a lot, these are the basics.
-		// if (this->_request.getChunked() == true) {
+		/* check if contentLengthAvailable() or getChunked() are true if so body
+		 * exists read bytes and setBody */
+		// 		if (this->_request.getHeaderAvailable() == true) { // this can be
+		// written shorter, with one setBody and fewer if statements etc, but since
+		// you might change a lot, these are the basics. if
+		// (this->_request.getChunked() == true) {
 		//   std::cout << "do something with chunked body" <<
 		// std::endl;
 		// 				this->_request.setBody("this is a chunked body");
@@ -114,13 +165,15 @@ void ClientFD::getHeader() {
 
 		/* create CGIrequest or HTTPrequest */
 		if (this->_request.getCgi() == true) {
-			// std::cout << "CGI: this should work with the new .findConfig() function"
+			// std::cout << "CGI: this should work with the new .findConfig()
+			// function"
 			// << std::endl;
 			this->_requestInterface =
 				new CGIRequest(this->_request, this->_server->findConfig(this->_request),
 							   this->_response);
 		} else {
-			// std::cout << "HTTP: this should work with the new .findConfig() function"
+			// std::cout << "HTTP: this should work with the new .findConfig()
+			// function"
 			// 		  << std::endl;
 			// std::cout << "config size!: " << this->_server->_configs.size() <<
 			// std::endl;

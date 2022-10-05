@@ -80,7 +80,6 @@ class ClientFD : public IPollable {
 		void    pollout();
 		void    resetBytes();
 		int     getFileDescriptor() const;
-		size_t  extractChunkedSize(size_t pos);
 		void    getHeader();
 		void    getBody();
 		void    receiveChunked();
@@ -91,6 +90,10 @@ class ClientFD : public IPollable {
 		void    initResponse(int index);
 		void    closeFD();
 		int32_t getRemainderBytes() const;
+
+		size_t  extractChunkedSize(size_t pos);
+		size_t  extractChunkSize();
+		bool    extractChunk();
 };
 
 class FileFD : public IPollable {
