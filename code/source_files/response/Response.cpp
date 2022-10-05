@@ -25,14 +25,14 @@ std::string 	Response::CalcContentLen(std::string str){
 }
 
 void Response::initResponse(std::string status, const Config &Conf, const Request &Req) {
-	/*Status Line */
+	/* Status Line */
 	this->_httpVersion = Req.getHTTPVersion();
 	this->_statusCode = status;
 	this->_reasonPhrase = "OK";  //should work with status
 
 	/* Http Header */
 	this->_date = "Date: " + getDate();
-	this->_serverType = "Server: VIROLI_Server/1.0"; // or is this the servername in the config?
+	this->_serverType = "Server: VIROLI_Server/26.3.8"; // or is this the servername in the config?
 
 	this->_contentType = "Content-type: " + getContentType();
 	if (Req.getConnectionAvailable())
@@ -40,18 +40,19 @@ void Response::initResponse(std::string status, const Config &Conf, const Reques
 	else
 		this->_connection =  "Connection: Close"; //is this correct?
 
-	/*		Message Body */
+	/* Message Body */
 	this->_messageBody = "this is a test Response";
 	this->_contentLen = "Content-Length: " + CalcContentLen(this->_messageBody);
 }
 
 void Response::createResponseHeader() {
-	//checks around these
-	std::string StatusLine = this->_httpVersion + " " + this->_statusCode + " " + this->_reasonPhrase + "\r\n";
-	std::string HTTPHeader = this->_date + "\r\n" + this->_serverType + "\r\n" + this->_contentLen + "\r\n" + this->_contentType + "\r\n" + this->_connection + "\r\n\r\n";
-	std::string MessageBody = this->_messageBody + "\r\n";
+	// checks around these
+	std::string StatusLine = this->_httpVersion + " " + this->_statusCode + " " + this->_reasonPhrase + CRLF;
+	std::string HTTPHeader = this->_date + CRLF + this->_serverType + CRLF + this->_contentLen + CRLF + this->_contentType + CRLF + this->_connection + CRLF CRLF;
+	std::string MessageBody = this->_messageBody + CRLF;
 
 	this->_response = StatusLine + HTTPHeader + MessageBody;
+
 	/* Response Ready to Send */
 	this->_respReady = true;
 }

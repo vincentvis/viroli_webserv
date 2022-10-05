@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 
+#define CRLF "\r\n"
+
 namespace Utils {
 
 const std::string get_string("GET");

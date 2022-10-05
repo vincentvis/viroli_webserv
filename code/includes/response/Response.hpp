@@ -1,8 +1,10 @@
 #pragma once
 #include "config/Config.hpp"
+#include "utils/Defines.hpp"
 #include <iostream>
+#include <map>
 
-// Statudcode range:
+// Statuscode range:
 //	100-199 is classed as Informational.
 //	200-299 is Successful.
 //	300-399 is Redirection.
@@ -13,6 +15,7 @@ class Response {
 	private:
 		std::string _response;
 		bool        _respReady;
+//		std::map<std::string, std::string> _statusCodes; // vincent adds
 
 		/* Status Line: */
 		std::string _httpVersion;  /* [HTTP1.1] */
@@ -24,8 +27,9 @@ class Response {
 		std::string _serverType;  /* [Server: ] */
 								  //		std::string _contentLen; /* [Content-Length: ] */
 		std::string _contentType; /* [Content-type: ] */
-		std::string _contentLen;
+		std::string _contentLen; /* [Content-Length: ] */
 		std::string _connection; /* [Connection: ] */
+		std::string _location; /* [Location: ] */
 
 		/*		Message Body */
 		std::string _messageBody;
