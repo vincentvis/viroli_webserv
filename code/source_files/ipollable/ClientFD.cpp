@@ -92,7 +92,25 @@ void ClientFD::receive() {
 	std::stringstream stream;
 	size_t            pos = 0;
 
-	if (_data.size() > 0) {
+
+	// "9\r\nlooooooool\r\n3\r\npop\r\n"
+
+	while (true) {
+		if (!_left) {
+			if (_data.find("\r\n") == std::string::npos) {
+				receive(BUFFERSIZE);
+				break;
+			} else {
+				stream << std::hex << _data.substr(0, pos);
+				stream >> _left;
+				_data = _data.substr(pos + CRLF);
+				if (_left == 0) {
+					_state = END;
+					std::cout << _body << std::endl;
+					break;
+				}
+			}
+		}
 		if (_left) {
 			if (_left + CRLF <= _data.size()) {
 				if (_data.substr(_left, CRLF).find("\r\n") == std::string::npos) {
@@ -103,20 +121,9 @@ void ClientFD::receive() {
 				_left = 0;
 			} else {
 				receive(BUFFERSIZE);
+				break;
 			}
-		} else if ((pos = _data.find("\r\n")) != std::string::npos) {
-			stream << std::hex << _data.substr(0, pos);
-			stream >> _left;
-			_data = _data.substr(pos + CRLF);
-			if (_left == 0) {
-				_state = END;
-				return;
-			}
-		} else {
-			receive(BUFFERSIZE);
 		}
-	} else {
-		receive(BUFFERSIZE);
 	}
 }
 
