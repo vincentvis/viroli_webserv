@@ -11,7 +11,7 @@ uint16_t Server::getPort() const {
 	return _port;
 }
 
-const Config Server::findConfig(const Request &request) const {
+Config *Server::findConfig(const Request &request) const {
 	std::vector<Config *>::const_iterator        begin  = this->_configs.begin();
 	std::vector<Config *>::const_iterator        end    = this->_configs.end();
 
@@ -21,16 +21,16 @@ const Config Server::findConfig(const Request &request) const {
 		// TODO !
 		// check if this is correct,
 		// currently, if there is not host field in the header, we return the first config
-		return (**(this->_configs.begin()));
+		return (*(this->_configs.begin()));
 	}
 
 
 	for (; begin != end; ++begin) {
 		if ((*begin)->containsServerName(host->second)) {
-			return **begin;
+			return *begin;
 		}
 	}
-	return (**(this->_configs.begin()));
+	return (*(this->_configs.begin()));
 }
 
 std::ostream &operator<<(std::ostream &os, const Server &server) {

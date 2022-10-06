@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ipollable/ClientFD.hpp"
 #include "request/RequestInterface.hpp"
 #include "response/Response.hpp"
 #include "utils/Defines.hpp"
@@ -7,13 +8,13 @@
 
 class HttpRequest : public RequestInterface {
 	private:
-		void CheckMethod(const Request &Req, const Config &Conf, Response &Res);
-		void GETRequest(const Request &Req, const Config &Conf, Response &Res);
-		void POSTRequest(const Request &Req, const Config &Conf, Response &Res);
-		void DELETERequest(const Request &Req, const Config &Conf, Response &Res);
+		void CheckMethod(ClientFD &Client);
+		void GETRequest(ClientFD &Client);
+		void POSTRequest(ClientFD &Client);
+		void DELETERequest(ClientFD &Client);
 
 	public:
 		HttpRequest(); // should become private!
-		HttpRequest(const Request &Req, const Config &Serv, Response &Res);
+		HttpRequest(ClientFD &Client);
 		~HttpRequest();
 };

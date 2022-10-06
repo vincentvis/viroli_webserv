@@ -3,28 +3,7 @@
 Response::Response() {
 	this->_respReady = false;
 }
-
-std::string Response::getResponse() const {
-	return this->_response;
-}
-
-std::string Response::getDate() {
-	// do something to get date and time;
-	return "Thu, 09 Dec 2004 12:07:48 GMT";
-}
-
-std::string Response::getContentType() {
-	// do something to get contentType;
-	return "text/plain";
-}
-
-std::string Response::CalcContentLen(std::string str) {
-	(void)str;
-	//.length and than to str
-	return "23";
-}
-
-void Response::initResponse(std::string status, const Config &Conf, const Request &Req) {
+void Response::initResponse(std::string status, Config *Conf, const Request &Req) {
 	(void)Conf;
 	/* Status Line */
 	this->_httpVersion  = Req.getHTTPVersion();
@@ -64,6 +43,26 @@ void Response::createResponseHeader() {
 
 bool Response::respReady() const {
 	return this->_respReady;
+}
+
+std::string Response::getResponse() const {
+	return this->_response;
+}
+
+std::string Response::getDate() {
+	// do something to get date and time;
+	return "Thu, 09 Dec 2004 12:07:48 GMT";
+}
+
+std::string Response::getContentType() {
+	// do something to get contentType;
+	return "text/plain";
+}
+
+std::string Response::CalcContentLen(std::string str) {
+	(void)str;
+	//.length and than to str
+	return "23";
 }
 
 Response::~Response() {

@@ -12,17 +12,17 @@ Config::~Config() {
 
 // This function relies on the requirement that the first location block
 // is a location matching only a single backslash
-const Location Config::findLocation(const Request &request) const {
-	std::vector<Location>::const_iterator begin = this->_locations.begin();
-	std::vector<Location>::const_iterator end   = this->_locations.end();
+Location *Config::findLocation(const Request &request) {
+	std::vector<Location>::iterator begin = this->_locations.begin();
+	std::vector<Location>::iterator end   = this->_locations.end();
 
-	std::vector<Location>::const_iterator loc   = begin;
+	std::vector<Location>::iterator loc   = begin;
 	for (; begin != end; ++begin) {
 		if (Utils::starts_with(request.getUri(), (*begin).getMatch())) {
 			loc = begin;
 		}
 	}
-	return (*loc);
+	return (&(*loc));
 }
 
 bool Config::containsServerName(std::string to_search) {
