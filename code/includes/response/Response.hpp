@@ -45,13 +45,8 @@ class Response {
 		Response();
 		~Response();
 
-		void initResponse(std::string status, const Config &Conf, const Request &Req);
-		void createResponseHeader();
-		//		void setStatusCode(std::string newRes); //needed later on or not?
-		//		void setReasonPhrase(std::string RP);
-		//		void setDate(std::string Date);
-		//		void setContentType(std::string ContentType);
-		//		void setMessageBody(std::string MessageBody);
+		void initResponse(std::string status, Config *Conf, const Request &Req) ;
+		void createResponseHeader() ;
 
 		std::string getResponse() const;
 		bool        respReady() const;
@@ -59,4 +54,10 @@ class Response {
 		std::string getDate();
 		std::string getContentType();
 		std::string CalcContentLen(std::string str);
+
+		//		void setStatusCode(std::string newRes); //needed later on or not?
+		//		void setReasonPhrase(std::string RP);
+		//		void setDate(std::string Date);
+		//		void setContentType(std::string ContentType);
+		//		void setMessageBody(std::string MessageBody);
 };

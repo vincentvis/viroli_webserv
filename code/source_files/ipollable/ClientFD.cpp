@@ -94,8 +94,8 @@ void ClientFD::getHeader() {
 		try {
 			this->_request.ParseRequest(this->_data);
 			this->_config   = this->_server->findConfig(this->_request);
-			this->_location = this->_config.findLocation(this->_request);
-			this->_request.ValidateRequest(this->_server->findConfig(this->_request));
+			this->_location = this->_config->findLocation(this->_request);
+			this->_request.ValidateRequest(this->_config);
 		} catch (const Utils::ErrorPageException &e) {
 			this->_response.initResponse(
 				e.what(), this->_config,
@@ -114,30 +114,27 @@ void ClientFD::getHeader() {
 		// if (this->_request.getHeaderAvailable() == true) { // this can be written
 		// shorter, with one setBody and fewer if statements etc, but since you might
 		// change a lot, these are the basics.
-		if (this->_request.getChunked() == true) {
-			std::cout << "do something with chunked body" << std::endl;
-			// this->_request.setBody("this is a chunked body");
-		}
-		if (this->_request.contentLenAvailable() == true) {
-			std::cout << "do something with contentlen body" << std::endl;
-			// this->_request.setBody("this is a body with contentlen");
-		}
-		this->_request.printAttributesInRequestClass(); // used for
-														// testing;
-														// REMOVE later
+		// if (this->_request.getChunked() == true) {
+		// 	std::cout << "do something with chunked body" << std::endl;
+		// 	// this->_request.setBody("this is a chunked body");
+		// }
+		// if (this->_request.contentLenAvailable() == true) {
+		// 	std::cout << "do something with contentlen body" << std::endl;
+		// 	// this->_request.setBody("this is a body with contentlen");
+		// }
+		// this->_request.printAttributesInRequestClass(); // used for
+		// 												// testing;
+		// 												// REMOVE later
 
 		/* create CGIrequest or HTTPrequest */
 		if (this->_request.getCgi() == true) {
-			this->_requestInterface =
-				new CGIRequest(this->_request, this->_config, this->_response);
+			this->_requestInterface = new CGIRequest(*this);
 		} else {
-			this->_request.printAttributesInRequestClass(); // REMOVE LATER
-			this->_requestInterface =
-				new HttpRequest(this->_request, this->_config, this->_response);
+			this->_requestInterface = new HttpRequest(*this);
 			// initResponse(_index);
 		}
-		resetBytes(); // used for reading body
-		getBody();    // check if (part of) body is already in _data
+		// this->_request.printAttributesInRequestClass(); // REMOVE LATER
+		getBody();
 	}
 }
 
@@ -160,7 +157,7 @@ void ClientFD::getBody() {
 	case LENGTH:
 	  receive(BUFFERSIZE);
 	} */
-	receive();
+	// receive();
 }
 
 int32_t ClientFD::getRemainderBytes() const {
