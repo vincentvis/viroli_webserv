@@ -22,8 +22,8 @@ class ClientFD : public IPollable {
 		Request           _request;
 		Response          _response;
 		RequestInterface *_requestInterface;
-		Config            *_config;
-		Location          *_location;
+		Config           *_config;
+		Location         *_location;
 		Server           *_server;
 		Transfer          _transfer;
 		State             _state;

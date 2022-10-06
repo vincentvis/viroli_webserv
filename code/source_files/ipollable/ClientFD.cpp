@@ -123,11 +123,9 @@ void ClientFD::getHeader() {
 
 		/* create CGIrequest or HTTPrequest */
 		if (this->_request.getCgi() == true) {
-			this->_requestInterface =
-				new CGIRequest(*this);
+			this->_requestInterface = new CGIRequest(*this);
 		} else {
-			this->_requestInterface =
-				new HttpRequest(*this);
+			this->_requestInterface = new HttpRequest(*this);
 			initResponse(_index);
 		}
 		this->_request.printAttributesInRequestClass(); // REMOVE LATER

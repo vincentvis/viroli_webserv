@@ -18,7 +18,6 @@ void HttpRequest::CheckMethod(ClientFD &Client) {
 }
 
 void HttpRequest::GETRequest(ClientFD &Client) {
-
 	Client._response.initResponse("200", Client._config, Client._request);
 	Client._response.createResponseHeader();
 }

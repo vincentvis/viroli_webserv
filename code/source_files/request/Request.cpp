@@ -16,9 +16,9 @@ Request::Request() {
 	this->_TransferEncodingChunked = false;
 	this->_ContentLengthAvailable  = false;
 	this->_ConnectionAvailable     = false;
-	_MethodKeys["GET"]             = GET; // make static
+	_MethodKeys["GET"]             = GET;    // make static
 	_MethodKeys["DELETE"]          = DELETE; // make static
-	_MethodKeys["POST"]            = POST; // make static
+	_MethodKeys["POST"]            = POST;   // make static
 }
 
 void Request::ParseRequest(std::string BUF) {
@@ -92,7 +92,7 @@ void Request::ParseRequest(std::string BUF) {
 		throw Utils::ErrorPageException("400");
 	}
 
-	this->_itr = _header.find("Transfer-Encoding:");
+	this->_itr = _header.find("Transfer-Encoding");
 	if (this->_itr != _header.end()) {
 		if (this->_itr->second.find("chunked") != std::string::npos)
 			this->_TransferEncodingChunked = true;
@@ -115,8 +115,7 @@ bool Request::methodsAllowed(const Request &Req, Config &Conf) {
 		tryFind =
 			std::find(Loc->getAllow().begin(), Loc->getAllow().end(), Req.getMethod());
 		return (tryFind != Loc->getAllow().end());
-	}
-	else {
+	} else {
 		tryFind =
 			std::find(Conf.getAllow().begin(), Conf.getAllow().end(), Req.getMethod());
 		return (tryFind != Conf.getAllow().end());
@@ -137,10 +136,12 @@ bool Request::checkValidMethod(const Request &Req) {
 	}
 }
 
-void Request::ValidateRequest( Config &Conf) {
+void Request::ValidateRequest(Config &Conf) {
 	/* check method */
 	if (checkValidMethod(*this) == false) {
-		throw Utils::ErrorPageException("405"); // not sure if this is the right number; the method given by the client could be "DOG"
+		throw Utils::ErrorPageException(
+			"405"); // not sure if this is the right number; the method given by the
+					// client could be "DOG"
 	}
 	if (methodsAllowed(*this, Conf) == false) {
 		throw Utils::ErrorPageException("405");
