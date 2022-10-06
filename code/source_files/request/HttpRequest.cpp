@@ -5,31 +5,32 @@
 HttpRequest::HttpRequest() {
 }
 
-HttpRequest::HttpRequest(const Request &Req, const Config &Conf, Response &Res) {
-	CheckMethod(Req, Conf, Res);
+HttpRequest::HttpRequest(ClientFD &Client) {
+	CheckMethod(Client);
 }
 
-void HttpRequest::CheckMethod(const Request &Req, const Config &Conf, Response &Res) {
-	if (Req.getMethod() == Utils::get_string)
-		GETRequest(Req, Conf, Res);
-	if (Req.getMethod() == Utils::post_string)
-		POSTRequest(Req, Conf, Res);
-	DELETERequest(Req, Conf, Res);
+void HttpRequest::CheckMethod(ClientFD &Client) {
+	if (Client._request.getMethod() == Utils::get_string)
+		GETRequest(Client);
+	if (Client._request.getMethod() == Utils::post_string)
+		POSTRequest(Client);
+	DELETERequest(Client);
 }
 
-void HttpRequest::GETRequest(const Request &Req, const Config &Conf, Response &Res) {
-	Res.initResponse("200", Conf, Req);
-	Res.createResponseHeader();
+void HttpRequest::GETRequest(ClientFD &Client) {
+
+	Client._response.initResponse("200", Client._config, Client._request);
+	Client._response.createResponseHeader();
 }
 
-void HttpRequest::POSTRequest(const Request &Req, const Config &Conf, Response &Res) {
-	Res.initResponse("200", Conf, Req);
-	Res.createResponseHeader();
+void HttpRequest::POSTRequest(ClientFD &Client) {
+	Client._response.initResponse("200", Client._config, Client._request);
+	Client._response.createResponseHeader();
 }
 
-void HttpRequest::DELETERequest(const Request &Req, const Config &Conf, Response &Res) {
-	Res.initResponse("200", Conf, Req);
-	Res.createResponseHeader();
+void HttpRequest::DELETERequest(ClientFD &Client) {
+	Client._response.initResponse("200", Client._config, Client._request);
+	Client._response.createResponseHeader();
 }
 
 HttpRequest::~HttpRequest() {

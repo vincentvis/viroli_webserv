@@ -3,36 +3,30 @@
 CGIRequest::CGIRequest() {
 }
 
-CGIRequest::CGIRequest(const Request &Req, const Config &Conf, Response &Res) {
-	CheckMethod(Req, Conf, Res);
+CGIRequest::CGIRequest(ClientFD &Client) {
+	CheckMethod(Client);
 }
 
-void CGIRequest::CheckMethod(const Request &Req, const Config &Conf, Response &Res) {
-	if (Req.getMethod() == Utils::get_string)
-		GETRequest(Req, Conf, Res);
-	if (Req.getMethod() == Utils::post_string)
-		POSTRequest(Req, Conf, Res);
-	DELETERequest(Req, Conf, Res);
+void CGIRequest::CheckMethod(ClientFD &Client) {
+	if (Client._request.getMethod() == Utils::get_string)
+		GETRequest(Client);
+	if (Client._request.getMethod() == Utils::post_string)
+		POSTRequest(Client);
+	DELETERequest(Client);
 }
 
-void CGIRequest::GETRequest(const Request &Req, const Config &Conf, Response &Res) {
-	(void)Req;
-	(void)Conf;
-	(void)Res;
+void CGIRequest::GETRequest(ClientFD &Client) {
+	(void)Client;
 	std::cout << "this is a GET CGI Request" << std::endl; // REMOVE LATER
 }
 
-void CGIRequest::POSTRequest(const Request &Req, const Config &Conf, Response &Res) {
-	(void)Req;
-	(void)Conf;
-	(void)Res;
+void CGIRequest::POSTRequest(ClientFD &Client) {
+	(void)Client;
 	std::cout << "this is a POST CGI Request" << std::endl; // REMOVE LATER
 }
 
-void CGIRequest::DELETERequest(const Request &Req, const Config &Conf, Response &Res) {
-	(void)Req;
-	(void)Conf;
-	(void)Res;
+void CGIRequest::DELETERequest(ClientFD &Client) {
+	(void)Client;
 	std::cout << "this is a DELETE CGI Request" << std::endl; // REMOVE LATER
 }
 

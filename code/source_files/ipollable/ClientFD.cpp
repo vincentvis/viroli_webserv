@@ -90,8 +90,8 @@ void ClientFD::getHeader() {
 		try {
 			this->_request.ParseRequest(this->_data);
 			this->_config   = this->_server->findConfig(this->_request);
-			this->_location = this->_config.findLocation(this->_request);
-			this->_request.ValidateRequest(this->_server->findConfig(this->_request));
+			this->_location = this->_config->findLocation(this->_request);
+			this->_request.ValidateRequest(*this->_config);
 		} catch (const Utils::ErrorPageException &e) {
 			this->_response.initResponse(
 				e.what(), this->_config,
@@ -124,10 +124,10 @@ void ClientFD::getHeader() {
 		/* create CGIrequest or HTTPrequest */
 		if (this->_request.getCgi() == true) {
 			this->_requestInterface =
-				new CGIRequest(this->_request, this->_config, this->_response);
+				new CGIRequest(*this);
 		} else {
 			this->_requestInterface =
-				new HttpRequest(this->_request, this->_config, this->_response);
+				new HttpRequest(*this);
 			initResponse(_index);
 		}
 		this->_request.printAttributesInRequestClass(); // REMOVE LATER

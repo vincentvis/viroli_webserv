@@ -102,19 +102,19 @@ void Request::ParseRequest(std::string BUF) {
 	this->_headerAvailable = true;
 }
 
-bool Request::methodsAllowed(const Request &Req, const Config &Conf) {
+bool Request::methodsAllowed(const Request &Req, Config &Conf) {
 	std::vector<std::string>::iterator tryFind;
 	/* if both location.getAllow() and Config.getAllow don't exist "default fallback
 	 * rules" apply: all methods are allowed*/
-	Location Loc = Conf.findLocation(Req);
-	if (Loc.getAllow().empty() && Conf.getAllow().empty())
+	Location *Loc = Conf.findLocation(Req);
+	if (Loc->getAllow().empty() && Conf.getAllow().empty())
 		return true;
 	/* check if location.getAllow() exists it overrules the fallback rules, else "config
 	 * fallback" rules should be applied */
-	if (!Loc.getAllow().empty()) {
+	if (!Loc->getAllow().empty()) {
 		tryFind =
-			std::find(Loc.getAllow().begin(), Loc.getAllow().end(), Req.getMethod());
-		return (tryFind != Loc.getAllow().end());
+			std::find(Loc->getAllow().begin(), Loc->getAllow().end(), Req.getMethod());
+		return (tryFind != Loc->getAllow().end());
 	}
 	else {
 		tryFind =
@@ -137,7 +137,7 @@ bool Request::checkValidMethod(const Request &Req) {
 	}
 }
 
-void Request::ValidateRequest(const Config &Conf) {
+void Request::ValidateRequest( Config &Conf) {
 	/* check method */
 	if (checkValidMethod(*this) == false) {
 		throw Utils::ErrorPageException("405"); // not sure if this is the right number; the method given by the client could be "DOG"
@@ -172,7 +172,7 @@ std::string Request::getUri() const {
 }
 
 std::string Request::getHTTPVersion() const {
-	return _HTTPVersion;
+	return this->_HTTPVersion;
 }
 
 std::string Request::getBody() const {

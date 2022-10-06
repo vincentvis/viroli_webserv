@@ -2,10 +2,10 @@
 
 #include "config/Config.hpp"
 #include "ipollable/IPollable.hpp"
+//#include "request/RequestInterface.hpp"
 #include "request/CGIRequest.hpp"
 #include "request/HttpRequest.hpp"
 #include "request/Request.hpp"
-#include "request/RequestInterface.hpp"
 #include "response/Response.hpp"
 #include "server/Location.hpp"
 #include "server/Server.hpp"
@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+class RequestInterface;
 class ClientFD : public IPollable {
 	public:
 		enum State { HEADER, BODY, END };
@@ -21,8 +22,8 @@ class ClientFD : public IPollable {
 		Request           _request;
 		Response          _response;
 		RequestInterface *_requestInterface;
-		Config            _config;
-		Location          _location;
+		Config            *_config;
+		Location          *_location;
 		Server           *_server;
 		Transfer          _transfer;
 		State             _state;
