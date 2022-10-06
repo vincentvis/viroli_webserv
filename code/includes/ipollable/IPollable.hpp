@@ -69,7 +69,7 @@ class ClientFD : public IPollable {
 		std::string       _data;
 		std::string       _header;
 		std::string       _body;
-		size_t            _bytes;
+		int               _bytes;
 		size_t            _left;
 		size_t            _total;
 		int               _fd;
@@ -88,14 +88,12 @@ class ClientFD : public IPollable {
 		void    receiveLength(int length);
 		Server *getServer() const;
 		void    receive();
-		void    receive(int len);
+		void    receive(size_t len);
 		void    initResponse(int index);
 		void    closeFD();
 		int32_t getRemainderBytes() const;
 
-		size_t  extractChunkedSize(size_t pos);
-		size_t  extractChunkSize();
-		bool    extractChunk();
+		void    extractChunk();
 };
 
 class FileFD : public IPollable {
@@ -106,7 +104,7 @@ class FileFD : public IPollable {
 		Server           *_server;
 		std::vector<char> _buffer;
 		std::string       _data;
-		int               _bytes;
+		size_t            _bytes;
 		int               _left;
 		int               _total;
 		int               _fd;

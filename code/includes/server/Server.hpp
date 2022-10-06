@@ -23,8 +23,8 @@
 #include <utility>
 #include <vector>
 
-#define BUFFERSIZE     1000 // tmp
-#define MAXCONNECTIONS 10   // tmp
+#define BUFFERSIZE     64 // tmp
+#define MAXCONNECTIONS 10 // tmp
 #define PFDS_THRESHOLD 1000
 
 enum Pollable { SERVERPOLL, CLIENTPOLL, FILEPOLL };

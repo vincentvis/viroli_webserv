@@ -1,5 +1,5 @@
 #include "ipollable/IPollable.hpp"
-#include <algorithm>
+
 ClientFD::ClientFD(Server *server, int fd, int index) :
 	_server(server), _state(HEADER), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
 	_total(0), _fd(fd), _index(index) {
@@ -8,17 +8,9 @@ ClientFD::ClientFD(Server *server, int fd, int index) :
 ClientFD::~ClientFD() {
 }
 
-void ClientFD::receive(int len) {
+void ClientFD::receive(size_t len) {
 	_bytes = recv(_fd, _buffer.data(), len, 0);
-
-
-	// std::cout << "bytes received: " _bytes << std::endl;
-	// std::cout << "_buffer content: " << std::endl;
-	// for (size_t i = 0; i < _buffer.size(); ++i) {
-	// 	std::cout << _buffer[i];
-	// }
-	// std::cout << std::endl;
-
+	std::cout << "bytes read: " << _bytes << std::endl;
 
 	if (_bytes == 0) {
 		Server::_pfds[_index].fd = INVALID_FD;
@@ -29,6 +21,7 @@ void ClientFD::receive(int len) {
 		// '\n')
 		// << std::endl;
 		_total += _bytes;
+
 		// _left -= _bytes; // overflows/underflows
 		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
 		// std::cout << "data2.sie(): " << _data.size() << std::endl;
@@ -41,77 +34,30 @@ void ClientFD::resetBytes() {
 	_total = 0;
 }
 
-// void ClientFD::receive() {
-// 	size_t pos = 0;
-
-// 	// check chunk size
-// 	std::cout << "waddup\n";
-// 	if (_left == 0) {
-// 		// look for chunk size in data already received
-// 		if ((pos = _data.find("\r\n")) != std::string::npos) {
-// 			std::stringstream stream;
-// 			stream << std::hex << _data.substr(0, pos);
-// 			stream >> _left;
-// 			_data = _data.substr(pos + CRLF);
-// 			std::cout << "chunk: " << _left << std::endl;
-// 			// zero chunk size denotes end of transfer
-// 			if (_left == 0) {
-// 				// std::cout << _body << "$" << std::endl;
-// 				// std::cout << "count: " << std::count(_body.begin(), _body.end(), '\n')
-// 				// 		  << std::endl;
-// 				_state = END;
-// 				return;
-// 			}
-// 			// receive more data to check
-// 		} else {
-// 			receive(BUFFERSIZE);
-// 		}
-// 	}
-// 	// chunk size is known
-// 	if (_left) {
-// 		// check if size is in data already received
-// 		if (_left + CRLF <= _data.size()) {
-// 			// check if chunk size ends in CRLF
-// 			if (_data.substr(_left, CRLF).find("\r\n") == std::string::npos) {
-// 				throw(std::string("expected CRLF not found"));
-// 			}
-// 			std::cout << "chunk2: " << _left << std::endl;
-// 			_body.append(_data.begin(), _data.begin() + _left);
-// 			_data = _data.substr(_left + CRLF);
-// 			_left = 0;
-// 			// receive more data for chunk
-// 		} else {
-// 			receive(BUFFERSIZE);
-// 			std::cout << "chunk1: " << _left << std::endl;
-// 			std::cout << "data.size(): " << _data.size() << std::endl;
-// 		}
-// 	}
-// }
-
-void ClientFD::receive() {
+void ClientFD::extractChunk() {
 	std::stringstream stream;
 	size_t            pos = 0;
 
-
-	// "9\r\nlooooooool\r\n3\r\npop\r\n"
-
 	while (true) {
-		if (!_left) {
-			if (_data.find("\r\n") == std::string::npos) {
-				receive(BUFFERSIZE);
-				break;
-			} else {
-				stream << std::hex << _data.substr(0, pos);
-				stream >> _left;
-				_data = _data.substr(pos + CRLF);
-				if (_left == 0) {
-					_state = END;
-					std::cout << _body << std::endl;
-					break;
-				}
+		// chunk size unknown and not found in _data, receive more bytes
+		if ((_left == 0) && ((pos = _data.find("\r\n")) == std::string::npos)) {
+			break;
+		}
+		// chunk size unknown and found in _data
+		if ((_left == 0) && ((pos = _data.find("\r\n")) != std::string::npos)) {
+			stream << std::hex << _data.substr(0, pos);
+			stream >> _left;
+			std::cout << _left << "\n";
+			_data = _data.substr(pos + CRLF);
+			if (_left == 0) {
+				std::cout << "\nbody:\n\n" << _body << "\n";
+				_state = END;
+				return;
 			}
 		}
-		if (_left) {
+		// chunk size known
+		if (_left > 0) {
+			// chunk found in _data
 			if (_left + CRLF <= _data.size()) {
 				if (_data.substr(_left, CRLF).find("\r\n") == std::string::npos) {
 					throw(std::string("expected CRLF not found"));
@@ -119,12 +65,18 @@ void ClientFD::receive() {
 				_body.append(_data.begin(), _data.begin() + _left);
 				_data = _data.substr(_left + CRLF);
 				_left = 0;
+				// chunk not found, receive more bytes
 			} else {
-				receive(BUFFERSIZE);
 				break;
 			}
 		}
 	}
+}
+
+void ClientFD::receive() {
+	extractChunk();
+	receive(BUFFERSIZE);
+	extractChunk();
 }
 
 void ClientFD::initResponse(int index) {
@@ -150,7 +102,7 @@ void ClientFD::getHeader() {
 		_data   = _data.substr(end + CRLFCRLF);
 		_state  = BODY;
 		resetBytes();
-		std::cout << _data << std::endl;
+		// std::cout << "\n_data:\n\n" << _data << "\n\n";
 		std::cout << "\nheader:\n\n-----------\n" << _header << "\n-----------\n\n";
 
 		/* check if contentLengthAvailable() or getChunked() are true if so body
@@ -190,6 +142,9 @@ void ClientFD::getHeader() {
 								this->_response);
 			// initResponse(_index);
 		}
+		// server needs to process the data left behind immediately, next
+		// pollin cycle might not be required
+		getBody();
 	}
 }
 
