@@ -11,6 +11,10 @@
 #include <unistd.h>
 #include <vector>
 
+#define AUTOINDEX_LI(dir) \
+	std::string("\t\t<li><a href=\"./") + (dir) + "\">" + (dir) + "</a></li>\n"
+#define AUTOINDEX_LI_DIR(dir) \
+	std::string("\t\t<li><a href=\"./") + (dir) + "/\">" + (dir) + "</a></li>\n"
 #define AUTOINDEX_TEMPLATE \
 	"<!DOCTYPE html>\n\
 <html lang=\"en\">\n\
@@ -30,12 +34,6 @@ ${LIST}\
     \n\
 </body>\n\
 </html>"
-
-
-#define AUTOINDEX_LI(dir) \
-	std::string("\t\t<li><a href=\"./") + (dir) + "\">" + (dir) + "</a></li>\n"
-#define AUTOINDEX_LI_DIR(dir) \
-	std::string("\t\t<li><a href=\"./") + (dir) + "/\">" + (dir) + "</a></li>\n"
 
 class Autoindex {
 	public:
