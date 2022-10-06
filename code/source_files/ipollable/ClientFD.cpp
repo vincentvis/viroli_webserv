@@ -1,4 +1,4 @@
-#include "ipollable/IPollable.hpp"
+#include "ipollable/ClientFD.hpp"
 
 ClientFD::ClientFD(Server *server, int fd, int index) :
 	_server(server), _state(HEADER), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
@@ -40,11 +40,11 @@ void ClientFD::receive() {
 	size_t pos = 0;
 
 	if (_left == 0) {
-		if ((pos = _data.find("\r\n")) != std::string::npos) {
+		if ((pos = _data.find(CRLF)) != std::string::npos) {
 			std::stringstream stream;
 			stream << std::hex << _data.substr(0, pos);
 			stream >> _left;
-			_data = _data.substr(pos + CRLF);
+			_data = _data.substr(pos + CRLF_LEN);
 			std::cout << "chunk: " << _left << std::endl;
 			if (_left == 0) {
 				std::cout << _body << "$" << std::endl;
@@ -56,12 +56,12 @@ void ClientFD::receive() {
 		}
 	}
 	if (_left) {
-		if (_left + CRLF <= _data.size()) {
-			if (_data.substr(_left, CRLF).find("\r\n") == std::string::npos) {
+		if (_left + CRLF_LEN <= _data.size()) {
+			if (_data.substr(_left, CRLF_LEN).find(CRLF) == std::string::npos) {
 				throw(std::string("expected CRLF not found"));
 			}
 			_body.append(_data.begin(), _data.begin() + _left);
-			_data = _data.substr(_left + CRLF);
+			_data = _data.substr(_left + CRLF_LEN);
 			_left = 0;
 		} else {
 			receive(BUFFERSIZE);
@@ -86,51 +86,51 @@ void ClientFD::getHeader() {
 	size_t end = 0;
 
 	receive(BUFFERSIZE);
-	if ((end = _data.find("\r\n\r\n")) != std::string::npos) {
-		try{
+	if ((end = _data.find(CRLF_END)) != std::string::npos) {
+		try {
 			this->_request.ParseRequest(this->_data);
-			this->_config = this->_server->findConfig(this->_request);
+			this->_config   = this->_server->findConfig(this->_request);
 			this->_location = this->_config.findLocation(this->_request);
 			this->_request.ValidateRequest(this->_server->findConfig(this->_request));
-		}
-		catch (const Utils::ErrorPageException &e) {
-			this->_response.initResponse(e.what(), this->_config, this->_request); // make sure if error it sets it immidiately to create response and stops here
+		} catch (const Utils::ErrorPageException &e) {
+			this->_response.initResponse(
+				e.what(), this->_config,
+				this->_request); // make sure if error it sets it immidiately to create
+								 // response and stops here
 		} catch (const std::exception &e) {
 			// other exceptions like std::string! should be finished later/how?
 		}
 		_header = _data.substr(0, end);
-		_data   = _data.substr(end + CRLFCRLF);
+		_data   = _data.substr(end + CRLF_LEN2);
 		_state  = BODY;
 		//		std::cout << "\nheader:\n\n" << _header << "\n\n";
 
 		/* check if contentLengthAvailable() or getChunked() are true if so body exists
 		 * read bytes and setBody */
 		//		if (this->_request.getHeaderAvailable() == true) { // this can be written
-		//shorter, with one setBody and fewer if statements etc, but since you might
-		//change a lot, these are the basics. 			if (this->_request.getChunked() == true){
-		//				std::cout << "do something with chunked body" << std::endl;
+		// shorter, with one setBody and fewer if statements etc, but since you might
+		// change a lot, these are the basics. 			if (this->_request.getChunked() ==
+		// true){ 				std::cout << "do something with chunked body" <<
+		// std::endl;
 		//				this->_request.setBody("this is a chunked body");
 		//			}
 		//			if (this->_request.contentLenAvailable() == true){
 		//				std::cout << "do something with contentlen body" << std::endl;
 		//				this->_request.setBody("this is a body with contentlen");
 		//			}
-		//			this->_request.printAttributesInRequestClass(); // used for testing;REMOVE
-		//later
+		//			this->_request.printAttributesInRequestClass(); // used for
+		// testing;REMOVE later
 
 		/* create CGIrequest or HTTPrequest */
 		if (this->_request.getCgi() == true) {
 			this->_requestInterface =
-				new CGIRequest(this->_request, this->_config,
-							   this->_response);
+				new CGIRequest(this->_request, this->_config, this->_response);
 		} else {
 			this->_request.printAttributesInRequestClass(); // REMOVE LATER
 			this->_requestInterface =
-				new HttpRequest(this->_request, this->_config,
-								this->_response);
+				new HttpRequest(this->_request, this->_config, this->_response);
 			initResponse(_index);
 		}
-
 	}
 }
 

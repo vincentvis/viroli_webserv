@@ -1,4 +1,5 @@
 #pragma once
+
 #include "config/Config.hpp"
 #include "utils/Defines.hpp"
 #include <iostream>
@@ -15,7 +16,7 @@ class Response {
 	private:
 		std::string _response;
 		bool        _respReady;
-//		std::map<std::string, std::string> _statusCodes; // vincent adds
+		//		std::map<std::string, std::string> _statusCodes; // vincent adds
 
 		/* Status Line: */
 		std::string _httpVersion;  /* [HTTP1.1] */
@@ -27,9 +28,9 @@ class Response {
 		std::string _serverType;  /* [Server: ] */
 								  //		std::string _contentLen; /* [Content-Length: ] */
 		std::string _contentType; /* [Content-type: ] */
-		std::string _contentLen; /* [Content-Length: ] */
-		std::string _connection; /* [Connection: ] */
-		std::string _location; /* [Location: ] */
+		std::string _contentLen;  /* [Content-Length: ] */
+		std::string _connection;  /* [Connection: ] */
+		std::string _location;    /* [Location: ] */
 
 		/*		Message Body */
 		std::string _messageBody;
@@ -53,7 +54,7 @@ class Response {
 		//		void setMessageBody(std::string MessageBody);
 
 		std::string getResponse() const;
-		bool respReady() const;
+		bool        respReady() const;
 
 		std::string getDate();
 		std::string getContentType();
