@@ -126,11 +126,11 @@ void ClientFD::getHeader() {
 			this->_requestInterface =
 				new CGIRequest(this->_request, this->_config, this->_response);
 		} else {
-			this->_request.printAttributesInRequestClass(); // REMOVE LATER
 			this->_requestInterface =
 				new HttpRequest(this->_request, this->_config, this->_response);
 			initResponse(_index);
 		}
+		this->_request.printAttributesInRequestClass(); // REMOVE LATER
 	}
 }
 
