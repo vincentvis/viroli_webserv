@@ -20,11 +20,13 @@ std::string 	Response::getContentType(){
 }
 
 std::string 	Response::CalcContentLen(std::string str){
+(void)str;
 	//.length and than to str
 	return "23";
 }
 
 void Response::initResponse(std::string status, const Config &Conf, const Request &Req) {
+(void)Conf;
 	/* Status Line */
 	this->_httpVersion = Req.getHTTPVersion();
 	this->_statusCode = status;
