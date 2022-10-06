@@ -3,7 +3,10 @@
 #include <iostream>
 #include <string>
 
-#define sCRLF "\r\n"
+#define CRLF      "\r\n"
+#define CRLF_END  "\r\n\r\n"
+#define CRLF_LEN  2
+#define CRLF_LEN2 4
 
 namespace Utils {
 
