@@ -91,7 +91,7 @@ void ClientFD::getHeader() {
 			this->_request.ParseRequest(this->_data);
 			this->_config   = this->_server->findConfig(this->_request);
 			this->_location = this->_config->findLocation(this->_request);
-			this->_request.ValidateRequest(*this->_config);
+			this->_request.ValidateRequest(this->_config);
 		} catch (const Utils::ErrorPageException &e) {
 			this->_response.initResponse(
 				e.what(), this->_config,

@@ -16,9 +16,9 @@ Request::Request() {
 	this->_TransferEncodingChunked = false;
 	this->_ContentLengthAvailable  = false;
 	this->_ConnectionAvailable     = false;
-	_MethodKeys["GET"]             = GET;    // make static
-	_MethodKeys["DELETE"]          = DELETE; // make static
-	_MethodKeys["POST"]            = POST;   // make static
+	_MethodKeys["GET"]             = GET;
+	_MethodKeys["DELETE"]          = DELETE;
+	_MethodKeys["POST"]            = POST;
 }
 
 void Request::ParseRequest(std::string BUF) {
@@ -102,12 +102,12 @@ void Request::ParseRequest(std::string BUF) {
 	this->_headerAvailable = true;
 }
 
-bool Request::methodsAllowed(const Request &Req, Config &Conf) {
+bool Request::methodsAllowed(const Request &Req, Config *Conf) {
 	std::vector<std::string>::iterator tryFind;
 	/* if both location.getAllow() and Config.getAllow don't exist "default fallback
 	 * rules" apply: all methods are allowed*/
-	Location *Loc = Conf.findLocation(Req);
-	if (Loc->getAllow().empty() && Conf.getAllow().empty())
+	Location *Loc = Conf->findLocation(Req);
+	if (Loc->getAllow().empty() && Conf->getAllow().empty())
 		return true;
 	/* check if location.getAllow() exists it overrules the fallback rules, else "config
 	 * fallback" rules should be applied */
@@ -117,8 +117,8 @@ bool Request::methodsAllowed(const Request &Req, Config &Conf) {
 		return (tryFind != Loc->getAllow().end());
 	} else {
 		tryFind =
-			std::find(Conf.getAllow().begin(), Conf.getAllow().end(), Req.getMethod());
-		return (tryFind != Conf.getAllow().end());
+			std::find(Conf->getAllow().begin(), Conf->getAllow().end(), Req.getMethod());
+		return (tryFind != Conf->getAllow().end());
 	}
 }
 
@@ -136,7 +136,7 @@ bool Request::checkValidMethod(const Request &Req) {
 	}
 }
 
-void Request::ValidateRequest(Config &Conf) {
+void Request::ValidateRequest(Config *Conf) {
 	/* check method */
 	if (checkValidMethod(*this) == false) {
 		throw Utils::ErrorPageException(
