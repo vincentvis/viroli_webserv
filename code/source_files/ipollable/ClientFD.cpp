@@ -14,17 +14,10 @@ void ClientFD::receive(size_t len) {
 
 	if (_bytes == 0) {
 		Server::_pfds[_index].fd = INVALID_FD;
-		std::cout << "done receiving data\n";
 	}
 	if (_bytes > 0) {
-		// std::cout << "buffer count: " << std::count(_buffer.begin(), _buffer.end(),
-		// '\n')
-		// << std::endl;
 		_total += _bytes;
-
-		// _left -= _bytes; // overflows/underflows
 		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
-		// std::cout << "data2.sie(): " << _data.size() << std::endl;
 	}
 }
 
@@ -47,10 +40,10 @@ void ClientFD::extractChunk() {
 		if ((_left == 0) && ((pos = _data.find("\r\n")) != std::string::npos)) {
 			stream << std::hex << _data.substr(0, pos);
 			stream >> _left;
-			std::cout << _left << "\n";
+			// std::cout << "chunk size: " << _left << "\n";
 			_data = _data.substr(pos + CRLF);
 			if (_left == 0) {
-				std::cout << "\nbody:\n\n" << _body << "\n";
+				// std::cout << "\nbody:\n>>>\n" << _body << "\n>>>\n";
 				_state = END;
 				return;
 			}
@@ -173,11 +166,7 @@ void ClientFD::pollin() {
 			return getBody();
 		case END: // not sure if this one is neccessary
 				  // Server::_pfds[_index].events = POLLOUT;
-
 			Server::_pfds[_index].fd = INVALID_FD; // tmp
-			// std::cout << _body;
-			// std::cout << "end of request reached\n";
-			// exit(EXIT_SUCCESS);
 			// send response
 			return;
 	}
