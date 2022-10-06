@@ -23,7 +23,7 @@
 #include <utility>
 #include <vector>
 
-#define BUFFERSIZE     2  // tmp
+#define BUFFERSIZE     1  // tmp
 #define MAXCONNECTIONS 10 // tmp
 #define PFDS_THRESHOLD 1000
 
@@ -38,7 +38,7 @@ class Server {
 
 		Server(uint16_t port, std::vector<Config *> configs);
 
-		Config         *findConfig(const Request &request) const;
+		Config              *findConfig(const Request &request) const;
 
 		friend std::ostream &operator<<(std::ostream &os, const Server &server);
 		friend class ConfigParser;

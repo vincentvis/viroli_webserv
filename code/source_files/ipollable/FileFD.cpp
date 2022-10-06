@@ -26,7 +26,6 @@ void FileFD::pollin() {
 			readFile();
 			break;
 		case END:
-			close(_fd);
 			break;
 	}
 }
@@ -60,7 +59,6 @@ void FileFD::pollout() {
 			writeFile();
 			break;
 		case END:
-			close(_fd); // remove properly later
 			break;
 	}
 }

@@ -13,7 +13,7 @@ void ClientFD::receive(size_t len) {
 	// std::cout << "bytes read: " << _bytes << std::endl;
 
 	if (_bytes == 0) {
-		Server::_pfds[_index].fd = INVALID_FD;
+		Server::_pfds[_index].fd = INVALID_FD; // build response
 	}
 	if (_bytes > 0) {
 		_total += _bytes;
@@ -67,7 +67,7 @@ void ClientFD::extractChunk() {
 	}
 }
 
-void ClientFD::receive() {
+void ClientFD::receiveChunked() {
 	extractChunk();
 	receive(BUFFERSIZE);
 	extractChunk();
@@ -107,6 +107,8 @@ void ClientFD::getHeader() {
 		_header = _data.substr(0, end);
 		_data   = _data.substr(end + CRLF_LEN2);
 		_state  = BODY;
+		_total  = _data.size();
+		getBody();
 		//		std::cout << "\nheader:\n\n" << _header << "\n\n";
 
 		/* check if contentLengthAvailable() or getChunked() are true if so body exists
@@ -133,31 +135,33 @@ void ClientFD::getHeader() {
 			this->_requestInterface = new HttpRequest(*this);
 			// initResponse(_index);
 		}
-		// this->_request.printAttributesInRequestClass(); // REMOVE LATER
-		getBody();
+		this->_request.printAttributesInRequestClass(); // REMOVE LATER
+	}
+}
+
+void ClientFD::receiveLength() {
+	if (_left == 0) {
+		_left = _request.getContentLength();
+	}
+	if (_total < _left) {
+		std::cout << "total: " << _total;
+		std::cout << " | left: " << _left << std::endl;
+		receive(BUFFERSIZE);
+	}
+	if (_total == _left) {
+		std::cout << ">>>>> body: " << _data << std::endl;
+		_state = END;
 	}
 }
 
 void ClientFD::getBody() {
-	// std::cout << std::boolalpha;
-	// std::cout << _request.contentLenAvailable() << std::endl;
-	// std::cout << _request.getChunked() << std::endl;
-
 	if (_request.contentLenAvailable() == true) {
-		receive(BUFFERSIZE);
+		receiveLength();
 	} else if (_request.getChunked() == true) {
-		receive();
+		receiveChunked();
 	} else {
 		throw(std::string("error in getBody()"));
 	}
-
-	/* switch (_method) {
-	case CHUNKED:
-
-	case LENGTH:
-	  receive(BUFFERSIZE);
-	} */
-	// receive();
 }
 
 int32_t ClientFD::getRemainderBytes() const {
@@ -165,7 +169,6 @@ int32_t ClientFD::getRemainderBytes() const {
 }
 
 /* receive data */
-/* need some states to process different parts of the request: HEADER | BODY */
 void ClientFD::pollin() {
 	switch (_state) {
 		case HEADER:
