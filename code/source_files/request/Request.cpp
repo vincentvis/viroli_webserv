@@ -92,7 +92,7 @@ void Request::ParseRequest(std::string BUF) {
 		throw Utils::ErrorPageException("400");
 	}
 
-	this->_itr = _header.find("Transfer-Encoding:");
+	this->_itr = _header.find("Transfer-Encoding");
 	if (this->_itr != _header.end()) {
 		if (this->_itr->second.find("chunked") != std::string::npos)
 			this->_TransferEncodingChunked = true;
@@ -224,6 +224,7 @@ void Request::printAttributesInRequestClass() {
 	std::cout << "--------------------------------------" << std::endl;
 	std::cout << "Body = [" << this->_body << "]" << std::endl;
 	std::cout << "CGI = [" << this->_CGI << "]" << std::endl;
+	std::cout << "chunked = [" << this->_TransferEncodingChunked << "]" << std::endl;
 	std::cout << "--------------------------------------" << std::endl;
 }
 

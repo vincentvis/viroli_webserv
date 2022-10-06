@@ -10,8 +10,8 @@ def gen():
   yield b'this is an emergency'
 
 def sendRequest(host, port):
-  # requests.get(f'http://{host}:{port}')
-  requests.post(f'http://{host}:{port}', data=gen())
+  requests.get(f'http://{host}:{port}')
+  # requests.post(f'http://{host}:{port}', data=gen())
   # print(r)
 
   # print(r)

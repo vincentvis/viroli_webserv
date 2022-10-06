@@ -1,10 +1,10 @@
 #pragma once
 
 #include "config/Config.hpp"
-// #include "ipollable/ClientFD.hpp"
-// #include "ipollable/FileFD.hpp"
+#include "ipollable/ClientFD.hpp"
+#include "ipollable/FileFD.hpp"
 #include "ipollable/IPollable.hpp"
-// #include "ipollable/ServerFD.hpp"
+#include "ipollable/ServerFD.hpp"
 #include "utils/Utils.hpp"
 
 #include <arpa/inet.h>
@@ -23,7 +23,7 @@
 #include <utility>
 #include <vector>
 
-#define BUFFERSIZE     64 // tmp
+#define BUFFERSIZE     2  // tmp
 #define MAXCONNECTIONS 10 // tmp
 #define PFDS_THRESHOLD 1000
 
@@ -44,11 +44,12 @@ class Server {
 		friend class ConfigParser;
 
 
-		uint16_t    getPort() const;
-		int32_t     getFileDescriptor() const;
-		static void run();
-		static void removePoll();
-		static void addPollable(Server *server, int fd, Pollable type, int16_t event);
+		uint16_t          getPort() const;
+		int32_t           getFileDescriptor() const;
+		static void       run();
+		static void       removePoll();
+		static IPollable *addPollable(Server *server, int fd, Pollable type,
+									  int16_t event);
 
 		static std::map<int32_t, IPollable *> _pollables;
 		static std::vector<struct pollfd>     _pfds;

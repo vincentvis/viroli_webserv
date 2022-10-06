@@ -132,7 +132,7 @@ void Server::run() {
 	}
 }
 
-void Server::addPollable(Server *server, int32_t fd, Pollable type, int16_t event) {
+IPollable *Server::addPollable(Server *server, int32_t fd, Pollable type, int16_t event) {
 	struct pollfd pfd = {fd, event, 0};
 	IPollable    *pollable;
 
@@ -141,17 +141,17 @@ void Server::addPollable(Server *server, int32_t fd, Pollable type, int16_t even
 			pollable = new ServerFD(server, fd, Server::_pfds.size());
 			Server::_pollables.insert(std::pair<int32_t, IPollable *>(fd, pollable));
 			Server::_pfds.push_back(pfd);
-			break;
+			return pollable;
 		case CLIENTPOLL:
 			pollable = new ClientFD(server, fd, Server::_pfds.size());
 			Server::_pollables.insert(std::pair<int32_t, IPollable *>(fd, pollable));
 			Server::_pfds.push_back(pfd);
-			break;
+			return pollable;
 		case FILEPOLL:
 			pollable = new FileFD(server, fd, Server::_pfds.size());
 			Server::_pollables.insert(std::pair<int32_t, IPollable *>(fd, pollable));
 			Server::_pfds.push_back(pfd);
-			break;
+			return pollable;
 	}
 }
 

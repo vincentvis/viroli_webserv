@@ -1,4 +1,4 @@
-#include "ipollable/IPollable.hpp"
+#include "ipollable/ClientFD.hpp"
 
 ClientFD::ClientFD(Server *server, int fd, int index) :
 	_server(server), _state(HEADER), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
@@ -10,7 +10,7 @@ ClientFD::~ClientFD() {
 
 void ClientFD::receive(size_t len) {
 	_bytes = recv(_fd, _buffer.data(), len, 0);
-	std::cout << "bytes read: " << _bytes << std::endl;
+	// std::cout << "bytes read: " << _bytes << std::endl;
 
 	if (_bytes == 0) {
 		Server::_pfds[_index].fd = INVALID_FD;
@@ -31,7 +31,7 @@ void ClientFD::extractChunk() {
 	std::stringstream stream;
 	size_t            pos = 0;
 
-	while (true) {
+	while (_state == BODY) {
 		// chunk size unknown and not found in _data, receive more bytes
 		if ((_left == 0) && ((pos = _data.find("\r\n")) == std::string::npos)) {
 			break;
@@ -41,9 +41,10 @@ void ClientFD::extractChunk() {
 			stream << std::hex << _data.substr(0, pos);
 			stream >> _left;
 			// std::cout << "chunk size: " << _left << "\n";
-			_data = _data.substr(pos + CRLF);
+			_data = _data.substr(pos + CRLF_LEN);
 			if (_left == 0) {
 				// std::cout << "\nbody:\n>>>\n" << _body << "\n>>>\n";
+				_request.setBody(_body);
 				_state = END;
 				return;
 			}
@@ -51,12 +52,12 @@ void ClientFD::extractChunk() {
 		// chunk size known
 		if (_left > 0) {
 			// chunk found in _data
-			if (_left + CRLF <= _data.size()) {
-				if (_data.substr(_left, CRLF).find("\r\n") == std::string::npos) {
+			if (_left + CRLF_LEN <= _data.size()) {
+				if (_data.substr(_left, CRLF_LEN).find("\r\n") == std::string::npos) {
 					throw(std::string("expected CRLF not found"));
 				}
 				_body.append(_data.begin(), _data.begin() + _left);
-				_data = _data.substr(_left + CRLF);
+				_data = _data.substr(_left + CRLF_LEN);
 				_left = 0;
 				// chunk not found, receive more bytes
 			} else {
@@ -89,65 +90,70 @@ void ClientFD::getHeader() {
 	size_t end = 0;
 
 	receive(BUFFERSIZE);
-	if ((end = _data.find("\r\n\r\n")) != std::string::npos) {
-		this->_request.ParseRequest(this->_data);
+	if ((end = _data.find(CRLF_END)) != std::string::npos) {
+		try {
+			this->_request.ParseRequest(this->_data);
+			this->_config   = this->_server->findConfig(this->_request);
+			this->_location = this->_config.findLocation(this->_request);
+			this->_request.ValidateRequest(this->_server->findConfig(this->_request));
+		} catch (const Utils::ErrorPageException &e) {
+			this->_response.initResponse(
+				e.what(), this->_config,
+				this->_request); // make sure if error it sets it immidiately to create
+								 // response and stops here
+		} catch (const std::exception &e) {
+			// other exceptions like std::string! should be finished later/how?
+		}
 		_header = _data.substr(0, end);
-		_data   = _data.substr(end + CRLFCRLF);
+		_data   = _data.substr(end + CRLF_LEN2);
 		_state  = BODY;
-		resetBytes();
-		// std::cout << "\n_data:\n\n" << _data << "\n\n";
-		std::cout << "\nheader:\n\n-----------\n" << _header << "\n-----------\n\n";
+		//		std::cout << "\nheader:\n\n" << _header << "\n\n";
 
-		/* check if contentLengthAvailable() or getChunked() are true if so body
-		 * exists read bytes and setBody */
-		// 		if (this->_request.getHeaderAvailable() == true) { // this can be
-		// written shorter, with one setBody and fewer if statements etc, but since
-		// you might change a lot, these are the basics. if
-		// (this->_request.getChunked() == true) {
-		//   std::cout << "do something with chunked body" <<
-		// std::endl;
-		// 				this->_request.setBody("this is a chunked body");
-		// 			}
-		// 			if (this->_request.contentLenAvailable() == true){
-		// 				std::cout << "do something with contentlen body" << std::endl;
-		// 				this->_request.setBody("this is a body with contentlen");
-		// 			}
-		// 			this->_request.printAttributesInRequestClass(); // used for
-		// testing;REMOVE later
+		/* check if contentLengthAvailable() or getChunked() are true if so body exists
+		 * read bytes and setBody */
+		// if (this->_request.getHeaderAvailable() == true) { // this can be written
+		// shorter, with one setBody and fewer if statements etc, but since you might
+		// change a lot, these are the basics.
+		if (this->_request.getChunked() == true) {
+			std::cout << "do something with chunked body" << std::endl;
+			// this->_request.setBody("this is a chunked body");
+		}
+		if (this->_request.contentLenAvailable() == true) {
+			std::cout << "do something with contentlen body" << std::endl;
+			// this->_request.setBody("this is a body with contentlen");
+		}
+		this->_request.printAttributesInRequestClass(); // used for
+														// testing;
+														// REMOVE later
 
 		/* create CGIrequest or HTTPrequest */
 		if (this->_request.getCgi() == true) {
-			// std::cout << "CGI: this should work with the new .findConfig()
-			// function"
-			// << std::endl;
 			this->_requestInterface =
-				new CGIRequest(this->_request, this->_server->findConfig(this->_request),
-							   this->_response);
+				new CGIRequest(this->_request, this->_config, this->_response);
 		} else {
-			// std::cout << "HTTP: this should work with the new .findConfig()
-			// function"
-			// 		  << std::endl;
-			// std::cout << "config size!: " << this->_server->_configs.size() <<
-			// std::endl;
-			// this->_request.printAttributesInRequestClass(); // REMOVE LATER
+			this->_request.printAttributesInRequestClass(); // REMOVE LATER
 			this->_requestInterface =
-				new HttpRequest(this->_request, this->_server->findConfig(this->_request),
-								this->_response);
+				new HttpRequest(this->_request, this->_config, this->_response);
 			// initResponse(_index);
 		}
-		// server needs to process the data left behind immediately, next
-		// pollin cycle might not be required
-		getBody();
+		resetBytes(); // used for reading body
+		getBody();    // check if (part of) body is already in _data
 	}
 }
 
 void ClientFD::getBody() {
-	// if (_request.contentLenAvailable() == true) {
-	// 	receive(BUFFERSIZE);
-	// } else if (_request.getChunked() == true) {
-	// 	std::cout << "chunked\n";
-	// 	receive();
-	// }
+	// std::cout << std::boolalpha;
+	// std::cout << _request.contentLenAvailable() << std::endl;
+	// std::cout << _request.getChunked() << std::endl;
+
+	if (_request.contentLenAvailable() == true) {
+		receive(BUFFERSIZE);
+	} else if (_request.getChunked() == true) {
+		receive();
+	} else {
+		throw(std::string("error in getBody()"));
+	}
+
 	/* switch (_method) {
 	case CHUNKED:
 
@@ -157,7 +163,12 @@ void ClientFD::getBody() {
 	receive();
 }
 
+int32_t ClientFD::getRemainderBytes() const {
+	return BUFFERSIZE > _left ? BUFFERSIZE : _left;
+}
+
 /* receive data */
+/* need some states to process different parts of the request: HEADER | BODY */
 void ClientFD::pollin() {
 	switch (_state) {
 		case HEADER:
@@ -170,10 +181,6 @@ void ClientFD::pollin() {
 			// send response
 			return;
 	}
-}
-
-int32_t ClientFD::getRemainderBytes() const {
-	return BUFFERSIZE > _left ? BUFFERSIZE : _left;
 }
 
 /* send data */
