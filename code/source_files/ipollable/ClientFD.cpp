@@ -107,6 +107,7 @@ void ClientFD::getHeader() {
 		_header = _data.substr(0, end);
 		_data   = _data.substr(end + CRLF_LEN2);
 		_state  = BODY;
+		getBody();
 		//		std::cout << "\nheader:\n\n" << _header << "\n\n";
 
 		/* check if contentLengthAvailable() or getChunked() are true if so body exists
@@ -127,14 +128,8 @@ void ClientFD::getHeader() {
 		// 												// REMOVE later
 
 		/* create CGIrequest or HTTPrequest */
-		if (this->_request.getCgi() == true) {
-			this->_requestInterface = new CGIRequest(*this);
-		} else {
-			this->_requestInterface = new HttpRequest(*this);
-			// initResponse(_index);
-		}
+
 		// this->_request.printAttributesInRequestClass(); // REMOVE LATER
-		getBody();
 	}
 }
 
@@ -150,6 +145,16 @@ void ClientFD::getBody() {
 	} else {
 		throw(std::string("error in getBody()"));
 	}
+
+	if (_state == END) {
+		if (this->_request.getCgi() == true) {
+			this->_requestInterface = new CGIRequest(*this);
+		} else {
+			this->_requestInterface = new HttpRequest(*this);
+			initResponse(_index);
+		}
+	}
+
 
 	/* switch (_method) {
 	case CHUNKED:
