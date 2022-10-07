@@ -10,7 +10,6 @@ FileFD::~FileFD() {
 
 void FileFD::readFile() {
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
-
 	if (_bytes == 0) {
 		Server::_pfds[_index].fd = INVALID_FD;
 		_state                   = END;

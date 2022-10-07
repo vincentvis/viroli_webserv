@@ -31,7 +31,7 @@ class ClientFD : public IPollable {
 		std::string       _data;
 		std::string       _header;
 		std::string       _body;
-		size_t            _bytes;
+		int               _bytes;
 		size_t            _left;
 		size_t            _total;
 		int               _fd;
@@ -51,8 +51,9 @@ class ClientFD : public IPollable {
 		void    receiveLength(int length);
 		Server *getServer() const;
 		void    receive();
-		void    receive(int len);
+		void    receive(size_t len);
 		void    initResponse(int index);
 		void    closeFD();
 		int32_t getRemainderBytes() const;
+		void    extractChunk();
 };

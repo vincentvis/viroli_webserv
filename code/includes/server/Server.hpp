@@ -23,7 +23,7 @@
 #include <utility>
 #include <vector>
 
-#define BUFFERSIZE     4  // tmp
+#define BUFFERSIZE     2  // tmp
 #define MAXCONNECTIONS 10 // tmp
 #define PFDS_THRESHOLD 1000
 

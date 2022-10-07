@@ -106,7 +106,6 @@ void Server::run() {
 		if ((events = poll(Server::_pfds.data(), Server::_pfds.size(), 0)) < 0) {
 			throw(std::string("error on poll()")); // placeholder
 		}
-
 		/* check events and timeout */
 		for (size_t i = 0; i < Server::_pfds.size(); ++i) {
 			/* find on what file descriptor event occurred */
