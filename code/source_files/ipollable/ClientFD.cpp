@@ -134,19 +134,16 @@ void ClientFD::getHeader() {
 }
 
 void ClientFD::getBody() {
-	// std::cout << std::boolalpha;
-	// std::cout << _request.contentLenAvailable() << std::endl;
-	// std::cout << _request.getChunked() << std::endl;
-
 	if (_request.contentLenAvailable() == true) {
 		receive(BUFFERSIZE);
 	} else if (_request.getChunked() == true) {
 		receive();
 	} else {
-		throw(std::string("error in getBody()"));
+		_state = END;
 	}
 
 	if (_state == END) {
+		this->_request.printAttributesInRequestClass(); // REMOVE LATER
 		if (this->_request.getCgi() == true) {
 			this->_requestInterface = new CGIRequest(*this);
 		} else {
@@ -154,15 +151,6 @@ void ClientFD::getBody() {
 			initResponse(_index);
 		}
 	}
-
-
-	/* switch (_method) {
-	case CHUNKED:
-
-	case LENGTH:
-	  receive(BUFFERSIZE);
-	} */
-	// receive();
 }
 
 int32_t ClientFD::getRemainderBytes() const {
