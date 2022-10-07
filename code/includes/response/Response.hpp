@@ -41,12 +41,17 @@ class Response {
 		 * action the client needs to take to complete the request successfully.
 		 */
 
+	protected:
+		static std::map<std::string, std::string> _errorPageHtml;
+		static void                               init_errorpage_htmls(void);
+		void                                      generateErrorPage(std::string page);
+
 	public:
 		Response();
 		~Response();
 
-		void initResponse(std::string status, Config *Conf, const Request &Req) ;
-		void createResponseHeader() ;
+		void        initResponse(std::string status, Config *Conf, const Request &Req);
+		void        createResponseHeader();
 
 		std::string getResponse() const;
 		bool        respReady() const;

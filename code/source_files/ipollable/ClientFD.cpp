@@ -9,7 +9,6 @@ ClientFD::~ClientFD() {
 }
 
 void ClientFD::receive(size_t len) {
-	// _is_polled = true;
 	_bytes = recv(_fd, _buffer.data(), len, 0);
 	// std::cout << "bytes read: " << _bytes << std::endl;
 
@@ -45,7 +44,6 @@ void ClientFD::receiveChunked() {
 			_data = _data.substr(pos + CRLF_LEN);
 			if (_left == 0) {
 				std::cout << "\nbody:\n>>>\n" << _body << "\n>>>\n";
-				_request.setBody(_body);
 				_state = END;
 				return;
 			}
@@ -102,7 +100,6 @@ void ClientFD::getHeader() {
 		_header = _data.substr(0, end);
 		_data   = _data.substr(end + CRLF_LEN2);
 		_state  = BODY;
-		_total  = _data.size();
 		getBody();
 		//		std::cout << "\nheader:\n\n" << _header << "\n\n";
 
@@ -124,13 +121,29 @@ void ClientFD::getHeader() {
 		// 												// REMOVE later
 
 		/* create CGIrequest or HTTPrequest */
+
+		// this->_request.printAttributesInRequestClass(); // REMOVE LATER
+	}
+}
+
+void ClientFD::getBody() {
+	if (_request.contentLenAvailable() == true) {
+		receiveLength();
+	} else if (_request.getChunked() == true) {
+		receiveChunked();
+	} else {
+		_request.setBody(_body);
+		_state = END;
+	}
+
+	if (_state == END) {
+		this->_request.printAttributesInRequestClass(); // REMOVE LATER
 		if (this->_request.getCgi() == true) {
 			this->_requestInterface = new CGIRequest(*this);
 		} else {
 			this->_requestInterface = new HttpRequest(*this);
-			// initResponse(_index);
+			initResponse(_index);
 		}
-		this->_request.printAttributesInRequestClass(); // REMOVE LATER
 	}
 }
 
@@ -141,27 +154,10 @@ void ClientFD::receiveLength() {
 	if (_total < _left) {
 		std::cout << "total: " << _total;
 		std::cout << " | left: " << _left << std::endl;
-		if (_is_polled == false) {
-			receive(BUFFERSIZE);
-		}
 	}
 	if (_total == _left) {
 		std::cout << ">>>>> body: " << _data << std::endl;
 		_state = END;
-	}
-}
-
-void ClientFD::getBody() {
-	// if (_request.getHeaderAvailable() == false) {
-	// 	return;
-	// }
-
-	if (_request.contentLenAvailable() == true) {
-		receiveLength();
-	} else if (_request.getChunked() == true) {
-		receiveChunked();
-	} else {
-		throw(std::string("error in getBody()"));
 	}
 }
 
