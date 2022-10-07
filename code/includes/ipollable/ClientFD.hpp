@@ -36,6 +36,7 @@ class ClientFD : public IPollable {
 		size_t            _total;
 		int               _fd;
 		int               _index;
+		bool              _is_polled;
 
 		ClientFD(Server *server, int fd, int index);
 		~ClientFD();
