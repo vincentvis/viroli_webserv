@@ -78,9 +78,13 @@ int32_t Server::getFileDescriptor() const {
 	return _fd;
 }
 
+size_t Server::flushThreshold() {
+	return Server::_pfds.size();
+}
+
 /* test this with more connections */
 /* instead of doing after every poll iteration use a threshold */
-void Server::removePoll() {
+void Server::flushPollables() {
 	std::cout << "size _pfds: " << Server::_pfds.size() << std::endl;
 	std::vector<struct pollfd> tmp;
 

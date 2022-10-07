@@ -32,11 +32,10 @@ class ClientFD : public IPollable {
 		std::string       _header;
 		std::string       _body;
 		int               _bytes;
-		size_t            _left;
-		size_t            _total;
+		int64_t           _left;
+		int64_t           _total;
 		int               _fd;
 		int               _index;
-		bool              _is_polled;
 
 		ClientFD(Server *server, int fd, int index);
 		~ClientFD();

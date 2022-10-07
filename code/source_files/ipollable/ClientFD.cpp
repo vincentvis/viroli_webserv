@@ -2,7 +2,7 @@
 
 ClientFD::ClientFD(Server *server, int fd, int index) :
 	_server(server), _state(HEADER), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
-	_total(0), _fd(fd), _index(index), _is_polled(false) {
+	_total(0), _fd(fd), _index(index) {
 }
 
 ClientFD::~ClientFD() {
@@ -16,7 +16,6 @@ void ClientFD::receive(size_t len) {
 		Server::_pfds[_index].fd = INVALID_FD; // build response
 	}
 	if (_bytes > 0) {
-		_total += _bytes;
 		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
 }
@@ -42,8 +41,16 @@ void ClientFD::receiveChunked() {
 			stream >> _left;
 			std::cout << "chunk size: " << _left << "\n";
 			_data = _data.substr(pos + CRLF_LEN);
-			if (_left == 0) {
+			// ending chunk
+			if (_left > 0) {
+				_total += _left;
+				if (_total > _config->getMaxBodySize()) {
+					std::cout << "ERROR ERROR ERROR ERROR (body > maxBodySize)\n";
+					exit(EXIT_FAILURE);
+				}
+			} else if (_left == 0) {
 				std::cout << "\nbody:\n>>>\n" << _body << "\n>>>\n";
+				std::cout << _total << std::endl;
 				_state = END;
 				return;
 			}
@@ -51,14 +58,14 @@ void ClientFD::receiveChunked() {
 		// chunk size known
 		if (_left > 0) {
 			// chunk found in _data
-			if (_left + CRLF_LEN <= _data.size()) {
+			if (_left + CRLF_LEN <= static_cast<int64_t>(_data.size())) {
 				if (_data.substr(_left, CRLF_LEN).find("\r\n") == std::string::npos) {
 					throw(std::string("expected CRLF not found"));
 				}
 				_body.append(_data.begin(), _data.begin() + _left);
 				_data = _data.substr(_left + CRLF_LEN);
 				_left = 0;
-				// chunk not found, receive more bytes
+				// chunk not found in _data, receive more bytes
 			} else {
 				break;
 			}
@@ -82,7 +89,6 @@ void ClientFD::initResponse(int index) {
 void ClientFD::getHeader() {
 	size_t end = 0;
 
-	// receive(BUFFERSIZE);
 	if ((end = _data.find(CRLF_END)) != std::string::npos) {
 		try {
 			this->_request.ParseRequest(this->_data);
@@ -148,6 +154,9 @@ void ClientFD::getBody() {
 }
 
 void ClientFD::receiveLength() {
+	if (_bytes > 0) {
+		_total += _bytes;
+	}
 	if (_left == 0) {
 		_left = _request.getContentLength();
 	}
@@ -168,16 +177,13 @@ int32_t ClientFD::getRemainderBytes() const {
 /* receive data */
 void ClientFD::pollin() {
 	receive(BUFFERSIZE);
-	// _is_polled = false;
+
 	switch (_state) {
 		case HEADER:
 			return getHeader();
 		case BODY:
 			return getBody();
-		case END: // not sure if this one is neccessary
-				  // Server::_pfds[_index].events = POLLOUT;
-			Server::_pfds[_index].fd = INVALID_FD; // tmp
-			// send response
+		case END:
 			return;
 	}
 }

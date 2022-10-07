@@ -25,7 +25,9 @@
 
 #define BUFFERSIZE     1  // tmp
 #define MAXCONNECTIONS 10 // tmp
-#define PFDS_THRESHOLD 1000
+
+// https://stackoverflow.com/questions/13248495/elegant-way-to-add-remove-descriptors-to-from-poll
+// threshold could be a hardcode number
 
 enum Pollable { SERVERPOLL, CLIENTPOLL, FILEPOLL };
 
@@ -47,7 +49,8 @@ class Server {
 		uint16_t          getPort() const;
 		int32_t           getFileDescriptor() const;
 		static void       run();
-		static void       removePoll();
+		size_t            flushThreshold();
+		static void       flushPollables();
 		static IPollable *addPollable(Server *server, int fd, Pollable type,
 									  int16_t event);
 
