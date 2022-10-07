@@ -9,8 +9,8 @@ ClientFD::~ClientFD() {
 }
 
 void ClientFD::receive(size_t len) {
-	_is_polled = true;
-	_bytes     = recv(_fd, _buffer.data(), len, 0);
+	// _is_polled = true;
+	_bytes = recv(_fd, _buffer.data(), len, 0);
 	// std::cout << "bytes read: " << _bytes << std::endl;
 
 	if (_bytes == 0) {
@@ -28,7 +28,7 @@ void ClientFD::resetBytes() {
 	_total = 0;
 }
 
-void ClientFD::extractChunk() {
+void ClientFD::receiveChunked() {
 	std::stringstream stream;
 	size_t            pos = 0;
 
@@ -44,7 +44,7 @@ void ClientFD::extractChunk() {
 			std::cout << "chunk size: " << _left << "\n";
 			_data = _data.substr(pos + CRLF_LEN);
 			if (_left == 0) {
-				// std::cout << "\nbody:\n>>>\n" << _body << "\n>>>\n";
+				std::cout << "\nbody:\n>>>\n" << _body << "\n>>>\n";
 				_request.setBody(_body);
 				_state = END;
 				return;
@@ -68,14 +68,6 @@ void ClientFD::extractChunk() {
 	}
 }
 
-void ClientFD::receiveChunked() {
-	extractChunk();
-	if (_is_polled == false) {
-		receive(BUFFERSIZE);
-		extractChunk();
-	}
-}
-
 void ClientFD::initResponse(int index) {
 	/* check is response is created with _response.respReady() + receive response with
 	 * _response.getResponse() */
@@ -92,7 +84,7 @@ void ClientFD::initResponse(int index) {
 void ClientFD::getHeader() {
 	size_t end = 0;
 
-	receive(BUFFERSIZE);
+	// receive(BUFFERSIZE);
 	if ((end = _data.find(CRLF_END)) != std::string::npos) {
 		try {
 			this->_request.ParseRequest(this->_data);
@@ -160,6 +152,10 @@ void ClientFD::receiveLength() {
 }
 
 void ClientFD::getBody() {
+	// if (_request.getHeaderAvailable() == false) {
+	// 	return;
+	// }
+
 	if (_request.contentLenAvailable() == true) {
 		receiveLength();
 	} else if (_request.getChunked() == true) {
@@ -175,7 +171,8 @@ int32_t ClientFD::getRemainderBytes() const {
 
 /* receive data */
 void ClientFD::pollin() {
-	_is_polled = false;
+	receive(BUFFERSIZE);
+	// _is_polled = false;
 	switch (_state) {
 		case HEADER:
 			return getHeader();
