@@ -8,11 +8,12 @@ FileFD::FileFD(Server *server, int fd, int index) :
 FileFD::~FileFD() {
 }
 
-void FileFD::readFile() {
+void FileFD::pollin() {
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
+
 	if (_bytes == 0) {
 		Server::_pfds[_index].fd = INVALID_FD;
-		_state                   = END;
+		// body ready initialize it with response
 	}
 	if (_bytes > 0) {
 		_total += _bytes;
@@ -20,22 +21,16 @@ void FileFD::readFile() {
 	}
 }
 
-void FileFD::pollin() {
-	switch (_state) {
-		case PROCESS:
-			readFile();
-			break;
-		case END:
-			close(_fd);
-			break;
-	}
-}
-
 int32_t FileFD::getRemainderBytes() const {
-	return BUFFERSIZE < _left ? BUFFERSIZE : _left;
+	return BUFFERSIZE > _left ? _left : BUFFERSIZE;
 }
 
-void FileFD::writeFile() {
+void FileFD::setData(std::string data) {
+	_data = data;
+	_left = _data.size();
+}
+
+void FileFD::pollout() {
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
 	_bytes = write(_fd, _buffer.data(), getRemainderBytes());
 
@@ -45,23 +40,7 @@ void FileFD::writeFile() {
 	}
 	if (_left == 0) {
 		Server::_pfds[_index].fd = INVALID_FD;
-		_state                   = END;
-	}
-}
-
-void FileFD::setData(std::string data) {
-	_data = data;
-	_left = _data.size();
-}
-
-void FileFD::pollout() {
-	switch (_state) {
-		case PROCESS:
-			writeFile();
-			break;
-		case END:
-			close(_fd); // remove properly later
-			break;
+		// file made, ready for response
 	}
 }
 

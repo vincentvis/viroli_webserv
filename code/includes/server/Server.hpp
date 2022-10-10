@@ -23,9 +23,11 @@
 #include <utility>
 #include <vector>
 
-#define BUFFERSIZE     2  // tmp
+#define BUFFERSIZE     1  // tmp
 #define MAXCONNECTIONS 10 // tmp
-#define PFDS_THRESHOLD 1000
+
+// https://stackoverflow.com/questions/13248495/elegant-way-to-add-remove-descriptors-to-from-poll
+// threshold could be a hardcode number
 
 enum Pollable { SERVERPOLL, CLIENTPOLL, FILEPOLL };
 
@@ -38,7 +40,7 @@ class Server {
 
 		Server(uint16_t port, std::vector<Config *> configs);
 
-		Config         *findConfig(const Request &request) const;
+		Config              *findConfig(const Request &request) const;
 
 		friend std::ostream &operator<<(std::ostream &os, const Server &server);
 		friend class ConfigParser;
@@ -47,13 +49,14 @@ class Server {
 		uint16_t          getPort() const;
 		int32_t           getFileDescriptor() const;
 		static void       run();
-		static void       removePoll();
+		static bool       isFlushable();
+		static void       flushPollables();
 		static IPollable *addPollable(Server *server, int fd, Pollable type,
 									  int16_t event);
 
+		static size_t     _nflush;
 		static std::map<int32_t, IPollable *> _pollables;
 		static std::vector<struct pollfd>     _pfds;
-
 		std::vector<Config *>                 _configs;
 
 	protected:

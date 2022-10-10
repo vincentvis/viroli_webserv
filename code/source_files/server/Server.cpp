@@ -78,9 +78,16 @@ int32_t Server::getFileDescriptor() const {
 	return _fd;
 }
 
+bool Server::isFlushable() {
+	if (Server::_nflush > (Server::_pfds.size() / 10)) {
+		return true;
+	}
+	return false;
+}
+
 /* test this with more connections */
 /* instead of doing after every poll iteration use a threshold */
-void Server::removePoll() {
+void Server::flushPollables() {
 	std::cout << "size _pfds: " << Server::_pfds.size() << std::endl;
 	std::vector<struct pollfd> tmp;
 
@@ -95,6 +102,7 @@ void Server::removePoll() {
 	}
 
 	Server::_pfds.swap(tmp);
+	Server::_nflush = 0;
 	std::cout << "size _pfds: " << Server::_pfds.size() << std::endl;
 }
 
@@ -123,12 +131,16 @@ void Server::run() {
 					throw(std::string("error on _pollables.find()")); // placholder
 				}
 			}
-
-			/* remove file descriptors that are no longer needed (implement threshold) */
-			// if (_pfds.size() > 1000) {
-			// 	Server::removePoll();
-			// }
 		}
+
+		if (Server::isFlushable() == true) {
+			Server::flushPollables();
+		}
+
+		/* remove file descriptors that are no longer needed (implement threshold) */
+		// if (_pfds.size() > 1000) {
+		// 	Server::removePoll();
+		// }
 	}
 }
 
@@ -155,5 +167,6 @@ IPollable *Server::addPollable(Server *server, int32_t fd, Pollable type, int16_
 	}
 }
 
+size_t                         Server::_nflush;
 std::map<int32_t, IPollable *> Server::_pollables;
 std::vector<struct pollfd>     Server::_pfds;
