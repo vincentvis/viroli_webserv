@@ -8,11 +8,15 @@ CGIRequest::CGIRequest(ClientFD &Client) {
 }
 
 void CGIRequest::CheckMethod(ClientFD &Client) {
-	if (Client._request.getMethod() == Utils::get_string)
+	if (Client._request.getMethod() == Utils::get_string) {
 		GETRequest(Client);
-	if (Client._request.getMethod() == Utils::post_string)
+	}
+	if (Client._request.getMethod() == Utils::post_string) {
 		POSTRequest(Client);
-	DELETERequest(Client);
+	}
+	if (Client._request.getMethod() == Utils::delete_string) {
+		DELETERequest(Client);
+	}
 }
 
 void CGIRequest::GETRequest(ClientFD &Client) {
