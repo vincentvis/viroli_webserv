@@ -50,6 +50,7 @@ class ClientFD : public IPollable {
 		void    receive(size_t len);
 		void    receiveChunked();
 		void    receiveLength();
+		void    ready();
 		Server *getServer() const;
 		void    initResponse(int index);
 		void    closeFD();

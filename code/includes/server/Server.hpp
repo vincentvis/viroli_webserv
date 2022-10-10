@@ -49,14 +49,14 @@ class Server {
 		uint16_t          getPort() const;
 		int32_t           getFileDescriptor() const;
 		static void       run();
-		size_t            flushThreshold();
+		static bool       isFlushable();
 		static void       flushPollables();
 		static IPollable *addPollable(Server *server, int fd, Pollable type,
 									  int16_t event);
 
+		static size_t     _nflush;
 		static std::map<int32_t, IPollable *> _pollables;
 		static std::vector<struct pollfd>     _pfds;
-
 		std::vector<Config *>                 _configs;
 
 	protected:

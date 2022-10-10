@@ -8,11 +8,18 @@ ClientFD::ClientFD(Server *server, int fd, int index) :
 ClientFD::~ClientFD() {
 }
 
+void ClientFD::resetBytes() {
+	_bytes = 0;
+	_left  = 0;
+	_total = 0;
+}
+
 void ClientFD::receive(size_t len) {
 	_bytes = recv(_fd, _buffer.data(), len, 0);
 	// std::cout << "bytes read: " << _bytes << std::endl;
 
 	if (_bytes == 0) {
+		// _state = END;
 		Server::_pfds[_index].fd = INVALID_FD; // build response
 	}
 	if (_bytes > 0) {
@@ -20,11 +27,6 @@ void ClientFD::receive(size_t len) {
 	}
 }
 
-void ClientFD::resetBytes() {
-	_bytes = 0;
-	_left  = 0;
-	_total = 0;
-}
 
 void ClientFD::receiveChunked() {
 	std::stringstream stream;
@@ -44,13 +46,13 @@ void ClientFD::receiveChunked() {
 			// ending chunk
 			if (_left > 0) {
 				_total += _left;
+				// - initialize a response (server error probably)
 				if (_total > _config->getMaxBodySize()) {
 					std::cout << "ERROR ERROR ERROR ERROR (body > maxBodySize)\n";
-					exit(EXIT_FAILURE);
 				}
 			} else if (_left == 0) {
-				std::cout << "\nbody:\n>>>\n" << _body << "\n>>>\n";
-				std::cout << _total << std::endl;
+				// std::cout << "\nbody:\n>>>\n" << _body << "\n>>>\n";
+				// std::cout << _total << std::endl;
 				_state = END;
 				return;
 			}
@@ -60,8 +62,9 @@ void ClientFD::receiveChunked() {
 			// chunk found in _data
 			if (_left + CRLF_LEN <= static_cast<int64_t>(_data.size())) {
 				if (_data.substr(_left, CRLF_LEN).find("\r\n") == std::string::npos) {
-					throw(std::string("expected CRLF not found"));
+					throw(std::string("expected CRLF not found")); // placeholder
 				}
+				// std::cout << "body size: " << _body.size() << std::endl;
 				_body.append(_data.begin(), _data.begin() + _left);
 				_data = _data.substr(_left + CRLF_LEN);
 				_left = 0;
@@ -70,6 +73,27 @@ void ClientFD::receiveChunked() {
 				break;
 			}
 		}
+	}
+}
+
+void ClientFD::receiveLength() {
+	if (_left == 0) {
+		// _body = _data;
+		_left = _request.getContentLength();
+	}
+	if (_bytes > 0) {
+		_total += _bytes;
+		// _body.append(_buffer.begin(), _buffer.begin() + _bytes);
+		// std::cout << _body << std::endl;
+	}
+	if (_total < _left) {
+		// std::cout << "total: " << _total;
+		// std::cout << " | left: " << _left << std::endl;
+	}
+	if (_total == _left) {
+		_body = _data;
+		// std::cout << ">>>>> body: " << _data << std::endl;
+		_state = END;
 	}
 }
 
@@ -87,63 +111,53 @@ void ClientFD::initResponse(int index) {
 }
 
 void ClientFD::getHeader() {
-	size_t end = 0;
+	if (_state == HEADER) {
+		size_t end = 0;
 
-	if ((end = _data.find(CRLF_END)) != std::string::npos) {
-		try {
-			this->_request.ParseRequest(this->_data);
-			this->_config   = this->_server->findConfig(this->_request);
-			this->_location = this->_config->findLocation(this->_request);
-			this->_request.ValidateRequest(this->_config);
-		} catch (const Utils::ErrorPageException &e) {
-			this->_response.initResponse(
-				e.what(), this->_config,
-				this->_request); // make sure if error it sets it immidiately to create
-								 // response and stops here
-		} catch (const std::exception &e) {
-			// other exceptions like std::string! should be finished later/how?
+		if ((end = _data.find(CRLF_END)) != std::string::npos) {
+			try {
+				this->_request.ParseRequest(this->_data);
+				this->_config   = this->_server->findConfig(this->_request);
+				this->_location = this->_config->findLocation(this->_request);
+				this->_request.ValidateRequest(this->_config);
+			} catch (const Utils::ErrorPageException &e) {
+				this->_response.initResponse(
+					e.what(), this->_config,
+					this->_request); // make sure if error it sets it immidiately to
+									 // create response and stops here
+			} catch (const std::exception &e) {
+				// other exceptions like std::string! should be finished later/how?
+			}
+			_data  = _data.substr(end + CRLF_LEN2);
+			_total = _data.size();
+			_bytes = 0;
+			_state = BODY;
 		}
-		_header = _data.substr(0, end);
-		_data   = _data.substr(end + CRLF_LEN2);
-		_state  = BODY;
-		getBody();
-		//		std::cout << "\nheader:\n\n" << _header << "\n\n";
-
-		/* check if contentLengthAvailable() or getChunked() are true if so body exists
-		 * read bytes and setBody */
-		// if (this->_request.getHeaderAvailable() == true) { // this can be written
-		// shorter, with one setBody and fewer if statements etc, but since you might
-		// change a lot, these are the basics.
-		// if (this->_request.getChunked() == true) {
-		// 	std::cout << "do something with chunked body" << std::endl;
-		// 	// this->_request.setBody("this is a chunked body");
-		// }
-		// if (this->_request.contentLenAvailable() == true) {
-		// 	std::cout << "do something with contentlen body" << std::endl;
-		// 	// this->_request.setBody("this is a body with contentlen");
-		// }
-		// this->_request.printAttributesInRequestClass(); // used for
-		// 												// testing;
-		// 												// REMOVE later
-
-		/* create CGIrequest or HTTPrequest */
-
-		// this->_request.printAttributesInRequestClass(); // REMOVE LATER
 	}
 }
 
 void ClientFD::getBody() {
-	if (_request.contentLenAvailable() == true) {
-		receiveLength();
-	} else if (_request.getChunked() == true) {
-		receiveChunked();
-	} else {
-		_request.setBody(_body);
-		_state = END;
+	if (_state == BODY) {
+		if (_request.contentLenAvailable() == true) {
+			receiveLength();
+		} else if (_request.getChunked() == true) {
+			receiveChunked();
+		} else {
+			_state = END;
+		}
 	}
+}
 
+int32_t ClientFD::getRemainderBytes() const {
+	return BUFFERSIZE > _left ? BUFFERSIZE : _left;
+}
+
+void ClientFD::ready() {
 	if (_state == END) {
-		this->_request.printAttributesInRequestClass(); // REMOVE LATER
+		std::cout << "\n-------------\nbody: \n" << _body << "\n-------------\n";
+		std::cout << "body size: " << _body.size() << std::endl;
+		_request.setBody(_body);
+		// this->_request.printAttributesInRequestClass(); // REMOVE LATER
 		if (this->_request.getCgi() == true) {
 			this->_requestInterface = new CGIRequest(*this);
 		} else {
@@ -153,38 +167,17 @@ void ClientFD::getBody() {
 	}
 }
 
-void ClientFD::receiveLength() {
-	if (_bytes > 0) {
-		_total += _bytes;
-	}
-	if (_left == 0) {
-		_left = _request.getContentLength();
-	}
-	if (_total < _left) {
-		std::cout << "total: " << _total;
-		std::cout << " | left: " << _left << std::endl;
-	}
-	if (_total == _left) {
-		std::cout << ">>>>> body: " << _data << std::endl;
-		_state = END;
-	}
-}
-
-int32_t ClientFD::getRemainderBytes() const {
-	return BUFFERSIZE > _left ? BUFFERSIZE : _left;
-}
-
 /* receive data */
 void ClientFD::pollin() {
 	receive(BUFFERSIZE);
 
 	switch (_state) {
 		case HEADER:
-			return getHeader();
+			getHeader();
 		case BODY:
-			return getBody();
+			getBody();
 		case END:
-			return;
+			ready();
 	}
 }
 
