@@ -10,11 +10,15 @@ HttpRequest::HttpRequest(ClientFD &Client) {
 }
 
 void HttpRequest::CheckMethod(ClientFD &Client) {
-	if (Client._request.getMethod() == Utils::get_string)
+	if (Client._request.getMethod() == Utils::get_string) {
 		GETRequest(Client);
-	if (Client._request.getMethod() == Utils::post_string)
+	}
+	if (Client._request.getMethod() == Utils::post_string) {
 		POSTRequest(Client);
-	DELETERequest(Client);
+	}
+	if (Client._request.getMethod() == Utils::delete_string) {
+		DELETERequest(Client);
+	}
 }
 
 void HttpRequest::GETRequest(ClientFD &Client) {
