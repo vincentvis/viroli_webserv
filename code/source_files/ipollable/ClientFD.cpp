@@ -27,7 +27,6 @@ void ClientFD::receive(size_t len) {
 	}
 }
 
-
 void ClientFD::receiveChunked() {
 	std::stringstream stream;
 	size_t            pos = 0;
@@ -97,7 +96,7 @@ void ClientFD::receiveLength() {
 	}
 }
 
-void ClientFD::initResponse(int index) {
+void ClientFD::initResponse(int index) { // remove index parameter
 	/* check is response is created with _response.respReady() + receive response with
 	 * _response.getResponse() */
 	if (_response.respReady() == true) {
@@ -149,13 +148,14 @@ void ClientFD::getBody() {
 }
 
 int32_t ClientFD::getRemainderBytes() const {
-	return BUFFERSIZE > _left ? BUFFERSIZE : _left;
+	return BUFFERSIZE > _left ? _left : BUFFERSIZE;
 }
 
 void ClientFD::ready() {
 	if (_state == END) {
-		std::cout << "\n-------------\nbody: \n" << _body << "\n-------------\n";
+		// std::cout << "\n-------------\nbody: \n" << _body << "\n-------------\n";
 		std::cout << "body size: " << _body.size() << std::endl;
+		// Server::_pfds[_index].fd = INVALID_FD;
 		_request.setBody(_body);
 		// this->_request.printAttributesInRequestClass(); // REMOVE LATER
 		if (this->_request.getCgi() == true) {

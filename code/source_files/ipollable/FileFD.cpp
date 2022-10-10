@@ -22,7 +22,7 @@ void FileFD::pollin() {
 }
 
 int32_t FileFD::getRemainderBytes() const {
-	return BUFFERSIZE < _left ? BUFFERSIZE : _left;
+	return BUFFERSIZE > _left ? _left : BUFFERSIZE;
 }
 
 void FileFD::setData(std::string data) {
