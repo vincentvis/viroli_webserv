@@ -54,10 +54,9 @@ class Response {
 		void        createResponse();
 
 		std::string getResponse() const;
-		bool        respReady() const;
 
 		std::string getDate();
-		std::string getContentType(const Request &Req) const;
+		std::string getContentType() const;
 		std::string findReasonPhrase(std::string status);
 		void        setMessageBody(std::string MessageBody);
 		void        setContentType(std::string ContentType);

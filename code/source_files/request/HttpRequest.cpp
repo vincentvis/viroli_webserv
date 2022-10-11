@@ -53,6 +53,7 @@ void HttpRequest::processResponse(ClientFD *Client, std::string Data, int ErrorS
 }
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
+	(void)Client;
 	std::cout << "POST REQUEST UNDER CONSTRUCTION" << std::endl;
 //	Client._response.setContentType("text/plain");
 //	Client._response.initResponse("200", Client._config, Client._request);
@@ -61,6 +62,7 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 }
 
 void HttpRequest::DELETERequest(ClientFD &Client) {
+	(void)Client;
 	std::cout << "DELETE REQUEST UNDER CONSTRUCTION" << std::endl;
 //	Client._response.setContentType("text/plain");
 //	Client._response.initResponse("200", Client._config, Client._request);

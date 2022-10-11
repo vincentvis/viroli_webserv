@@ -103,7 +103,7 @@ void Response::initResponse(std::string status, Config *Conf, const Request &Req
 	this->_serverType =
 		"Server: VIROLI_Server/26.3.8"; // or is this the servername in the config?
 
-	this->_contentType = "Content-type: " + getContentType(Req);
+	this->_contentType = "Content-type: " + getContentType();
 	if (Req.getConnectionAvailable())
 		this->_connection = "Connection: " + Req.getConnectionInfo();
 	else
@@ -129,10 +129,6 @@ void Response::createResponse() {
 	this->_response         = StatusLine + HTTPHeader + MessageBody;
 }
 
-bool Response::respReady() const {
-	return this->_respReady;
-}
-
 std::string Response::getResponse() const {
 	return this->_response;
 }
@@ -142,7 +138,7 @@ std::string Response::getDate() {
 	return "Mon, 10 Oct 2022 00:43:49 GMT";
 }
 
-std::string Response::getContentType(const Request &Req) const {
+std::string Response::getContentType() const {
 	return this->_contentType;
 }
 
