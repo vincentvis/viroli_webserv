@@ -16,7 +16,6 @@ class Response {
 	private:
 		std::string _response;
 		bool        _respReady;
-		//		std::map<std::string, std::string> _statusCodes; // vincent adds
 
 		/* Status Line: */
 		std::string _httpVersion;  /* [HTTP1.1] */
@@ -42,27 +41,28 @@ class Response {
 		 */
 
 	protected:
-		static std::map<std::string, std::string> _errorPageHtml;
-		static void                               init_errorpage_htmls(void);
-		void                                      generateErrorPage(std::string page);
+		static std::map<std::string, std::string>    _reasonPhraseMap;
+		std::map<std::string, std::string>::iterator _itr;
+		static void                                  initReasonPhraseMap(void);
+		void                                         generateErrorPage(std::string page);
 
 	public:
 		Response();
 		~Response();
 
 		void        initResponse(std::string status, Config *Conf, const Request &Req);
-		void        createResponseHeader();
+		void        createResponse();
 
 		std::string getResponse() const;
-		bool        respReady() const;
 
 		std::string getDate();
-		std::string getContentType();
-		std::string CalcContentLen(std::string str);
+		std::string getContentType() const;
+		std::string findReasonPhrase(std::string status);
+		void        setMessageBody(std::string MessageBody);
+		void        setContentType(std::string ContentType);
+		void        findAndSetContentType(const Request &Req);
 
 		//		void setStatusCode(std::string newRes); //needed later on or not?
 		//		void setReasonPhrase(std::string RP);
 		//		void setDate(std::string Date);
-		//		void setContentType(std::string ContentType);
-		//		void setMessageBody(std::string MessageBody);
 };

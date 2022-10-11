@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ipollable/IPollable.hpp"
+#include "request/RequestInterface.hpp"
 #include "server/Server.hpp"
 #include <string>
 #include <vector>
@@ -30,4 +31,7 @@ class FileFD : public IPollable {
 		void    setData(std::string data);
 		Server *getServer() const;
 		int32_t getRemainderBytes() const;
+		void 	setRequestInterface(RequestInterface* req, ClientFD *Client);
+		RequestInterface *_requestInterface;
+		ClientFD			*_client;
 };

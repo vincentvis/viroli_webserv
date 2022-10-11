@@ -12,9 +12,10 @@ class CGIRequest : public RequestInterface {
 		void GETRequest(ClientFD &Client);
 		void POSTRequest(ClientFD &Client);
 		void DELETERequest(ClientFD &Client);
+		CGIRequest();
 
 	public:
-		CGIRequest(); // should become private!
 		CGIRequest(ClientFD &Client);
+		void processResponse(ClientFD *Client, std::string Data, int ErrorStatus);
 		~CGIRequest();
 };
