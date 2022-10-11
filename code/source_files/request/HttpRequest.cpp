@@ -45,19 +45,24 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 
 void HttpRequest::processResponse(ClientFD *Client, std::string Data){
 	Client->_response.setMessageBody(Data);
+//	std::cout << "data: " << Data << std::endl;
 	Client->_response.initResponse("200", Client->_config, Client->_request);
 	Client->_response.createResponse();
-	Client->setStateSend();
+	Client->sendResponse(Client->_index);
+//	std::cout << "RESP [" <<  Client->_response.getResponse() << "]"<< std::endl;
+//	Client->setStateSend();
 }
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
 	Client._response.initResponse("200", Client._config, Client._request);
 	Client._response.createResponse();
+//	Client->sendResponse(Client->_index);
 }
 
 void HttpRequest::DELETERequest(ClientFD &Client) {
 	Client._response.initResponse("200", Client._config, Client._request);
 	Client._response.createResponse();
+//	Client->sendResponse(Client->_index);
 }
 
 HttpRequest::~HttpRequest() {

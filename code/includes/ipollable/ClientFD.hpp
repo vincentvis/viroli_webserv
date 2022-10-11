@@ -55,7 +55,7 @@ class ClientFD : public IPollable {
 		void    receiveLength();
 		void    ready();
 		Server *getServer() const;
-		void    initResponse(int index);
+		void    sendResponse(int index);
 		void    closeFD();
 		int32_t getRemainderBytes() const;
 		void    extractChunk();

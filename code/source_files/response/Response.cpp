@@ -110,6 +110,7 @@ void Response::initResponse(std::string status, Config *Conf, const Request &Req
 		this->_connection = "Connection: Close"; // is this correct?
 
 	//	/* Message Body */
+//	if (this->_messageBody)
 	//	this->_messageBody =
 
 	this->_contentLen =

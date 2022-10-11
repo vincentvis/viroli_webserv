@@ -96,11 +96,11 @@ void ClientFD::receiveLength() {
 	}
 }
 
-void ClientFD::initResponse(int index) { // remove index parameter
+void ClientFD::sendResponse(int index) { // remove index parameter
 	/* check is response is created with _response.respReady() + receive response with
 	 * _response.getResponse() */
 	std::cout << _response.respReady() << std::endl;
-	std::cout << "RESPONSE" << _response.getResponse() << std::endl;
+	std::cout << "RESPONSE [" << _response.getResponse() << "]" << std::endl;
 	if (_response.respReady() == true) {
 		std::cout << "does this work" << std::endl;
 		Server::_pfds[index].events = POLLOUT;
@@ -164,7 +164,7 @@ void ClientFD::ready() {
 			this->_requestInterface = new CGIRequest(*this);
 		} else {
 			this->_requestInterface = new HttpRequest(*this);
-
+//			initResponse(_index);
 //			delete(this->_requestInterface);
 //			initResponse(_index);
 //			_state = SEND;
@@ -178,15 +178,17 @@ void ClientFD::pollin() {
 	receive(BUFFERSIZE);
 
 	switch (_state) {
+		default:
+			break;
 		case HEADER:
 			getHeader();
 		case BODY:
 			getBody();
 		case END:
 			ready();
-		case SEND:
-			std::cout << "send is ready" << std::endl;
-			initResponse(_index);
+//		case SEND:
+//			std::cout << "send is ready" << std::endl;
+//			initResponse(_index);
 	}
 }
 
