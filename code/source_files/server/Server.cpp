@@ -78,32 +78,49 @@ int32_t Server::getFileDescriptor() const {
 	return _fd;
 }
 
-bool Server::isFlushable() {
-	if (Server::_nflush > (Server::_pfds.size() / 10)) {
-		return true;
+// TO BE REMOVED WHEN removePollable() has been tested
+// bool Server::isFlushable() {
+// 	if (Server::_nflush > (Server::_pfds.size() / 10)) {
+// 		return true;
+// 	}
+// 	return false;
+// }
+
+// /* test this with more connections */
+// /* instead of doing after every poll iteration use a threshold */
+// void Server::flushPollables() {
+// 	std::cout << "size _pfds: " << Server::_pfds.size() << std::endl;
+// 	std::vector<struct pollfd> tmp;
+
+// 	for (size_t i = 0; i < Server::_pfds.size(); ++i) {
+// 		if (Server::_pfds[i].fd != INVALID_FD) {
+// 			tmp.push_back(Server::_pfds[i]);
+// 		} else {
+// 			close(Server::_pfds[i].fd);
+// 			delete Server::_pollables.find(Server::_pfds[i].fd)->second;
+// 			Server::_pollables.erase(Server::_pfds[i].fd);
+// 		}
+// 	}
+
+// 	Server::_pfds.swap(tmp);
+// 	Server::_nflush = 0;
+// 	std::cout << "size _pfds: " << Server::_pfds.size() << std::endl;
+// }
+// TO BE REMOVED WHEN removePollable() has been tested
+
+void Server::removePollable(int index) {
+	/* close file descriptor of ClientFD or FileFD */
+	close(Server::_pfds[index].fd);
+	/* delete ClientFD or FileFD */
+	delete Server::_pollables.find(Server::_pfds[index].fd)->second;
+	/* remove ClientFD or FileFD from map */
+	Server::_pollables.erase(Server::_pfds[index].fd);
+	/* swap pollable to be removed at index with last element in vector */
+	if (Server::_pfds.size() > 1) {
+		std::swap(Server::_pfds.at(index), Server::_pfds.back());
 	}
-	return false;
-}
-
-/* test this with more connections */
-/* instead of doing after every poll iteration use a threshold */
-void Server::flushPollables() {
-	std::cout << "size _pfds: " << Server::_pfds.size() << std::endl;
-	std::vector<struct pollfd> tmp;
-
-	for (size_t i = 0; i < Server::_pfds.size(); ++i) {
-		if (Server::_pfds[i].fd != INVALID_FD) {
-			tmp.push_back(Server::_pfds[i]);
-		} else {
-			close(Server::_pfds[i].fd);
-			delete Server::_pollables.find(Server::_pfds[i].fd)->second;
-			Server::_pollables.erase(Server::_pfds[i].fd);
-		}
-	}
-
-	Server::_pfds.swap(tmp);
-	Server::_nflush = 0;
-	std::cout << "size _pfds: " << Server::_pfds.size() << std::endl;
+	/* remove last element in vector */
+	Server::_pfds.pop_back();
 }
 
 void Server::run() {
@@ -117,6 +134,9 @@ void Server::run() {
 		/* check events and timeout */
 		for (size_t i = 0; i < Server::_pfds.size(); ++i) {
 			Server::_pollables.find(Server::_pfds[i].fd)->second->timeout();
+			if (Server::_pfds[i].fd == INVALID_FD) {
+				Server::removePollable(i);
+			}
 			/* find on what file descriptor event occurred */
 			if (Server::_pfds[i].revents & (POLLIN | POLLOUT)) {
 				it = Server::_pollables.find(Server::_pfds[i].fd);
@@ -134,14 +154,16 @@ void Server::run() {
 			}
 		}
 
-		if (Server::isFlushable() == true) {
-			Server::flushPollables();
-		}
+		// TO BE REMOVED WHEN removePollable() has been tested
+		// if (Server::isFlushable() == true) {
+		// 	Server::flushPollables();
+		// }
 
 		/* remove file descriptors that are no longer needed (implement threshold) */
 		// if (_pfds.size() > 1000) {
 		// 	Server::removePoll();
 		// }
+		// TO BE REMOVED WHEN removePollable() has been tested
 	}
 }
 
@@ -168,6 +190,6 @@ IPollable *Server::addPollable(Server *server, int32_t fd, Pollable type, int16_
 	}
 }
 
-size_t                         Server::_nflush;
+// size_t                         Server::_nflush;
 std::map<int32_t, IPollable *> Server::_pollables;
 std::vector<struct pollfd>     Server::_pfds;
