@@ -59,5 +59,4 @@ class ClientFD : public IPollable {
 		void    closeFD();
 		int32_t getRemainderBytes() const;
 		void    extractChunk();
-		void    setStateSend();
 };

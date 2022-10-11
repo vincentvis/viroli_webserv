@@ -2,7 +2,7 @@
 
 ClientFD::ClientFD(Server *server, int fd, int index) :
 	_server(server), _state(HEADER), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
-	_total(0), _fd(fd), _index(index){
+	_total(0), _fd(fd), _index(index) {
 }
 
 ClientFD::~ClientFD() {
@@ -96,19 +96,12 @@ void ClientFD::receiveLength() {
 	}
 }
 
-void ClientFD::sendResponse(int index) { // remove index parameter
-	/* check is response is created with _response.respReady() + receive response with
-	 * _response.getResponse() */
-	std::cout << _response.respReady() << std::endl;
-	std::cout << "RESPONSE [" << _response.getResponse() << "]" << std::endl;
-	if (_response.respReady() == true) {
-		std::cout << "does this work" << std::endl;
-		Server::_pfds[index].events = POLLOUT;
-		_data = _response.getResponse(); // this should work at a certain moment
-		_bytes = 0;
-		_total = 0;
-		_left  = _data.size();
-	}
+void ClientFD::sendResponse(int index) { // remove index parameter?
+	Server::_pfds[index].events = POLLOUT;
+	_data  = _response.getResponse(); // this should work at a certain moment
+	_bytes = 0;                       // ronald check are these oke?
+	_total = 0;                       // ronald check are these oke?
+	_left  = _data.size();            // ronald check are these oke?
 }
 
 void ClientFD::getHeader() {
@@ -142,7 +135,19 @@ void ClientFD::getBody() {
 		if (_request.contentLenAvailable() == true) {
 			receiveLength();
 		} else if (_request.getChunked() == true) {
+			// in received chunked throw errors if error catch will create a error
+			// response -> RONALD :)!
+			//			try {
 			receiveChunked();
+			//		}
+			//			catch (const Utils::ErrorPageException &e) {
+			//				this->_response.initResponse(
+			//					e.what(), this->_config,
+			//					this->_request); // make sure if error it sets it immidiately
+			//to
+			//									 // create response and stops here
+			//				_state = END;
+			//			}
 		} else {
 			_state = END;
 		}
@@ -159,17 +164,12 @@ void ClientFD::ready() {
 		std::cout << "body size: " << _body.size() << std::endl;
 		// Server::_pfds[_index].fd = INVALID_FD;
 		_request.setBody(_body);
-		 this->_request.printAttributesInRequestClass(); // REMOVE LATER
+		this->_request.printAttributesInRequestClass(); // REMOVE LATER
 		if (this->_request.getCgi() == true) {
 			this->_requestInterface = new CGIRequest(*this);
 		} else {
 			this->_requestInterface = new HttpRequest(*this);
-//			initResponse(_index);
-//			delete(this->_requestInterface);
-//			initResponse(_index);
-//			_state = SEND;
 		}
-
 	}
 }
 
@@ -186,9 +186,6 @@ void ClientFD::pollin() {
 			getBody();
 		case END:
 			ready();
-//		case SEND:
-//			std::cout << "send is ready" << std::endl;
-//			initResponse(_index);
 	}
 }
 
@@ -220,8 +217,4 @@ int ClientFD::getFileDescriptor() const {
 
 Server *ClientFD::getServer() const {
 	return _server;
-}
-
-void ClientFD::setStateSend() {
-	this->_state = SEND;
 }

@@ -16,7 +16,6 @@ class Response {
 	private:
 		std::string _response;
 		bool        _respReady;
-		//		std::map<std::string, std::string> _statusCodes; // vincent adds
 
 		/* Status Line: */
 		std::string _httpVersion;  /* [HTTP1.1] */
@@ -42,10 +41,10 @@ class Response {
 		 */
 
 	protected:
-		static std::map<std::string, std::string> _reasonPhraseMap;
+		static std::map<std::string, std::string>    _reasonPhraseMap;
 		std::map<std::string, std::string>::iterator _itr;
-		static void                               initReasonPhraseMap(void);
-		void                                      generateErrorPage(std::string page);
+		static void                                  initReasonPhraseMap(void);
+		void                                         generateErrorPage(std::string page);
 
 	public:
 		Response();
@@ -58,14 +57,13 @@ class Response {
 		bool        respReady() const;
 
 		std::string getDate();
-		std::string getContentType();
+		std::string getContentType(const Request &Req) const;
 		std::string findReasonPhrase(std::string status);
-		std::string CalcContentLen(std::string str);
-		void setMessageBody(std::string MessageBody);
+		void        setMessageBody(std::string MessageBody);
+		void        setContentType(std::string ContentType);
+		void        findAndSetContentType(const Request &Req);
 
 		//		void setStatusCode(std::string newRes); //needed later on or not?
 		//		void setReasonPhrase(std::string RP);
 		//		void setDate(std::string Date);
-		//		void setContentType(std::string ContentType);
-
 };

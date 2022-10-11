@@ -80,11 +80,11 @@ Response::Response() {
 	this->_respReady = false;
 }
 
-std::string Response::findReasonPhrase(std::string status){
+std::string Response::findReasonPhrase(std::string status) {
 	this->_itr = _reasonPhraseMap.find(status);
 	if (this->_itr != _reasonPhraseMap.end())
 		return this->_itr->second;
-	return NULL; //should be something else, like an error that is always valid?
+	return NULL; // should be something else, like an error that is always valid?
 }
 
 void Response::setMessageBody(std::string MessageBody) {
@@ -103,15 +103,15 @@ void Response::initResponse(std::string status, Config *Conf, const Request &Req
 	this->_serverType =
 		"Server: VIROLI_Server/26.3.8"; // or is this the servername in the config?
 
-	this->_contentType = "Content-type: " + getContentType();
+	this->_contentType = "Content-type: " + getContentType(Req);
 	if (Req.getConnectionAvailable())
 		this->_connection = "Connection: " + Req.getConnectionInfo();
 	else
 		this->_connection = "Connection: Close"; // is this correct?
 
 	//	/* Message Body */
-//	if (this->_messageBody)
-	//	this->_messageBody =
+	//	if (this->_messageBody.empty) // not sure if we'll be using this
+	//		this->_messageBody = "this is a test";
 
 	this->_contentLen =
 		"Content-Length: " + Utils::to_string(this->_messageBody.length());
@@ -127,10 +127,6 @@ void Response::createResponse() {
 	std::string MessageBody = this->_messageBody + CRLF;
 
 	this->_response         = StatusLine + HTTPHeader + MessageBody;
-
-	std::cout << "\nRESPONSE: " << this->_response << std::endl;
-	/* Response Ready to Send */
-	this->_respReady = true;
 }
 
 bool Response::respReady() const {
@@ -146,17 +142,24 @@ std::string Response::getDate() {
 	return "Mon, 10 Oct 2022 00:43:49 GMT";
 }
 
-std::string Response::getContentType() {
-	// do something to get contentType;
-	//	return "text/plain";
-	return "text/html";
+std::string Response::getContentType(const Request &Req) const {
+	return this->_contentType;
 }
 
-std::string Response::CalcContentLen(std::string str) {
-	(void)str;
-	//.length and than to str
-	return "23";
+void Response::setContentType(std::string ContentType) {
+	this->_contentType = ContentType;
 }
+
+ void Response::findAndSetContentType(const Request &Req) {
+	if (Req.getUri().find(".html", Req.getUri().length() - 5) != std::string::npos) {
+		this->_contentType = "text/html";
+	} else if (Req.getUri().find(".jpg", Req.getUri().length() - 4) != std::string::npos)
+	{
+		this->_contentType = "media type";
+	} else {
+		this->_contentType = "text/plain";
+	}
+ }
 
 void Response::generateErrorPage(std::string page) {
 	if (_reasonPhraseMap.size() == 0) {

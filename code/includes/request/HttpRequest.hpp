@@ -14,8 +14,8 @@ class HttpRequest : public RequestInterface {
 		void DELETERequest(ClientFD &Client);
 
 	public:
-		HttpRequest(); // should become private!
+		HttpRequest(); // should become private?
 		HttpRequest(ClientFD &Client);
-		void processResponse(ClientFD *Client, std::string Data);
+		void processResponse(ClientFD *Client, std::string Data, int ErrorStatus);
 		~HttpRequest();
 };
