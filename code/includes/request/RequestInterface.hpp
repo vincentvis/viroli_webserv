@@ -1,9 +1,6 @@
 #pragma once
 
-//#include "config/Config.hpp"
-//#include "ipollable/ClientFD.hpp"
-//#include "request/Request.hpp"
-//#include "response/Response.hpp"
+#include <iostream>
 
 class ClientFD;
 
@@ -15,7 +12,9 @@ class RequestInterface {
 		virtual void DELETERequest(ClientFD &Client) = 0;
 
 	public:
-		RequestInterface(); // should become private!
+		RequestInterface();
 		RequestInterface(ClientFD &Client);
+		virtual void processResponse(ClientFD *Client, std::string Data,
+									 int ErrorStatus) = 0;
 		~RequestInterface();
 };

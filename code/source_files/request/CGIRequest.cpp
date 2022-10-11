@@ -8,11 +8,15 @@ CGIRequest::CGIRequest(ClientFD &Client) {
 }
 
 void CGIRequest::CheckMethod(ClientFD &Client) {
-	if (Client._request.getMethod() == Utils::get_string)
+	if (Client._request.getMethod() == Utils::get_string) {
 		GETRequest(Client);
-	if (Client._request.getMethod() == Utils::post_string)
+	}
+	if (Client._request.getMethod() == Utils::post_string) {
 		POSTRequest(Client);
-	DELETERequest(Client);
+	}
+	if (Client._request.getMethod() == Utils::delete_string) {
+		DELETERequest(Client);
+	}
 }
 
 void CGIRequest::GETRequest(ClientFD &Client) {
@@ -28,6 +32,18 @@ void CGIRequest::POSTRequest(ClientFD &Client) {
 void CGIRequest::DELETERequest(ClientFD &Client) {
 	(void)Client;
 	std::cout << "this is a DELETE CGI Request" << std::endl; // REMOVE LATER
+}
+
+void CGIRequest::processResponse(ClientFD *Client, std::string Data, int ErrorStatus){
+	if (ErrorStatus != 0) {
+		std::cout << "create error response" << std::endl;
+	}
+	else{
+		Client->_response.setMessageBody(Data);
+		Client->_response.initResponse("200", Client->_config, Client->_request);
+		Client->_response.createResponse();
+	}
+	Client->sendResponse(Client->_index);
 }
 
 CGIRequest::~CGIRequest() {
