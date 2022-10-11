@@ -499,7 +499,7 @@ void ConfigParser::processBoolval(std::string name, bool &target, std::string tr
 }
 
 bool ConfigParser::isValidConfigURI(const std::string &match_str) {
-	if (match_str.empty() || match_str.at(0) != '/') {
+	if (match_str.empty()) {
 		return (false);
 	}
 	std::string::size_type length = match_str.length();
@@ -510,7 +510,8 @@ bool ConfigParser::isValidConfigURI(const std::string &match_str) {
 		if (match_str.at(i) == '/' && word == 0)
 			return (false);
 		if (std::isalnum(match_str.at(i)) || match_str.at(i) == '-' ||
-			match_str.at(i) == '_') {
+			match_str.at(i) == '_' || match_str.at(i) == '.')
+		{
 			word++;
 		} else if (match_str.at(i) == '/') {
 			word = 0;
