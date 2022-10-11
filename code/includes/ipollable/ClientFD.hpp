@@ -1,11 +1,12 @@
 #pragma once
 
 #include "config/Config.hpp"
+#include "ipollable/FileFD.hpp"
 #include "ipollable/IPollable.hpp"
-//#include "request/RequestInterface.hpp"
 #include "request/CGIRequest.hpp"
 #include "request/HttpRequest.hpp"
 #include "request/Request.hpp"
+#include "request/RequestInterface.hpp"
 #include "response/Response.hpp"
 #include "server/Location.hpp"
 #include "server/Server.hpp"
@@ -13,6 +14,7 @@
 #include <string>
 #include <vector>
 
+class FileFD;
 class RequestInterface;
 class ClientFD : public IPollable {
 	public:
@@ -25,6 +27,7 @@ class ClientFD : public IPollable {
 		Config           *_config;
 		Location         *_location;
 		Server           *_server;
+		FileFD           *_fileFD;
 		Transfer          _transfer;
 		State             _state;
 		std::vector<char> _buffer;
@@ -52,7 +55,7 @@ class ClientFD : public IPollable {
 		void    receiveLength();
 		void    ready();
 		Server *getServer() const;
-		void    initResponse(int index);
+		void    sendResponse(int index);
 		void    closeFD();
 		int32_t getRemainderBytes() const;
 		void    extractChunk();

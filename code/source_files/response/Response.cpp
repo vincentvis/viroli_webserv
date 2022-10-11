@@ -1,90 +1,102 @@
 #include "response/Response.hpp"
 
-std::map<std::string, std::string> Response::_errorPageHtml;
+std::map<std::string, std::string> Response::_reasonPhraseMap;
 
-void                               Response::init_errorpage_htmls(void) {
-								  _errorPageHtml["100"] = "Continue";
-								  _errorPageHtml["101"] = "Switching Protocols";
-								  _errorPageHtml["102"] = "Processing";
-								  _errorPageHtml["200"] = "OK";
-								  _errorPageHtml["201"] = "Created";
-								  _errorPageHtml["202"] = "Accepted";
-								  _errorPageHtml["203"] = "Non-Authoritative Information";
-								  _errorPageHtml["204"] = "No Content";
-								  _errorPageHtml["206"] = "Partial Content";
-								  _errorPageHtml["207"] = "Multi-Status";
-								  _errorPageHtml["300"] = "Multiple Choices";
-								  _errorPageHtml["301"] = "Moved Permanently";
-								  _errorPageHtml["302"] = "Found";
-								  _errorPageHtml["303"] = "See Other";
-								  _errorPageHtml["304"] = "Not Modified";
-								  _errorPageHtml["305"] = "Use Proxy";
-								  _errorPageHtml["307"] = "Temporary Redirect";
-								  _errorPageHtml["308"] = "Permanent Redirect";
-								  _errorPageHtml["400"] = "Bad Request";
-								  _errorPageHtml["401"] = "Unauthorized";
-								  _errorPageHtml["402"] = "Payment Required";
-								  _errorPageHtml["403"] = "Forbidden";
-								  _errorPageHtml["404"] = "Not Found";
-								  _errorPageHtml["405"] = "Method Not Allowed";
-								  _errorPageHtml["406"] = "Not Acceptable";
-								  _errorPageHtml["407"] = "Proxy Authentication Required";
-								  _errorPageHtml["408"] = "Request Timeout";
-								  _errorPageHtml["409"] = "Conflict";
-								  _errorPageHtml["410"] = "Gone";
-								  _errorPageHtml["411"] = "Length Required";
-								  _errorPageHtml["412"] = "Precondition Failed";
-								  _errorPageHtml["413"] = "Payload Too Large";
-								  _errorPageHtml["414"] = "Request-URI Too Long";
-								  _errorPageHtml["415"] = "Unsupported Media Type";
-								  _errorPageHtml["416"] = "Request Range Not Satisfiable";
-								  _errorPageHtml["417"] = "Expectation Failed";
-								  _errorPageHtml["418"] = "I’m a teapot";
-								  _errorPageHtml["420"] = "Enhance Your Calm";
-								  _errorPageHtml["421"] = "Misdirected Request";
-								  _errorPageHtml["422"] = "Unprocessable Entity";
-								  _errorPageHtml["423"] = "Locked";
-								  _errorPageHtml["424"] = "Failed Dependency";
-								  _errorPageHtml["425"] = "Too Early";
-								  _errorPageHtml["426"] = "Upgrade Required";
-								  _errorPageHtml["429"] = "Too Many Requests";
-								  _errorPageHtml["431"] = "Request Header Fields Too Large";
-								  _errorPageHtml["444"] = "No Response";
-								  _errorPageHtml["450"] = "Blocked by Windows Parental Controls";
-								  _errorPageHtml["451"] = "Unavailable For Legal Reasons";
-								  _errorPageHtml["497"] = "HTTP Request Sent to HTTPS Port";
-								  _errorPageHtml["498"] = "Token expired/invalid";
-								  _errorPageHtml["499"] = "Client Closed Request";
-								  _errorPageHtml["500"] = "Internal Server Error";
-								  _errorPageHtml["501"] = "Not Implemented";
-								  _errorPageHtml["502"] = "Bad Gateway";
-								  _errorPageHtml["503"] = "Service Unavailable";
-								  _errorPageHtml["504"] = "Gateway Timeout";
-								  _errorPageHtml["506"] = "Variant Also Negotiates";
-								  _errorPageHtml["507"] = "Insufficient Storage";
-								  _errorPageHtml["508"] = "Loop Detected";
-								  _errorPageHtml["509"] = "Bandwidth Limit Exceeded";
-								  _errorPageHtml["510"] = "Not Extended";
-								  _errorPageHtml["511"] = "Network Authentication Required";
-								  _errorPageHtml["521"] = "Web Server Is Down";
-								  _errorPageHtml["522"] = "Connection Timed Out";
-								  _errorPageHtml["523"] = "Origin Is Unreachable";
-								  _errorPageHtml["525"] = "SSL Handshake Failed";
-								  _errorPageHtml["599"] = "Network Connect Timeout Error";
+void                               Response::initReasonPhraseMap() {
+								  _reasonPhraseMap["100"] = "Continue";
+								  _reasonPhraseMap["101"] = "Switching Protocols";
+								  _reasonPhraseMap["102"] = "Processing";
+								  _reasonPhraseMap["200"] = "OK";
+								  _reasonPhraseMap["201"] = "Created";
+								  _reasonPhraseMap["202"] = "Accepted";
+								  _reasonPhraseMap["203"] = "Non-Authoritative Information";
+								  _reasonPhraseMap["204"] = "No Content";
+								  _reasonPhraseMap["206"] = "Partial Content";
+								  _reasonPhraseMap["207"] = "Multi-Status";
+								  _reasonPhraseMap["300"] = "Multiple Choices";
+								  _reasonPhraseMap["301"] = "Moved Permanently";
+								  _reasonPhraseMap["302"] = "Found";
+								  _reasonPhraseMap["303"] = "See Other";
+								  _reasonPhraseMap["304"] = "Not Modified";
+								  _reasonPhraseMap["305"] = "Use Proxy";
+								  _reasonPhraseMap["307"] = "Temporary Redirect";
+								  _reasonPhraseMap["308"] = "Permanent Redirect";
+								  _reasonPhraseMap["400"] = "Bad Request";
+								  _reasonPhraseMap["401"] = "Unauthorized";
+								  _reasonPhraseMap["402"] = "Payment Required";
+								  _reasonPhraseMap["403"] = "Forbidden";
+								  _reasonPhraseMap["404"] = "Not Found";
+								  _reasonPhraseMap["405"] = "Method Not Allowed";
+								  _reasonPhraseMap["406"] = "Not Acceptable";
+								  _reasonPhraseMap["407"] = "Proxy Authentication Required";
+								  _reasonPhraseMap["408"] = "Request Timeout";
+								  _reasonPhraseMap["409"] = "Conflict";
+								  _reasonPhraseMap["410"] = "Gone";
+								  _reasonPhraseMap["411"] = "Length Required";
+								  _reasonPhraseMap["412"] = "Precondition Failed";
+								  _reasonPhraseMap["413"] = "Payload Too Large";
+								  _reasonPhraseMap["414"] = "Request-URI Too Long";
+								  _reasonPhraseMap["415"] = "Unsupported Media Type";
+								  _reasonPhraseMap["416"] = "Request Range Not Satisfiable";
+								  _reasonPhraseMap["417"] = "Expectation Failed";
+								  _reasonPhraseMap["418"] = "I’m a teapot";
+								  _reasonPhraseMap["420"] = "Enhance Your Calm";
+								  _reasonPhraseMap["421"] = "Misdirected Request";
+								  _reasonPhraseMap["422"] = "Unprocessable Entity";
+								  _reasonPhraseMap["423"] = "Locked";
+								  _reasonPhraseMap["424"] = "Failed Dependency";
+								  _reasonPhraseMap["425"] = "Too Early";
+								  _reasonPhraseMap["426"] = "Upgrade Required";
+								  _reasonPhraseMap["429"] = "Too Many Requests";
+								  _reasonPhraseMap["431"] = "Request Header Fields Too Large";
+								  _reasonPhraseMap["444"] = "No Response";
+								  _reasonPhraseMap["450"] = "Blocked by Windows Parental Controls";
+								  _reasonPhraseMap["451"] = "Unavailable For Legal Reasons";
+								  _reasonPhraseMap["497"] = "HTTP Request Sent to HTTPS Port";
+								  _reasonPhraseMap["498"] = "Token expired/invalid";
+								  _reasonPhraseMap["499"] = "Client Closed Request";
+								  _reasonPhraseMap["500"] = "Internal Server Error";
+								  _reasonPhraseMap["501"] = "Not Implemented";
+								  _reasonPhraseMap["502"] = "Bad Gateway";
+								  _reasonPhraseMap["503"] = "Service Unavailable";
+								  _reasonPhraseMap["504"] = "Gateway Timeout";
+								  _reasonPhraseMap["506"] = "Variant Also Negotiates";
+								  _reasonPhraseMap["507"] = "Insufficient Storage";
+								  _reasonPhraseMap["508"] = "Loop Detected";
+								  _reasonPhraseMap["509"] = "Bandwidth Limit Exceeded";
+								  _reasonPhraseMap["510"] = "Not Extended";
+								  _reasonPhraseMap["511"] = "Network Authentication Required";
+								  _reasonPhraseMap["521"] = "Web Server Is Down";
+								  _reasonPhraseMap["522"] = "Connection Timed Out";
+								  _reasonPhraseMap["523"] = "Origin Is Unreachable";
+								  _reasonPhraseMap["525"] = "SSL Handshake Failed";
+								  _reasonPhraseMap["599"] = "Network Connect Timeout Error";
 }
 
 Response::Response() {
-	if (_errorPageHtml.size() == 0) {
-		init_errorpage_htmls();
+	if (_reasonPhraseMap.size() == 0) {
+		initReasonPhraseMap();
 	}
 	this->_respReady = false;
 }
+
+std::string Response::findReasonPhrase(std::string status) {
+	this->_itr = _reasonPhraseMap.find(status);
+	if (this->_itr != _reasonPhraseMap.end())
+		return this->_itr->second;
+	return "200"; //ronald would you agree?
+}
+
+void Response::setMessageBody(std::string MessageBody) {
+	this->_messageBody = MessageBody;
+}
+
 void Response::initResponse(std::string status, Config *Conf, const Request &Req) {
 	(void)Conf;
 	/* Status Line */
 	this->_httpVersion  = Req.getHTTPVersion();
 	this->_statusCode   = status;
-	this->_reasonPhrase = "OK"; // should work with status
+	this->_reasonPhrase = findReasonPhrase(status);
 
 	/* Http Header */
 	this->_date = "Date: " + getDate();
@@ -97,13 +109,15 @@ void Response::initResponse(std::string status, Config *Conf, const Request &Req
 	else
 		this->_connection = "Connection: Close"; // is this correct?
 
-	/* Message Body */
-	this->_messageBody = "this is a test Response";
+	//	/* Message Body */
+	//	if (this->_messageBody.empty) // not sure if we'll be using this
+	//		this->_messageBody = "this is a test";
+
 	this->_contentLen =
-		"Content-Length: " + Utils::to_string(this->_messageBody.length() + 2);
+		"Content-Length: " + Utils::to_string(this->_messageBody.length());
 }
 
-void Response::createResponseHeader() {
+void Response::createResponse() {
 	// checks around these
 	std::string StatusLine =
 		this->_httpVersion + " " + this->_statusCode + " " + this->_reasonPhrase + CRLF;
@@ -113,13 +127,6 @@ void Response::createResponseHeader() {
 	std::string MessageBody = this->_messageBody + CRLF;
 
 	this->_response         = StatusLine + HTTPHeader + MessageBody;
-
-	/* Response Ready to Send */
-	this->_respReady = true;
-}
-
-bool Response::respReady() const {
-	return this->_respReady;
 }
 
 std::string Response::getResponse() const {
@@ -128,27 +135,35 @@ std::string Response::getResponse() const {
 
 std::string Response::getDate() {
 	// do something to get date and time;
-	return "Thu, 09 Dec 2004 12:07:48 GMT";
+	return "Mon, 10 Oct 2022 00:43:49 GMT";
 }
 
-std::string Response::getContentType() {
-	// do something to get contentType;
-	return "text/plain";
+std::string Response::getContentType() const {
+	return this->_contentType;
 }
 
-std::string Response::CalcContentLen(std::string str) {
-	(void)str;
-	//.length and than to str
-	return "23";
+void Response::setContentType(std::string ContentType) {
+	this->_contentType = ContentType;
 }
+
+ void Response::findAndSetContentType(const Request &Req) {
+	if (Req.getUri().find(".html", Req.getUri().length() - 5) != std::string::npos) {
+		this->_contentType = "text/html";
+	} else if (Req.getUri().find(".jpg", Req.getUri().length() - 4) != std::string::npos)
+	{
+		this->_contentType = "media type";
+	} else {
+		this->_contentType = "text/plain";
+	}
+ }
 
 void Response::generateErrorPage(std::string page) {
-	if (_errorPageHtml.size() == 0) {
-		init_errorpage_htmls();
+	if (_reasonPhraseMap.size() == 0) {
+		initReasonPhraseMap();
 	}
-	std::map<std::string, std::string>::iterator p = _errorPageHtml.find(page);
-	if (p == _errorPageHtml.end()) {
-		p = _errorPageHtml.find("500");
+	std::map<std::string, std::string>::iterator p = _reasonPhraseMap.find(page);
+	if (p == _reasonPhraseMap.end()) {
+		p = _reasonPhraseMap.find("500");
 	}
 	_messageBody =
 		"<!DOCTYPE html>\n"

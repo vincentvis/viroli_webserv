@@ -13,12 +13,21 @@ void FileFD::pollin() {
 
 	if (_bytes == 0) {
 		Server::_pfds[_index].fd = INVALID_FD;
+		_requestInterface->processResponse(_client, _data, 0);
+		_state = END;
 		// body ready initialize it with response
 	}
 	if (_bytes > 0) {
 		_total += _bytes;
 		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
+//	if (_bytes == -1) // ronald check for errorpagenum and also error if timeout
+//		_requestInterface->processResponse(_client, _data, 500);
+}
+
+void FileFD::setRequestInterface(RequestInterface* req, ClientFD *Client) {
+	_requestInterface = req;
+	_client = Client;
 }
 
 int32_t FileFD::getRemainderBytes() const {
@@ -43,6 +52,7 @@ void FileFD::pollout() {
 		// file made, ready for response
 	}
 }
+
 
 int FileFD::getFileDescriptor() const {
 	return _fd;
