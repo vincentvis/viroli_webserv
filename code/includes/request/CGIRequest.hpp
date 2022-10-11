@@ -16,5 +16,6 @@ class CGIRequest : public RequestInterface {
 	public:
 		CGIRequest(); // should become private!
 		CGIRequest(ClientFD &Client);
+		void processResponse(ClientFD *Client, std::string Data);
 		~CGIRequest();
 };

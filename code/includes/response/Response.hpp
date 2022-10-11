@@ -42,8 +42,9 @@ class Response {
 		 */
 
 	protected:
-		static std::map<std::string, std::string> _errorPageHtml;
-		static void                               init_errorpage_htmls(void);
+		static std::map<std::string, std::string> _reasonPhraseMap;
+		std::map<std::string, std::string>::iterator _itr;
+		static void                               initReasonPhraseMap(void);
 		void                                      generateErrorPage(std::string page);
 
 	public:
@@ -51,18 +52,20 @@ class Response {
 		~Response();
 
 		void        initResponse(std::string status, Config *Conf, const Request &Req);
-		void        createResponseHeader();
+		void        createResponse();
 
 		std::string getResponse() const;
 		bool        respReady() const;
 
 		std::string getDate();
 		std::string getContentType();
+		std::string findReasonPhrase(std::string status);
 		std::string CalcContentLen(std::string str);
+		void setMessageBody(std::string MessageBody);
 
 		//		void setStatusCode(std::string newRes); //needed later on or not?
 		//		void setReasonPhrase(std::string RP);
 		//		void setDate(std::string Date);
 		//		void setContentType(std::string ContentType);
-		//		void setMessageBody(std::string MessageBody);
+
 };

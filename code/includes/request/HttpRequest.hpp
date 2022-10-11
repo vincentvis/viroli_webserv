@@ -5,8 +5,8 @@
 #include "response/Response.hpp"
 #include "utils/Defines.hpp"
 #include <iostream>
-
 class HttpRequest : public RequestInterface {
+
 	private:
 		void CheckMethod(ClientFD &Client);
 		void GETRequest(ClientFD &Client);
@@ -16,5 +16,6 @@ class HttpRequest : public RequestInterface {
 	public:
 		HttpRequest(); // should become private!
 		HttpRequest(ClientFD &Client);
+		void processResponse(ClientFD *Client, std::string Data);
 		~HttpRequest();
 };
