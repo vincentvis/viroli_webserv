@@ -178,8 +178,6 @@ void ClientFD::pollin() {
 	receive(BUFFERSIZE);
 
 	switch (_state) {
-		default:
-			break;
 		case HEADER:
 			getHeader();
 		case BODY:
