@@ -6,15 +6,14 @@
 #include "utils/Defines.hpp"
 #include <iostream>
 class HttpRequest : public RequestInterface {
-
 	private:
 		void CheckMethod(ClientFD &Client);
 		void GETRequest(ClientFD &Client);
 		void POSTRequest(ClientFD &Client);
 		void DELETERequest(ClientFD &Client);
+		HttpRequest();
 
 	public:
-		HttpRequest(); // should become private?
 		HttpRequest(ClientFD &Client);
 		void processResponse(ClientFD *Client, std::string Data, int ErrorStatus);
 		~HttpRequest();

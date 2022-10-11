@@ -84,7 +84,7 @@ std::string Response::findReasonPhrase(std::string status) {
 	this->_itr = _reasonPhraseMap.find(status);
 	if (this->_itr != _reasonPhraseMap.end())
 		return this->_itr->second;
-	return NULL; // should be something else, like an error that is always valid?
+	return "200"; //ronald would you agree?
 }
 
 void Response::setMessageBody(std::string MessageBody) {
