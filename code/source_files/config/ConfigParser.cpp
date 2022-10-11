@@ -497,6 +497,26 @@ void ConfigParser::processBoolval(std::string name, bool &target, std::string tr
 	}
 	check_and_skip_semicolon(name);
 }
+void ConfigParser::processBoolval(std::string name, std::string &target,
+								  std::string truthy, std::string falsy) {
+	std::string param = extractParam();
+	if (param.empty()) {
+		throw std::runtime_error("Not enough parameters found for directive \"" + name +
+								 "\" in config file at line " +
+								 Utils::to_string(_linenum));
+	}
+
+	if (param == truthy) {
+		target = param;
+	} else if (param == falsy) {
+		target = param;
+	} else {
+		throw std::runtime_error("Value \"" + param + "\" does not match any of [\"" +
+								 truthy + "\",\"" + falsy + "\"] for directive " + name +
+								 " in config file at line " + Utils::to_string(_linenum));
+	}
+	check_and_skip_semicolon(name);
+}
 
 bool ConfigParser::isValidConfigURI(const std::string &match_str) {
 	if (match_str.empty() || match_str.at(0) != '/') {

@@ -4,7 +4,7 @@ Config::Config() {
 	this->_root        = "/data/html";
 	this->_maxBodySize = 1000000;
 	this->_allowUpload = 0;
-	this->_autoIndex   = 0;
+	this->_autoIndex   = "off";
 }
 
 Config::~Config() {
@@ -31,11 +31,36 @@ bool Config::containsServerName(std::string to_search) {
 }
 
 // getters
-std::string Config::getRoot() const {
+std::string const &Config::getRoot() const {
 	return _root;
 }
 
-std::vector<std::string> Config::getAllow() const {
+std::string const &Config::getRoot(Location *const primary) const {
+	if (primary->getRoot().empty() == false) {
+		return (primary->getRoot());
+	}
+	return (_root);
+}
+
+std::vector<std::string> const &Config::getIndex() const {
+	return _index;
+}
+
+std::vector<std::string> const &Config::getIndex(Location *const primary) const {
+	if (primary->getIndex().size() > 0) {
+		return (primary->getIndex());
+	}
+	return (_index);
+}
+
+std::vector<std::string> const &Config::getAllow() const {
+	return _allow;
+}
+
+std::vector<std::string> const &Config::getAllow(Location *const primary) const {
+	if (primary->getAllow().size() > 0) {
+		return (primary->getAllow());
+	}
 	return _allow;
 }
 
@@ -47,8 +72,46 @@ bool Config::getAllowUpload() const {
 	return _allowUpload;
 }
 
-bool Config::getAutoIndex() const {
+std::string const &Config::getAutoIndex() const {
 	return _autoIndex;
+}
+
+std::string const &Config::getAutoIndex(Location *const primary) const {
+	if (primary->getAutoIndex().empty() == false) {
+		return (primary->getAutoIndex());
+	}
+	return _autoIndex;
+}
+
+int Config::getPathAndOpen(std::string &path, std::string requestUri,
+						   Location *const primary) const {
+	std::string tmp = getRoot(primary);
+	if (requestUri.empty() == false) {
+		*requestUri.rbegin()
+	}
+	std::vector<std::string>                 indexes = getIndex(primary);
+	int                                      fd      = -1;
+
+	std::vector<std::string>::const_iterator it      = indexes.begin();
+	std::vector<std::string>::const_iterator end     = indexes.end();
+
+	while (it != end) {
+		std::string tryPath = tmp + "/" + *it;
+		fd                  = open(tryPath.c_str(), O_RDONLY);
+		if (fd >= 0) {
+			tmp = tryPath;
+			break;
+		}
+		it++;
+	}
+	if (fd >= 0) {
+		path = tmp;
+	}
+	return fd;
+}
+
+std::vector<Location> const &Config::getLocations() {
+	return _locations;
 }
 
 // stream output

@@ -103,7 +103,7 @@ void Request::ParseRequest(std::string BUF) {
 }
 
 bool Request::methodsAllowed(const Request &Req, Config *Conf) {
-	std::vector<std::string>::iterator tryFind;
+	std::vector<std::string>::const_iterator tryFind;
 	/* if both location.getAllow() and Config.getAllow don't exist "default fallback
 	 * rules" apply: all methods are allowed*/
 	Location *Loc = Conf->findLocation(Req);

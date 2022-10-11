@@ -42,18 +42,18 @@ class ConfigParser {
 		uint16_t stringToPort(std::string &string);
 		void     processListen(Config &target);
 		void     processErrorPages(std::map<std::string, std::string> &target);
-		void     processAddParamsToVector(
-				std::string name, std::vector<std::string> &target,
-				std::vector<std::string>::size_type min, bool shouldBeUnique
-			);
+		void processAddParamsToVector(std::string name, std::vector<std::string> &target,
+									  std::vector<std::string>::size_type min,
+									  bool                                shouldBeUnique);
 		void processLocationBlock(std::vector<Location> &target);
 		bool isValidConfigURI(const std::string &match_str);
 		void processRoot(std::string &target);
 		void processIntval(std::string name, int64_t &target);
 		void processReturn(Location &target);
-		void processBoolval(
-			std::string name, bool &target, std::string truthy, std::string falsy
-		);
+		void processBoolval(std::string name, bool &target, std::string truthy,
+							std::string falsy);
+		void processBoolval(std::string name, std::string &target, std::string truthy,
+							std::string falsy);
 
 		void check_and_skip_semicolon(std::string name);
 		void addConfigToPort(uint16_t port, Config &config);

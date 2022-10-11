@@ -1,41 +1,41 @@
 #include "server/Location.hpp"
 
 Location::Location() {
-	_match          = "";
-	_root           = "";
-	_autoIndex      = false;
-	_sortWeight     = 0;
-	_shouldRedirect = false;
-	_redirect       = "";
-	_redirectType   = "";
-	_maxBodySize    = -1;
+	this->_match          = "";
+	this->_root           = "";
+	this->_autoIndex      = "";
+	this->_sortWeight     = 0;
+	this->_shouldRedirect = false;
+	this->_redirect       = "";
+	this->_redirectType   = "";
+	this->_maxBodySize    = -1;
 }
 
 Location::~Location() {
 }
 
 // getters
-std::string Location::getMatch() const {
-	return _match;
+std::string const &Location::getMatch() const {
+	return (_match);
 }
 
-std::string Location::getRoot() const {
-	return _root;
+std::string const &Location::getRoot() const {
+	return (_root);
 }
 
-std::vector<std::string> Location::getAllow() const {
-	return _allow;
+std::vector<std::string> const &Location::getAllow() const {
+	return (_allow);
 }
 
-std::vector<std::string> Location::getIndex() const {
-	return _index;
+std::vector<std::string> const &Location::getIndex() const {
+	return (_index);
 }
 
 std::map<std::string, std::string> Location::getErrorPages() const {
 	return _errorPages;
 }
 
-bool Location::getAutoIndex() const {
+std::string const &Location::getAutoIndex() const {
 	return _autoIndex;
 }
 
@@ -67,9 +67,8 @@ std::ostream &operator<<(std::ostream &os, const Location &location) {
 
 	os << PRINT_ALIGN << "Error pages"
 	   << "(" << location._errorPages.size() << "): [";
-	Utils::print_map<std::string, std::string>(
-		location._errorPages, "\n\t\t\t  {", ": ", "}", ", "
-	);
+	Utils::print_map<std::string, std::string>(location._errorPages, "\n\t\t\t  {", ": ",
+											   "}", ", ");
 	if (location._errorPages.size()) {
 		os << std::endl << "\t\t\t]" << std::endl;
 	} else {

@@ -15,12 +15,12 @@ class Location {
 		friend std::ostream &operator<<(std::ostream &os, const Location &location);
 
 		// getters
-		std::string                        getMatch() const;
-		std::string                        getRoot() const;
-		std::vector<std::string>           getAllow() const;
-		std::vector<std::string>           getIndex() const;
+		std::string const                 &getMatch() const;
+		std::string const                 &getRoot() const;
+		std::vector<std::string> const    &getAllow() const;
+		std::vector<std::string> const    &getIndex() const;
 		std::map<std::string, std::string> getErrorPages() const;
-		bool                               getAutoIndex() const;
+		std::string const                 &getAutoIndex() const;
 
 		int                                getSortWeight() const;
 
@@ -30,7 +30,7 @@ class Location {
 		std::vector<std::string>           _allow;
 		std::vector<std::string>           _index;
 		std::map<std::string, std::string> _errorPages;
-		bool                               _autoIndex;
+		std::string                        _autoIndex;
 		int64_t                            _maxBodySize;
 		std::string                        _redirect;
 		std::string                        _redirectType;
