@@ -18,7 +18,7 @@ class FileFD;
 class RequestInterface;
 class ClientFD : public IPollable {
 	public:
-		enum State { HEADER, BODY, END, SEND };
+		enum State { HEADER, BODY, END };
 		enum Transfer { LENGTH, CHUNKED };
 
 		Request           _request;
