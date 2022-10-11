@@ -159,15 +159,17 @@ void ClientFD::ready() {
 		std::cout << "body size: " << _body.size() << std::endl;
 		// Server::_pfds[_index].fd = INVALID_FD;
 		_request.setBody(_body);
-		// this->_request.printAttributesInRequestClass(); // REMOVE LATER
+		 this->_request.printAttributesInRequestClass(); // REMOVE LATER
 		if (this->_request.getCgi() == true) {
 			this->_requestInterface = new CGIRequest(*this);
 		} else {
 			this->_requestInterface = new HttpRequest(*this);
-			std::cout << "RESPONSE" << _response.getResponse() << std::endl;
+
+//			delete(this->_requestInterface);
 //			initResponse(_index);
+//			_state = SEND;
 		}
-		_state = SEND;
+
 	}
 }
 
@@ -183,6 +185,7 @@ void ClientFD::pollin() {
 		case END:
 			ready();
 		case SEND:
+			std::cout << "send is ready" << std::endl;
 			initResponse(_index);
 	}
 }

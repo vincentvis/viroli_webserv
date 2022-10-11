@@ -130,7 +130,6 @@ void Response::createResponse() {
 	std::cout << "\nRESPONSE: " << this->_response << std::endl;
 	/* Response Ready to Send */
 	this->_respReady = true;
-
 }
 
 bool Response::respReady() const {
