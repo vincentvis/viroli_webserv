@@ -86,9 +86,13 @@ std::string const &Config::getAutoIndex(Location *const primary) const {
 int Config::getPathAndOpen(std::string &path, std::string requestUri,
 						   Location *const primary) const {
 	std::string tmp = getRoot(primary);
-	if (requestUri.empty() == false) {
-		*requestUri.rbegin()
-	}
+
+	// if autoindex == off, don't produce directory listings
+	(void)requestUri;
+	// if this is a directory request
+	// if (requestUri.empty() == false && *requestUri.rbegin() == '/') {
+	// 	;
+	// }
 	std::vector<std::string>                 indexes = getIndex(primary);
 	int                                      fd      = -1;
 

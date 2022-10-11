@@ -208,6 +208,13 @@ bool Request::contentLenAvailable() const {
 	return this->_ContentLengthAvailable;
 }
 
+bool Request::uriIsDir() const {
+	if (_uri.empty() || *_uri.rbegin() == '/') {
+		return (false);
+	}
+	return (true);
+}
+
 /* !REMOVE later, print function used for testing */
 void Request::printAttributesInRequestClass() {
 	std::cout << "--------------------------------------" << std::endl;
