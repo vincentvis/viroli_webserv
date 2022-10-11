@@ -112,7 +112,10 @@ void Server::removePollable(int index) {
 	// std::cout << "size _pfds (pre-removal): " << Server::_pfds.size();
 	// std::cout << "  | size _pollables (pre-removal): " << Server::_pollables.size()
 	// 		  << std::endl;
+
+	std::cout << "fd to be closed: " << Server::_pfds[index].fd << std::endl;
 	close(Server::_pfds[index].fd);
+	std::cout << "fuck" << std::endl;
 	/* delete ClientFD or FileFD */
 	delete Server::_pollables.find(Server::_pfds[index].fd)->second;
 	/* remove ClientFD or FileFD from map */
@@ -138,12 +141,23 @@ void Server::run() {
 			throw(std::string("error on poll()")); // placeholder
 		}
 		/* check events and timeout */
-		for (size_t i = 0; i < Server::_pfds.size(); ++i) {
+		__SIZE_TYPE__ size = Server::_pfds.size();
+		for (size_t i = 0; i < size; ++i) {
+			std::cout << "FDEEEEE: " << Server::_pfds[i].fd << std::endl;
 			it = Server::_pollables.find(Server::_pfds[i].fd);
 			it->second->timeout();
 			if (it->second->isClosed() == true) {
-				Server::removePollable(i);
-				--i;
+				// Server::removePollable(i);
+				std::cout << "A\n";
+				close(Server::_pfds[i].fd);
+				std::cout << "B\n";
+				delete Server::_pollables.find(Server::_pfds[i].fd)->second;
+				std::cout << "C\n";
+				Server::_pfds.erase(Server::_pfds.begin() + i);
+				std::cout << "D`\n";
+
+				i    = 0;
+				size = Server::_pfds.size();
 				continue;
 			}
 			/* find on what file descriptor event occurred */
