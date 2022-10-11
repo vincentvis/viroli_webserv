@@ -39,9 +39,16 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	Client._fileFD->setRequestInterface(this, &Client);
 }
 
+// Statuscode range:
+//	100-199 is classed as Informational.
+//	200-299 is Successful.
+//	300-399 is Redirection.
+//	400-499 is Client error.
+//	500-599 is Server error.
+
 /* called in ClientFD after fileFD is read */
 void HttpRequest::processResponse(ClientFD *Client, std::string Data, int StatusCode) {
-	if (StatusCode == 0) {
+	if (StatusCode > 400) {
 		Client->_response.findAndSetContentType(Client->_request);
 		Client->_response.setMessageBody(Data);
 	}
