@@ -21,7 +21,6 @@ void ClientFD::receive(size_t len) {
 
 	if (_bytes == 0) {
 		// _state = END;
-		close(_fd);
 		_closed = true;
 
 		// Server::_pfds[_index].fd = INVALID_FD; // build response
@@ -208,13 +207,12 @@ void ClientFD::pollout() {
 	/* what to do after all data is sent? */
 	if (_left == 0) {
 		if (_request.getConnectionAvailable() == false) {
-			close(_fd);
 			_closed = true;
 
 			// Server::_pfds[_index].fd = INVALID_FD;
 		} else {
 			std::cout << "send next request" << std::endl;
-			exit(EXIT_SUCCESS);
+			_closed                      = true;
 			Server::_pfds[_index].events = POLLIN;
 		}
 	}
@@ -234,7 +232,6 @@ void ClientFD::timeout() {
 	time(&timeout);
 	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
 		std::cout << "TIMEOUT\n"; // generate a response error. close connection
-		close(_fd);
 		_closed = true;
 		// Server::_pfds[_index].fd = INVALID_FD; // for now
 	}
