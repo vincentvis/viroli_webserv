@@ -152,7 +152,6 @@ void Server::run() {
 					throw(std::string("error on _pollables.find()")); // placholder
 				}
 			}
-<<<<<<< HEAD
 		}
 
 		// TO BE REMOVED WHEN removePollable() has been tested
@@ -160,22 +159,11 @@ void Server::run() {
 		// 	Server::flushPollables();
 		// }
 
-=======
-		}
-
-		if (Server::isFlushable() == true) {
-			Server::flushPollables();
-		}
-
->>>>>>> main
 		/* remove file descriptors that are no longer needed (implement threshold) */
 		// if (_pfds.size() > 1000) {
 		// 	Server::removePoll();
 		// }
-<<<<<<< HEAD
 		// TO BE REMOVED WHEN removePollable() has been tested
-=======
->>>>>>> main
 	}
 }
 
@@ -202,10 +190,6 @@ IPollable *Server::addPollable(Server *server, int32_t fd, Pollable type, int16_
 	}
 }
 
-<<<<<<< HEAD
 // size_t                         Server::_nflush;
-=======
-size_t Server::_nflush;
->>>>>>> main
 std::map<int32_t, IPollable *> Server::_pollables;
 std::vector<struct pollfd>     Server::_pfds;
