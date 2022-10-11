@@ -2,7 +2,7 @@
 
 ClientFD::ClientFD(Server *server, int fd, int index) :
 	_server(server), _state(HEADER), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
-	_total(0), _fd(fd), _index(index), _tick() {
+	_total(0), _fd(fd), _index(index), _tick(), _closed(false) {
 	time(&_tick);
 }
 
@@ -21,7 +21,10 @@ void ClientFD::receive(size_t len) {
 
 	if (_bytes == 0) {
 		// _state = END;
-		Server::_pfds[_index].fd = INVALID_FD; // build response
+		close(_fd);
+		_closed = true;
+
+		// Server::_pfds[_index].fd = INVALID_FD; // build response
 	}
 	if (_bytes > 0) {
 		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
@@ -205,7 +208,10 @@ void ClientFD::pollout() {
 	/* what to do after all data is sent? */
 	if (_left == 0) {
 		if (_request.getConnectionAvailable() == false) {
-			Server::_pfds[_index].fd = INVALID_FD;
+			close(_fd);
+			_closed = true;
+
+			// Server::_pfds[_index].fd = INVALID_FD;
 		} else {
 			std::cout << "send next request" << std::endl;
 			exit(EXIT_SUCCESS);
@@ -228,5 +234,12 @@ void ClientFD::timeout() {
 	time(&timeout);
 	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
 		std::cout << "TIMEOUT\n"; // generate a response error. close connection
+		close(_fd);
+		_closed = true;
+		// Server::_pfds[_index].fd = INVALID_FD; // for now
 	}
+}
+
+bool ClientFD::isClosed() const {
+	return _closed;
 }

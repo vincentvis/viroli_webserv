@@ -2,7 +2,7 @@
 
 FileFD::FileFD(Server *server, int fd, int index) :
 	_state(PROCESS), _server(server), _buffer(BUFFERSIZE, 0), _data(), _bytes(0),
-	_left(0), _total(0), _fd(fd), _index(index), _tick() {
+	_left(0), _total(0), _fd(fd), _index(index), _tick(), _closed(false) {
 	time(&_tick);
 }
 
@@ -51,7 +51,10 @@ void FileFD::pollout() {
 		_left -= _bytes;
 	}
 	if (_left == 0) {
-		Server::_pfds[_index].fd = INVALID_FD;
+		close(_fd);
+		_closed = true;
+
+		// Server::_pfds[_index].fd = INVALID_FD;
 		// file made, ready for response
 	}
 }
@@ -69,6 +72,11 @@ void FileFD::timeout() {
 
 	time(&timeout);
 	if (difftime(timeout, _tick) > 10) {
-		std::cout << "TIMEOUT\n";
+		std::cout << "TIMEOUT\n"; // will have to send a response
+		_closed = true;           // this must be removed
 	}
+}
+
+bool FileFD::isClosed() const {
+	return _closed;
 }

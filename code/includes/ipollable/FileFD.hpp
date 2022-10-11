@@ -20,6 +20,7 @@ class FileFD : public IPollable {
 		int               _fd;
 		int               _index;
 		time_t            _tick;
+		bool              _closed;
 
 
 		FileFD(Server *server, int fd, int index);
@@ -37,4 +38,5 @@ class FileFD : public IPollable {
 		void              setRequestInterface(RequestInterface *req, ClientFD *Client);
 		RequestInterface *_requestInterface;
 		ClientFD         *_client;
+		bool              isClosed() const;
 };

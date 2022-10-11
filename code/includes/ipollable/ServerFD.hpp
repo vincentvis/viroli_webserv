@@ -9,6 +9,7 @@ class ServerFD : public IPollable {
 		Server *_server;
 		int     _fd;
 		int     _index;
+		bool    _closed;
 
 		ServerFD(Server *server, int fd, int index);
 		~ServerFD();
@@ -18,4 +19,5 @@ class ServerFD : public IPollable {
 		int     getFileDescriptor() const;
 		Server *getServer() const;
 		void    timeout();
+		bool    isClosed() const;
 };

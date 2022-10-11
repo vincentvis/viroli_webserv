@@ -15,6 +15,7 @@ class IPollable {
 		virtual void    pollin()                  = 0;
 		virtual void    pollout()                 = 0;
 		virtual void    timeout()                 = 0;
+		virtual bool    isClosed() const          = 0;
 		virtual int     getFileDescriptor() const = 0;
 		virtual Server *getServer() const         = 0;
 };

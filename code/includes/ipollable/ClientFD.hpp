@@ -25,8 +25,8 @@ class ClientFD : public IPollable {
 		RequestInterface *_requestInterface;
 		Config           *_config;
 		Location         *_location;
-
 		Server           *_server;
+		FileFD           *_fileFD;
 		State             _state;
 		std::vector<char> _buffer;
 		std::string       _data;
@@ -37,6 +37,7 @@ class ClientFD : public IPollable {
 		int               _fd;
 		int               _index;
 		time_t            _tick;
+		bool              _closed;
 
 		ClientFD(Server *server, int fd, int index);
 		~ClientFD();
@@ -56,4 +57,5 @@ class ClientFD : public IPollable {
 		void    sendResponse(int index);
 		int32_t getRemainderBytes() const;
 		void    timeout();
+		bool    isClosed() const;
 };
