@@ -2,13 +2,15 @@
 
 FileFD::FileFD(Server *server, int fd, int index) :
 	_state(PROCESS), _server(server), _buffer(BUFFERSIZE, 0), _data(), _bytes(0),
-	_left(0), _total(0), _fd(fd), _index(index) {
+	_left(0), _total(0), _fd(fd), _index(index), _tick() {
+	time(&_tick);
 }
 
 FileFD::~FileFD() {
 }
 
 void FileFD::pollin() {
+	time(&_tick);
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
 
 	if (_bytes == 0) {
@@ -31,6 +33,7 @@ void FileFD::setData(std::string data) {
 }
 
 void FileFD::pollout() {
+	time(&_tick);
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
 	_bytes = write(_fd, _buffer.data(), getRemainderBytes());
 
@@ -50,4 +53,13 @@ int FileFD::getFileDescriptor() const {
 
 Server *FileFD::getServer() const {
 	return _server;
+}
+
+void FileFD::timeout() {
+	time_t timeout;
+
+	time(&timeout);
+	if (difftime(timeout, _tick) > 10) {
+		std::cout << "TIMEOUT\n";
+	}
 }

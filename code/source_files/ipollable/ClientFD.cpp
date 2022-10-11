@@ -2,7 +2,8 @@
 
 ClientFD::ClientFD(Server *server, int fd, int index) :
 	_server(server), _state(HEADER), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
-	_total(0), _fd(fd), _index(index) {
+	_total(0), _fd(fd), _index(index), _tick() {
+	time(&_tick);
 }
 
 ClientFD::~ClientFD() {
@@ -162,13 +163,14 @@ void ClientFD::ready() {
 			this->_requestInterface = new CGIRequest(*this);
 		} else {
 			this->_requestInterface = new HttpRequest(*this);
-			initResponse(_index);
+			// initResponse(_index);
 		}
 	}
 }
 
 /* receive data */
 void ClientFD::pollin() {
+	time(&_tick);
 	receive(BUFFERSIZE);
 
 	switch (_state) {
@@ -184,6 +186,7 @@ void ClientFD::pollin() {
 /* send data */
 /* need to know connection status (keep-alive|close) */
 void ClientFD::pollout() {
+	time(&_tick);
 	/* make sure to not go out of bounds with the buffer */
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
 	_bytes = send(_fd, _buffer.data(), getRemainderBytes(), 0);
@@ -195,11 +198,13 @@ void ClientFD::pollout() {
 
 	/* what to do after all data is sent? */
 	if (_left == 0) {
-		/* if connection: keep-alive */
-		// Server::_pfds[index].event = POLLIN
-		/* if connection: close */
-		// set fd to -1 to ignore further polling and flush later.
-		Server::_pfds[_index].fd = INVALID_FD;
+		if (_request.getConnectionAvailable() == false) {
+			Server::_pfds[_index].fd = INVALID_FD;
+		} else {
+			std::cout << "send next request" << std::endl;
+			exit(EXIT_SUCCESS);
+			Server::_pfds[_index].events = POLLIN;
+		}
 	}
 }
 
@@ -209,4 +214,13 @@ int ClientFD::getFileDescriptor() const {
 
 Server *ClientFD::getServer() const {
 	return _server;
+}
+
+void ClientFD::timeout() {
+	time_t timeout;
+
+	time(&timeout);
+	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
+		std::cout << "TIMEOUT\n"; // generate a response error. close connection
+	}
 }

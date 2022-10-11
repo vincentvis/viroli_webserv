@@ -17,4 +17,5 @@ class ServerFD : public IPollable {
 		void    pollout();
 		int     getFileDescriptor() const;
 		Server *getServer() const;
+		void    timeout();
 };

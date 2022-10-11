@@ -116,6 +116,7 @@ void Server::run() {
 		}
 		/* check events and timeout */
 		for (size_t i = 0; i < Server::_pfds.size(); ++i) {
+			Server::_pollables.find(Server::_pfds[i].fd)->second->timeout();
 			/* find on what file descriptor event occurred */
 			if (Server::_pfds[i].revents & (POLLIN | POLLOUT)) {
 				it = Server::_pollables.find(Server::_pfds[i].fd);

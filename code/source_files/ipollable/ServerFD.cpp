@@ -45,3 +45,6 @@ int ServerFD::getFileDescriptor() const {
 Server *ServerFD::getServer() const {
 	return _server;
 }
+
+void ServerFD::timeout() {
+}

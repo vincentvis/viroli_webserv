@@ -9,6 +9,7 @@
 
 #include <arpa/inet.h>
 #include <cstring>
+#include <ctime>
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>

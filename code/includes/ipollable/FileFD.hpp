@@ -18,6 +18,8 @@ class FileFD : public IPollable {
 		int               _total;
 		int               _fd;
 		int               _index;
+		time_t            _tick;
+
 
 		FileFD(Server *server, int fd, int index);
 		~FileFD();
@@ -30,4 +32,5 @@ class FileFD : public IPollable {
 		void    setData(std::string data);
 		Server *getServer() const;
 		int32_t getRemainderBytes() const;
+		void    timeout();
 };
