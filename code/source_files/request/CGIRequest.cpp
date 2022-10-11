@@ -34,15 +34,13 @@ void CGIRequest::DELETERequest(ClientFD &Client) {
 	std::cout << "this is a DELETE CGI Request" << std::endl; // REMOVE LATER
 }
 
-void CGIRequest::processResponse(ClientFD *Client, std::string Data, int ErrorStatus){
-	if (ErrorStatus != 0) {
-		std::cout << "create error response" << std::endl;
-	}
-	else{
+void CGIRequest::processResponse(ClientFD *Client, std::string Data, int StatusCode) {
+	if (StatusCode == 0){
+		Client->_response.findAndSetContentType(Client->_request);
 		Client->_response.setMessageBody(Data);
-		Client->_response.initResponse("200", Client->_config, Client->_request);
-		Client->_response.createResponse();
 	}
+	Client->_response.initResponse("200", Client->_config, Client->_request);
+	Client->_response.createResponse();
 	Client->sendResponse(Client->_index);
 }
 
