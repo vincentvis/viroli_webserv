@@ -179,6 +179,10 @@ std::string Request::getUri() const {
 	return this->_uri;
 }
 
+void Request::setUri(std::string newUri) {
+	this->_uri = newUri;
+}
+
 std::string Request::getHTTPVersion() const {
 	return this->_HTTPVersion;
 }

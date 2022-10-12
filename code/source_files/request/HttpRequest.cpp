@@ -34,10 +34,17 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		if (Client._config->getAutoIndex(Client._location) == "on") {
 			try {
 				Autoindex autoindex(path);
-				processResponse(&Client, autoindex.getHtml(), 0);
+				Client._response.setContentType("text/html");
+				processResponse(&Client, autoindex.getHtml(), "200");
 				return;
 			} catch (const Utils::AutoindexException &e) {
-				std::cerr << "Create 404 error response" << std::endl;
+				processResponse(&Client, "", "404");
+				return;
+			} catch (const std::exception &e) {
+				// all other exceptions?
+				// but what to do?
+				// internal server error for now
+				processResponse(&Client, "", "500");
 				return;
 			}
 		}
@@ -54,6 +61,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 			fd  = open(tmp.c_str(), O_RDONLY);
 			if (fd > 0) {
 				path = tmp;
+				Client._request.setUri(Client._request.getUri() + *it);
 				break;
 			}
 			fd = -1;

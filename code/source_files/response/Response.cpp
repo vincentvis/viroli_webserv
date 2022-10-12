@@ -2,6 +2,7 @@
 
 std::map<std::string, std::string> Response::_reasonPhraseMap;
 
+// clang-format off
 void                               Response::initReasonPhraseMap() {
     _reasonPhraseMap["100"] = "Continue";
     _reasonPhraseMap["101"] = "Switching Protocols";
@@ -72,6 +73,7 @@ void                               Response::initReasonPhraseMap() {
     _reasonPhraseMap["525"] = "SSL Handshake Failed";
     _reasonPhraseMap["599"] = "Network Connect Timeout Error";
 }
+// clang-format on
 
 Response::Response() {
 	if (_reasonPhraseMap.size() == 0) {
@@ -142,15 +144,20 @@ std::string Response::getContentType() const {
 }
 
 void Response::setContentType(std::string ContentType) {
-	this->_contentType = ContentType;
+	this->_contentType      = ContentType;
+	this->_contentTypeIsSet = true;
 }
 
 void Response::findAndSetContentType(const Request &Req) {
-	if (Req.getUri().find(".html", Req.getUri().length() - 5) != std::string::npos) {
+	if (this->_contentTypeIsSet) {
+		return;
+	}
+	if (Utils::ends_with(Req.getUri(), ".html")) {
 		this->_contentType = "text/html";
-	} else if (Req.getUri().find(".jpg", Req.getUri().length() - 4) != std::string::npos)
-	{
+	} else if (Utils::ends_with(Req.getUri(), ".jpg")) {
 		this->_contentType = "media type";
+	} else if (Utils::ends_with(Req.getUri(), ".css")) {
+		this->_contentType = "text/css";
 	} else {
 		this->_contentType = "text/plain";
 	}

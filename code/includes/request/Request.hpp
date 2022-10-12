@@ -45,6 +45,7 @@ class Request {
 		std::string                        getConnectionInfo() const;
 		std::string                        getMethod() const;
 		std::string                        getUri() const;
+		void                               setUri(std::string newUri);
 		std::string                        getHTTPVersion() const;
 		std::string                        getBody() const;
 		std::string                        getQuery() const;

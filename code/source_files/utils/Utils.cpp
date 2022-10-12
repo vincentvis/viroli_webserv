@@ -81,4 +81,11 @@ bool starts_with(const std::string &source, const std::string &prefix) {
 	return (source.find(prefix) == 0);
 }
 
+bool ends_with(const std::string &source, const std::string &match) {
+	if (match.size() == 0 || source.size() == 0 || match.length() > source.length()) {
+		return (false);
+	}
+	return (std::equal(match.rbegin(), match.rend(), source.rbegin()));
+}
+
 } // namespace Utils
