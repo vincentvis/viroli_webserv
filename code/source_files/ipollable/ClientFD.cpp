@@ -20,10 +20,8 @@ void ClientFD::receive(size_t len) {
 	// std::cout << "bytes read: " << _bytes << std::endl;
 
 	if (_bytes == 0) {
-		// _state = END;
-		_closed = true;
-
-		// Server::_pfds[_index].fd = INVALID_FD; // build response
+		_state = END;
+		// _closed = true;
 	}
 	if (_bytes > 0) {
 		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
@@ -165,7 +163,6 @@ void ClientFD::ready() {
 	if (_state == END) {
 		// std::cout << "\n-------------\nbody: \n" << _body << "\n-------------\n";
 		std::cout << "body size: " << _body.size() << std::endl;
-		// Server::_pfds[_index].fd = INVALID_FD;
 		_request.setBody(_body);
 		// this->_request.printAttributesInRequestClass(); // REMOVE LATER
 		if (this->_request.getCgi() == true) {
@@ -208,8 +205,6 @@ void ClientFD::pollout() {
 	if (_left == 0) {
 		if (_request.getConnectionAvailable() == false) {
 			_closed = true;
-
-			// Server::_pfds[_index].fd = INVALID_FD;
 		} else {
 			std::cout << "send next request" << std::endl;
 			_closed                      = true;
@@ -233,7 +228,6 @@ void ClientFD::timeout() {
 	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
 		std::cout << "TIMEOUT\n"; // generate a response error. close connection
 		_closed = true;
-		// Server::_pfds[_index].fd = INVALID_FD; // for now
 	}
 }
 

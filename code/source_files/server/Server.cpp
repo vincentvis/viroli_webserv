@@ -1,4 +1,5 @@
 #include "server/Server.hpp"
+#include <cassert>
 
 Server::Server() {
 	this->_port = 0;
@@ -132,6 +133,7 @@ void Server::removePollable(int index) {
 	// 		  << std::endl;
 }
 
+/* events var might be not needed */
 void Server::run() {
 	std::map<int32_t, IPollable *>::iterator it;
 	int                                      events = 0;
@@ -141,51 +143,30 @@ void Server::run() {
 			throw(std::string("error on poll()")); // placeholder
 		}
 		/* check events and timeout */
-		__SIZE_TYPE__ size = Server::_pfds.size();
-		for (size_t i = 0; i < size; ++i) {
-			std::cout << "FDEEEEE: " << Server::_pfds[i].fd << std::endl;
+		for (size_t i = 0; i < Server::_pfds.size(); ++i) {
 			it = Server::_pollables.find(Server::_pfds[i].fd);
-			it->second->timeout();
-			if (it->second->isClosed() == true) {
-				// Server::removePollable(i);
-				std::cout << "A\n";
-				close(Server::_pfds[i].fd);
-				std::cout << "B\n";
-				delete Server::_pollables.find(Server::_pfds[i].fd)->second;
-				std::cout << "C\n";
-				Server::_pfds.erase(Server::_pfds.begin() + i);
-				std::cout << "D`\n";
-
-				i    = 0;
-				size = Server::_pfds.size();
-				continue;
-			}
-			/* find on what file descriptor event occurred */
-			if (Server::_pfds[i].revents & (POLLIN | POLLOUT)) {
-				/* file descriptor exists */
-				if (it != _pollables.end()) {
-					if (Server::_pfds[i].revents & POLLIN) {
-						it->second->pollin();
-					} else if (Server::_pfds[i].revents & POLLOUT) {
-						it->second->pollout();
+			assert(it != Server::_pollables.end());
+			assert(it->second->getFileDescriptor() != -1);
+			if (it != _pollables.end()) {
+				// std::cout << "pollable FD: " << it->second->getFileDescriptor()
+				// 		  << std::endl;
+				if (it->second->isClosed() == false) {
+					it->second->timeout();
+					/* find on what file descriptor event occurred */
+					if (Server::_pfds[i].revents & (POLLIN | POLLOUT)) {
+						/* file descriptor exists */
+						if (Server::_pfds[i].revents & POLLIN) {
+							it->second->pollin();
+						} else if (Server::_pfds[i].revents & POLLOUT) {
+							it->second->pollout();
+						}
 					}
-					/* file descriptor doesn't exist */
-				} else {
-					throw(std::string("error on _pollables.find()")); // placholder
 				}
+				/* file descriptor pollable doesn't exist */
+			} else {
+				throw(std::string("error on _pollables.find()")); // placholder
 			}
 		}
-
-		// TO BE REMOVED WHEN removePollable() has been tested
-		// if (Server::isFlushable() == true) {
-		// 	Server::flushPollables();
-		// }
-
-		/* remove file descriptors that are no longer needed (implement threshold) */
-		// if (_pfds.size() > 1000) {
-		// 	Server::removePoll();
-		// }
-		// TO BE REMOVED WHEN removePollable() has been tested
 	}
 }
 

@@ -14,7 +14,6 @@ void FileFD::pollin() {
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
 
 	if (_bytes == 0) {
-		// Server::_pfds[_index].fd = INVALID_FD;
 		_closed = true;
 		_requestInterface->processResponse(_client, _data, 0);
 		_state = END;
@@ -55,7 +54,6 @@ void FileFD::pollout() {
 		// close(_fd);
 		_closed = true;
 
-		// Server::_pfds[_index].fd = INVALID_FD;
 		// file made, ready for response
 	}
 }
