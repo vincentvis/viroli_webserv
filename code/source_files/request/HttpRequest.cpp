@@ -45,16 +45,27 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	}
 }
 
+// Statuscode range:
+//	100-199 is classed as Informational.
+//	200-299 is Successful.
+//	300-399 is Redirection.
+//	400-499 is Client error.
+//	500-599 is Server error.
+
 /* called in ClientFD after fileFD is read */
-void HttpRequest::processResponse(ClientFD *Client, std::string Data, int ErrorStatus) {
-	if (ErrorStatus != 0) {
-		std::cout << "create error page response" << std::endl;
-	} else {
+void HttpRequest::processResponse(ClientFD *Client, std::string messageBody,
+								  std::string StatusCode) {
+	/* check errorpages */
+	if (StatusCode.at(0) < '4') {
 		Client->_response.findAndSetContentType(Client->_request);
-		Client->_response.setMessageBody(Data);
-		Client->_response.initResponse("200", Client->_config, Client->_request);
-		Client->_response.createResponse();
+		Client->_response.setMessageBody(messageBody);
+	} else {
+		Client->_response.setContentType("text/html");
+		Client->_response.generateErrorPage(StatusCode);
 	}
+	/* generate response */
+	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);
+	Client->_response.createResponse(); // thinking about merging those two
 	Client->sendResponse(Client->_index);
 }
 

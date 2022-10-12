@@ -3,74 +3,74 @@
 std::map<std::string, std::string> Response::_reasonPhraseMap;
 
 void                               Response::initReasonPhraseMap() {
-								  _reasonPhraseMap["100"] = "Continue";
-								  _reasonPhraseMap["101"] = "Switching Protocols";
-								  _reasonPhraseMap["102"] = "Processing";
-								  _reasonPhraseMap["200"] = "OK";
-								  _reasonPhraseMap["201"] = "Created";
-								  _reasonPhraseMap["202"] = "Accepted";
-								  _reasonPhraseMap["203"] = "Non-Authoritative Information";
-								  _reasonPhraseMap["204"] = "No Content";
-								  _reasonPhraseMap["206"] = "Partial Content";
-								  _reasonPhraseMap["207"] = "Multi-Status";
-								  _reasonPhraseMap["300"] = "Multiple Choices";
-								  _reasonPhraseMap["301"] = "Moved Permanently";
-								  _reasonPhraseMap["302"] = "Found";
-								  _reasonPhraseMap["303"] = "See Other";
-								  _reasonPhraseMap["304"] = "Not Modified";
-								  _reasonPhraseMap["305"] = "Use Proxy";
-								  _reasonPhraseMap["307"] = "Temporary Redirect";
-								  _reasonPhraseMap["308"] = "Permanent Redirect";
-								  _reasonPhraseMap["400"] = "Bad Request";
-								  _reasonPhraseMap["401"] = "Unauthorized";
-								  _reasonPhraseMap["402"] = "Payment Required";
-								  _reasonPhraseMap["403"] = "Forbidden";
-								  _reasonPhraseMap["404"] = "Not Found";
-								  _reasonPhraseMap["405"] = "Method Not Allowed";
-								  _reasonPhraseMap["406"] = "Not Acceptable";
-								  _reasonPhraseMap["407"] = "Proxy Authentication Required";
-								  _reasonPhraseMap["408"] = "Request Timeout";
-								  _reasonPhraseMap["409"] = "Conflict";
-								  _reasonPhraseMap["410"] = "Gone";
-								  _reasonPhraseMap["411"] = "Length Required";
-								  _reasonPhraseMap["412"] = "Precondition Failed";
-								  _reasonPhraseMap["413"] = "Payload Too Large";
-								  _reasonPhraseMap["414"] = "Request-URI Too Long";
-								  _reasonPhraseMap["415"] = "Unsupported Media Type";
-								  _reasonPhraseMap["416"] = "Request Range Not Satisfiable";
-								  _reasonPhraseMap["417"] = "Expectation Failed";
-								  _reasonPhraseMap["418"] = "I’m a teapot";
-								  _reasonPhraseMap["420"] = "Enhance Your Calm";
-								  _reasonPhraseMap["421"] = "Misdirected Request";
-								  _reasonPhraseMap["422"] = "Unprocessable Entity";
-								  _reasonPhraseMap["423"] = "Locked";
-								  _reasonPhraseMap["424"] = "Failed Dependency";
-								  _reasonPhraseMap["425"] = "Too Early";
-								  _reasonPhraseMap["426"] = "Upgrade Required";
-								  _reasonPhraseMap["429"] = "Too Many Requests";
-								  _reasonPhraseMap["431"] = "Request Header Fields Too Large";
-								  _reasonPhraseMap["444"] = "No Response";
-								  _reasonPhraseMap["450"] = "Blocked by Windows Parental Controls";
-								  _reasonPhraseMap["451"] = "Unavailable For Legal Reasons";
-								  _reasonPhraseMap["497"] = "HTTP Request Sent to HTTPS Port";
-								  _reasonPhraseMap["498"] = "Token expired/invalid";
-								  _reasonPhraseMap["499"] = "Client Closed Request";
-								  _reasonPhraseMap["500"] = "Internal Server Error";
-								  _reasonPhraseMap["501"] = "Not Implemented";
-								  _reasonPhraseMap["502"] = "Bad Gateway";
-								  _reasonPhraseMap["503"] = "Service Unavailable";
-								  _reasonPhraseMap["504"] = "Gateway Timeout";
-								  _reasonPhraseMap["506"] = "Variant Also Negotiates";
-								  _reasonPhraseMap["507"] = "Insufficient Storage";
-								  _reasonPhraseMap["508"] = "Loop Detected";
-								  _reasonPhraseMap["509"] = "Bandwidth Limit Exceeded";
-								  _reasonPhraseMap["510"] = "Not Extended";
-								  _reasonPhraseMap["511"] = "Network Authentication Required";
-								  _reasonPhraseMap["521"] = "Web Server Is Down";
-								  _reasonPhraseMap["522"] = "Connection Timed Out";
-								  _reasonPhraseMap["523"] = "Origin Is Unreachable";
-								  _reasonPhraseMap["525"] = "SSL Handshake Failed";
-								  _reasonPhraseMap["599"] = "Network Connect Timeout Error";
+    _reasonPhraseMap["100"] = "Continue";
+    _reasonPhraseMap["101"] = "Switching Protocols";
+    _reasonPhraseMap["102"] = "Processing";
+    _reasonPhraseMap["200"] = "OK";
+    _reasonPhraseMap["201"] = "Created";
+    _reasonPhraseMap["202"] = "Accepted";
+    _reasonPhraseMap["203"] = "Non-Authoritative Information";
+    _reasonPhraseMap["204"] = "No Content";
+    _reasonPhraseMap["206"] = "Partial Content";
+    _reasonPhraseMap["207"] = "Multi-Status";
+    _reasonPhraseMap["300"] = "Multiple Choices";
+    _reasonPhraseMap["301"] = "Moved Permanently";
+    _reasonPhraseMap["302"] = "Found";
+    _reasonPhraseMap["303"] = "See Other";
+    _reasonPhraseMap["304"] = "Not Modified";
+    _reasonPhraseMap["305"] = "Use Proxy";
+    _reasonPhraseMap["307"] = "Temporary Redirect";
+    _reasonPhraseMap["308"] = "Permanent Redirect";
+    _reasonPhraseMap["400"] = "Bad Request";
+    _reasonPhraseMap["401"] = "Unauthorized";
+    _reasonPhraseMap["402"] = "Payment Required";
+    _reasonPhraseMap["403"] = "Forbidden";
+    _reasonPhraseMap["404"] = "Not Found";
+    _reasonPhraseMap["405"] = "Method Not Allowed";
+    _reasonPhraseMap["406"] = "Not Acceptable";
+    _reasonPhraseMap["407"] = "Proxy Authentication Required";
+    _reasonPhraseMap["408"] = "Request Timeout";
+    _reasonPhraseMap["409"] = "Conflict";
+    _reasonPhraseMap["410"] = "Gone";
+    _reasonPhraseMap["411"] = "Length Required";
+    _reasonPhraseMap["412"] = "Precondition Failed";
+    _reasonPhraseMap["413"] = "Payload Too Large";
+    _reasonPhraseMap["414"] = "Request-URI Too Long";
+    _reasonPhraseMap["415"] = "Unsupported Media Type";
+    _reasonPhraseMap["416"] = "Request Range Not Satisfiable";
+    _reasonPhraseMap["417"] = "Expectation Failed";
+    _reasonPhraseMap["418"] = "I’m a teapot";
+    _reasonPhraseMap["420"] = "Enhance Your Calm";
+    _reasonPhraseMap["421"] = "Misdirected Request";
+    _reasonPhraseMap["422"] = "Unprocessable Entity";
+    _reasonPhraseMap["423"] = "Locked";
+    _reasonPhraseMap["424"] = "Failed Dependency";
+    _reasonPhraseMap["425"] = "Too Early";
+    _reasonPhraseMap["426"] = "Upgrade Required";
+    _reasonPhraseMap["429"] = "Too Many Requests";
+    _reasonPhraseMap["431"] = "Request Header Fields Too Large";
+    _reasonPhraseMap["444"] = "No Response";
+    _reasonPhraseMap["450"] = "Blocked by Windows Parental Controls";
+    _reasonPhraseMap["451"] = "Unavailable For Legal Reasons";
+    _reasonPhraseMap["497"] = "HTTP Request Sent to HTTPS Port";
+    _reasonPhraseMap["498"] = "Token expired/invalid";
+    _reasonPhraseMap["499"] = "Client Closed Request";
+    _reasonPhraseMap["500"] = "Internal Server Error";
+    _reasonPhraseMap["501"] = "Not Implemented";
+    _reasonPhraseMap["502"] = "Bad Gateway";
+    _reasonPhraseMap["503"] = "Service Unavailable";
+    _reasonPhraseMap["504"] = "Gateway Timeout";
+    _reasonPhraseMap["506"] = "Variant Also Negotiates";
+    _reasonPhraseMap["507"] = "Insufficient Storage";
+    _reasonPhraseMap["508"] = "Loop Detected";
+    _reasonPhraseMap["509"] = "Bandwidth Limit Exceeded";
+    _reasonPhraseMap["510"] = "Not Extended";
+    _reasonPhraseMap["511"] = "Network Authentication Required";
+    _reasonPhraseMap["521"] = "Web Server Is Down";
+    _reasonPhraseMap["522"] = "Connection Timed Out";
+    _reasonPhraseMap["523"] = "Origin Is Unreachable";
+    _reasonPhraseMap["525"] = "SSL Handshake Failed";
+    _reasonPhraseMap["599"] = "Network Connect Timeout Error";
 }
 
 Response::Response() {
@@ -84,7 +84,7 @@ std::string Response::findReasonPhrase(std::string status) {
 	this->_itr = _reasonPhraseMap.find(status);
 	if (this->_itr != _reasonPhraseMap.end())
 		return this->_itr->second;
-	return "200"; //ronald would you agree?
+	return "200"; // ronald would you agree?
 }
 
 void Response::setMessageBody(std::string MessageBody) {
@@ -110,8 +110,7 @@ void Response::initResponse(std::string status, Config *Conf, const Request &Req
 		this->_connection = "Connection: Close"; // is this correct?
 
 	//	/* Message Body */
-	//	if (this->_messageBody.empty) // not sure if we'll be using this
-	//		this->_messageBody = "this is a test";
+	//		this->_messageBody = already set
 
 	this->_contentLen =
 		"Content-Length: " + Utils::to_string(this->_messageBody.length());
@@ -146,7 +145,7 @@ void Response::setContentType(std::string ContentType) {
 	this->_contentType = ContentType;
 }
 
- void Response::findAndSetContentType(const Request &Req) {
+void Response::findAndSetContentType(const Request &Req) {
 	if (Req.getUri().find(".html", Req.getUri().length() - 5) != std::string::npos) {
 		this->_contentType = "text/html";
 	} else if (Req.getUri().find(".jpg", Req.getUri().length() - 4) != std::string::npos)
@@ -155,7 +154,7 @@ void Response::setContentType(std::string ContentType) {
 	} else {
 		this->_contentType = "text/plain";
 	}
- }
+}
 
 void Response::generateErrorPage(std::string page) {
 	if (_reasonPhraseMap.size() == 0) {
