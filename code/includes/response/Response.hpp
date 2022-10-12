@@ -44,7 +44,7 @@ class Response {
 		static std::map<std::string, std::string>    _reasonPhraseMap;
 		std::map<std::string, std::string>::iterator _itr;
 		static void                                  initReasonPhraseMap(void);
-
+		void                                         generateErrorPage(std::string page);
 
 	public:
 		Response();
@@ -61,7 +61,6 @@ class Response {
 		void        setMessageBody(std::string MessageBody);
 		void        setContentType(std::string ContentType);
 		void        findAndSetContentType(const Request &Req);
-		void        generateErrorPage(std::string page);
 
 		//		void setStatusCode(std::string newRes); //needed later on or not?
 		//		void setReasonPhrase(std::string RP);

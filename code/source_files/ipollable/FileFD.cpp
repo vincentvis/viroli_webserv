@@ -13,7 +13,7 @@ void FileFD::pollin() {
 
 	if (_bytes == 0) {
 		Server::_pfds[_index].fd = INVALID_FD;
-		_requestInterface->processResponse(_client, _data, "200");
+		_requestInterface->processResponse(_client, _data, 0);
 		_state = END;
 		// body ready initialize it with response
 	}
