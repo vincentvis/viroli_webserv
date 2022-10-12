@@ -194,7 +194,11 @@ void ClientFD::pollout() {
 	time(&_tick);
 	/* make sure to not go out of bounds with the buffer */
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
-	_bytes = send(_fd, _buffer.data(), getRemainderBytes(), 0);
+
+	_bytes = send(_fd, &_buffer[0], getRemainderBytes(), 0);
+	if (_bytes < 0) {
+		std::cout << "sjot\n";
+	}
 
 	if (_bytes > 0) {
 		_total += _bytes;

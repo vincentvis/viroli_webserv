@@ -1,5 +1,6 @@
 #include "server/Server.hpp"
 #include <cassert>
+#include <csignal>
 
 Server::Server() {
 	this->_port = 0;
@@ -110,33 +111,40 @@ int32_t Server::getFileDescriptor() const {
 // TO BE REMOVED WHEN removePollable() has been tested
 
 void Server::removePollable(int index) {
-	// std::cout << "size _pfds (pre-removal): " << Server::_pfds.size();
-	// std::cout << "  | size _pollables (pre-removal): " << Server::_pollables.size()
-	// 		  << std::endl;
-
+	std::cout << "size _pfds (pre-removal): " << Server::_pfds.size();
+	std::cout << "  | size _pollables (pre-removal): " << Server::_pollables.size()
+			  << std::endl;
 	std::cout << "fd to be closed: " << Server::_pfds[index].fd << std::endl;
+
+
 	close(Server::_pfds[index].fd);
-	std::cout << "fuck" << std::endl;
+
 	/* delete ClientFD or FileFD */
 	delete Server::_pollables.find(Server::_pfds[index].fd)->second;
+
 	/* remove ClientFD or FileFD from map */
 	Server::_pollables.erase(Server::_pfds[index].fd);
+
 	/* swap pollable to be removed at index with last element in vector */
 	if (Server::_pfds.size() > 1 &&
 		(Server::_pfds.at(index).fd != Server::_pfds.back().fd)) {
 		std::swap(Server::_pfds.at(index), Server::_pfds.back());
 	}
+
 	/* remove last element in vector */
 	Server::_pfds.pop_back();
-	// std::cout << "size _pfds (post-removal): " << Server::_pfds.size();
-	// std::cout << " | size _pollables (post-removal): " << Server::_pollables.size()
-	// 		  << std::endl;
+
+	std::cout << "size _pfds (post-removal): " << Server::_pfds.size();
+	std::cout << " | size _pollables (post-removal): " << Server::_pollables.size()
+			  << std::endl;
+	std::cout << "succesful removal\n";
 }
 
 /* events var might be not needed */
 void Server::run() {
 	std::map<int32_t, IPollable *>::iterator it;
 	int                                      events = 0;
+	signal(SIGPIPE, SIG_IGN);
 
 	while (true) {
 		if ((events = poll(Server::_pfds.data(), Server::_pfds.size(), 0)) < 0) {
@@ -147,19 +155,20 @@ void Server::run() {
 			it = Server::_pollables.find(Server::_pfds[i].fd);
 			assert(it != Server::_pollables.end());
 			assert(it->second->getFileDescriptor() != -1);
+			it->second->timeout();
+			if (it->second->isClosed() == true) {
+				removePollable(i);
+				--i;
+				continue;
+			}
 			if (it != _pollables.end()) {
-				// std::cout << "pollable FD: " << it->second->getFileDescriptor()
-				// 		  << std::endl;
-				if (it->second->isClosed() == false) {
-					it->second->timeout();
-					/* find on what file descriptor event occurred */
-					if (Server::_pfds[i].revents & (POLLIN | POLLOUT)) {
-						/* file descriptor exists */
-						if (Server::_pfds[i].revents & POLLIN) {
-							it->second->pollin();
-						} else if (Server::_pfds[i].revents & POLLOUT) {
-							it->second->pollout();
-						}
+				/* find on what file descriptor event occurred */
+				if (Server::_pfds[i].revents & (POLLIN | POLLOUT)) {
+					/* file descriptor exists */
+					if (Server::_pfds[i].revents & POLLIN) {
+						it->second->pollin();
+					} else if (Server::_pfds[i].revents & POLLOUT) {
+						it->second->pollout();
 					}
 				}
 				/* file descriptor pollable doesn't exist */

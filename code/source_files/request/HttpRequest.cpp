@@ -34,8 +34,8 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	int fd = open(uri.c_str(), O_RDONLY);
 	if (fd == -1) {
 		std::cout << fd << ": FD ERROR" << std::endl; // throw error
-		std::cout << uri.c_str() << std::endl;
-		std::cout << strerror(errno) << std::endl;
+		std::cout << uri.c_str() << std::endl;        // tmp for debugging
+		std::cout << strerror(errno) << std::endl;    // tmp for debugging
 
 	} else {
 		std::cout << "file opened: " << uri.c_str() << std::endl;

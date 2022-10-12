@@ -24,11 +24,8 @@
 #include <utility>
 #include <vector>
 
-#define BUFFERSIZE     1  // tmp
-#define MAXCONNECTIONS 10 // tmp
-
-// https://stackoverflow.com/questions/13248495/elegant-way-to-add-remove-descriptors-to-from-poll
-// threshold could be a hardcode number
+#define BUFFERSIZE     100 // tmp
+#define MAXCONNECTIONS 100 // tmp
 
 enum Pollable { SERVERPOLL, CLIENTPOLL, FILEPOLL };
 
