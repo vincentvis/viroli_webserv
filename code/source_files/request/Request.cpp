@@ -209,10 +209,10 @@ bool Request::contentLenAvailable() const {
 }
 
 bool Request::uriIsDir() const {
-	if (_uri.empty() || *_uri.rbegin() == '/') {
-		return (false);
+	if (_uri.empty() == false && *_uri.rbegin() == '/') {
+		return (true);
 	}
-	return (true);
+	return (false);
 }
 
 /* !REMOVE later, print function used for testing */

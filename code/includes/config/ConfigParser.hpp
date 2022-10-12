@@ -1,5 +1,6 @@
 #include "config/Config.hpp"
 #include "server/Server.hpp"
+#include "utils/Defines.hpp"
 #include "utils/Utils.hpp"
 
 #include <algorithm>

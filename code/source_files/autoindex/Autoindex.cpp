@@ -1,10 +1,6 @@
 #include "autoindex/Autoindex.hpp"
 
 Autoindex::Autoindex(const std::string &root) : _root(root) {
-	this->_template = std::string(AUTOINDEX_TEMPLATE);
-	template_replace("${ROOT}", _root);
-	template_replace("${TITLE}", _root);
-
 	DIR *dir_stream = opendir(this->_root.c_str());
 
 	if (dir_stream == NULL) {
@@ -43,6 +39,9 @@ Autoindex::Autoindex(const std::string &root) : _root(root) {
 		i++;
 	}
 	free(namelist);
+	this->_template = std::string(AUTOINDEX_TEMPLATE);
+	template_replace("${ROOT}", _root);
+	template_replace("${TITLE}", _root);
 	template_replace("${LIST}", list);
 	closedir(dir_stream);
 }

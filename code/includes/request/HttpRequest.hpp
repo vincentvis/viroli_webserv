@@ -1,5 +1,6 @@
 #pragma once
 
+#include "autoindex/Autoindex.hpp"
 #include "ipollable/ClientFD.hpp"
 #include "request/RequestInterface.hpp"
 #include "response/Response.hpp"

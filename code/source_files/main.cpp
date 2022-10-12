@@ -56,18 +56,6 @@ int main(int argc, char const *argv[]) {
 		std::cout << " | port: " << it->second->getServer()->getPort() << std::endl;
 	}
 
-
-	Config               *tmp  = config.getParseResult().at(0);
-	std::vector<Location> locs = tmp->getLocations();
-	Location             *l    = &locs[0];
-	std::cout << *l << std::endl;
-	std::cout << tmp->getRoot(l) << std::endl;
-
-	std::string path;
-	int         fd = tmp->getPathAndOpen(path, "/", l);
-	std::cout << "path:[" << path << "].fd:" << fd << std::endl;
-
-
 	try {
 		Server::run();
 	} catch (std::string &e) {
