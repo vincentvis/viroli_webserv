@@ -20,7 +20,7 @@ void HttpRequest::CheckMethod(ClientFD &Client) {
 		DELETERequest(Client);
 	}
 }
-#include <cerrno>
+
 void HttpRequest::GETRequest(ClientFD &Client) {
 	/* create path */
 	std::string uri = Client._location->getRoot();
@@ -29,7 +29,6 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	}
 	uri   = uri + Client._request.getUri();
 
-	errno = 0; // tmp for debugging
 	/* add fileFd to poll */
 	int fd = open(uri.c_str(), O_RDONLY);
 	if (fd == -1) {
