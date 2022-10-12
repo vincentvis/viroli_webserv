@@ -19,19 +19,18 @@ void CGIRequest::CheckMethod(ClientFD &Client) {
 	}
 }
 
-void CGIRequest::processResponse(ClientFD *Client, std::string Data,
+void CGIRequest::processResponse(ClientFD *Client, std::string messageBody,
 								 std::string StatusCode) {
 	/* check errorpages */
 	if (StatusCode.at(0) < '4') {
 		Client->_response.findAndSetContentType(Client->_request);
-		Client->_response.setMessageBody(Data);
+		Client->_response.setMessageBody(messageBody);
 	} else {
 		Client->_response.setContentType("text/html");
 		Client->_response.generateErrorPage(StatusCode);
 	}
 	/* generate response */
-	Client->_response.initResponse(StatusCode, Client->_config,
-								   Client->_request);
+	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);
 	Client->_response.createResponse();
 	Client->sendResponse(Client->_index);
 }

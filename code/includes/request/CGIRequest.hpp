@@ -16,6 +16,6 @@ class CGIRequest : public RequestInterface {
 
 	public:
 		CGIRequest(ClientFD &Client);
-		void processResponse(ClientFD *Client, std::string Data, std::string StatusCode);
+		void processResponse(ClientFD *Client, std::string messageBody, std::string StatusCode);
 		~CGIRequest();
 };
