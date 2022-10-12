@@ -15,6 +15,6 @@ class RequestInterface {
 		RequestInterface();
 		RequestInterface(ClientFD &Client);
 		virtual void processResponse(ClientFD *Client, std::string Data,
-									 int ErrorStatus) = 0;
+									 std::string ErrorStatus) = 0;
 		~RequestInterface();
 };

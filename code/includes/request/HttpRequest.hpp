@@ -15,6 +15,6 @@ class HttpRequest : public RequestInterface {
 
 	public:
 		HttpRequest(ClientFD &Client);
-		void processResponse(ClientFD *Client, std::string Data, int StatusCode);
+		void processResponse(ClientFD *Client, std::string Data, std::string StatusCode);
 		~HttpRequest();
 };
