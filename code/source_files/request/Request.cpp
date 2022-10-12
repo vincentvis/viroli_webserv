@@ -69,8 +69,15 @@ void Request::ParseRequest(std::string BUF) {
 	/* check and set connection */
 	this->_itr = _header.find("Connection");
 	if (this->_itr != _header.end()) {
+		this->_connection = this->_itr->second;
+		/* if 'Connection: close' is specified */
+		if (this->_connection == std::string("close")) {
+			this->_ConnectionAvailable = false;
+		} else {
+			this->_ConnectionAvailable = true;
+		}
+	} else {
 		this->_ConnectionAvailable = true;
-		this->_connection          = this->_itr->second;
 	}
 
 	/* set CGI for initialisation request interface */

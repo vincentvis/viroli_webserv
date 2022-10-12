@@ -2,7 +2,8 @@
 
 ClientFD::ClientFD(Server *server, int fd, int index) :
 	_server(server), _state(HEADER), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
-	_total(0), _fd(fd), _index(index) {
+	_total(0), _fd(fd), _index(index), _tick(), _closed(false) {
+	time(&_tick);
 }
 
 ClientFD::~ClientFD() {
@@ -19,8 +20,8 @@ void ClientFD::receive(size_t len) {
 	// std::cout << "bytes read: " << _bytes << std::endl;
 
 	if (_bytes == 0) {
-		// _state = END;
-		Server::_pfds[_index].fd = INVALID_FD; // build response
+		_state = END;
+		// _closed = true;
 	}
 	if (_bytes > 0) {
 		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
@@ -140,8 +141,8 @@ void ClientFD::getBody() {
 			//			catch (const Utils::ErrorPageException &e) {
 			//				this->_response.initResponse(
 			//					e.what(), this->_config,
-			//					this->_request); // make sure if error it sets it immidiately
-			//to
+			//					this->_request); // make sure if error it sets it
+			// immidiately to
 			//									 // create response and stops here
 			//				_state = END;
 			//			}
@@ -159,9 +160,8 @@ void ClientFD::ready() {
 	if (_state == END) {
 		// std::cout << "\n-------------\nbody: \n" << _body << "\n-------------\n";
 		std::cout << "body size: " << _body.size() << std::endl;
-		// Server::_pfds[_index].fd = INVALID_FD;
 		_request.setBody(_body);
-		this->_request.printAttributesInRequestClass(); // REMOVE LATER
+		// this->_request.printAttributesInRequestClass(); // REMOVE LATER
 		if (this->_request.getCgi() == true) {
 			this->_requestInterface = new CGIRequest(*this);
 		} else {
@@ -172,6 +172,7 @@ void ClientFD::ready() {
 
 /* receive data */
 void ClientFD::pollin() {
+	time(&_tick);
 	receive(BUFFERSIZE);
 
 	switch (_state) {
@@ -187,9 +188,14 @@ void ClientFD::pollin() {
 /* send data */
 /* need to know connection status (keep-alive|close) */
 void ClientFD::pollout() {
+	time(&_tick);
 	/* make sure to not go out of bounds with the buffer */
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
-	_bytes = send(_fd, _buffer.data(), getRemainderBytes(), 0);
+
+	_bytes = send(_fd, &_buffer[0], getRemainderBytes(), 0);
+	if (_bytes < 0) {
+		std::cout << "sjot\n";
+	}
 
 	if (_bytes > 0) {
 		_total += _bytes;
@@ -198,11 +204,13 @@ void ClientFD::pollout() {
 
 	/* what to do after all data is sent? */
 	if (_left == 0) {
-		/* if connection: keep-alive */
-		// Server::_pfds[index].event = POLLIN
-		/* if connection: close */
-		// set fd to -1 to ignore further polling and flush later.
-		Server::_pfds[_index].fd = INVALID_FD;
+		if (_request.getConnectionAvailable() == false) {
+			_closed = true;
+		} else {
+			std::cout << "send next request" << std::endl;
+			_closed                      = true;
+			Server::_pfds[_index].events = POLLIN;
+		}
 	}
 }
 
@@ -212,4 +220,18 @@ int ClientFD::getFileDescriptor() const {
 
 Server *ClientFD::getServer() const {
 	return _server;
+}
+
+void ClientFD::timeout() {
+	time_t timeout;
+
+	time(&timeout);
+	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
+		std::cout << "TIMEOUT\n"; // generate a response error. close connection
+		_closed = true;
+	}
+}
+
+bool ClientFD::isClosed() const {
+	return _closed;
 }

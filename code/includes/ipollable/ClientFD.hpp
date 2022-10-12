@@ -19,7 +19,6 @@ class RequestInterface;
 class ClientFD : public IPollable {
 	public:
 		enum State { HEADER, BODY, END };
-		enum Transfer { LENGTH, CHUNKED };
 
 		Request           _request;
 		Response          _response;
@@ -28,17 +27,17 @@ class ClientFD : public IPollable {
 		Location         *_location;
 		Server           *_server;
 		FileFD           *_fileFD;
-		Transfer          _transfer;
 		State             _state;
 		std::vector<char> _buffer;
 		std::string       _data;
-		std::string       _header;
 		std::string       _body;
 		int               _bytes;
 		int64_t           _left;
 		int64_t           _total;
 		int               _fd;
 		int               _index;
+		time_t            _tick;
+		bool              _closed;
 
 		ClientFD(Server *server, int fd, int index);
 		~ClientFD();
@@ -56,7 +55,7 @@ class ClientFD : public IPollable {
 		void    ready();
 		Server *getServer() const;
 		void    sendResponse(int index);
-		void    closeFD();
 		int32_t getRemainderBytes() const;
-		void    extractChunk();
+		void    timeout();
+		bool    isClosed() const;
 };

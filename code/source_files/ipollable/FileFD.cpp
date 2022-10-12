@@ -2,32 +2,35 @@
 
 FileFD::FileFD(Server *server, int fd, int index) :
 	_state(PROCESS), _server(server), _buffer(BUFFERSIZE, 0), _data(), _bytes(0),
-	_left(0), _total(0), _fd(fd), _index(index) {
+	_left(0), _total(0), _fd(fd), _index(index), _tick(), _closed(false) {
+	time(&_tick);
 }
 
 FileFD::~FileFD() {
 }
 
 void FileFD::pollin() {
+	time(&_tick);
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
 
-	if (_bytes == 0) {
-		Server::_pfds[_index].fd = INVALID_FD;
+	if (_bytes < 0) {
+		_closed = true;
+		_requestInterface->processResponse(_client, "", "500");
+		_state = END;
+	} else if (_bytes == 0) {
+		_closed = true;
 		_requestInterface->processResponse(_client, _data, "200");
 		_state = END;
 		// body ready initialize it with response
-	}
-	if (_bytes > 0) {
+	} else if (_bytes > 0) {
 		_total += _bytes;
 		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
-//	if (_bytes == -1) // ronald check for errorpagenum and also error if timeout
-//		_requestInterface->processResponse(_client, _data, 500);
 }
 
-void FileFD::setRequestInterface(RequestInterface* req, ClientFD *Client) {
+void FileFD::setRequestInterface(RequestInterface *req, ClientFD *Client) {
 	_requestInterface = req;
-	_client = Client;
+	_client           = Client;
 }
 
 int32_t FileFD::getRemainderBytes() const {
@@ -40,6 +43,7 @@ void FileFD::setData(std::string data) {
 }
 
 void FileFD::pollout() {
+	time(&_tick);
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
 	_bytes = write(_fd, _buffer.data(), getRemainderBytes());
 
@@ -48,11 +52,12 @@ void FileFD::pollout() {
 		_left -= _bytes;
 	}
 	if (_left == 0) {
-		Server::_pfds[_index].fd = INVALID_FD;
+		// close(_fd);
+		_closed = true;
+
 		// file made, ready for response
 	}
 }
-
 
 int FileFD::getFileDescriptor() const {
 	return _fd;
@@ -60,4 +65,19 @@ int FileFD::getFileDescriptor() const {
 
 Server *FileFD::getServer() const {
 	return _server;
+}
+
+void FileFD::timeout() {
+	time_t timeout;
+
+	time(&timeout);
+	if (difftime(timeout, _tick) > 10) {
+		std::cout << "TIMEOUT\n"; // will have to send a response
+		// _requestInterface->processResponse(_client, "", "408");
+		_closed = true; // this must be removed
+	}
+}
+
+bool FileFD::isClosed() const {
+	return _closed;
 }

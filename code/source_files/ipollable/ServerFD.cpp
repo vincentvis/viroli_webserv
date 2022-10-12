@@ -1,7 +1,7 @@
 #include "ipollable/ServerFD.hpp"
 
 ServerFD::ServerFD(Server *server, int fd, int index) :
-	_server(server), _fd(fd), _index(index) {
+	_server(server), _fd(fd), _index(index), _closed(false) {
 }
 
 ServerFD::~ServerFD() {
@@ -44,4 +44,11 @@ int ServerFD::getFileDescriptor() const {
 
 Server *ServerFD::getServer() const {
 	return _server;
+}
+
+void ServerFD::timeout() {
+}
+
+bool ServerFD::isClosed() const {
+	return _closed;
 }

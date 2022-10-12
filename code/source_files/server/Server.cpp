@@ -1,4 +1,6 @@
 #include "server/Server.hpp"
+#include <cassert>
+#include <csignal>
 
 Server::Server() {
 	this->_port = 0;
@@ -78,37 +80,41 @@ int32_t Server::getFileDescriptor() const {
 	return _fd;
 }
 
-bool Server::isFlushable() {
-	if (Server::_nflush > (Server::_pfds.size() / 10)) {
-		return true;
-	}
-	return false;
-}
+void Server::removePollable(int index) {
+	std::cout << "size _pfds (pre-removal): " << Server::_pfds.size();
+	std::cout << "  | size _pollables (pre-removal): " << Server::_pollables.size()
+			  << std::endl;
+	std::cout << "fd to be closed: " << Server::_pfds[index].fd << std::endl;
 
-/* test this with more connections */
-/* instead of doing after every poll iteration use a threshold */
-void Server::flushPollables() {
-	std::cout << "size _pfds: " << Server::_pfds.size() << std::endl;
-	std::vector<struct pollfd> tmp;
 
-	for (size_t i = 0; i < Server::_pfds.size(); ++i) {
-		if (Server::_pfds[i].fd != INVALID_FD) {
-			tmp.push_back(Server::_pfds[i]);
-		} else {
-			close(Server::_pfds[i].fd);
-			delete Server::_pollables.find(Server::_pfds[i].fd)->second;
-			Server::_pollables.erase(Server::_pfds[i].fd);
-		}
+	close(Server::_pfds[index].fd);
+
+	/* delete ClientFD or FileFD */
+	delete Server::_pollables.find(Server::_pfds[index].fd)->second;
+
+	/* remove ClientFD or FileFD from map */
+	Server::_pollables.erase(Server::_pfds[index].fd);
+
+	/* swap pollable to be removed at index with last element in vector */
+	if (Server::_pfds.size() > 1 &&
+		(Server::_pfds.at(index).fd != Server::_pfds.back().fd)) {
+		std::swap(Server::_pfds.at(index), Server::_pfds.back());
 	}
 
-	Server::_pfds.swap(tmp);
-	Server::_nflush = 0;
-	std::cout << "size _pfds: " << Server::_pfds.size() << std::endl;
+	/* remove last element in vector */
+	Server::_pfds.pop_back();
+
+	std::cout << "size _pfds (post-removal): " << Server::_pfds.size();
+	std::cout << " | size _pollables (post-removal): " << Server::_pollables.size()
+			  << std::endl;
+	std::cout << "succesful removal\n";
 }
 
+/* events var might be not needed */
 void Server::run() {
 	std::map<int32_t, IPollable *>::iterator it;
 	int                                      events = 0;
+	signal(SIGPIPE, SIG_IGN);
 
 	while (true) {
 		if ((events = poll(Server::_pfds.data(), Server::_pfds.size(), 0)) < 0) {
@@ -116,31 +122,30 @@ void Server::run() {
 		}
 		/* check events and timeout */
 		for (size_t i = 0; i < Server::_pfds.size(); ++i) {
-			/* find on what file descriptor event occurred */
-			if (Server::_pfds[i].revents & (POLLIN | POLLOUT)) {
-				it = Server::_pollables.find(Server::_pfds[i].fd);
-				/* file descriptor exists */
-				if (it != _pollables.end()) {
+			it = Server::_pollables.find(Server::_pfds[i].fd);
+			assert(it != Server::_pollables.end());
+			assert(it->second->getFileDescriptor() != -1);
+			it->second->timeout();
+			if (it->second->isClosed() == true) {
+				removePollable(i);
+				--i;
+				continue;
+			}
+			if (it != _pollables.end()) {
+				/* find on what file descriptor event occurred */
+				if (Server::_pfds[i].revents & (POLLIN | POLLOUT)) {
+					/* file descriptor exists */
 					if (Server::_pfds[i].revents & POLLIN) {
 						it->second->pollin();
 					} else if (Server::_pfds[i].revents & POLLOUT) {
 						it->second->pollout();
 					}
-					/* file descriptor doesn't exist */
-				} else {
-					throw(std::string("error on _pollables.find()")); // placholder
 				}
+				/* file descriptor pollable doesn't exist */
+			} else {
+				throw(std::string("error on _pollables.find()")); // placholder
 			}
 		}
-
-		if (Server::isFlushable() == true) {
-			Server::flushPollables();
-		}
-
-		/* remove file descriptors that are no longer needed (implement threshold) */
-		// if (_pfds.size() > 1000) {
-		// 	Server::removePoll();
-		// }
 	}
 }
 
@@ -167,6 +172,5 @@ IPollable *Server::addPollable(Server *server, int32_t fd, Pollable type, int16_
 	}
 }
 
-size_t                         Server::_nflush;
 std::map<int32_t, IPollable *> Server::_pollables;
 std::vector<struct pollfd>     Server::_pfds;
