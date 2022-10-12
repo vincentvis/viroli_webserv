@@ -64,6 +64,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	}
 	if (fd == -1) {
 		processResponse(&Client, "", "404");
+		return;
 	}
 	/* add fileFd to poll */
 	Client._fileFD = reinterpret_cast<FileFD *>(
