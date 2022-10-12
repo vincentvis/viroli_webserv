@@ -20,7 +20,7 @@ void HttpRequest::CheckMethod(ClientFD &Client) {
 		DELETERequest(Client);
 	}
 }
-
+#include <cerrno>
 void HttpRequest::GETRequest(ClientFD &Client) {
 	/* create path */
 	std::string uri = Client._location->getRoot();
@@ -33,12 +33,8 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	/* add fileFd to poll */
 	int fd = open(uri.c_str(), O_RDONLY);
 	if (fd == -1) {
-		std::cout << fd << ": FD ERROR" << std::endl; // throw error
-		std::cout << uri.c_str() << std::endl;        // tmp for debugging
-		std::cout << strerror(errno) << std::endl;    // tmp for debugging
-
+		processResponse(&Client, "", "404");
 	} else {
-		std::cout << "file opened: " << uri.c_str() << std::endl;
 		Client._fileFD = reinterpret_cast<FileFD *>(
 			Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
 		Client._fileFD->setRequestInterface(this, &Client);
