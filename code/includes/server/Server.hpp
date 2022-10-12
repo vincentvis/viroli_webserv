@@ -9,6 +9,7 @@
 
 #include <arpa/inet.h>
 #include <cstring>
+#include <ctime>
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
@@ -23,11 +24,8 @@
 #include <utility>
 #include <vector>
 
-#define BUFFERSIZE     1  // tmp
-#define MAXCONNECTIONS 10 // tmp
-
-// https://stackoverflow.com/questions/13248495/elegant-way-to-add-remove-descriptors-to-from-poll
-// threshold could be a hardcode number
+#define BUFFERSIZE     100 // tmp
+#define MAXCONNECTIONS 100 // tmp
 
 enum Pollable { SERVERPOLL, CLIENTPOLL, FILEPOLL };
 
@@ -49,12 +47,10 @@ class Server {
 		uint16_t          getPort() const;
 		int32_t           getFileDescriptor() const;
 		static void       run();
-		static bool       isFlushable();
-		static void       flushPollables();
+		static void       removePollable(int index);
 		static IPollable *addPollable(Server *server, int fd, Pollable type,
 									  int16_t event);
 
-		static size_t     _nflush;
 		static std::map<int32_t, IPollable *> _pollables;
 		static std::vector<struct pollfd>     _pfds;
 		std::vector<Config *>                 _configs;

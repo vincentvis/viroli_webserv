@@ -20,23 +20,25 @@ void HttpRequest::CheckMethod(ClientFD &Client) {
 		DELETERequest(Client);
 	}
 }
-
+#include <cerrno>
 void HttpRequest::GETRequest(ClientFD &Client) {
 	/* create path */
 	std::string uri = Client._location->getRoot();
 	if (uri.empty()) {
 		uri = Client._config->getRoot();
 	}
-	uri = uri + Client._request.getUri();
+	uri   = uri + Client._request.getUri();
 
+	errno = 0; // tmp for debugging
 	/* add fileFd to poll */
 	int fd = open(uri.c_str(), O_RDONLY);
 	if (fd == -1) {
 		processResponse(&Client, "", "404");
+	} else {
+		Client._fileFD = reinterpret_cast<FileFD *>(
+			Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
+		Client._fileFD->setRequestInterface(this, &Client);
 	}
-	Client._fileFD = reinterpret_cast<FileFD *>(
-		Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
-	Client._fileFD->setRequestInterface(this, &Client);
 }
 
 // Statuscode range:
