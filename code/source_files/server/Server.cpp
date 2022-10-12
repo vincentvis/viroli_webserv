@@ -80,36 +80,6 @@ int32_t Server::getFileDescriptor() const {
 	return _fd;
 }
 
-// TO BE REMOVED WHEN removePollable() has been tested
-// bool Server::isFlushable() {
-// 	if (Server::_nflush > (Server::_pfds.size() / 10)) {
-// 		return true;
-// 	}
-// 	return false;
-// }
-
-// /* test this with more connections */
-// /* instead of doing after every poll iteration use a threshold */
-// void Server::flushPollables() {
-// 	std::cout << "size _pfds: " << Server::_pfds.size() << std::endl;
-// 	std::vector<struct pollfd> tmp;
-
-// 	for (size_t i = 0; i < Server::_pfds.size(); ++i) {
-// 		if (Server::_pfds[i].fd != INVALID_FD) {
-// 			tmp.push_back(Server::_pfds[i]);
-// 		} else {
-// 			close(Server::_pfds[i].fd);
-// 			delete Server::_pollables.find(Server::_pfds[i].fd)->second;
-// 			Server::_pollables.erase(Server::_pfds[i].fd);
-// 		}
-// 	}
-
-// 	Server::_pfds.swap(tmp);
-// 	Server::_nflush = 0;
-// 	std::cout << "size _pfds: " << Server::_pfds.size() << std::endl;
-// }
-// TO BE REMOVED WHEN removePollable() has been tested
-
 void Server::removePollable(int index) {
 	std::cout << "size _pfds (pre-removal): " << Server::_pfds.size();
 	std::cout << "  | size _pollables (pre-removal): " << Server::_pollables.size()
@@ -202,6 +172,5 @@ IPollable *Server::addPollable(Server *server, int32_t fd, Pollable type, int16_
 	}
 }
 
-// size_t                         Server::_nflush;
 std::map<int32_t, IPollable *> Server::_pollables;
 std::vector<struct pollfd>     Server::_pfds;

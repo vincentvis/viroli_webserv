@@ -13,18 +13,19 @@ void FileFD::pollin() {
 	time(&_tick);
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
 
-	if (_bytes == 0) {
+	if (_bytes < 0) {
 		_closed = true;
-		_requestInterface->processResponse(_client, _data, 0);
+		_requestInterface->processResponse(_client, "", "500");
+		_state = END;
+	} else if (_bytes == 0) {
+		_closed = true;
+		_requestInterface->processResponse(_client, _data, "200");
 		_state = END;
 		// body ready initialize it with response
-	}
-	if (_bytes > 0) {
+	} else if (_bytes > 0) {
 		_total += _bytes;
 		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
-	//	if (_bytes == -1) // ronald check for errorpagenum and also error if timeout
-	//		_requestInterface->processResponse(_client, _data, 500);
 }
 
 void FileFD::setRequestInterface(RequestInterface *req, ClientFD *Client) {
@@ -72,7 +73,8 @@ void FileFD::timeout() {
 	time(&timeout);
 	if (difftime(timeout, _tick) > 10) {
 		std::cout << "TIMEOUT\n"; // will have to send a response
-		_closed = true;           // this must be removed
+		// _requestInterface->processResponse(_client, "", "408");
+		_closed = true; // this must be removed
 	}
 }
 
