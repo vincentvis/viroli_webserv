@@ -59,7 +59,7 @@ void HttpRequest::processResponse(ClientFD *Client, std::string messageBody,
 	}
 	/* generate response */
 	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);
-	Client->_response.createResponse();
+	Client->_response.createResponse(); // thinking about merging those two
 	Client->sendResponse(Client->_index);
 }
 
