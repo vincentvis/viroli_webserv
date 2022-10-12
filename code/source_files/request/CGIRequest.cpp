@@ -19,6 +19,22 @@ void CGIRequest::CheckMethod(ClientFD &Client) {
 	}
 }
 
+void CGIRequest::processResponse(ClientFD *Client, std::string messageBody,
+								 std::string StatusCode) {
+	/* check errorpages */
+	if (StatusCode.at(0) < '4') {
+		Client->_response.findAndSetContentType(Client->_request);
+		Client->_response.setMessageBody(messageBody);
+	} else {
+		Client->_response.setContentType("text/html");
+		Client->_response.generateErrorPage(StatusCode);
+	}
+	/* generate response */
+	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);
+	Client->_response.createResponse();
+	Client->sendResponse(Client->_index);
+}
+
 void CGIRequest::GETRequest(ClientFD &Client) {
 	(void)Client;
 	std::cout << "this is a GET CGI Request" << std::endl; // REMOVE LATER
@@ -32,18 +48,6 @@ void CGIRequest::POSTRequest(ClientFD &Client) {
 void CGIRequest::DELETERequest(ClientFD &Client) {
 	(void)Client;
 	std::cout << "this is a DELETE CGI Request" << std::endl; // REMOVE LATER
-}
-
-void CGIRequest::processResponse(ClientFD *Client, std::string Data, int ErrorStatus){
-	if (ErrorStatus != 0) {
-		std::cout << "create error response" << std::endl;
-	}
-	else{
-		Client->_response.setMessageBody(Data);
-		Client->_response.initResponse("200", Client->_config, Client->_request);
-		Client->_response.createResponse();
-	}
-	Client->sendResponse(Client->_index);
 }
 
 CGIRequest::~CGIRequest() {
