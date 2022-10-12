@@ -503,12 +503,12 @@ bool ConfigParser::isValidConfigURI(const std::string &match_str) {
 		return (false);
 	}
 	std::string::size_type length = match_str.length();
-	std::string::size_type i      = 1;
+	std::string::size_type i      = 0;
 	std::string::size_type word   = 0;
 
 	while (i != length) {
-		if (match_str.at(i) == '/' && word == 0)
-			return (false);
+		// if (match_str.at(i) == '/' && word == 0)
+		// 	return (false);
 		if (std::isalnum(match_str.at(i)) || match_str.at(i) == '-' ||
 			match_str.at(i) == '_' || match_str.at(i) == '.')
 		{
