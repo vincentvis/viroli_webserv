@@ -83,37 +83,6 @@ std::string const &Config::getAutoIndex(Location *const primary) const {
 	return _autoIndex;
 }
 
-int Config::getPathAndOpen(std::string &path, std::string requestUri,
-						   Location *const primary) const {
-	std::string tmp = getRoot(primary);
-
-	// if autoindex == off, don't produce directory listings
-	(void)requestUri;
-	// if this is a directory request
-	// if (requestUri.empty() == false && *requestUri.rbegin() == '/') {
-	// 	;
-	// }
-	std::vector<std::string>                 indexes = getIndex(primary);
-	int                                      fd      = -1;
-
-	std::vector<std::string>::const_iterator it      = indexes.begin();
-	std::vector<std::string>::const_iterator end     = indexes.end();
-
-	while (it != end) {
-		std::string tryPath = tmp + "/" + *it;
-		fd                  = open(tryPath.c_str(), O_RDONLY);
-		if (fd >= 0) {
-			tmp = tryPath;
-			break;
-		}
-		it++;
-	}
-	if (fd >= 0) {
-		path = tmp;
-	}
-	return fd;
-}
-
 std::vector<Location> const &Config::getLocations() {
 	return _locations;
 }

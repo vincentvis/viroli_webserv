@@ -44,9 +44,6 @@ class Config {
 		bool                            containsServerName(std::string to_search);
 		std::vector<Location> const    &getLocations();
 
-		int getPathAndOpen(std::string &path, std::string requestUri,
-						   Location *const primary) const;
-
 	protected:
 		int32_t                            _priority;
 		std::vector<uint16_t>              _ports;
