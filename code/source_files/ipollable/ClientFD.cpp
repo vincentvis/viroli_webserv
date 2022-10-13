@@ -131,6 +131,7 @@ void ClientFD::getHeader() {
 			_state = BODY;
 		}
 	}
+//	if there is a body and the method is body we need to send a 100 response in between the header and the body parsing
 }
 
 void ClientFD::getBody() {
