@@ -27,9 +27,10 @@ class Response {
 		std::string _serverType;  /* [Server: ] */
 								  //		std::string _contentLen; /* [Content-Length: ] */
 		std::string _contentType; /* [Content-type: ] */
-		std::string _contentLen;  /* [Content-Length: ] */
-		std::string _connection;  /* [Connection: ] */
-		std::string _location;    /* [Location: ] */
+		bool        _contentTypeIsSet;
+		std::string _contentLen; /* [Content-Length: ] */
+		std::string _connection; /* [Connection: ] */
+		std::string _location;   /* [Location: ] */
 
 		/*		Message Body */
 		std::string _messageBody;

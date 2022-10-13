@@ -146,7 +146,8 @@ void ConfigParser::extract_server_block_info(Config &target) {
 				processAddParamsToVector(directiveName, target._index, 1, true);
 				break;
 			case ED_AUTOINDEX:
-				processBoolval(directiveName, target._autoIndex, "on", "off");
+				processBoolval(directiveName, target._autoIndex, Utils::on_string,
+							   Utils::off_string);
 				break;
 			case ED_ALLOW:
 				processAddParamsToVector(directiveName, target._allow, 1, true);
@@ -217,7 +218,8 @@ void ConfigParser::processLocationBlock(std::vector<Location> &target) {
 				processAddParamsToVector(directiveName, location._index, 1, true);
 				break;
 			case ED_AUTOINDEX:
-				processBoolval(directiveName, location._autoIndex, "on", "off");
+				processBoolval(directiveName, location._autoIndex, Utils::on_string,
+							   Utils::off_string);
 				break;
 			case ED_ROOT:
 				processRoot(location._root);
@@ -473,6 +475,27 @@ void ConfigParser::processAddParamsToVector(std::string                         
 		throw std::runtime_error("Not enough parameters found for directive \"" + name +
 								 "\", found " + Utils::to_string(target.size()) +
 								 " need (at least) " + Utils::to_string(min));
+	}
+	check_and_skip_semicolon(name);
+}
+
+void ConfigParser::processBoolval(std::string name, std::string &target,
+								  std::string truthy, std::string falsy) {
+	std::string param = extractParam();
+	if (param.empty()) {
+		throw std::runtime_error("Not enough parameters found for directive \"" + name +
+								 "\" in config file at line " +
+								 Utils::to_string(_linenum));
+	}
+
+	if (param == truthy) {
+		target = param;
+	} else if (param == falsy) {
+		target = param;
+	} else {
+		throw std::runtime_error("Value \"" + param + "\" does not match any of [\"" +
+								 truthy + "\",\"" + falsy + "\"] for directive " + name +
+								 " in config file at line " + Utils::to_string(_linenum));
 	}
 	check_and_skip_semicolon(name);
 }

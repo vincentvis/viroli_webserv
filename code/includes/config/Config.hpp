@@ -4,6 +4,7 @@
 #include "server/Location.hpp"
 #include "utils/Utils.hpp"
 #include <algorithm>
+#include <fcntl.h>
 #include <iostream>
 #include <map>
 #include <stdint.h>
@@ -16,18 +17,32 @@ class Config {
 		Config();
 		~Config();
 
-		Location       *findLocation(const Request &request);
+		Location            *findLocation(const Request &request);
 
 		friend std::ostream &operator<<(std::ostream &os, const Config &config);
 		friend class ConfigParser;
 
 		// getters
-		std::string              getRoot() const;
-		std::vector<std::string> getAllow() const;
-		int64_t                  getMaxBodySize() const;
-		bool                     getAllowUpload() const;
-		bool                     getAutoIndex() const;
-		bool                     containsServerName(std::string to_search);
+		std::string const              &getRoot() const;
+		std::string const              &getRoot(Location *const primary) const;
+
+		std::vector<std::string> const &getIndex() const;
+		std::vector<std::string> const &getIndex(Location *const primary) const;
+
+		std::vector<std::string> const &getAllow() const;
+		std::vector<std::string> const &getAllow(Location *const primary) const;
+
+		int64_t                         getMaxBodySize() const;
+		int64_t                         getMaxBodySize(Location *const primary) const;
+
+		bool                            getAllowUpload() const;
+		bool                            getAllowUpload(Location *const primary) const;
+
+		std::string const              &getAutoIndex() const;
+		std::string const              &getAutoIndex(Location *const primary) const;
+
+		bool                            containsServerName(std::string to_search);
+		std::vector<Location> const    &getLocations();
 
 	protected:
 		int32_t                            _priority;
@@ -40,7 +55,7 @@ class Config {
 		std::map<std::string, std::string> _errorPages;
 		int64_t                            _maxBodySize;
 		bool                               _allowUpload;
-		bool                               _autoIndex;
+		std::string                        _autoIndex;
 		std::vector<Location>              _locations;
 
 	private:

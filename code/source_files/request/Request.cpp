@@ -110,7 +110,7 @@ void Request::ParseRequest(std::string BUF) {
 }
 
 bool Request::methodsAllowed(const Request &Req, Config *Conf) {
-	std::vector<std::string>::iterator tryFind;
+	std::vector<std::string>::const_iterator tryFind;
 	/* if both location.getAllow() and Config.getAllow don't exist "default fallback
 	 * rules" apply: all methods are allowed*/
 	Location *Loc = Conf->findLocation(Req);
@@ -179,6 +179,10 @@ std::string Request::getUri() const {
 	return this->_uri;
 }
 
+void Request::setUri(std::string newUri) {
+	this->_uri = newUri;
+}
+
 std::string Request::getHTTPVersion() const {
 	return this->_HTTPVersion;
 }
@@ -213,6 +217,13 @@ bool Request::getHeaderAvailable() const {
 
 bool Request::contentLenAvailable() const {
 	return this->_ContentLengthAvailable;
+}
+
+bool Request::uriIsDir() const {
+	if (_uri.empty() == false && *_uri.rbegin() == '/') {
+		return (true);
+	}
+	return (false);
 }
 
 /* !REMOVE later, print function used for testing */

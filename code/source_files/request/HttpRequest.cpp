@@ -20,25 +20,64 @@ void HttpRequest::CheckMethod(ClientFD &Client) {
 		DELETERequest(Client);
 	}
 }
-#include <cerrno>
-void HttpRequest::GETRequest(ClientFD &Client) {
-	/* create path */
-	std::string uri = Client._location->getRoot();
-	if (uri.empty()) {
-		uri = Client._config->getRoot();
-	}
-	uri   = uri + Client._request.getUri();
 
-	errno = 0; // tmp for debugging
-	/* add fileFd to poll */
-	int fd = open(uri.c_str(), O_RDONLY);
+void HttpRequest::GETRequest(ClientFD &Client) {
+	std::string path = Client._config->getRoot(Client._location);
+	std::string uri  = Client._request.getUri();
+	if (*path.rbegin() != '/' && (uri.empty() == false && uri.at(0) != '/')) {
+		path += "/";
+	}
+	path += uri;
+	int fd;
+
+	if (Client._request.uriIsDir()) {
+		if (Client._config->getAutoIndex(Client._location) == "on") {
+			try {
+				Autoindex autoindex(path);
+				Client._response.setContentType("text/html");
+				processResponse(&Client, autoindex.getHtml(), "200");
+				return;
+			} catch (const Utils::AutoindexException &e) {
+				processResponse(&Client, "", "404");
+				return;
+			} catch (const std::exception &e) {
+				// all other exceptions?
+				// but what to do?
+				// internal server error for now
+				processResponse(&Client, "", "500");
+				return;
+			}
+		}
+		std::vector<std::string> indexes = Client._config->getIndex(Client._location);
+		std::vector<std::string>::const_iterator it  = indexes.begin();
+		std::vector<std::string>::const_iterator end = indexes.end();
+		std::string                              tmp;
+		if (*path.rbegin() != '/') {
+			path += "/";
+		}
+		fd = -1;
+		while (it != end) {
+			tmp = path + *it;
+			fd  = open(tmp.c_str(), O_RDONLY);
+			if (fd > 0) {
+				path = tmp;
+				Client._request.setUri(Client._request.getUri() + *it);
+				break;
+			}
+			fd = -1;
+			it++;
+		}
+	} else {
+		fd = open(path.c_str(), O_RDONLY);
+	}
 	if (fd == -1) {
 		processResponse(&Client, "", "404");
-	} else {
-		Client._fileFD = reinterpret_cast<FileFD *>(
-			Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
-		Client._fileFD->setRequestInterface(this, &Client);
+		return;
 	}
+	/* add fileFd to poll */
+	Client._fileFD = reinterpret_cast<FileFD *>(
+		Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
+	Client._fileFD->setRequestInterface(this, &Client);
 }
 
 // Statuscode range:
