@@ -22,6 +22,65 @@ void HttpRequest::CheckMethod(ClientFD &Client) {
 	}
 }
 
+void HttpRequest::GETRequest(ClientFD &Client) {
+	std::string path = Client._config->getRoot(Client._location);
+	std::string uri  = Client._request.getUri();
+	if (*path.rbegin() != '/' && (uri.empty() == false && uri.at(0) != '/')) {
+		path += "/";
+	}
+	path += uri;
+	int fd;
+
+	if (Client._request.uriIsDir()) {
+		if (Client._config->getAutoIndex(Client._location) == "on") {
+			try {
+				Autoindex autoindex(path);
+				Client._response.setContentType("text/html");
+				processResponse(&Client, autoindex.getHtml(), "200");
+				return;
+			} catch (const Utils::AutoindexException &e) {
+				processResponse(&Client, "", "404");
+				return;
+			} catch (const std::exception &e) {
+				// all other exceptions?
+				// but what to do?
+				// internal server error for now
+				processResponse(&Client, "", "500");
+				return;
+			}
+		}
+		std::vector<std::string> indexes = Client._config->getIndex(Client._location);
+		std::vector<std::string>::const_iterator it  = indexes.begin();
+		std::vector<std::string>::const_iterator end = indexes.end();
+		std::string                              tmp;
+		if (*path.rbegin() != '/') {
+			path += "/";
+		}
+		fd = -1;
+		while (it != end) {
+			tmp = path + *it;
+			fd  = open(tmp.c_str(), O_RDONLY);
+			if (fd > 0) {
+				path = tmp;
+				Client._request.setUri(Client._request.getUri() + *it);
+				break;
+			}
+			fd = -1;
+			it++;
+		}
+	} else {
+		fd = open(path.c_str(), O_RDONLY);
+	}
+	if (fd == -1) {
+		processResponse(&Client, "", "404");
+		return;
+	}
+	/* add fileFd to poll */
+	Client._fileFD = reinterpret_cast<FileFD *>(
+		Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
+	Client._fileFD->setRequestInterface(this, &Client);
+}
+
 // Statuscode range:
 // 100-199 is classed as Informational.
 // 200-299 is Successful.
@@ -46,24 +105,24 @@ void HttpRequest::processResponse(ClientFD *Client, std::string messageBody,
 	Client->sendResponse(Client->_index);
 }
 
-void HttpRequest::GETRequest(ClientFD &Client) {
-	/* create path */
-	std::string uri = Client._location->getRoot();
-	if (uri.empty()) {
-		uri = Client._config->getRoot();
-	}
-	uri   = uri + Client._request.getUri();
-
-	/* add fileFd to poll */
-	int fd = open(uri.c_str(), O_RDONLY); // O_NONBLOCK?
-	if (fd == -1) {
-		processResponse(&Client, "", "404");
-	} else {
-		Client._fileFD = reinterpret_cast<FileFD *>(
-			Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
-		Client._fileFD->setRequestInterface(this, &Client);
-	}
-}
+//void HttpRequest::GETRequest(ClientFD &Client) {
+//	/* create path */
+//	std::string uri = Client._location->getRoot();
+//	if (uri.empty()) {
+//		uri = Client._config->getRoot();
+//	}
+//	uri   = uri + Client._request.getUri();
+//
+//	/* add fileFd to poll */
+//	int fd = open(uri.c_str(), O_RDONLY); // O_NONBLOCK?
+//	if (fd == -1) {
+//		processResponse(&Client, "", "404");
+//	} else {
+//		Client._fileFD = reinterpret_cast<FileFD *>(
+//			Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
+//		Client._fileFD->setRequestInterface(this, &Client);
+//	}
+//}
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
 

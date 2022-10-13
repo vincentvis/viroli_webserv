@@ -16,11 +16,10 @@ int main(int argc, char const *argv[]) {
 	try {
 		config.parseFromArgs(argc, argv);
 	} catch (const std::exception &e) {
-			std::cerr << "Exception caught during config file parsing: \n"
-					  << e.what() << std::endl;
-			return (1);
-		}
-
+		std::cerr << "Exception caught during config file parsing: \n"
+				  << e.what() << std::endl;
+		return (1);
+	}
 
 
 	Server *serv;
@@ -56,7 +55,6 @@ int main(int argc, char const *argv[]) {
 				  << " | IPollable fd: " << it->second->getFileDescriptor();
 		std::cout << " | port: " << it->second->getServer()->getPort() << std::endl;
 	}
-
 
 	try {
 		Server::run();
