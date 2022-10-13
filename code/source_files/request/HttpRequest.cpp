@@ -71,7 +71,7 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 	if (uri.empty()) {
 		uri = Client._config->getRoot();
 	}
-	uri   = uri + Client._request.getUri();
+	uri  = uri + Client._request.getUri();
 	std::cout << uri << std::endl;
 	int fd = open(uri.c_str(), O_APPEND); // change
 	if (fd == -1) {
