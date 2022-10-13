@@ -105,7 +105,7 @@ void HttpRequest::processResponse(ClientFD *Client, std::string messageBody,
 	Client->sendResponse(Client->_index);
 }
 
-//void HttpRequest::GETRequest(ClientFD &Client) {
+// void HttpRequest::GETRequest(ClientFD &Client) {
 //	/* create path */
 //	std::string uri = Client._location->getRoot();
 //	if (uri.empty()) {
@@ -122,21 +122,29 @@ void HttpRequest::processResponse(ClientFD *Client, std::string messageBody,
 //			Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
 //		Client._fileFD->setRequestInterface(this, &Client);
 //	}
-//}
+// }
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
-
-	std::string uri = Client._location->getRoot();
-	if (uri.empty()) {
-		uri = Client._config->getRoot();
+//	200 turn into 201 if the file is valid
+//		std::string uri = Client._location->getRoot();
+//		if (uri.empty()) {
+//			uri = Client._config->getRoot();
+//		}
+//		uri  = uri + Client._request.getUri();
+	std::string path = Client._config->getRoot(Client._location);
+	std::string uri  = Client._request.getUri();
+	if (*path.rbegin() != '/' && (uri.empty() == false && uri.at(0) != '/')) {
+		path += "/";
 	}
-	uri  = uri + Client._request.getUri();
-	std::cout << uri << std::endl;
-	int fd = open(uri.c_str(), O_APPEND); // change
+	path += uri;
+	std::cout << path << std::endl;
+	int fd = open(path.c_str(), O_CREAT | O_WRONLY, S_IRWXU); // change
+
+//	fd = open(filepath.c_str(), O_RDONLY);
 	if (fd == -1) {
 		processResponse(&Client, "", "404");
-	}
-	else {
+	} else {
+//		set location in response header
 		std::cout << "yes" << std::endl;
 		Client._fileFD = reinterpret_cast<FileFD *>(
 			Server::addPollable(Client._server, fd, FILEPOLL, POLLOUT));
