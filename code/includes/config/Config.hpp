@@ -4,7 +4,6 @@
 #include "server/Location.hpp"
 #include "utils/Utils.hpp"
 #include <algorithm>
-#include <cerrno>
 #include <fcntl.h>
 #include <iostream>
 #include <map>
