@@ -15,7 +15,7 @@ Request::Request() {
 	this->_CGI                     = false;
 	this->_TransferEncodingChunked = false;
 	this->_ContentLengthAvailable  = false;
-	this->_ConnectionAvailable     = false;
+	this->_ConnectionAvailable     = true;
 	_MethodKeys["GET"]             = GET;
 	_MethodKeys["DELETE"]          = DELETE;
 	_MethodKeys["POST"]            = POST;
@@ -73,12 +73,14 @@ void Request::ParseRequest(std::string BUF) {
 		/* if 'Connection: close' is specified */
 		if (this->_connection == std::string("close")) {
 			this->_ConnectionAvailable = false;
-		} else {
-			this->_ConnectionAvailable = true;
 		}
-	} else {
-		this->_ConnectionAvailable = true;
+//		} else {
+//			this->_ConnectionAvailable = true;
+//		}
 	}
+//	else {
+//		this->_ConnectionAvailable = true;
+//	}
 
 	/* set CGI for initialisation request interface */
 	if (this->_uri.find(".py") == this->_uri.length() - 3) // should be tested
@@ -193,6 +195,9 @@ std::string Request::getBody() const {
 
 std::string Request::getQuery() const {
 	return this->_query;
+}
+std::string Request::getConnectionInfo() const {
+	return this->_connection;
 }
 
 long Request::getContentLength() const {

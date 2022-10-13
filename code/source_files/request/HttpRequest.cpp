@@ -138,7 +138,7 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 	}
 	path += uri;
 	std::cout << path << std::endl;
-	int fd = open(path.c_str(), O_CREAT | O_WRONLY, S_IRWXU); // change
+	int fd = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change
 
 //	fd = open(filepath.c_str(), O_RDONLY);
 	if (fd == -1) {
