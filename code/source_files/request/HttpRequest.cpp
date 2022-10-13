@@ -10,6 +10,7 @@ HttpRequest::HttpRequest(ClientFD &Client) {
 }
 
 void HttpRequest::CheckMethod(ClientFD &Client) {
+	std::cout << "check method" << std::endl;
 	if (Client._request.getMethod() == Utils::get_string) {
 		GETRequest(Client);
 	}

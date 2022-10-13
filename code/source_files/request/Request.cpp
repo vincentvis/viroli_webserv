@@ -92,8 +92,8 @@ void Request::ParseRequest(std::string BUF) {
 			this->_ContentLength = Utils::stol(this->_itr->second);
 		} catch (const std::runtime_error &e) {
 			std::cerr << "stol failed: \n" << e.what() << std::endl;
+			throw Utils::ErrorPageException("400");
 		}
-		throw Utils::ErrorPageException("400");
 	}
 	if (this->_ContentLength < 0) {
 		throw Utils::ErrorPageException("400");

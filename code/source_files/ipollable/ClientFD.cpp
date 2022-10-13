@@ -157,11 +157,12 @@ int32_t ClientFD::getRemainderBytes() const {
 }
 
 void ClientFD::ready() {
-	if (_state == END) {
+	std::cout << _state << std::endl;
+ 	if (_state == END) {
 		// std::cout << "\n-------------\nbody: \n" << _body << "\n-------------\n";
 		std::cout << "body size: " << _body.size() << std::endl;
 		_request.setBody(_body);
-		// this->_request.printAttributesInRequestClass(); // REMOVE LATER
+		 this->_request.printAttributesInRequestClass(); // REMOVE LATER
 		if (this->_request.getCgi() == true) {
 			this->_requestInterface = new CGIRequest(*this);
 		} else {
