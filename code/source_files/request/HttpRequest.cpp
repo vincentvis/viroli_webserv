@@ -149,6 +149,7 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 		Client._fileFD = reinterpret_cast<FileFD *>(
 			Server::addPollable(Client._server, fd, FILEPOLL, POLLOUT));
 		Client._fileFD->setRequestInterface(this, &Client);
+		Client._fileFD->setData(Client._request.getBody());
 	}
 }
 

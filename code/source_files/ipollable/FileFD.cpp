@@ -44,6 +44,7 @@ void FileFD::setData(std::string data) {
 
 void FileFD::pollout() {
 //	std::cout << "data:" << _data << std::endl;
+//_requestInterface.
 	time(&_tick);
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
 	_bytes = write(_fd, _buffer.data(), getRemainderBytes());
