@@ -1,11 +1,7 @@
 #pragma once
 
-#include <fstream>
-#include <iostream>
 #include <map>
 #include <string>
-#include <utility>
-#include <vector>
 
 class HttpStatus {
 	public:
@@ -16,13 +12,22 @@ class HttpStatus {
 			return instance;
 		}
 
-		static std::string generateErrorPage(const std::string &page) {
+		static std::string generateErrorPage(const std::string &status) {
 			std::map<std::string, std::string>::iterator it =
-				getInstance()._statusses.find(page);
+				getInstance()._statusses.find(status);
 			if (it == getInstance()._statusses.end()) {
 				return ("WHAT ARE YOU DOING?!");
 			}
 			return (getInstance().getFromTemplate(it->first, it->second));
+		}
+
+		static std::string getReasonPhrase(const std::string &status) {
+			std::map<std::string, std::string>::iterator it =
+				getInstance()._statusses.find(status);
+			if (it != getInstance()._statusses.end()) {
+				return (it->second);
+			}
+			return (getInstance()._statusses.find("200")->second);
 		}
 
 	private:

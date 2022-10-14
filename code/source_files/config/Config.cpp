@@ -82,6 +82,10 @@ std::vector<Location> const &Config::getLocations() {
 	return _locations;
 }
 
+std::map<std::string, std::string> const &Config::getErrorPages() const {
+	return _errorPages;
+}
+
 // stream output
 std::ostream &operator<<(std::ostream &os, const Config &config) {
 	os << "\033[1;4mConfig info:\033[0m" << std::endl;
