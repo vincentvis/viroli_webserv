@@ -106,10 +106,10 @@ void Response::initResponse(std::string status, Config *Conf, const Request &Req
 		"Server: VIROLI_Server/26.3.8"; // or is this the servername in the config?
 
 	this->_contentType = "Content-type: " + getContentType();
-	if (Req.getConnectionAvailable() == 0)
+	if (Req.getConnectionAvailable() == false)
 		this->_connection = "Connection: " + Req.getConnectionInfo();
 	else
-		this->_connection = "Connection: Close"; // is this correct?
+		this->_connection = "Connection: Keep-Alive"; // is this correct?
 
 	//	/* Message Body */
 	//		this->_messageBody = already set

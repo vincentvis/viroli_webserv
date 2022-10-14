@@ -51,7 +51,6 @@ class Request {
 		std::string                        getQuery() const;
 		bool                               contentLenAvailable() const;
 		bool                               getConnectionAvailable() const;
-		std::string                        getConnectionInfo() const;
 		bool                               getChunked() const;
 		long                               getContentLength() const;
 		bool                               getCgi() const;
