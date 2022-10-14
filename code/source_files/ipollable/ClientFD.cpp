@@ -289,6 +289,7 @@ bool ClientFD::isClosed() const {
 }
 
 
+
 //#include "ipollable/ClientFD.hpp"
 //
 // ClientFD::ClientFD(Server *server, int fd, int index) :
@@ -577,3 +578,7 @@ bool ClientFD::isClosed() const {
 // bool ClientFD::isClosed() const {
 //	return _closed;
 // }
+
+void ClientFD::setIndex(int32_t index) {
+	_index = index;
+}

@@ -39,4 +39,5 @@ class FileFD : public IPollable {
 		RequestInterface *_requestInterface;
 		ClientFD         *_client;
 		bool              isClosed() const;
+		void              setIndex(int32_t index);
 };

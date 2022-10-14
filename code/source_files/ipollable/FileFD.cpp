@@ -92,3 +92,7 @@ void FileFD::timeout() {
 bool FileFD::isClosed() const {
 	return _closed;
 }
+
+void FileFD::setIndex(int32_t index) {
+	_index = index;
+}

@@ -60,4 +60,6 @@ class ClientFD : public IPollable {
 		void    timeout();
 		bool    isClosed() const;
 		void    process();
+		void    setIndex(int32_t index);
+
 };
