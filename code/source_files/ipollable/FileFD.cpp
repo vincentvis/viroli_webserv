@@ -50,11 +50,11 @@ void FileFD::pollout() {
 	_bytes = write(_fd, _buffer.data(), getRemainderBytes());
 
 
-	std::cout << "buffer content: \n";
-	for (size_t i = 0; i < getRemainderBytes(); ++i) {
-		std::cout << _buffer[i] << std::endl;
-		std::cout << "index: " << i << std::endl;
-	}
+//	std::cout << "buffer content: \n";
+//	for (size_t i = 0; i < getRemainderBytes(); ++i) {
+//		std::cout << _buffer[i] << std::endl;
+//		std::cout << "index: " << i << std::endl;
+//	}
 
 
 	if (_bytes) {
