@@ -78,9 +78,6 @@ void ClientFD::receiveChunked() {
 }
 
 void ClientFD::receiveLength() {
-	std::cout << "_left: " << _left << std::endl;
-	std::cout << "_total: " << _total << std::endl;
-	std::cout << "data: [" << _data << "]" << std::endl;
 	if (_left == 0) {
 		// _body = _data;
 		_left = _request.getContentLength();
@@ -95,6 +92,10 @@ void ClientFD::receiveLength() {
 		// std::cout << " | left: " << _left << std::endl;
 	}
 	if (_total == _left) {
+		std::cout << "_left: " << _left << std::endl;
+		std::cout << "_total: " << _total << std::endl;
+		std::cout << "data: [" << _data << "]" << std::endl;
+
 		_body = _data;
 		std::cout << "!>>>>> body: " << _data << std::endl;
 		_state = END;
@@ -186,6 +187,7 @@ void ClientFD::ready() {
 	if (_state == END) {
 		// std::cout << "\n-------------\nbody: \n" << _body << "\n-------------\n";
 		// std::cout << "body size: " << _body.size() << std::endl;
+		std::cout << "_body.size(): " << _body.size() << std::endl;
 		_request.setBody(_body);
 		this->_request.printAttributesInRequestClass(); // REMOVE LATER
 		if (this->_request.getCgi() == true) {
@@ -248,6 +250,10 @@ void ClientFD::pollout() {
 					_request.getExpect() == "100-continue" && _request.getBody().empty())
 				{
 					std::cout << "POST IS SETTING STATE TO BODY" << std::endl;
+					resetBytes();
+					std::cout << "pollout() _data: " << _data << std::endl;
+					_data = std::string("");
+					_left = 0;
 					_state = BODY;
 				} else {
 					_state = HEADER;

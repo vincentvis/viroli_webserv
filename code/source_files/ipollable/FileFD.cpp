@@ -43,14 +43,17 @@ void FileFD::setData(std::string data) {
 }
 
 void FileFD::pollout() {
-
+//	setData(lient._request.getBody());
 //_requestInterface.
 	time(&_tick);
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
 	_bytes = write(_fd, _buffer.data(), getRemainderBytes());
 
-	for (size_t i = 0; i < _buffer.size(); ++i) {
-		std::cout << _buffer[i];
+
+	std::cout << "buffer content: \n";
+	for (size_t i = 0; i < getRemainderBytes(); ++i) {
+		std::cout << _buffer[i] << std::endl;
+		std::cout << "index: " << i << std::endl;
 	}
 
 
@@ -60,6 +63,7 @@ void FileFD::pollout() {
 	}
 	if (_left == 0) {
 		// close(_fd);
+		std::cout << "finished writing\n";
 		_closed = true;
 		_requestInterface->processResponse(_client, "", "201");
 		// file made, ready for response

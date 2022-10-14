@@ -127,12 +127,13 @@ void HttpRequest::processResponse(ClientFD *Client, std::string messageBody,
 // }
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
-//	200 turn into 201 if the file is valid
-//		std::string uri = Client._location->getRoot();
-//		if (uri.empty()) {
-//			uri = Client._config->getRoot();
-//		}
-//		uri  = uri + Client._request.getUri();
+	//	200 turn into 201 if the file is valid
+	//		std::string uri = Client._location->getRoot();
+	//		if (uri.empty()) {
+	//			uri = Client._config->getRoot();
+	//		}
+	//		uri  = uri + Client._request.getUri();
+//	std::cout << "POSTRequest:: Client request body.size(): " << Client._request.getBody().size() << std::endl;
 	std::string path = Client._config->getRoot(Client._location);
 	std::string uri  = Client._request.getUri();
 	if (*path.rbegin() != '/' && (uri.empty() == false && uri.at(0) != '/')) {
@@ -142,17 +143,15 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 	std::cout << path << std::endl;
 	int fd = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change
 
-//	fd = open(filepath.c_str(), O_RDONLY);
+	//	fd = open(filepath.c_str(), O_RDONLY);
 	if (fd == -1) {
 		processResponse(&Client, "", "404");
 	} else {
-//		set location in response header
+		//		set location in response header
 		Client._fileFD = reinterpret_cast<FileFD *>(
 			Server::addPollable(Client._server, fd, FILEPOLL, POLLOUT));
-		std::cout << "CLIENT body: [" << Client.getBodyStr() << "]" << std::endl;
-//		std::cout << "response status: [" << Client._response.getResponse() << "]" << std::cout;
-		if (!Client.getBodyStr().empty()){
-			Client._fileFD->setData(Client.getBodyStr());
+		if (!Client.getBodyStr().empty()) {
+			Client._fileFD->setData(Client._request.getBody());
 			std::cout << "body: [" << Client._request.getBody() << "]" << std::endl;
 		}
 		Client._fileFD->setRequestInterface(this, &Client);
