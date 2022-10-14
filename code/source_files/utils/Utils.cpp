@@ -91,7 +91,7 @@ bool ends_with(const std::string &source, const std::string &match) {
 std::string getExtensionFromString(const std::string &source) {
 	const std::string::size_type dot_pos = source.find_last_of(".");
 
-	if (dot_pos == std::string::npos || dot_pos + 1 == std::string::npos) {
+	if (dot_pos == std::string::npos || dot_pos >= source.length()) {
 		return "txt";
 	}
 	std::string ext = source.substr(dot_pos + 1);
