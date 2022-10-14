@@ -151,10 +151,10 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 		std::cout << "yes" << std::endl;
 		Client._fileFD = reinterpret_cast<FileFD *>(
 			Server::addPollable(Client._server, fd, FILEPOLL, POLLOUT));
-//		if (!Client.getBodyStr().empty()){
-//			Client._fileFD->setData(Client.getBodyStr());
-//			std::cout << "body: [" << Client._request.getBody() << "]" << std::cout;
-//		}
+		if (!Client.getBodyStr().empty()){
+			Client._fileFD->setData(Client.getBodyStr());
+			std::cout << "body: [" << Client._request.getBody() << "]" << std::cout;
+		}
 		Client._fileFD->setRequestInterface(this, &Client);
 	}
 }

@@ -135,7 +135,7 @@ void ClientFD::getHeader() {
 			_total = _data.size();
 			_bytes = 0;
 			_state = BODY;
-			if (this->_request.getMethod() == "POST") {
+			if (this->_request.getMethod() == "POST" && this->_request.getExpect() == "100-continue") {
 				this->_requestInterface = new HttpRequest(*this);
 				this->_requestInterface->processResponse(this, "", "100");
 			} else {
@@ -184,7 +184,7 @@ int32_t ClientFD::getRemainderBytes() const {
 }
 
 void ClientFD::ready() {
-	std::cout << _state << std::endl;
+	std::cout << "state: " << _state << std::endl;
 	//	this->_request.printAttributesInRequestClass(); // REMOVE LATER
 	if (_state == END) {
 		// std::cout << "\n-------------\nbody: \n" << _body << "\n-------------\n";
