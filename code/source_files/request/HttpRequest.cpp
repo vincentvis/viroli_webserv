@@ -10,7 +10,6 @@ HttpRequest::HttpRequest(ClientFD &Client) {
 }
 
 void HttpRequest::CheckMethod(ClientFD &Client) {
-	std::cout << "check method" << std::endl;
 	if (Client._request.getMethod() == Utils::get_string) {
 		GETRequest(Client);
 	}
@@ -148,12 +147,13 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 		processResponse(&Client, "", "404");
 	} else {
 //		set location in response header
-		std::cout << "yes" << std::endl;
 		Client._fileFD = reinterpret_cast<FileFD *>(
 			Server::addPollable(Client._server, fd, FILEPOLL, POLLOUT));
+		std::cout << "CLIENT body: [" << Client.getBodyStr() << "]" << std::endl;
+//		std::cout << "response status: [" << Client._response.getResponse() << "]" << std::cout;
 		if (!Client.getBodyStr().empty()){
 			Client._fileFD->setData(Client.getBodyStr());
-			std::cout << "body: [" << Client._request.getBody() << "]" << std::cout;
+			std::cout << "body: [" << Client._request.getBody() << "]" << std::endl;
 		}
 		Client._fileFD->setRequestInterface(this, &Client);
 	}

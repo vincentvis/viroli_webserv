@@ -104,7 +104,7 @@ void Request::ParseRequest(std::string BUF) {
 	/* check Expect */
 	this->_itr = _header.find("Expect");
 	if (this->_itr != _header.end()) {
-		this->_connection = this->_itr->second;
+		this->_expect = this->_itr->second;
 	}
 	/* after parsing header, set header available */
 	this->_headerAvailable = true;

@@ -43,19 +43,16 @@ void FileFD::setData(std::string data) {
 }
 
 void FileFD::pollout() {
-//	std::cout << "data:" << _data << std::endl;
+
 //_requestInterface.
 	time(&_tick);
-	std::cout << "_data.size(): " << _data.size() << std::endl;
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
 	_bytes = write(_fd, _buffer.data(), getRemainderBytes());
 
-	std::cout << "buffer content:\n";
 	for (size_t i = 0; i < _buffer.size(); ++i) {
 		std::cout << _buffer[i];
 	}
-	std::cout << std::endl;
-	std::cout << "FileFD::polout" << std::endl;
+
 
 	if (_bytes) {
 		_total += _bytes;
@@ -64,7 +61,6 @@ void FileFD::pollout() {
 	if (_left == 0) {
 		// close(_fd);
 		_closed = true;
-		std::cout << "ready to write" << std::endl;
 		_requestInterface->processResponse(_client, "", "201");
 		// file made, ready for response
 	}
