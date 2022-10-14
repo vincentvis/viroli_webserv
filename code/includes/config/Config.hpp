@@ -54,7 +54,6 @@ class Config {
 		std::vector<std::string>           _index;
 		std::map<std::string, std::string> _errorPages;
 		int64_t                            _maxBodySize;
-		bool                               _allowUpload;
 		std::string                        _autoIndex;
 		std::vector<Location>              _locations;
 

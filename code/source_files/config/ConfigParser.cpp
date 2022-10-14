@@ -73,6 +73,52 @@ std::vector<Config *> ConfigParser::parseFromArgs(int argc, char const **argv) {
 	return (this->_configs);
 }
 
+void ConfigParser::getErrorPageContent(Config *config) {
+	if (config->_errorPages.size() == 0 || config->_root.empty()) {
+		return;
+	}
+
+	std::vector<std::string>                     keys_to_delete;
+	std::map<std::string, std::string>::iterator it  = config->_errorPages.begin();
+	std::map<std::string, std::string>::iterator end = config->_errorPages.end();
+	while (it != end) {
+		std::string path = config->_root + it->second;
+		if (*config->_root.rbegin() != '/' && it->second.at(0) != '/') {
+			path = config->_root + '/' + it->second;
+		}
+		std::ifstream file;
+		file.open(path.c_str(), std::ios_base::in);
+		if (file.is_open() == false) {
+			keys_to_delete.push_back(it->first);
+			it++;
+			// ignore because we cannot find it..
+			continue;
+		}
+		if (file.bad()) {
+			keys_to_delete.push_back(it->first);
+			it++;
+			// ignore because we cannot find it..
+			continue;
+		}
+		std::string fileContents;
+		std::string tmp;
+		while (file.eof() == false) {
+			getline(file, tmp);
+			fileContents += tmp;
+			fileContents += "\n";
+		}
+		file.close();
+		it->second = fileContents;
+		it++;
+	}
+	// delete error pages from map where no file was found
+	for (std::vector<std::string>::iterator it = keys_to_delete.begin();
+		 it != keys_to_delete.end(); it++)
+	{
+		config->_errorPages.erase(*it);
+	}
+}
+
 void ConfigParser::parseStream() {
 	getNewLine();
 
@@ -101,6 +147,8 @@ void ConfigParser::parseStream() {
 		if (newConfig->_ports.size() == 0) {
 			throw std::runtime_error("Missing required directives for server config");
 		}
+
+		getErrorPageContent(newConfig);
 	}
 	return;
 }

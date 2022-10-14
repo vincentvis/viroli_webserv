@@ -50,6 +50,7 @@ CLASSES		:= config/ConfigParser\
                 request/Request\
                 request/RequestInterface\
                 response/Response\
+                response/HttpStatus\
 				autoindex/Autoindex
 
 OBJECTS		:= $(CLASSES:%=$(OBJ_DIR)%.o)
