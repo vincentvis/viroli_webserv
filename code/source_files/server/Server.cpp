@@ -125,6 +125,7 @@ void Server::run() {
 			it = Server::_pollables.find(Server::_pfds[i].fd);
 			assert(it != Server::_pollables.end());
 			assert(it->second->getFileDescriptor() != -1);
+			it->second->setIndex(i);
 			it->second->timeout();
 			if (it->second->isClosed() == true) {
 				removePollable(i);

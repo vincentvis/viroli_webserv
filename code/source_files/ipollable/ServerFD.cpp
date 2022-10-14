@@ -52,3 +52,7 @@ void ServerFD::timeout() {
 bool ServerFD::isClosed() const {
 	return _closed;
 }
+
+void ServerFD::setIndex(int32_t index) {
+	_index = index;
+}
