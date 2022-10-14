@@ -17,10 +17,11 @@ void ClientFD::resetBytes() {
 
 void ClientFD::receive(size_t len) {
 	_bytes = recv(_fd, _buffer.data(), len, 0);
-	// std::cout << "bytes read: " << _bytes << std::endl;
 
-	if (_bytes == 0) {
+	if (_bytes == 0){
+
 		_state = END;
+//		process();
 		// _closed = true;
 	}
 	if (_bytes > 0) {
@@ -54,6 +55,7 @@ void ClientFD::receiveChunked() {
 				// std::cout << "\nbody:\n>>>\n" << _body << "\n>>>\n";
 				// std::cout << _total << std::endl;
 				_state = END;
+				//				process();
 				return;
 			}
 		}
@@ -77,6 +79,9 @@ void ClientFD::receiveChunked() {
 }
 
 void ClientFD::receiveLength() {
+	std::cout << "_left: " << _left << std::endl;
+	std::cout << "_total: " << _total << std::endl;
+	std::cout << _data << std::endl;
 	if (_left == 0) {
 		// _body = _data;
 		_left = _request.getContentLength();
@@ -92,8 +97,9 @@ void ClientFD::receiveLength() {
 	}
 	if (_total == _left) {
 		_body = _data;
-		// std::cout << ">>>>> body: " << _data << std::endl;
+		std::cout << "!>>>>> body: " << _data << std::endl;
 		_state = END;
+		process();
 	}
 }
 
@@ -117,9 +123,10 @@ void ClientFD::getHeader() {
 			} catch (const Utils::ErrorPageException &e) {
 				// CHECK IF THIS IS `delete`'ed  at some point..
 				this->_requestInterface = new HttpRequest(*this);
-				std::cerr << "THINGS STILL GO WRONG AT THIS POINT. the above line is a "
-							 "quick fix to not segfault!!"
-						  << std::endl;
+//				std::cerr << "THINGS STILL GO WRONG AT THIS POINT. the above line is a "
+//							 "quick fix to not segfault!!"
+//						  << std::endl;
+//				std::cout << "ERROR BUT WHY?" << std::endl;
 				this->_requestInterface->processResponse(this, "", e.what());
 			} catch (const std::exception &e) {
 				// other exceptions like std::string! should be finished later/how?
@@ -128,25 +135,26 @@ void ClientFD::getHeader() {
 			_total = _data.size();
 			_bytes = 0;
 			_state = BODY;
-			if (this->_request.getMethod() == "POST")
-			{
+			if (this->_request.getMethod() == "POST") {
 				this->_requestInterface = new HttpRequest(*this);
 				this->_requestInterface->processResponse(this, "", "100");
-			}
-			else {
+			} else {
 				process();
 			}
-
 		}
 	}
-	//	if there is a body and the method is body we need to send a 100 response in between the header and the body parsing
+	//	if there is a body and the method is body we need to send a 100 response in
+	//between the header and the body parsing
+}
+std::string ClientFD::getBodyStr() const {
+	return _body;
 }
 
 void ClientFD::getBody() {
-	std::cout << "body" << std::endl;
 	if (_state == BODY) {
 		if (_request.contentLenAvailable() == true) {
-			std::cout << "contentlen" << std::endl;
+			//			std::cout << "contentlen" << std::endl; //
+			//			std::cout << _request.getContentLength() << std::endl; //
 			receiveLength();
 		} else if (_request.getChunked() == true) {
 			std::cout << "chuncked" << std::endl;
@@ -177,6 +185,7 @@ int32_t ClientFD::getRemainderBytes() const {
 
 void ClientFD::ready() {
 	std::cout << _state << std::endl;
+	//	this->_request.printAttributesInRequestClass(); // REMOVE LATER
 	if (_state == END) {
 		// std::cout << "\n-------------\nbody: \n" << _body << "\n-------------\n";
 		// std::cout << "body size: " << _body.size() << std::endl;
@@ -193,10 +202,14 @@ void ClientFD::ready() {
 void ClientFD::process() {
 	switch (_state) {
 		case HEADER:
+			std::cout << "HEADER" << std::endl;
 			return getHeader();
 		case BODY:
+			this->_request.printAttributesInRequestClass(); // REMOVE LATER
+			std::cout << "BODY" << std::endl;
 			return getBody();
 		case END:
+			std::cout << "END" << std::endl;
 			return ready();
 	}
 }
@@ -215,10 +228,10 @@ void ClientFD::pollout() {
 	time(&_tick);
 	/* make sure to not go out of bounds with the buffer */
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
-
+	std::cout << "ClientFD::polout" << std::endl;
 	_bytes = send(_fd, &_buffer[0], getRemainderBytes(), 0);
 	if (_bytes < 0) {
-		std::cout << "sjot\n";
+		std::cout << "sjot\n"; // what is this?
 	}
 
 	if (_bytes > 0) {
@@ -233,21 +246,23 @@ void ClientFD::pollout() {
 		} else {
 			std::cout << "send next request" << std::endl;
 			// _closed                      = true;
-			if (_request.getHeaderAvailable() == true){
-				//Expect : 100
-				if (_request.getMethod() == "POST" && _request.getBody().empty()){
+			if (_request.getHeaderAvailable() == true) {
+				// Expect : 100
+				if (_request.getMethod() == "POST" &&
+					_request.getExpect() == "100-continue" && _request.getBody().empty())
+				{
 					std::cout << "POST IS SETTING STATE TO BODY" << std::endl;
 					_state = BODY;
 				}
-//				else if (_request.getMethod() == "POST" && !_request.getBody().empty()){
-//					std::cout << "POST IS SETTING STATE TO END" << std::endl;
-//					_state = END;
-//				}
+				//				else if (_request.getMethod() == "POST" &&
+				//!_request.getBody().empty()){ 					std::cout << "POST IS SETTING STATE TO
+				//END" << std::endl; 					_state = END;
+				//				}
 				else
 					_state = HEADER;
 			}
-			Server::_pfds[_index].events = POLLIN;
 		}
+		Server::_pfds[_index].events = POLLIN;
 	}
 }
 
@@ -274,26 +289,24 @@ bool ClientFD::isClosed() const {
 }
 
 
-
-
 //#include "ipollable/ClientFD.hpp"
 //
-//ClientFD::ClientFD(Server *server, int fd, int index) :
+// ClientFD::ClientFD(Server *server, int fd, int index) :
 //	_server(server), _state(HEADER), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
 //	_total(0), _fd(fd), _index(index), _tick(), _closed(false) {
 //	time(&_tick);
 //}
 //
-//ClientFD::~ClientFD() {
+// ClientFD::~ClientFD() {
 //}
 //
-//void ClientFD::resetBytes() {
+// void ClientFD::resetBytes() {
 //	_bytes = 0;
 //	_left  = 0;
 //	_total = 0;
 //}
 //
-//void ClientFD::receive(size_t len) {
+// void ClientFD::receive(size_t len) {
 //	_bytes = recv(_fd, _buffer.data(), len, 0);
 //	// std::cout << "bytes read: " << _bytes << std::endl;
 //
@@ -306,7 +319,7 @@ bool ClientFD::isClosed() const {
 //	}
 //}
 //
-//void ClientFD::receiveChunked() {
+// void ClientFD::receiveChunked() {
 //	std::stringstream stream;
 //	size_t            pos = 0;
 //
@@ -354,7 +367,7 @@ bool ClientFD::isClosed() const {
 //	}
 //}
 //
-//void ClientFD::receiveLength() {
+// void ClientFD::receiveLength() {
 //	if (_left == 0) {
 //		// _body = _data;
 //		_left = _request.getContentLength();
@@ -375,7 +388,7 @@ bool ClientFD::isClosed() const {
 //	}
 //}
 //
-//void ClientFD::sendResponse(int index) { // remove index parameter?
+// void ClientFD::sendResponse(int index) { // remove index parameter?
 //	Server::_pfds[index].events = POLLOUT;
 //	_data  = _response.getResponse(); // this should work at a certain moment
 //	_bytes = 0;                       // ronald check are these oke?
@@ -383,7 +396,7 @@ bool ClientFD::isClosed() const {
 //	_left  = _data.size();            // ronald check are these oke?
 //}
 //
-//void ClientFD::getHeader() {
+// void ClientFD::getHeader() {
 //	if (_state == HEADER) {
 //		size_t end = 0;
 //		if ((end = _data.find(CRLF_END)) != std::string::npos) {
@@ -415,10 +428,11 @@ bool ClientFD::isClosed() const {
 //			_state = BODY;
 //		}
 //	}
-////	if there is a body and the method is body we need to send a 100 response in between the header and the body parsing
+////	if there is a body and the method is body we need to send a 100 response in between
+///the header and the body parsing
 //}
 //
-//void ClientFD::getBody() {
+// void ClientFD::getBody() {
 //	if (_state == BODY) {
 //		if (_request.contentLenAvailable() == true) {
 //			receiveLength();
@@ -442,11 +456,11 @@ bool ClientFD::isClosed() const {
 //	}
 //}
 //
-//int32_t ClientFD::getRemainderBytes() const {
+// int32_t ClientFD::getRemainderBytes() const {
 //	return BUFFERSIZE > _left ? _left : BUFFERSIZE;
 //}
 //
-//void ClientFD::ready() {
+// void ClientFD::ready() {
 //	std::cout << _state << std::endl;
 // 	if (_state == END) {
 //		// std::cout << "\n-------------\nbody: \n" << _body << "\n-------------\n";
@@ -462,7 +476,7 @@ bool ClientFD::isClosed() const {
 //}
 //
 ///* receive data */
-//void ClientFD::pollin() {
+// void ClientFD::pollin() {
 //	if (_request.getHeaderAvailable() == true){
 //		if (_request.getMethod() == "POST")
 //			_state = BODY;
@@ -477,40 +491,40 @@ bool ClientFD::isClosed() const {
 //		case END:
 //			ready();
 //	}
-//}
-//
-/////* send data */
-/////* need to know connection status (keep-alive|close) */
-////void ClientFD::pollout() {
-////	time(&_tick);
-////	/* make sure to not go out of bounds with the buffer */
-////	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
-////
-////	_bytes = send(_fd, &_buffer[0], getRemainderBytes(), 0);
-////	if (_bytes < 0) {
-////		std::cout << "sjot\n";
-////	}
-////
-////	if (_bytes > 0) {
-////		_total += _bytes;
-////		_left -= _bytes;
-////	}
-////
-////	/* what to do after all data is sent? */
-////	if (_left == 0) {
-////		if (_request.getConnectionAvailable() == false) {
-////			_closed = true;
-////		} else {
-////			std::cout << "send next request" << std::endl;
-////			_closed                      = true;
-////			Server::_pfds[_index].events = POLLIN;
-////		}
-////	}
-////}
+// }
 //
 ///* send data */
 ///* need to know connection status (keep-alive|close) */
-//void ClientFD::pollout() {
+// void ClientFD::pollout() {
+//	time(&_tick);
+//	/* make sure to not go out of bounds with the buffer */
+//	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
+//
+//	_bytes = send(_fd, &_buffer[0], getRemainderBytes(), 0);
+//	if (_bytes < 0) {
+//		std::cout << "sjot\n";
+//	}
+//
+//	if (_bytes > 0) {
+//		_total += _bytes;
+//		_left -= _bytes;
+//	}
+//
+//	/* what to do after all data is sent? */
+//	if (_left == 0) {
+//		if (_request.getConnectionAvailable() == false) {
+//			_closed = true;
+//		} else {
+//			std::cout << "send next request" << std::endl;
+//			_closed                      = true;
+//			Server::_pfds[_index].events = POLLIN;
+//		}
+//	}
+// }
+//
+///* send data */
+///* need to know connection status (keep-alive|close) */
+// void ClientFD::pollout() {
 //	time(&_tick);
 //	/* make sure to not go out of bounds with the buffer */
 //	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
@@ -536,21 +550,21 @@ bool ClientFD::isClosed() const {
 //			Server::_pfds[_index].events = POLLIN;
 //		}
 //	}
-//}
+// }
 //
 //
 //
 //
 //
-//int ClientFD::getFileDescriptor() const {
+// int ClientFD::getFileDescriptor() const {
 //	return _fd;
-//}
+// }
 //
-//Server *ClientFD::getServer() const {
+// Server *ClientFD::getServer() const {
 //	return _server;
-//}
+// }
 //
-//void ClientFD::timeout() {
+// void ClientFD::timeout() {
 //	time_t timeout;
 //
 //	time(&timeout);
@@ -558,8 +572,8 @@ bool ClientFD::isClosed() const {
 //		std::cout << "TIMEOUT\n"; // generate a response error. close connection
 //		_closed = true;
 //	}
-//}
+// }
 //
-//bool ClientFD::isClosed() const {
+// bool ClientFD::isClosed() const {
 //	return _closed;
-//}
+// }

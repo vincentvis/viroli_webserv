@@ -46,8 +46,16 @@ void FileFD::pollout() {
 //	std::cout << "data:" << _data << std::endl;
 //_requestInterface.
 	time(&_tick);
+	std::cout << "_data.size(): " << _data.size() << std::endl;
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
 	_bytes = write(_fd, _buffer.data(), getRemainderBytes());
+
+	std::cout << "buffer content:\n";
+	for (size_t i = 0; i < _buffer.size(); ++i) {
+		std::cout << _buffer[i];
+	}
+	std::cout << std::endl;
+	std::cout << "FileFD::polout" << std::endl;
 
 	if (_bytes) {
 		_total += _bytes;

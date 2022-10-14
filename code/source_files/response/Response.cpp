@@ -104,8 +104,8 @@ void Response::initResponse(std::string status, Config *Conf, const Request &Req
 	this->_date = "Date: " + getDate();
 	this->_serverType =
 		"Server: VIROLI_Server/26.3.8"; // or is this the servername in the config?
-
-	this->_contentType = "Content-type: " + getContentType();
+	if (!this->_messageBody.empty())
+		this->_contentType = "Content-type: " + getContentType();
 	if (Req.getConnectionAvailable() == false)
 		this->_connection = "Connection: " + Req.getConnectionInfo();
 	else

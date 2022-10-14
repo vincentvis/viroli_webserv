@@ -49,6 +49,7 @@ class ClientFD : public IPollable {
 		size_t  extractChunkedSize(size_t pos);
 		void    getHeader();
 		void    getBody();
+		std::string getBodyStr() const;
 		void    receive(size_t len);
 		void    receiveChunked();
 		void    receiveLength();
