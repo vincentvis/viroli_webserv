@@ -19,6 +19,7 @@ class Request {
 		std::string                        _HTTPVersion;
 		std::string                        _body;
 		std::string                        _connection;
+		std::string                        _expect;
 		bool                               _ConnectionAvailable;
 		bool                               _CGI;
 		bool                               _TransferEncodingChunked;
@@ -49,6 +50,7 @@ class Request {
 		std::string                        getHTTPVersion() const;
 		std::string                        getBody() const;
 		std::string                        getQuery() const;
+		std::string                        getExpect() const;
 		bool                               contentLenAvailable() const;
 		bool                               getConnectionAvailable() const;
 		bool                               getChunked() const;

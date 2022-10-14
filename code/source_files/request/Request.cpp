@@ -101,6 +101,11 @@ void Request::ParseRequest(std::string BUF) {
 			this->_TransferEncodingChunked = true;
 	}
 
+	/* check Expect */
+	this->_itr = _header.find("Expect");
+	if (this->_itr != _header.end()) {
+		this->_connection = this->_itr->second;
+	}
 	/* after parsing header, set header available */
 	this->_headerAvailable = true;
 }
@@ -187,6 +192,10 @@ std::string Request::getBody() const {
 	return this->_body;
 }
 
+std::string Request::getExpect() const {
+	return this->_expect;
+}
+
 std::string Request::getQuery() const {
 	return this->_query;
 }
@@ -240,6 +249,7 @@ void Request::printAttributesInRequestClass() {
 	std::cout << "CGI = [" << this->_CGI << "]" << std::endl;
 	std::cout << "chunked = [" << this->_TransferEncodingChunked << "]" << std::endl;
 	std::cout << "content-length = [" << this->getContentLength() << "]" << std::endl;
+	std::cout << "expect = [" << this->getExpect() << "]" << std::endl;
 	std::cout << "--------------------------------------" << std::endl;
 }
 

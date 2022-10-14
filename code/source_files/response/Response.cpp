@@ -113,9 +113,14 @@ void Response::initResponse(std::string status, Config *Conf, const Request &Req
 
 	//	/* Message Body */
 	//		this->_messageBody = already set
+	if (Req.getMethod() == "POST")
+		this->_contentLen =
+			"Content-Length: " + Req.getContentLength();
+	else{
+		this->_contentLen =
+			"Content-Length: " + Utils::to_string(this->_messageBody.length());
+	}
 
-	this->_contentLen =
-		"Content-Length: " + Utils::to_string(this->_messageBody.length());
 }
 
 void Response::createResponse() {

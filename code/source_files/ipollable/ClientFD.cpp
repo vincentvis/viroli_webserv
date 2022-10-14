@@ -239,11 +239,10 @@ void ClientFD::pollout() {
 					std::cout << "POST IS SETTING STATE TO BODY" << std::endl;
 					_state = BODY;
 				}
-				else if (_request.getMethod() == "POST" && !_request.getBody().empty()){
-					std::cout << "POST IS SETTING STATE TO BODY" << std::endl;
-					_state = END;
-				}
-
+//				else if (_request.getMethod() == "POST" && !_request.getBody().empty()){
+//					std::cout << "POST IS SETTING STATE TO END" << std::endl;
+//					_state = END;
+//				}
 				else
 					_state = HEADER;
 			}

@@ -79,6 +79,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	Client._fileFD = reinterpret_cast<FileFD *>(
 		Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
 	Client._fileFD->setRequestInterface(this, &Client);
+
 }
 
 // Statuscode range:
@@ -148,8 +149,10 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 		std::cout << "yes" << std::endl;
 		Client._fileFD = reinterpret_cast<FileFD *>(
 			Server::addPollable(Client._server, fd, FILEPOLL, POLLOUT));
-		Client._fileFD->setRequestInterface(this, &Client);
 		Client._fileFD->setData(Client._request.getBody());
+		std::cout << "body: [" << Client._request.getBody() << "]" << std::cout;
+		Client._fileFD->setRequestInterface(this, &Client);
+
 	}
 }
 
