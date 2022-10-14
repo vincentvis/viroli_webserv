@@ -28,7 +28,7 @@ class FileFD : public IPollable {
 
 		void              pollin();
 		void              pollout();
-		int               getFileDescriptor() const;
+		int               getFD() const;
 		void              readFile();
 		void              writeFile();
 		void              setData(std::string data);

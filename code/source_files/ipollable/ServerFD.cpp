@@ -29,16 +29,14 @@ void ServerFD::pollin() {
 	}
 
 	std::cout << "new connection accepted\n";
-	Server::addPollable(_server, newfd, CLIENTPOLL, POLLIN);
-	// struct pollfd pfd = {newfd, POLLIN, 0};
-	// Server::addPollable(pfd, new ClientFD(_server, newfd, Server::_pfds.size()));
+	PollableFactory::pf.createPollable(_server, newfd, CLIENTFD, POLLIN);
 }
 
 /* do nothing on POLLOUT event */
 void ServerFD::pollout() {
 }
 
-int ServerFD::getFileDescriptor() const {
+int ServerFD::getFD() const {
 	return _fd;
 }
 

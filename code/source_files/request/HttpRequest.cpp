@@ -76,7 +76,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	}
 	/* add fileFd to poll */
 	Client._fileFD = reinterpret_cast<FileFD *>(
-		Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
+		PollableFactory::pf.createPollable(Client._server, fd, FILEPOLL, POLLIN));
 	Client._fileFD->setRequestInterface(this, &Client);
 }
 
