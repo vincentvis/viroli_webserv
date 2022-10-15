@@ -88,4 +88,17 @@ bool ends_with(const std::string &source, const std::string &match) {
 	return (std::equal(match.rbegin(), match.rend(), source.rbegin()));
 }
 
+std::string getExtensionFromString(const std::string &source) {
+	const std::string::size_type dot_pos = source.find_last_of(".");
+
+	if (dot_pos == std::string::npos || dot_pos >= source.length()) {
+		return "txt";
+	}
+	std::string ext = source.substr(dot_pos + 1);
+	if (ext.length() == 0) {
+		return "txt";
+	}
+	return ext;
+}
+
 } // namespace Utils
