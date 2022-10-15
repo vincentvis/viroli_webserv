@@ -240,3 +240,7 @@ void ClientFD::timeout() {
 bool ClientFD::isClosed() const {
 	return _closed;
 }
+
+void ClientFD::setIndex(int32_t index) {
+	_index = index;
+}

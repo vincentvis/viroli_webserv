@@ -25,6 +25,7 @@ void        trimLeadingWhitespaceRef(std::string &str);
 void        trimWhitespaceRef(std::string &str);
 bool        starts_with(const std::string &source, const std::string &prefix);
 bool        ends_with(const std::string &source, const std::string &match);
+std::string getExtensionFromString(const std::string &source);
 
 template <typename T> void print_vector(const std::vector<T> &vec) {
 	typename std::vector<T>::const_iterator it  = vec.begin();

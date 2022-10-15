@@ -18,4 +18,5 @@ class IPollable {
 		virtual bool    isClosed() const          = 0;
 		virtual int     getFileDescriptor() const = 0;
 		virtual Server *getServer() const         = 0;
+		virtual void    setIndex(int32_t index)   = 0;
 };
