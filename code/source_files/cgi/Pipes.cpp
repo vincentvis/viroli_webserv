@@ -1,11 +1,11 @@
 #include "cgi/Pipes.hpp"
 
 Pipes::Pipes() {
-	toCgi[READ_FD]     = ERR;
-	toCgi[WRITE_FD]    = ERR;
+	toCgi[READ_FD]     = SYS_ERR;
+	toCgi[WRITE_FD]    = SYS_ERR;
 
-	toServer[READ_FD]  = ERR;
-	toServer[WRITE_FD] = ERR;
+	toServer[READ_FD]  = SYS_ERR;
+	toServer[WRITE_FD] = SYS_ERR;
 }
 
 Pipes::~Pipes() {
@@ -16,11 +16,11 @@ Pipes::~Pipes() {
 	tryClose(toServer[WRITE_FD]);
 }
 
-Pipes::tryClose(int fd) {
-	if (fd != ERR) {
+void Pipes::tryClose(int fd) {
+	if (fd != SYS_ERR) {
 		close(fd);
 	}
-	fd = ERR;
+	fd = SYS_ERR;
 }
 
 void Pipes::closeForParent() {
@@ -33,13 +33,13 @@ void Pipes::closeForChild() {
 	tryClose(toCgi[WRITE_FD]);
 }
 
-Pipes::openPipes() {
+void Pipes::openPipes() {
 	if (pipe(toCgi) < 0) {
-		throw ErrorPageException("500");
+		throw Utils::ErrorPageException("500");
 	}
 	if (pipe(toServer) < 0) {
 		tryClose(toCgi[READ_FD]);
 		tryClose(toCgi[WRITE_FD]);
-		throw ErrorPageException("500");
+		throw Utils::ErrorPageException("500");
 	}
 }

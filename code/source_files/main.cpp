@@ -8,6 +8,8 @@
 #include <iostream>
 #include <string>
 
+#include "cgi/Exec.hpp"
+
 int main(int argc, char const *argv[]) {
 	std::vector<Server *> servers;
 	servers.reserve(100); // placeholder
@@ -20,7 +22,6 @@ int main(int argc, char const *argv[]) {
 				  << e.what() << std::endl;
 		return (1);
 	}
-
 
 	Server *serv;
 
@@ -55,6 +56,8 @@ int main(int argc, char const *argv[]) {
 				  << " | IPollable fd: " << it->second->getFileDescriptor();
 		std::cout << " | port: " << it->second->getServer()->getPort() << std::endl;
 	}
+
+	std::cout << "LAAAAAAAAAAAAAAAAAaa" << std::endl;
 
 	try {
 		Server::run();

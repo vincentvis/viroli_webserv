@@ -1,3 +1,6 @@
+#include "cgi/Exec.hpp"
+#include "cgi/Executables.hpp"
+
 Exec::Exec() {
 }
 

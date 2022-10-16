@@ -1,8 +1,11 @@
 #pragma once
 
+#include "utils/Defines.hpp"
 #include "utils/Exception.hpp"
+#include <string>
+#include <unistd.h>
 
-enum { READ_FD, WRITE_FD };
+enum { READ_FD, WRITE_FD, SYS_ERR = -1 };
 
 class Pipes {
 	public:

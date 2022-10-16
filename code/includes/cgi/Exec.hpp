@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cgi/Pipes.hpp"
+#include <unistd.h>
 
 class Exec {
 	public:
@@ -8,4 +9,5 @@ class Exec {
 		~Exec();
 
 	private:
+		Pipes pipes;
 };
