@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config/Config.hpp"
+#include "response/HttpStatus.hpp"
 #include "utils/Defines.hpp"
 #include <iostream>
 #include <map>
@@ -58,11 +59,12 @@ class Response {
 
 		std::string getDate();
 		std::string getContentType() const;
-		std::string findReasonPhrase(std::string status);
 		void        setMessageBody(std::string MessageBody);
 		void        setContentType(std::string ContentType);
 		void        findAndSetContentType(const Request &Req);
-		void        generateErrorPage(std::string page);
+		void
+		generateErrorPage(std::string                               status,
+						  const std::map<std::string, std::string> *customErrorPages);
 
 		//		void setStatusCode(std::string newRes); //needed later on or not?
 		//		void setReasonPhrase(std::string RP);

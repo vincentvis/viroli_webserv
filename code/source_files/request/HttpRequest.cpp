@@ -99,7 +99,8 @@ void HttpRequest::processResponse(ClientFD *Client, std::string messageBody,
 		Client->_response.setMessageBody(messageBody);
 	} else {
 		Client->_response.setContentType("text/html");
-		Client->_response.generateErrorPage(StatusCode);
+		Client->_response.generateErrorPage(StatusCode,
+											&Client->_config->getErrorPages());
 	}
 	/* generate response */
 	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);

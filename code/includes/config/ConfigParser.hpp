@@ -1,4 +1,5 @@
 #include "config/Config.hpp"
+#include "response/HttpStatus.hpp"
 #include "server/Server.hpp"
 #include "utils/Defines.hpp"
 #include "utils/Utils.hpp"
@@ -43,6 +44,7 @@ class ConfigParser {
 		uint16_t stringToPort(std::string &string);
 		void     processListen(Config &target);
 		void     processErrorPages(std::map<std::string, std::string> &target);
+		void     getErrorPageContent(Config *source);
 		void processAddParamsToVector(std::string name, std::vector<std::string> &target,
 									  std::vector<std::string>::size_type min,
 									  bool                                shouldBeUnique);

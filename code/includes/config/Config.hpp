@@ -35,14 +35,16 @@ class Config {
 		int64_t                         getMaxBodySize() const;
 		int64_t                         getMaxBodySize(Location *const primary) const;
 
-		bool                            getAllowUpload() const;
-		bool                            getAllowUpload(Location *const primary) const;
+		std::map<std::string, std::string> const &getErrorPages() const;
 
-		std::string const              &getAutoIndex() const;
-		std::string const              &getAutoIndex(Location *const primary) const;
+		bool                                      getAllowUpload() const;
+		bool                         getAllowUpload(Location *const primary) const;
 
-		bool                            containsServerName(std::string to_search);
-		std::vector<Location> const    &getLocations();
+		std::string const           &getAutoIndex() const;
+		std::string const           &getAutoIndex(Location *const primary) const;
+
+		bool                         containsServerName(std::string to_search);
+		std::vector<Location> const &getLocations();
 
 	protected:
 		int32_t                            _priority;
@@ -54,7 +56,6 @@ class Config {
 		std::vector<std::string>           _index;
 		std::map<std::string, std::string> _errorPages;
 		int64_t                            _maxBodySize;
-		bool                               _allowUpload;
 		std::string                        _autoIndex;
 		std::vector<Location>              _locations;
 
