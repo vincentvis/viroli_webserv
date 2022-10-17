@@ -10,7 +10,6 @@ FileFD::~FileFD() {
 }
 
 void FileFD::pollin() {
-	std::cout << "POLLIN" << std::endl;
 	time(&_tick);
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
 	if (_bytes < 0) {
@@ -44,7 +43,6 @@ void FileFD::setData(std::string data) {
 }
 
 void FileFD::pollout() {
-	std::cout << "POLLOUT" << _data << std::endl;
 	time(&_tick);
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
 	_bytes = write(_fd, _buffer.data(), getRemainderBytes());

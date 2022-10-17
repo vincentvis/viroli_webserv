@@ -101,25 +101,25 @@ void Response::initResponse(std::string status, Config *Conf, const Request &Req
 	this->_reasonPhrase = findReasonPhrase(status);
 
 	/* Http Header */
-	this->_date = "Date: " + getDate() + CRLF;
+	this->_date       = "Date: " + getDate() + CRLF;
 	this->_serverType = "Server: VIROLI_Server/26.3.8CRLF";
-	this->_serverType += CRLF; //not sure how to create one line 105+106?
-	if (!this->_messageBody.empty()){
+	this->_serverType += CRLF; // not sure how to create one line 105+106?
+	if (!this->_messageBody.empty()) {
 		this->_contentType = "Content-type: " + getContentType() + CRLF;
 	}
 
-	if (Req.getConnectionAvailable() == false){
+	if (Req.getConnectionAvailable() == false) {
 		this->_connection = "Connection: " + Req.getConnectionInfo();
-	}
-	else {
+	} else {
 		this->_connection = "Connection: Keep-Alive";
+		this->_connection += CRLF;
 	}
 
 	//	/* Message Body */
 	//		this->_messageBody = already set
-	if (Req.getMethod() == "GET"){
+	if (Req.getMethod() == "GET") {
 		this->_contentLen =
-			"Content-Length: " + Utils::to_string(Req.getContentLength()) + CRLF;
+			"Content-Length: " + Utils::to_string(this->_messageBody.length()) + CRLF;
 	}
 	if (Req.getMethod() == "POST") {
 		this->_location = "Location: " + Req.getUri() + CRLF; // with or without
@@ -127,17 +127,19 @@ void Response::initResponse(std::string status, Config *Conf, const Request &Req
 }
 
 void Response::createResponse() {
-	// contentlen is empty if the method is not get, is that oke for creating its response allocation wise?
-	// checks around these
+	// contentlen is empty if the method is not get, is that oke for creating its response
+	// allocation wise? checks around these
 	std::string StatusLine =
 		this->_httpVersion + " " + this->_statusCode + " " + this->_reasonPhrase + CRLF;
-	std::string HTTPHeader = this->_date  + this->_serverType  +
-							 this->_contentLen + this->_contentType + this->_location +
-							 this->_connection + CRLF CRLF;
+	std::string HTTPHeader = this->_date + this->_serverType + this->_contentLen +
+							 this->_contentType + this->_location + this->_connection +
+							 CRLF;
 
-	std::string MessageBody = this->_messageBody + CRLF;
+	if (!this->_messageBody.empty()) {
+		this->_messageBody += CRLF;
+	}
 
-	this->_response         = StatusLine + HTTPHeader + MessageBody;
+	this->_response = StatusLine + HTTPHeader + this->_messageBody;
 }
 
 std::string Response::getResponse() const {

@@ -85,12 +85,7 @@ void ClientFD::receiveLength() {
 						  // std::cout << " | left: " << _left << std::endl;
 	}
 	if (_total == _left) {
-		std::cout << "_left: " << _left << std::endl;
-		std::cout << "_total: " << _total << std::endl;
-		std::cout << "data: [" << _data << "]" << std::endl;
-
 		_body = _data;
-		std::cout << "!>>>>> body: " << _data << std::endl;
 		_state = END;
 		process();
 	}
@@ -99,7 +94,6 @@ void ClientFD::receiveLength() {
 void ClientFD::sendResponse(int index) { // remove index parameter?
 	Server::_pfds[index].events = POLLOUT;
 	_data  = _response.getResponse(); // this should work at a certain moment
-	std::cout << "response: [" << _data << "]" << std::endl;
 	_bytes = 0;                       // ronald check are these oke?
 	_total = 0;                       // ronald check are these oke?
 	_left  = _data.size();            // ronald check are these oke?
@@ -216,8 +210,6 @@ void ClientFD::pollin() {
 /* send data */
 /* need to know connection status (keep-alive|close) */
 void ClientFD::pollout() {
-	std::cout << "pollout" << std::endl;
-
 	time(&_tick);
 	/* make sure to not go out of bounds with the buffer */
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
@@ -237,7 +229,6 @@ void ClientFD::pollout() {
 			std::cout << "send next request" << std::endl;
 			 _closed                      = true;
 			if (_request.getHeaderAvailable() == true) {
-				std::cout << "komt hij hier in?" << std::cout;
 				if (_request.getMethod() == "POST" &&
 					_request.getExpect() == "100-continue" && _request.getBody().empty())
 				{
