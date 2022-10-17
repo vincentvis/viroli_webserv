@@ -46,6 +46,7 @@ CLASSES		:= config/ConfigParser\
                 request/Request\
                 request/RequestInterface\
                 response/Response\
+        		response/HttpStatus\
 				autoindex/Autoindex\
                 cgi/Exec\
                 cgi/Pipes

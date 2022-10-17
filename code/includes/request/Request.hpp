@@ -20,6 +20,8 @@ class Request {
 		std::string                        _HTTPVersion;
 		std::string                        _body;
 		std::string                        _connection;
+		std::string                        _location;
+		std::string                        _expect;
 		bool                               _ConnectionAvailable;
 		bool                               _CGI;
 		bool                               _TransferEncodingChunked;
@@ -38,8 +40,8 @@ class Request {
 		std::map<std::string, std::string>::iterator _itr;
 		void printAttributesInRequestClass(); // !used for testing; REMOVE later
 		void ParseRequest(std::string BUF);
-		void ValidateRequest(Config *conf);
-		bool methodsAllowed(const Request &Req, Config *Conf);
+		void ValidateRequest(Config *Conf);
+		bool methodsAllowed(Config *Conf);
 
 		void setBody(std::string NewBody);
 		std::map<std::string, std::string> getHeaderMap() const;
@@ -50,13 +52,13 @@ class Request {
 		std::string                        getHTTPVersion() const;
 		std::string                        getBody() const;
 		std::string                        getQuery() const;
+		std::string                        getExpect() const;
 		bool                               contentLenAvailable() const;
 		bool                               getConnectionAvailable() const;
 		bool                               getChunked() const;
 		long                               getContentLength() const;
 		bool                               getCgi() const;
 		bool                               getHeaderAvailable() const;
-		bool                               checkValidMethod(const Request &Req);
-
+		bool                               checkValidMethod();
 		bool                               uriIsDir() const;
 };

@@ -18,17 +18,19 @@ Config *Server::findConfig(const Request &request) const {
 	std::vector<Config *>::const_iterator        end    = this->_configs.end();
 
 	std::map<std::string, std::string>           header = request.getHeaderMap();
-	std::map<std::string, std::string>::iterator host   = header.find("host");
+	std::map<std::string, std::string>::iterator host   = header.find("Host");
+
 	if (host == header.end()) {
-		// TODO !
-		// check if this is correct,
-		// currently, if there is not host field in the header, we return the first config
 		return (*(this->_configs.begin()));
 	}
 
+	std::string hostname = host->second;
+	if (std::string::size_type colon_pos = hostname.find(":")) {
+		hostname = hostname.substr(0, colon_pos);
+	}
 
 	for (; begin != end; ++begin) {
-		if ((*begin)->containsServerName(host->second)) {
+		if ((*begin)->containsServerName(hostname)) {
 			return *begin;
 		}
 	}
@@ -81,10 +83,10 @@ int32_t Server::getFileDescriptor() const {
 }
 
 void Server::removePollable(int index) {
-	std::cout << "size _pfds (pre-removal): " << Server::_pfds.size();
-	std::cout << "  | size _pollables (pre-removal): " << Server::_pollables.size()
-			  << std::endl;
-	std::cout << "fd to be closed: " << Server::_pfds[index].fd << std::endl;
+//	std::cout << "size _pfds (pre-removal): " << Server::_pfds.size();
+//	std::cout << "  | size _pollables (pre-removal): " << Server::_pollables.size()
+//			  << std::endl;
+//	std::cout << "fd to be closed: " << Server::_pfds[index].fd << std::endl;
 
 
 	close(Server::_pfds[index].fd);
@@ -104,10 +106,10 @@ void Server::removePollable(int index) {
 	/* remove last element in vector */
 	Server::_pfds.pop_back();
 
-	std::cout << "size _pfds (post-removal): " << Server::_pfds.size();
-	std::cout << " | size _pollables (post-removal): " << Server::_pollables.size()
-			  << std::endl;
-	std::cout << "succesful removal\n";
+//	std::cout << "size _pfds (post-removal): " << Server::_pfds.size();
+//	std::cout << " | size _pollables (post-removal): " << Server::_pollables.size()
+//			  << std::endl;
+//	std::cout << "succesful removal\n";
 }
 
 /* events var might be not needed */

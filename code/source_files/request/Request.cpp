@@ -15,7 +15,7 @@ Request::Request() {
 	this->_CGI                     = false;
 	this->_TransferEncodingChunked = false;
 	this->_ContentLengthAvailable  = false;
-	this->_ConnectionAvailable     = false;
+	this->_ConnectionAvailable     = true;
 	_MethodKeys["GET"]             = GET;
 	_MethodKeys["DELETE"]          = DELETE;
 	_MethodKeys["POST"]            = POST;
@@ -73,11 +73,7 @@ void Request::ParseRequest(std::string BUF) {
 		/* if 'Connection: close' is specified */
 		if (this->_connection == std::string("close")) {
 			this->_ConnectionAvailable = false;
-		} else {
-			this->_ConnectionAvailable = true;
 		}
-	} else {
-		this->_ConnectionAvailable = true;
 	}
 
 	/* set CGI for initialisation request interface */
@@ -94,8 +90,8 @@ void Request::ParseRequest(std::string BUF) {
 			this->_ContentLength = Utils::stol(this->_itr->second);
 		} catch (const std::runtime_error &e) {
 			std::cerr << "stol failed: \n" << e.what() << std::endl;
+			throw Utils::ErrorPageException("400");
 		}
-		throw Utils::ErrorPageException("400");
 	}
 	if (this->_ContentLength < 0) {
 		throw Utils::ErrorPageException("400");
@@ -107,35 +103,27 @@ void Request::ParseRequest(std::string BUF) {
 			this->_TransferEncodingChunked = true;
 	}
 
+	/* check Expect */
+	this->_itr = _header.find("Expect");
+	if (this->_itr != _header.end()) {
+		this->_expect = this->_itr->second;
+	}
 	/* after parsing header, set header available */
 	this->_headerAvailable = true;
 }
 
-bool Request::methodsAllowed(const Request &Req, Config *Conf) {
-	std::vector<std::string>::const_iterator tryFind;
-	/* if both location.getAllow() and Config.getAllow don't exist "default fallback
-	 * rules" apply: all methods are allowed*/
-	Location *Loc = Conf->findLocation(Req);
-	if (Loc->getAllow().empty() && Conf->getAllow().empty())
-		return true;
-	/* check if location.getAllow() exists it overrules the fallback rules, else "config
-	 * fallback" rules should be applied */
-	if (!Loc->getAllow().empty()) {
-		tryFind =
-			std::find(Loc->getAllow().begin(), Loc->getAllow().end(), Req.getMethod());
-		return (tryFind != Loc->getAllow().end());
-	} else {
-		tryFind =
-			std::find(Conf->getAllow().begin(), Conf->getAllow().end(), Req.getMethod());
-		return (tryFind != Conf->getAllow().end());
-	}
+bool Request::methodsAllowed(Config *Conf) {
+	Location                *Loc   = Conf->findLocation(*this);
+
+		std::vector<std::string> allow = Conf->getAllow(Loc);
+	return (std::find(allow.begin(), allow.end(), getMethod()) != allow.end());
 }
 
-bool Request::checkValidMethod(const Request &Req) {
+bool Request::checkValidMethod() {
 	std::map<std::string, Request::e_RequestType>::iterator itr =
-		_MethodKeys.find(Req.getMethod());
+		_MethodKeys.find(getMethod());
 
-	switch (itr->second) {
+		switch (itr->second) {
 		case GET:
 		case POST:
 		case DELETE:
@@ -147,12 +135,12 @@ bool Request::checkValidMethod(const Request &Req) {
 
 void Request::ValidateRequest(Config *Conf) {
 	/* check method */
-	if (checkValidMethod(*this) == false) {
+	if (checkValidMethod() == false) {
 		throw Utils::ErrorPageException(
 			"405"); // not sure if this is the right number; the method given by the
 					// client could be "DOG"
 	}
-	if (methodsAllowed(*this, Conf) == false) {
+	if (methodsAllowed(Conf) == false) {
 		throw Utils::ErrorPageException("405");
 	};
 
@@ -191,6 +179,10 @@ std::string Request::getHTTPVersion() const {
 
 std::string Request::getBody() const {
 	return this->_body;
+}
+
+std::string Request::getExpect() const {
+	return this->_expect;
 }
 
 std::string Request::getQuery() const {
@@ -246,6 +238,7 @@ void Request::printAttributesInRequestClass() {
 	std::cout << "CGI = [" << this->_CGI << "]" << std::endl;
 	std::cout << "chunked = [" << this->_TransferEncodingChunked << "]" << std::endl;
 	std::cout << "content-length = [" << this->getContentLength() << "]" << std::endl;
+	std::cout << "expect = [" << this->getExpect() << "]" << std::endl;
 	std::cout << "--------------------------------------" << std::endl;
 }
 
