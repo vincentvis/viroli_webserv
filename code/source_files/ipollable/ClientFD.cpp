@@ -128,7 +128,7 @@ void ClientFD::getHeader() {
 			_total = _data.size();
 			_bytes = 0;
 			_state = BODY;
-			if (this->_request.getMethod() == "POST" &&
+			if (this->_request.getMethod() == Utils::post_string &&
 				this->_request.getExpect() == "100-continue")
 			{
 				this->_requestInterface = new HttpRequest(*this);
@@ -190,12 +190,15 @@ void ClientFD::ready() {
 void ClientFD::process() {
 	switch (_state) {
 		case HEADER:
-			return getHeader(); // change name? @ronald
+			getHeader(); // change name? @ronald
+			break;
 		case BODY:
 //			this->_request.printAttributesInRequestClass(); // REMOVE LATER
-			return getBody(); // change name? @ronald
+			getBody(); // change name? @ronald
+			break;
 		case END:
-			return ready(); // maybe even change this name @ronald
+			ready(); // maybe even change this name @ronald
+			break;
 	}
 }
 
