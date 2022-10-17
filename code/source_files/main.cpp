@@ -57,8 +57,6 @@ int main(int argc, char const *argv[]) {
 		std::cout << " | port: " << it->second->getServer()->getPort() << std::endl;
 	}
 
-	std::cout << "LAAAAAAAAAAAAAAAAAaa" << std::endl;
-
 	try {
 		Server::run();
 	} catch (std::string &e) {
