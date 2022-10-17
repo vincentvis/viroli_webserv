@@ -97,6 +97,7 @@ void ClientFD::sendResponse(int index) { // remove index parameter?
 	_bytes = 0;                       // ronald check are these oke?
 	_total = 0;                       // ronald check are these oke?
 	_left  = _data.size();            // ronald check are these oke?
+	std::cout << "state: " << _state << std::endl;
 }
 
 void ClientFD::getHeader() {
@@ -117,6 +118,7 @@ void ClientFD::getHeader() {
 				//						  << std::endl;
 				this->_requestInterface->processResponse(this, "", e.what());
 			} catch (const std::exception &e) {
+				std::cout << "temp error" << e.what() << std::endl;
 				// other exceptions like std::string! should be finished later/how?
 			}
 			_data  = _data.substr(end + CRLF_LEN2);
@@ -186,6 +188,7 @@ void ClientFD::process() {
 	switch (_state) {
 		case HEADER:
 			std::cout << "HEADER" << std::endl;
+//			this->_request.printAttributesInRequestClass(); // REMOVE LATER
 			getHeader(); // change name? @ronald
 			break;
 		case BODY:
@@ -227,9 +230,9 @@ void ClientFD::pollout() {
 			_closed = true;
 		} else {
 			std::cout << "send next request" << std::endl;
-			if (_request.getMethod() == Utils::get_string){
-				_closed                      = true;
-			}
+//			if (_request.getMethod() == Utils::get_string){
+//				_closed                      = true;
+//			}
 			if (_request.getHeaderAvailable() == true) {
 				if (_request.getMethod() == Utils::post_string &&
 					_request.getExpect() == "100-continue" && _request.getBody().empty())
