@@ -37,6 +37,6 @@ add_executable(webserv
         code/source_files/response/Response.cpp
         code/includes/response/Response.hpp
         code/includes/utils/Defines.hpp
-        code/source_files/autoindex/Autoindex)
+        code/source_files/autoindex/Autoindex.cpp)
 
 #target_link_libraries(webserv PUBLIC libft)

@@ -113,17 +113,13 @@ void Response::initResponse(std::string status, Config *Conf, const Request &Req
 
 	//	/* Message Body */
 	//		this->_messageBody = already set
-	if (Req.getMethod() == "POST")
+	if (Req.getMethod() == "GET")
 		this->_contentLen =
 			"Content-Length: " + Utils::to_string(Req.getContentLength());
-	else{
-		this->_contentLen =
-			"Content-Length: " + Utils::to_string(this->_messageBody.length());
-	}
-
 }
 
 void Response::createResponse() {
+	// contentlen is empty if the method is not get, is that oke for creating its response allocation wise?
 	// checks around these
 	std::string StatusLine =
 		this->_httpVersion + " " + this->_statusCode + " " + this->_reasonPhrase + CRLF;
