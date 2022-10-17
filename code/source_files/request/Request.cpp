@@ -81,8 +81,10 @@ void Request::ParseRequest(std::string BUF) {
 	}
 
 	/* set CGI for initialisation request interface */
-	if (this->_uri.find(".py") == this->_uri.length() - 3) // should be tested
+	// if (this->_uri.find(".py") == this->_uri.length() - 3) // should be tested
+	if (Utils::ends_with(this->_uri, ".py")) {
 		this->_CGI = true;
+	}
 
 	/* set content length and chunked for body creation in connectionClass */
 	this->_itr = _header.find("Content-Length");
