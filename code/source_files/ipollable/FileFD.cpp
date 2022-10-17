@@ -10,14 +10,15 @@ FileFD::~FileFD() {
 }
 
 void FileFD::pollin() {
+	std::cout << "POLLIN" << std::endl;
 	time(&_tick);
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
-
 	if (_bytes < 0) {
 		_closed = true;
 		_requestInterface->processResponse(_client, "", "500");
 		_state = END;
 	} else if (_bytes == 0) {
+		std::cout <<"data" << _data << std::endl;
 		_closed = true;
 		_requestInterface->processResponse(_client, _data, "200");
 		_state = END;
@@ -43,10 +44,10 @@ void FileFD::setData(std::string data) {
 }
 
 void FileFD::pollout() {
+	std::cout << "POLLOUT" << _data << std::endl;
 	time(&_tick);
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
 	_bytes = write(_fd, _buffer.data(), getRemainderBytes());
-
 	if (_bytes) {
 		_total += _bytes;
 		_left -= _bytes;

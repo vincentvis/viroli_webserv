@@ -77,9 +77,9 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	/* add fileFd to poll */
 	Client._fileFD = reinterpret_cast<FileFD *>(
 		Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
-	std::cout << "Client Body Str: " << Client.getBodyStr() << std::endl;
-	if (!Client.getBodyStr().empty())
-		Client._fileFD->setData(Client.getBodyStr());
+//	if (!Client.getBodyStr().empty()){
+//		Client._fileFD->setData(Client.getBodyStr());
+//	}
 	Client._fileFD->setRequestInterface(this, &Client);
 }
 

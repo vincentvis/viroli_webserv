@@ -134,9 +134,10 @@ void Response::createResponse() {
 	std::string HTTPHeader = this->_date  + this->_serverType  +
 							 this->_contentLen + this->_contentType + this->_location +
 							 this->_connection + CRLF CRLF;
-//	std::string MessageBody = this->_messageBody + CRLF;
 
-	this->_response         = StatusLine + HTTPHeader;// + MessageBody;
+	std::string MessageBody = this->_messageBody + CRLF;
+
+	this->_response         = StatusLine + HTTPHeader + MessageBody;
 }
 
 std::string Response::getResponse() const {
