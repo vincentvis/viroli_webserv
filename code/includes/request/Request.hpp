@@ -19,6 +19,7 @@ class Request {
 		std::string                        _HTTPVersion;
 		std::string                        _body;
 		std::string                        _connection;
+		std::string                        _location;
 		std::string                        _expect;
 		bool                               _ConnectionAvailable;
 		bool                               _CGI;

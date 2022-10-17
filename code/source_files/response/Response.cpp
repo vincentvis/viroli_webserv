@@ -116,6 +116,8 @@ void Response::initResponse(std::string status, Config *Conf, const Request &Req
 	if (Req.getMethod() == "GET")
 		this->_contentLen =
 			"Content-Length: " + Utils::to_string(Req.getContentLength());
+	if (Req.getMethod() == "POST")
+		this->_location = "Location: " + Req.getUri(); // with or without
 }
 
 void Response::createResponse() {
@@ -124,7 +126,7 @@ void Response::createResponse() {
 	std::string StatusLine =
 		this->_httpVersion + " " + this->_statusCode + " " + this->_reasonPhrase + CRLF;
 	std::string HTTPHeader = this->_date + CRLF + this->_serverType + CRLF +
-							 this->_contentLen + CRLF + this->_contentType + CRLF +
+							 this->_contentLen + CRLF + this->_contentType + CRLF + this->_location + CRLF +
 							 this->_connection + CRLF CRLF;
 	std::string MessageBody = this->_messageBody + CRLF;
 
