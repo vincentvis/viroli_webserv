@@ -230,24 +230,26 @@ void ClientFD::pollout() {
 			_closed = true;
 		} else {
 			std::cout << "send next request" << std::endl;
-//			if (_request.getMethod() == Utils::get_string){
-//				_closed                      = true;
-//			}
-//			 _closed                      = true;
+			//			if (_request.getMethod() == Utils::get_string){
+			//				_closed                      = true;
+			//			}
+			//			 _closed                      = true;
 			if (_request.getHeaderAvailable() == true) {
 				if (_request.getMethod() == Utils::post_string &&
 					_request.getExpect() == "100-continue" && _request.getBody().empty())
 				{
 					resetBytes();
 					_data  = std::string("");
-					_left  = 0;
 					_state = BODY;
 				} else {
 					_state = HEADER;
+					resetBytes();
+					_data = std::string("");
 				}
-			}
-			else {
+			} else {
 				_state = HEADER;
+				resetBytes();
+				_data = std::string("");
 			}
 		}
 		Server::_pfds[_index].events = POLLIN;

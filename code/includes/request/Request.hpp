@@ -39,8 +39,8 @@ class Request {
 		std::map<std::string, std::string>::iterator _itr;
 		void printAttributesInRequestClass(); // !used for testing; REMOVE later
 		void ParseRequest(std::string BUF);
-		void ValidateRequest(Config *conf);
-		bool methodsAllowed(const Request &Req, Config *Conf);
+		void ValidateRequest(Config *Conf);
+		bool methodsAllowed(Config *Conf);
 
 		void setBody(std::string NewBody);
 		std::map<std::string, std::string> getHeaderMap() const;
@@ -58,6 +58,6 @@ class Request {
 		long                               getContentLength() const;
 		bool                               getCgi() const;
 		bool                               getHeaderAvailable() const;
-		bool                               checkValidMethod(const Request &Req);
+		bool                               checkValidMethod();
 		bool                               uriIsDir() const;
 };

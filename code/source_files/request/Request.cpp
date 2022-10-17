@@ -110,31 +110,18 @@ void Request::ParseRequest(std::string BUF) {
 	this->_headerAvailable = true;
 }
 
-bool Request::methodsAllowed(const Request &Req, Config *Conf) {
-	std::vector<std::string>::const_iterator tryFind;
-	/* if both location.getAllow() and Config.getAllow don't exist "default fallback
-	 * rules" apply: all methods are allowed*/
-	Location *Loc = Conf->findLocation(Req);
-	if (Loc->getAllow().empty() && Conf->getAllow().empty())
-		return true;
-	/* check if location.getAllow() exists it overrules the fallback rules, else "config
-	 * fallback" rules should be applied */
-	if (!Loc->getAllow().empty()) {
-		tryFind =
-			std::find(Loc->getAllow().begin(), Loc->getAllow().end(), Req.getMethod());
-		return (tryFind != Loc->getAllow().end());
-	} else {
-		tryFind =
-			std::find(Conf->getAllow().begin(), Conf->getAllow().end(), Req.getMethod());
-		return (tryFind != Conf->getAllow().end());
-	}
+bool Request::methodsAllowed(Config *Conf) {
+	Location                *Loc   = Conf->findLocation(*this);
+
+		std::vector<std::string> allow = Conf->getAllow(Loc);
+	return (std::find(allow.begin(), allow.end(), getMethod()) != allow.end());
 }
 
-bool Request::checkValidMethod(const Request &Req) {
+bool Request::checkValidMethod() {
 	std::map<std::string, Request::e_RequestType>::iterator itr =
-		_MethodKeys.find(Req.getMethod());
+		_MethodKeys.find(getMethod());
 
-	switch (itr->second) {
+		switch (itr->second) {
 		case GET:
 		case POST:
 		case DELETE:
@@ -146,12 +133,12 @@ bool Request::checkValidMethod(const Request &Req) {
 
 void Request::ValidateRequest(Config *Conf) {
 	/* check method */
-	if (checkValidMethod(*this) == false) {
+	if (checkValidMethod() == false) {
 		throw Utils::ErrorPageException(
 			"405"); // not sure if this is the right number; the method given by the
 					// client could be "DOG"
 	}
-	if (methodsAllowed(*this, Conf) == false) {
+	if (methodsAllowed(Conf) == false) {
 		throw Utils::ErrorPageException("405");
 	};
 
