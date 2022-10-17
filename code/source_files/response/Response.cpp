@@ -133,7 +133,7 @@ void Response::createResponse() {
 		this->_httpVersion + " " + this->_statusCode + " " + this->_reasonPhrase + CRLF;
 	std::string HTTPHeader = this->_date + this->_serverType + this->_contentLen +
 							 this->_contentType + this->_location + this->_connection +
-							 CRLF;
+							 CRLF; // CRLF leesbaarheid
 
 	if (!this->_messageBody.empty()) {
 		this->_messageBody += CRLF;
