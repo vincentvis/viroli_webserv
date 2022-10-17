@@ -17,7 +17,7 @@ void FileFD::pollin() {
 		_requestInterface->processResponse(_client, "", "500");
 		_state = END;
 	} else if (_bytes == 0) {
-		std::cout <<"data" << _data << std::endl;
+		// std::cout <<"data" << _data << std::endl;
 		_closed = true;
 		_requestInterface->processResponse(_client, _data, "200");
 		_state = END;
@@ -51,7 +51,7 @@ void FileFD::pollout() {
 		_left -= _bytes;
 	}
 	if (_left == 0) {
-//		 close(_fd); // should this be erased?
+		//		 close(_fd); // should this be erased?
 		std::cout << "finished writing\n";
 		_closed = true;
 		_requestInterface->processResponse(_client, "", "201");
@@ -72,8 +72,8 @@ void FileFD::timeout() {
 
 	time(&timeout);
 	if (difftime(timeout, _tick) > 10) {
-		std::cout << "TIMEOUT\n"; // will have to send a response
-		_closed = true; // this must be removed?
+		std::cout << "filefd TIMEOUT\n"; // will have to send a response
+		_closed = true;                  // this must be removed?
 	}
 }
 
