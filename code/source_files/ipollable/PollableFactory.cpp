@@ -36,12 +36,13 @@ IPollable *PollableFactory::createPollable(Server *serv, int fd, int type, int e
 }
 
 PollableFactory::PollableFactory() : _memfun() {
-	_memfun.insert(std::make_pair(CLIENTFD, &PollableFactory::createClientFD));
-	_memfun.insert(std::make_pair(SERVERFD, &PollableFactory::createServerFD));
-	_memfun.insert(std::make_pair(FILEFD, &PollableFactory::createFileFD));
+	_memfun[0] = &PollableFactory::createServerFD;
+	_memfun[1] = &PollableFactory::createClientFD;
+	_memfun[2] = &PollableFactory::createFileFD;
 }
 
-PollableFactory::~PollableFactory() {
-}
+PollableFactory &PollableFactory::getInstance() {
+	static PollableFactory pollablefactory;
 
-PollableFactory PollableFactory::pf;
+	return pollablefactory;
+}

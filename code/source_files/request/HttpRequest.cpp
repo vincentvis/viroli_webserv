@@ -30,8 +30,8 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	path += uri;
 	int fd;
 
-	if (Client._request.uriIsDir()) {
-		if (Client._config->getAutoIndex(Client._location) == "on") {
+	if (Client._config->getAutoIndex(Client._location) == "on") {
+		if (Client._request.uriIsDir()) {
 			try {
 				Autoindex autoindex(path);
 				Client._response.setContentType("text/html");
@@ -75,8 +75,9 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		return;
 	}
 	/* add fileFd to poll */
-	Client._fileFD = reinterpret_cast<FileFD *>(
-		PollableFactory::pf.createPollable(Client._server, fd, FILEPOLL, POLLIN));
+	Client._fileFD =
+		reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
+			Client._server, fd, FILEPOLL, POLLIN));
 	Client._fileFD->setRequestInterface(this, &Client);
 }
 

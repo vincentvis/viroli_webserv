@@ -30,7 +30,8 @@ int main(int argc, char const *argv[]) {
 	std::map<uint16_t, std::vector<Config *> >::iterator end   = ports.end();
 	while (it != end) {
 		serv = new Server(it->first, it->second);
-		PollableFactory::pf.createPollable(serv, serv->getFD(), SERVERFD, POLLIN);
+		PollableFactory::getInstance().createPollable(serv, serv->getFD(), SERVERFD,
+													  POLLIN);
 		it++;
 	}
 

@@ -6,24 +6,23 @@
 #include "ipollable/FileFD.hpp"
 #include "ipollable/ServerFD.hpp"
 #include "utils/Defines.hpp"
-#include <map>
+#include <array>
 
 class IPollable;
 
 class PollableFactory {
 	public:
 		typedef IPollable *(PollableFactory::*MemFunP)(Server *serv, int fd, int event);
+		static PollableFactory &getInstance();
+		IPollable              *createPollable(Server *serv, int fd, int type, int event);
 
 	private:
-		std::map<int, MemFunP> _memfun;
+		PollableFactory();
+		std::array<MemFunP, 3> _memfun;
 		IPollable             *createClientFD(Server *serv, int fd, int event);
 		IPollable             *createServerFD(Server *serv, int fd, int event);
 		IPollable             *createFileFD(Server *serv, int fd, int event);
 
-	public:
-		IPollable *createPollable(Server *serv, int fd, int type, int event);
-		PollableFactory();
-		~PollableFactory();
-
-		static PollableFactory pf;
+		PollableFactory(PollableFactory const &);
+		void operator=(PollableFactory const &);
 };
