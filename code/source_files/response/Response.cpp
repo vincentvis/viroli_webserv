@@ -111,9 +111,8 @@ void Response::initResponse(std::string status, Config *Conf, const Request &Req
 	if (Req.getConnectionAvailable() == false){
 		this->_connection = "Connection: " + Req.getConnectionInfo();
 	}
-
 	else {
-		this->_connection = "Connection: Keep-Alive"; // is this correct @ronald?
+		this->_connection = "Connection: Keep-Alive";
 	}
 
 	//	/* Message Body */

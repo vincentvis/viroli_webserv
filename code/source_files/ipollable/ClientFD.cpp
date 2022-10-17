@@ -197,7 +197,7 @@ void ClientFD::process() {
 			getBody(); // change name? @ronald
 			break;
 		case END:
-			ready(); // maybe even change this name @ronald
+			ready(); // maybe even change this name? @ronald
 			break;
 	}
 }
