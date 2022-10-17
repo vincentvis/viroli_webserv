@@ -143,7 +143,6 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 	std::cout << path << std::endl;
 	int fd = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change
 
-	//	fd = open(filepath.c_str(), O_RDONLY);
 	if (fd == -1) {
 		processResponse(&Client, "", "404");
 	} else {
@@ -152,7 +151,6 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 			Server::addPollable(Client._server, fd, FILEPOLL, POLLOUT));
 		if (!Client.getBodyStr().empty()) {
 			Client._fileFD->setData(Client._request.getBody());
-			std::cout << "body: [" << Client._request.getBody() << "]" << std::endl;
 		}
 		Client._fileFD->setRequestInterface(this, &Client);
 	}

@@ -79,7 +79,6 @@ void ClientFD::receiveLength() {
 	if (_bytes > 0) {
 		_total += _bytes;
 		// _body.append(_buffer.begin(), _buffer.begin() + _bytes);  // this can be
-		// erased? std::cout << _body << std::endl;  // this can be erased?
 	}
 	if (_total < _left) { // this can be erased?
 						  // std::cout << "total: " << _total;
@@ -235,9 +234,7 @@ void ClientFD::pollout() {
 				if (_request.getMethod() == "POST" &&
 					_request.getExpect() == "100-continue" && _request.getBody().empty())
 				{
-					std::cout << "POST IS SETTING STATE TO BODY" << std::endl;
 					resetBytes();
-					std::cout << "pollout() _data: " << _data << std::endl;
 					_data  = std::string("");
 					_left  = 0;
 					_state = BODY;
