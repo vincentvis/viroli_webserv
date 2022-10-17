@@ -9,5 +9,8 @@ class Exec {
 		~Exec();
 
 	private:
-		Pipes pipes;
+		std::string executor_name;
+		std::string executor_path;
+		std::string script_name;
+		Pipes       pipes;
 };
