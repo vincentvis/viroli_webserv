@@ -152,7 +152,6 @@ void Request::ValidateRequest(Config *Conf) {
 					// client could be "DOG"
 	}
 	if (methodsAllowed(*this, Conf) == false) {
-		std::cout << "LISAERROR" << std::endl;
 		throw Utils::ErrorPageException("405");
 	};
 

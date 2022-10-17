@@ -117,7 +117,7 @@ void ClientFD::getHeader() {
 				// CHECK IF THIS IS `delete`'ed  at some point..
 				this->_requestInterface = new HttpRequest(*this);
 				//				std::cerr << "THINGS STILL GO WRONG AT THIS POINT. the
-				//above line is a " 							 "quick fix to not
+				// above line is a " 							 "quick fix to not
 				// segfault!!"
 				//						  << std::endl;
 				this->_requestInterface->processResponse(this, "", e.what());
@@ -190,15 +190,12 @@ void ClientFD::ready() {
 void ClientFD::process() {
 	switch (_state) {
 		case HEADER:
-			std::cout << "HEADER" << std::endl;
-			return getHeader();
+			return getHeader(); // change name? @ronald
 		case BODY:
-			this->_request.printAttributesInRequestClass(); // REMOVE LATER
-			std::cout << "BODY" << std::endl;
-			return getBody();
+//			this->_request.printAttributesInRequestClass(); // REMOVE LATER
+			return getBody(); // change name? @ronald
 		case END:
-			std::cout << "END" << std::endl;
-			return ready();
+			return ready(); // maybe even change this name @ronald
 	}
 }
 
