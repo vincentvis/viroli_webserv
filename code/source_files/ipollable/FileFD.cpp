@@ -51,7 +51,7 @@ void FileFD::pollout() {
 		_left -= _bytes;
 	}
 	if (_left == 0) {
-		// close(_fd); // should this be erased?
+//		 close(_fd); // should this be erased?
 		std::cout << "finished writing\n";
 		_closed = true;
 		_requestInterface->processResponse(_client, "", "201");
