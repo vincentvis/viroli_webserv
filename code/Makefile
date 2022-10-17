@@ -50,7 +50,7 @@ CLASSES		:= config/ConfigParser\
                 request/Request\
                 request/RequestInterface\
                 response/Response\
-        response/HttpStatus\
+        		response/HttpStatus\
 				autoindex/Autoindex\
 				config/MimeTypes
 

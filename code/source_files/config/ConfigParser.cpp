@@ -84,7 +84,7 @@ void ConfigParser::getErrorPageContent(Config *config) {
 	while (it != end) {
 		std::string path = config->_root + it->second;
 		if (*config->_root.rbegin() != '/' && it->second.at(0) != '/') {
-			path = config->_root + '/' + it->second;
+			path = config->_root + "/" + it->second;
 		}
 		std::ifstream file;
 		file.open(path.c_str(), std::ios_base::in);
