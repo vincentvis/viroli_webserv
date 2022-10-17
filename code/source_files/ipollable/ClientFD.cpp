@@ -227,9 +227,11 @@ void ClientFD::pollout() {
 			_closed = true;
 		} else {
 			std::cout << "send next request" << std::endl;
-			_closed                      = true;      "<---- deze moet nog aangepast worden"
+			if (_request.getMethod() == Utils::get_string){
+				_closed                      = true;
+			}
 			if (_request.getHeaderAvailable() == true) {
-				if (_request.getMethod() == "POST" &&
+				if (_request.getMethod() == Utils::post_string &&
 					_request.getExpect() == "100-continue" && _request.getBody().empty())
 				{
 					resetBytes();
