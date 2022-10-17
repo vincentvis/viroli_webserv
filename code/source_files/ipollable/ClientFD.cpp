@@ -233,7 +233,7 @@ void ClientFD::pollout() {
 //			if (_request.getMethod() == Utils::get_string){
 //				_closed                      = true;
 //			}
-			 _closed                      = true;
+//			 _closed                      = true;
 			if (_request.getHeaderAvailable() == true) {
 				if (_request.getMethod() == Utils::post_string &&
 					_request.getExpect() == "100-continue" && _request.getBody().empty())
@@ -246,8 +246,10 @@ void ClientFD::pollout() {
 					_state = HEADER;
 				}
 			}
+			else {
+				_state = HEADER;
+			}
 		}
-		_state = HEADER;
 		Server::_pfds[_index].events = POLLIN;
 	}
 }
