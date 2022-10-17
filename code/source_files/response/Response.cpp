@@ -79,11 +79,11 @@ void Response::findAndSetContentType(const Request &Req) {
 }
 
 void Response::generateErrorPage(
-	std::string status, const std::map<std::string, std::string> &customErrorPages) {
-	if (customErrorPages.empty() == false) {
+	std::string status, const std::map<std::string, std::string> *customErrorPages) {
+	if (customErrorPages && customErrorPages->empty() == false) {
 		std::map<std::string, std::string>::const_iterator custom =
-			customErrorPages.find(status);
-		if (custom != customErrorPages.end()) {
+			customErrorPages->find(status);
+		if (custom != customErrorPages->end()) {
 			this->_messageBody = custom->second;
 			return;
 		}

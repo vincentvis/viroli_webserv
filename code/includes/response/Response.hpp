@@ -64,7 +64,7 @@ class Response {
 		void        findAndSetContentType(const Request &Req);
 		void
 		generateErrorPage(std::string                               status,
-						  const std::map<std::string, std::string> &customErrorPages);
+						  const std::map<std::string, std::string> *customErrorPages);
 
 		//		void setStatusCode(std::string newRes); //needed later on or not?
 		//		void setReasonPhrase(std::string RP);
