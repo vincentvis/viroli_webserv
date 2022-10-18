@@ -1,4 +1,5 @@
 #include "response/Response.hpp"
+#include "ipollable/ClientFD.hpp"
 
 Response::Response() {
 	this->_respReady = false;
@@ -7,6 +8,25 @@ Response::Response() {
 void Response::setMessageBody(std::string MessageBody) {
 	this->_messageBody = MessageBody;
 }
+
+/* called in ClientFD after fileFD is read */
+void Response::processResponse(ClientFD *Client, std::string messageBody,
+								  std::string StatusCode) {
+	/* check errorpages */
+	if (StatusCode.at(0) < '4') {
+		Client->_response.findAndSetContentType(Client->_request);
+		Client->_response.setMessageBody(messageBody);
+	} else {
+		Client->_response.setContentType("text/html");
+		Client->_response.generateErrorPage(StatusCode,
+											&Client->_config->getErrorPages());
+	}
+	/* generate response */
+	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);
+	Client->_response.createResponse(); // thinking about merging those two
+	Client->sendResponse(Client->_index);
+}
+
 
 void Response::initResponse(std::string status, Config *Conf, const Request &Req) {
 	(void)Conf;

@@ -1,13 +1,10 @@
 #include "request/Request.hpp"
-// #include "server/Server.hpp"
 #include "config/Config.hpp"
 #include "utils/Defines.hpp"
 
 // Various ad hoc limitations on request-line length are found in practice. It is
 // RECOMMENDED that all HTTP senders and recipients support, at a minimum, request-line
 // lengths of 8000 octets.
-
-std::map<std::string, Request::e_RequestType> Request::_MethodKeys; // make static
 
 Request::Request() {
 	this->_headerAvailable         = false;
@@ -16,9 +13,6 @@ Request::Request() {
 	this->_TransferEncodingChunked = false;
 	this->_ContentLengthAvailable  = false;
 	this->_ConnectionAvailable     = true;
-	_MethodKeys["GET"]             = GET;
-	_MethodKeys["DELETE"]          = DELETE;
-	_MethodKeys["POST"]            = POST;
 }
 
 void Request::ParseRequest(std::string BUF) {

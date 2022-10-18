@@ -14,11 +14,11 @@ void FileFD::pollin() {
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
 	if (_bytes < 0) {
 		_closed = true;
-		_requestInterface->processResponse(_client, "", "500");
+		_client->_response.processResponse(_client, "", "500");
 		_state = END;
 	} else if (_bytes == 0) {
 		_closed = true;
-		_requestInterface->processResponse(_client, _data, "200");
+		_client->_response.processResponse(_client, _data, "200");
 		_state = END;
 		// body ready initialize it with response
 	} else if (_bytes > 0) {
@@ -53,7 +53,7 @@ void FileFD::pollout() {
 //		 close(_fd); // should this be erased?
 		std::cout << "finished writing\n";
 		_closed = true;
-		_requestInterface->processResponse(_client, "", "201");
+		_client->_response.processResponse(_client, "", "201");
 		// file made, ready for response
 	}
 }

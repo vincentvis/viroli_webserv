@@ -2,7 +2,6 @@
 
 #include "config/Config.hpp"
 #include "response/HttpStatus.hpp"
-#include "utils/Defines.hpp"
 #include <iostream>
 #include <map>
 
@@ -12,7 +11,7 @@
 //	300-399 is Redirection.
 //	400-499 is Client error.
 //	500-599 is Server error.
-
+class ClientFD;
 class Response {
 	private:
 		std::string _response;
@@ -54,6 +53,7 @@ class Response {
 
 		//		void 		processResponse(ClientFD *Client, std::string
 		// messageBody,std::string StatusCode);
+		void		processResponse(ClientFD *Client, std::string messageBody, std::string StatusCode);
 		void        initResponse(std::string status, Config *Conf, const Request &Req);
 		void        createResponse();
 

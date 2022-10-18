@@ -111,13 +111,7 @@ void ClientFD::getHeader() {
 				this->_location = this->_config->findLocation(this->_request);
 				this->_request.ValidateRequest(this->_config);
 			} catch (const Utils::ErrorPageException &e) {
-				// CHECK IF THIS IS `delete`'ed  at some point..
-				this->_requestInterface = new HttpRequest(*this);
-				//				std::cerr << "THINGS STILL GO WRONG AT THIS POINT. the
-				// above line is a " 							 "quick fix to not
-				// segfault!!"
-				//						  << std::endl;
-				this->_requestInterface->processResponse(this, "", e.what());
+				this->_response.processResponse(this, "", e.what());
 			} catch (const std::exception &e) {
 				std::cout << "temp error" << e.what() << std::endl;
 				// other exceptions like std::string! should be finished later/how?
@@ -130,7 +124,7 @@ void ClientFD::getHeader() {
 				this->_request.getExpect() == "100-continue")
 			{
 				this->_requestInterface = new HttpRequest(*this);
-				this->_requestInterface->processResponse(this, "", "100");
+				this->_response.processResponse(this, "", "100");
 			}
 		}
 	}
