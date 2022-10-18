@@ -85,7 +85,7 @@ void ClientFD::receiveLength() {
 						  // std::cout << " | left: " << _left << std::endl;
 	}
 	if (_total == _left) {
-		_body = _data;
+		_body  = _data;
 		_state = END;
 		process();
 	}
@@ -97,7 +97,6 @@ void ClientFD::sendResponse(int index) { // remove index parameter?
 	_bytes = 0;                       // ronald check are these oke?
 	_total = 0;                       // ronald check are these oke?
 	_left  = _data.size();            // ronald check are these oke?
-	std::cout << "state: " << _state << std::endl;
 }
 
 void ClientFD::getHeader() {
@@ -175,7 +174,13 @@ void ClientFD::ready() {
 	//	this->_request.printAttributesInRequestClass(); // REMOVE LATER
 	if (_state == END) {
 		_request.setBody(_body);
-		this->_request.printAttributesInRequestClass(); // REMOVE LATER
+		// this->_request.printAttributesInRequestClass(); // REMOVE LATER
+		std::cout
+			<< __PRETTY_FUNCTION__ << ": " << this->_requestInterface
+			<< "\033[31;4m <- IF THIS IS NOT NULL/0x0 we are creating memory leaks\033[0m"
+			<< std::endl;
+		//		if (_requestInterface)
+		//			delete _requestInterface;
 		if (this->_request.getCgi() == true) {
 			this->_requestInterface = new CGIRequest(*this);
 		} else {
@@ -188,12 +193,12 @@ void ClientFD::process() {
 	switch (_state) {
 		case HEADER:
 			std::cout << "HEADER" << std::endl;
-//			this->_request.printAttributesInRequestClass(); // REMOVE LATER
+			//			this->_request.printAttributesInRequestClass(); // REMOVE LATER
 			getHeader(); // change name? @ronald
 			break;
 		case BODY:
 			std::cout << "BODY" << std::endl;
-//			this->_request.printAttributesInRequestClass(); // REMOVE LATER
+			//			this->_request.printAttributesInRequestClass(); // REMOVE LATER
 			getBody(); // change name? @ronald
 			break;
 		case END:
@@ -209,6 +214,7 @@ void ClientFD::pollin() {
 	receive(BUFFERSIZE);
 	process();
 }
+
 
 /* send data */
 /* need to know connection status (keep-alive|close) */
@@ -229,32 +235,22 @@ void ClientFD::pollout() {
 		if (_request.getConnectionAvailable() == false) {
 			_closed = true;
 		} else {
+			_state = HEADER;
 			std::cout << "send next request" << std::endl;
-			//			if (_request.getMethod() == Utils::get_string){
-			//				_closed                      = true;
-			//			}
-			//			 _closed                      = true;
 			if (_request.getHeaderAvailable() == true) {
 				if (_request.getMethod() == Utils::post_string &&
 					_request.getExpect() == "100-continue" && _request.getBody().empty())
 				{
-					resetBytes();
-					_data  = std::string("");
 					_state = BODY;
-				} else {
-					_state = HEADER;
-					resetBytes();
-					_data = std::string("");
 				}
-			} else {
-				_state = HEADER;
-				resetBytes();
-				_data = std::string("");
 			}
+			resetBytes();
+			_data = std::string("");
+			Server::_pfds[_index].events = POLLIN;
 		}
-		Server::_pfds[_index].events = POLLIN;
 	}
 }
+
 
 int ClientFD::getFileDescriptor() const {
 	return _fd;

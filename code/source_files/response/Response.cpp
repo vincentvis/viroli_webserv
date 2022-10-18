@@ -17,21 +17,19 @@ void Response::initResponse(std::string status, Config *Conf, const Request &Req
 
 	/* Http Header */
 	this->_date       = "Date: " + getDate() + CRLF;
-	this->_serverType = "Server: VIROLI_Server/26.3.8CRLF";
-	this->_serverType += CRLF; // not sure how to create one line 105+106?
+	this->_serverType = "Server: VIROLI_Server/26.3.8" CRLF;
 	if (!this->_messageBody.empty()) {
 		this->_contentType = "Content-type: " + getContentType() + CRLF;
 	}
-
 	if (Req.getConnectionAvailable() == false) {
-		this->_connection = "Connection: " + Req.getConnectionInfo();
+		this->_connection = "Connection: " + Req.getConnectionInfo() + CRLF;
 	} else {
-		this->_connection = "Connection: Keep-Alive";
-		this->_connection += CRLF;
+		this->_connection = "Connection: Keep-Alive" CRLF;
 	}
 
-	//	/* Message Body */
+	//	/* Message Body */ REMOVE IF NOT NEEDED LATER
 	//		this->_messageBody = already set
+
 	if (Req.getMethod() == "GET") {
 		this->_contentLen =
 			"Content-Length: " + Utils::to_string(this->_messageBody.length()) + CRLF;
