@@ -179,6 +179,9 @@ void ClientFD::cleanClientFD() {
 
 void ClientFD::ready() {
 	if (_state == END) {
+		if (this->_request.getMethod().empty()){ // quick fix should be deleted
+			_state = HEADER; //
+			return;} //
 		std::cout << __PRETTY_FUNCTION__ << std::endl;
 		_request.setBody(_body);
 		// this->_request.printAttributesInRequestClass(); // REMOVE LATER

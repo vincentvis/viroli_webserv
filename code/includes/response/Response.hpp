@@ -51,8 +51,6 @@ class Response {
 		Response();
 		~Response();
 
-		//		void 		processResponse(ClientFD *Client, std::string
-		// messageBody,std::string StatusCode);
 		void		processResponse(ClientFD *Client, std::string messageBody, std::string StatusCode);
 		void        initResponse(std::string status, Config *Conf, const Request &Req);
 		void        createResponse();

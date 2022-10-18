@@ -74,6 +74,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		Client._response.processResponse(&Client, "", "404");
 		return;
 	}
+
 	/* add fileFd to poll */
 	Client._fileFD = reinterpret_cast<FileFD *>(
 		Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
@@ -81,6 +82,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 //		Client._fileFD->setData(Client.getBodyStr());
 //	}
 	Client._fileFD->setRequestInterface(this, &Client);
+
 }
 
 // Statuscode range:
