@@ -218,6 +218,31 @@ bool Request::uriIsDir() const {
 	return (false);
 }
 
+void Request::clean() {
+	this->_method.clear();
+	this->_uri.clear();
+	this->_query.clear();
+	this->_HTTPVersion.clear();
+	this->_body.clear();
+	this->_connection.clear();
+	this->_location.clear();
+	this->_expect.clear();
+	this->_ConnectionAvailable = false;
+	this->_CGI = false;
+	this->_TransferEncodingChunked = false;
+	this->_ContentLengthAvailable = false;
+	this->_headerAvailable = false;
+	this->_ContentLength = false;
+	this->_header.clear();
+
+	this->_headerAvailable         = false;
+	this->_ContentLength           = 0;
+	this->_CGI                     = false;
+	this->_TransferEncodingChunked = false;
+	this->_ContentLengthAvailable  = false;
+	this->_ConnectionAvailable     = true;
+}
+
 /* !REMOVE later, print function used for testing */
 void Request::printAttributesInRequestClass() {
 	std::cout << "--------------------------------------" << std::endl;

@@ -52,6 +52,7 @@ class Response {
 		Response();
 		~Response();
 
+//		void 		processResponse(ClientFD *Client, std::string messageBody,std::string StatusCode);
 		void        initResponse(std::string status, Config *Conf, const Request &Req);
 		void        createResponse();
 
@@ -65,6 +66,7 @@ class Response {
 		void
 		generateErrorPage(std::string                               status,
 						  const std::map<std::string, std::string> *customErrorPages);
+		void clean();
 
 		//		void setStatusCode(std::string newRes); //needed later on or not?
 		//		void setReasonPhrase(std::string RP);

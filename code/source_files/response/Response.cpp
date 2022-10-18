@@ -55,6 +55,40 @@ void Response::createResponse() {
 	this->_response = StatusLine + HTTPHeader + this->_messageBody;
 }
 
+///* called in ClientFD after fileFD is read */
+//void Response::processResponse(ClientFD *Client, std::string messageBody,
+//								  std::string StatusCode) {
+//	/* check errorpages */
+//	if (StatusCode.at(0) < '4') {
+//		Client->_response.findAndSetContentType(Client->_request);
+//		Client->_response.setMessageBody(messageBody);
+//	} else {
+//		Client->_response.setContentType("text/html");
+//		Client->_response.generateErrorPage(StatusCode,
+//											&Client->_config->getErrorPages());
+//	}
+//	/* generate response */
+//	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);
+//	Client->_response.createResponse(); // thinking about merging those two
+//	Client->sendResponse(Client->_index);
+//}
+
+void Response::clean() {
+	this->_response.clear();
+	this->_respReady = false;
+	this->_httpVersion.clear();
+	this->_statusCode.clear();
+	this->_reasonPhrase.clear();
+	this->_date.clear();
+	this->_serverType.clear();
+	this->_contentType.clear();
+	this->_contentTypeIsSet = false;
+	this->_contentLen.clear();
+	this->_connection.clear();
+	this->_location.clear();
+	this->_messageBody.clear();
+}
+
 std::string Response::getResponse() const {
 	return this->_response;
 }
