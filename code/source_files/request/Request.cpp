@@ -223,6 +223,7 @@ void Request::clean() {
 	this->_TransferEncodingChunked = false;
 	this->_ContentLengthAvailable  = false;
 	this->_ConnectionAvailable     = true;
+	this->_header.clear();
 }
 
 /* !REMOVE later, print function used for testing */
@@ -244,6 +245,7 @@ void Request::printAttributesInRequestClass() {
 	std::cout << "chunked = [" << this->_TransferEncodingChunked << "]" << std::endl;
 	std::cout << "content-length = [" << this->getContentLength() << "]" << std::endl;
 	std::cout << "expect = [" << this->getExpect() << "]" << std::endl;
+	std::cout << "connection = [" << this->_ConnectionAvailable << "]" << std::endl;
 	std::cout << "--------------------------------------" << std::endl;
 }
 

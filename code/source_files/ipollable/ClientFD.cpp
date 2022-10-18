@@ -88,7 +88,6 @@ void ClientFD::receiveLength() {
 	}
 	if (_total == _left) {
 		_body  = _data;
-		_state = END;
 	}
 }
 
@@ -197,6 +196,7 @@ void ClientFD::ready() {
 }
 
 void ClientFD::process() {
+//	_request.printAttributesInRequestClass();
 	getHeader(); // change name? @ronald //receivehHeader?
 	getBody();   // change name? @ronald //receiveBody?
 	ready();     // sendresponse?
