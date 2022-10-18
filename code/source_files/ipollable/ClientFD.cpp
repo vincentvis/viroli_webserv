@@ -102,7 +102,7 @@ void ClientFD::sendResponse(int index) { // remove index parameter?
 
 void ClientFD::getHeader() {
 	if (_state == HEADER) {
-		std::cout << __PRETTY_FUNCTION__ << std::endl;
+		std::cout << __PRETTY_FUNCTION__ << "(" << __LINE__ << ")" << std::endl;
 		size_t end = 0;
 		if ((end = _data.find(CRLF_END)) != std::string::npos) {
 			try {
@@ -141,7 +141,7 @@ std::string ClientFD::getBodyStr() const {
 
 void ClientFD::getBody() {
 	if (_state == BODY) {
-		std::cout << __PRETTY_FUNCTION__ << std::endl;
+		std::cout << __PRETTY_FUNCTION__ << "(" << __LINE__ << ")" << std::endl;
 		if (_request.contentLenAvailable() == true) {
 			receiveLength();
 		} else if (_request.getChunked() == true) { // this should be completed
@@ -186,12 +186,16 @@ void ClientFD::cleanClientFD() {
 
 void ClientFD::ready() {
 	if (_state == END) {
-		std::cout << __PRETTY_FUNCTION__ << std::endl;
+		if (this->_request.getMethod().empty()) {
+			_state = HEADER;
+			return;
+		}
 		_request.setBody(_body);
 		// this->_request.printAttributesInRequestClass(); // REMOVE LATER
 		std::cout
-			<< __PRETTY_FUNCTION__ << ": " << this->_requestInterface << " " << this
-			<< " "
+			<< __PRETTY_FUNCTION__ << "(" << __LINE__ << ")"
+			<< "(" << __LINE__ << ")"
+			<< ": " << this->_requestInterface << " " << this << " "
 			<< "\033[31;4m <- IF THIS IS NOT NULL/0x0 we are creating memory leaks\033[0m"
 			<< std::endl;
 		if (this->_request.getCgi() == true) {
