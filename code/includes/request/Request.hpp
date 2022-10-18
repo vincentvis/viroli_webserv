@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cgi/Executables.hpp"
 #include "config/Config.hpp"
 #include "utils/Exception.hpp"
 #include "utils/Utils.hpp"

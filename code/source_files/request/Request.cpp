@@ -78,7 +78,8 @@ void Request::ParseRequest(std::string BUF) {
 
 	/* set CGI for initialisation request interface */
 	// if (this->_uri.find(".py") == this->_uri.length() - 3) // should be tested
-	if (Utils::ends_with(this->_uri, ".py")) {
+	if (Executables::isCgiRequest(this->_uri)) {
+		COUT_DEBUGMSG << "It's a CGI request uri: [" << this->_uri << "]\n";
 		this->_CGI = true;
 	}
 
@@ -115,7 +116,7 @@ void Request::ParseRequest(std::string BUF) {
 bool Request::methodsAllowed(Config *Conf) {
 	Location                *Loc   = Conf->findLocation(*this);
 
-		std::vector<std::string> allow = Conf->getAllow(Loc);
+	std::vector<std::string> allow = Conf->getAllow(Loc);
 	return (std::find(allow.begin(), allow.end(), getMethod()) != allow.end());
 }
 
@@ -123,7 +124,7 @@ bool Request::checkValidMethod() {
 	std::map<std::string, Request::e_RequestType>::iterator itr =
 		_MethodKeys.find(getMethod());
 
-		switch (itr->second) {
+	switch (itr->second) {
 		case GET:
 		case POST:
 		case DELETE:
@@ -235,7 +236,7 @@ void Request::printAttributesInRequestClass() {
 	}
 	std::cout << "--------------------------------------" << std::endl;
 	std::cout << "Body = [" << this->_body << "]" << std::endl;
-	std::cout << "CGI = [" << this->_CGI << "]" << std::endl;
+	std::cout << "CGI = [" << std::boolalpha << this->_CGI << "]" << std::endl;
 	std::cout << "chunked = [" << this->_TransferEncodingChunked << "]" << std::endl;
 	std::cout << "content-length = [" << this->getContentLength() << "]" << std::endl;
 	std::cout << "expect = [" << this->getExpect() << "]" << std::endl;

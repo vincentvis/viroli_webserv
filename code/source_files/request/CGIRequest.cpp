@@ -35,11 +35,13 @@ void CGIRequest::processResponse(ClientFD *Client, std::string messageBody,
 }
 
 void CGIRequest::GETRequest(ClientFD &Client) {
+	Client._request.printAttributesInRequestClass();
 	(void)Client;
 	std::cout << "this is a GET CGI Request" << std::endl; // REMOVE LATER
 }
 
 void CGIRequest::POSTRequest(ClientFD &Client) {
+	Client._request.printAttributesInRequestClass();
 	(void)Client;
 	std::cout << "this is a POST CGI Request" << std::endl; // REMOVE LATER
 }

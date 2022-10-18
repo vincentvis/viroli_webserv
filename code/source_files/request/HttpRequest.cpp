@@ -12,11 +12,9 @@ HttpRequest::HttpRequest(ClientFD &Client) {
 void HttpRequest::CheckMethod(ClientFD &Client) {
 	if (Client._request.getMethod() == Utils::get_string) {
 		GETRequest(Client);
-	}
-	if (Client._request.getMethod() == Utils::post_string) {
+	} else if (Client._request.getMethod() == Utils::post_string) {
 		POSTRequest(Client);
-	}
-	if (Client._request.getMethod() == Utils::delete_string) {
+	} else if (Client._request.getMethod() == Utils::delete_string) {
 		DELETERequest(Client);
 	}
 }
@@ -77,9 +75,9 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	/* add fileFd to poll */
 	Client._fileFD = reinterpret_cast<FileFD *>(
 		Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
-//	if (!Client.getBodyStr().empty()){
-//		Client._fileFD->setData(Client.getBodyStr());
-//	}
+	//	if (!Client.getBodyStr().empty()){
+	//		Client._fileFD->setData(Client.getBodyStr());
+	//	}
 	Client._fileFD->setRequestInterface(this, &Client);
 }
 
@@ -134,7 +132,8 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 	//			uri = Client._config->getRoot();
 	//		}
 	//		uri  = uri + Client._request.getUri();
-//	std::cout << "POSTRequest:: Client request body.size(): " << Client._request.getBody().size() << std::endl;
+	//	std::cout << "POSTRequest:: Client request body.size(): " <<
+	// Client._request.getBody().size() << std::endl;
 	std::string path = Client._config->getRoot(Client._location);
 	std::string uri  = Client._request.getUri();
 	if (*path.rbegin() != '/' && (uri.empty() == false && uri.at(0) != '/')) {
@@ -159,7 +158,7 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 
 void HttpRequest::DELETERequest(ClientFD &Client) {
 	(void)Client;
-	std::cout << "DELETE REQUEST UNDER CONSTRUCTION" << std::endl;
+	COUT_DEBUGMSG << "DELETE REQUEST UNDER CONSTRUCTION" << std::endl;
 	//	Client._response.setContentType("text/plain");
 	//	Client._response.initResponse("200", Client._config, Client._request);
 	//	Client._response.createResponse();

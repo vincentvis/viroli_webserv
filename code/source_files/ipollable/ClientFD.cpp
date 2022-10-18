@@ -39,14 +39,14 @@ void ClientFD::receiveChunked() {
 		if ((_left == 0) && ((pos = _data.find("\r\n")) != std::string::npos)) {
 			stream << std::hex << _data.substr(0, pos);
 			stream >> _left;
-			std::cout << "chunk size: " << _left << "\n";
+			COUT_DEBUGMSG << "chunk size: " << _left << "\n";
 			_data = _data.substr(pos + CRLF_LEN);
 			// ending chunk
 			if (_left > 0) {
 				_total += _left;
 				// - initialize a response (server error probably)
 				if (_total > _config->getMaxBodySize()) {
-					std::cout << "ERROR ERROR ERROR ERROR (body > maxBodySize)\n";
+					COUT_DEBUGMSG << "ERROR ERROR ERROR ERROR (body > maxBodySize)\n";
 				}
 			} else if (_left == 0) {
 				_state = END;
@@ -85,7 +85,7 @@ void ClientFD::receiveLength() {
 						  // std::cout << " | left: " << _left << std::endl;
 	}
 	if (_total == _left) {
-		_body = _data;
+		_body  = _data;
 		_state = END;
 		process();
 	}
@@ -97,7 +97,7 @@ void ClientFD::sendResponse(int index) { // remove index parameter?
 	_bytes = 0;                       // ronald check are these oke?
 	_total = 0;                       // ronald check are these oke?
 	_left  = _data.size();            // ronald check are these oke?
-	std::cout << "state: " << _state << std::endl;
+	COUT_DEBUGMSG << "state: " << _state << std::endl;
 }
 
 void ClientFD::getHeader() {
@@ -118,7 +118,7 @@ void ClientFD::getHeader() {
 				//						  << std::endl;
 				this->_requestInterface->processResponse(this, "", e.what());
 			} catch (const std::exception &e) {
-				std::cout << "temp error" << e.what() << std::endl;
+				COUT_DEBUGMSG << "temp error" << e.what() << std::endl;
 				// other exceptions like std::string! should be finished later/how?
 			}
 			_data  = _data.substr(end + CRLF_LEN2);
@@ -174,33 +174,22 @@ int32_t ClientFD::getRemainderBytes() const {
 void ClientFD::ready() {
 	//	this->_request.printAttributesInRequestClass(); // REMOVE LATER
 	if (_state == END) {
-		_request.setBody(_body);
-		this->_request.printAttributesInRequestClass(); // REMOVE LATER
-		if (this->_request.getCgi() == true) {
-			this->_requestInterface = new CGIRequest(*this);
-		} else {
-			this->_requestInterface = new HttpRequest(*this);
+		// _request.setBody(_body);
+		if (this->_requestInterface == nullptr) {
+			this->_request.printAttributesInRequestClass(); // REMOVE LATER
+			if (this->_request.getCgi() == true) {
+				this->_requestInterface = new CGIRequest(*this);
+			} else {
+				this->_requestInterface = new HttpRequest(*this);
+			}
 		}
 	}
 }
 
 void ClientFD::process() {
-	switch (_state) {
-		case HEADER:
-			std::cout << "HEADER" << std::endl;
-//			this->_request.printAttributesInRequestClass(); // REMOVE LATER
-			getHeader(); // change name? @ronald
-			break;
-		case BODY:
-			std::cout << "BODY" << std::endl;
-//			this->_request.printAttributesInRequestClass(); // REMOVE LATER
-			getBody(); // change name? @ronald
-			break;
-		case END:
-			std::cout << "END" << std::endl;
-			ready(); // maybe even change this name @ronald
-			break;
-	}
+	getHeader();
+	getBody();
+	ready();
 }
 
 /* receive data */
@@ -229,7 +218,7 @@ void ClientFD::pollout() {
 		if (_request.getConnectionAvailable() == false) {
 			_closed = true;
 		} else {
-			std::cout << "send next request" << std::endl;
+			COUT_DEBUGMSG << "send next request" << std::endl;
 			//			if (_request.getMethod() == Utils::get_string){
 			//				_closed                      = true;
 			//			}
@@ -242,6 +231,10 @@ void ClientFD::pollout() {
 					_data  = std::string("");
 					_state = BODY;
 				} else {
+					COUT_DEBUGMSG
+						<< "Setting _state to HEADER, resetting bytes, _data length: "
+						<< _data.length() << std::endl;
+					;
 					_state = HEADER;
 					resetBytes();
 					_data = std::string("");
@@ -269,7 +262,7 @@ void ClientFD::timeout() {
 
 	time(&timeout);
 	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
-		std::cout << "TIMEOUT\n"; // generate a response error. close connection
+		COUT_DEBUGMSG << "TIMEOUT\n"; // generate a response error. close connection
 		_closed = true;
 	}
 }

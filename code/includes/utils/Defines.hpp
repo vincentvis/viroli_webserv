@@ -9,6 +9,9 @@
 #define CRLF_LEN2       4
 #define TIMEOUT_SECONDS 5
 
+#define COUT_DEBUGMSG \
+	std::cout << "\033[37m" << __PRETTY_FUNCTION__ << "[" << __LINE__ << "]: \033[0m"
+
 namespace Utils {
 
 const std::string get_string("GET");
