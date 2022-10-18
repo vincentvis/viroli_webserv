@@ -1,6 +1,5 @@
 #include "request/RequestInterface.hpp"
 
-
 RequestInterface::RequestInterface() {
 }
 

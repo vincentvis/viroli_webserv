@@ -2,7 +2,6 @@
 
 #include "ipollable/ClientFD.hpp"
 #include "request/RequestInterface.hpp"
-#include "response/Response.hpp"
 #include "utils/Defines.hpp"
 #include <iostream>
 
@@ -16,6 +15,5 @@ class CGIRequest : public RequestInterface {
 
 	public:
 		CGIRequest(ClientFD &Client);
-		void processResponse(ClientFD *Client, std::string messageBody, std::string StatusCode);
 		~CGIRequest();
 };

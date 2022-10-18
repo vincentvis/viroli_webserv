@@ -1,32 +1,28 @@
 #pragma once
 
-#include "config/Config.hpp"
-#include "ipollable/FileFD.hpp"
 #include "ipollable/IPollable.hpp"
-#include "request/CGIRequest.hpp"
-#include "request/HttpRequest.hpp"
-#include "request/Request.hpp"
-#include "request/RequestInterface.hpp"
 #include "response/Response.hpp"
-#include "server/Location.hpp"
 #include "server/Server.hpp"
-#include "utils/Exception.hpp"
+#include "request/HttpRequest.hpp"
+#include "request/CGIRequest.hpp"
 #include <string>
 #include <vector>
 
 class FileFD;
+//class Response;
 class RequestInterface;
+
 class ClientFD : public IPollable {
 	public:
 		enum State { HEADER, BODY, END };
 
 		Request           _request;
-		Response          _response;
 		RequestInterface *_requestInterface;
 		Config           *_config;
 		Location         *_location;
 		Server           *_server;
 		FileFD           *_fileFD;
+		Response          _response;
 		State             _state;
 		std::vector<char> _buffer;
 		std::string       _data;
