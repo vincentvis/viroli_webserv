@@ -1,9 +1,8 @@
 #include "config/Config.hpp"
 
 Config::Config() {
-	this->_root        = "/data/html";
+	this->_root        = "../website/html";
 	this->_maxBodySize = 1000000;
-	this->_allowUpload = 0;
 	this->_autoIndex   = "off";
 }
 
@@ -68,10 +67,6 @@ int64_t Config::getMaxBodySize() const {
 	return _maxBodySize;
 }
 
-bool Config::getAllowUpload() const {
-	return _allowUpload;
-}
-
 std::string const &Config::getAutoIndex() const {
 	return _autoIndex;
 }
@@ -85,6 +80,10 @@ std::string const &Config::getAutoIndex(Location *const primary) const {
 
 std::vector<Location> const &Config::getLocations() {
 	return _locations;
+}
+
+std::map<std::string, std::string> const &Config::getErrorPages() const {
+	return _errorPages;
 }
 
 // stream output
