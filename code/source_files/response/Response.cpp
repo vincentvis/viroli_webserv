@@ -17,21 +17,19 @@ void Response::initResponse(std::string status, Config *Conf, const Request &Req
 
 	/* Http Header */
 	this->_date       = "Date: " + getDate() + CRLF;
-	this->_serverType = "Server: VIROLI_Server/26.3.8CRLF";
-	this->_serverType += CRLF; // not sure how to create one line 105+106?
+	this->_serverType = "Server: VIROLI_Server/26.3.8" CRLF;
 	if (!this->_messageBody.empty()) {
 		this->_contentType = "Content-type: " + getContentType() + CRLF;
 	}
-
 	if (Req.getConnectionAvailable() == false) {
-		this->_connection = "Connection: " + Req.getConnectionInfo();
+		this->_connection = "Connection: " + Req.getConnectionInfo() + CRLF;
 	} else {
-		this->_connection = "Connection: Keep-Alive";
-		this->_connection += CRLF;
+		this->_connection = "Connection: Keep-Alive" CRLF;
 	}
 
-	//	/* Message Body */
+	//	/* Message Body */ REMOVE IF NOT NEEDED LATER
 	//		this->_messageBody = already set
+
 	if (Req.getMethod() == "GET") {
 		this->_contentLen =
 			"Content-Length: " + Utils::to_string(this->_messageBody.length()) + CRLF;
@@ -48,13 +46,47 @@ void Response::createResponse() {
 		this->_httpVersion + " " + this->_statusCode + " " + this->_reasonPhrase + CRLF;
 	std::string HTTPHeader = this->_date + this->_serverType + this->_contentLen +
 							 this->_contentType + this->_location + this->_connection +
-							 CRLF;
+							 CRLF; // CRLF leesbaarheid
 
 	if (!this->_messageBody.empty()) {
 		this->_messageBody += CRLF;
 	}
 
 	this->_response = StatusLine + HTTPHeader + this->_messageBody;
+}
+
+///* called in ClientFD after fileFD is read */
+// void Response::processResponse(ClientFD *Client, std::string messageBody,
+//								  std::string StatusCode) {
+//	/* check errorpages */
+//	if (StatusCode.at(0) < '4') {
+//		Client->_response.findAndSetContentType(Client->_request);
+//		Client->_response.setMessageBody(messageBody);
+//	} else {
+//		Client->_response.setContentType("text/html");
+//		Client->_response.generateErrorPage(StatusCode,
+//											&Client->_config->getErrorPages());
+//	}
+//	/* generate response */
+//	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);
+//	Client->_response.createResponse(); // thinking about merging those two
+//	Client->sendResponse(Client->_index);
+// }
+
+void Response::clean() {
+	this->_response.clear();
+	this->_respReady = false;
+	this->_httpVersion.clear();
+	this->_statusCode.clear();
+	this->_reasonPhrase.clear();
+	this->_date.clear();
+	this->_serverType.clear();
+	this->_contentType.clear();
+	this->_contentTypeIsSet = false;
+	this->_contentLen.clear();
+	this->_connection.clear();
+	this->_location.clear();
+	this->_messageBody.clear();
 }
 
 std::string Response::getResponse() const {

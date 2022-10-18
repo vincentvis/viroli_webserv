@@ -62,4 +62,5 @@ class Request {
 		bool                               getHeaderAvailable() const;
 		bool                               checkValidMethod();
 		bool                               uriIsDir() const;
+		void                               clean();
 };

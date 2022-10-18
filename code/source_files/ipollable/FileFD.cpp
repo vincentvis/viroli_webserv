@@ -17,7 +17,6 @@ void FileFD::pollin() {
 		_requestInterface->processResponse(_client, "", "500");
 		_state = END;
 	} else if (_bytes == 0) {
-		// std::cout <<"data" << _data << std::endl;
 		_closed = true;
 		_requestInterface->processResponse(_client, _data, "200");
 		_state = END;
