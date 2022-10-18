@@ -74,12 +74,13 @@ void ClientFD::receiveChunked() {
 
 void ClientFD::receiveLength() {
 	if (_left == 0) {
-		// _body = _data;
+		// _body = _data; //this can be erased?
 		_left = _request.getContentLength();
 	}
 	if (_bytes > 0) {
 		_total += _bytes;
 		// _body.append(_buffer.begin(), _buffer.begin() + _bytes);  // this can be
+		// erased?
 	}
 	if (_total < _left) { // this can be erased?
 						  // std::cout << "total: " << _total;
@@ -88,7 +89,6 @@ void ClientFD::receiveLength() {
 	if (_total == _left) {
 		_body  = _data;
 		_state = END;
-//		process();
 	}
 }
 
@@ -102,6 +102,7 @@ void ClientFD::sendResponse(int index) { // remove index parameter?
 
 void ClientFD::getHeader() {
 	if (_state == HEADER) {
+	std::cout << __PRETTY_FUNCTION__ << std::endl;
 		size_t end = 0;
 		if ((end = _data.find(CRLF_END)) != std::string::npos) {
 			try {
@@ -131,13 +132,8 @@ void ClientFD::getHeader() {
 				this->_requestInterface = new HttpRequest(*this);
 				this->_requestInterface->processResponse(this, "", "100");
 			}
-//			} else {
-//				process();
-//			}
 		}
 	}
-	//	if there is a body and the method is body we need to send a 100 response in
-	// between the header and the body parsing
 }
 std::string ClientFD::getBodyStr() const {
 	return _body;
@@ -145,6 +141,7 @@ std::string ClientFD::getBodyStr() const {
 
 void ClientFD::getBody() {
 	if (_state == BODY) {
+		std::cout << __PRETTY_FUNCTION__ << std::endl;
 		if (_request.contentLenAvailable() == true) {
 			receiveLength();
 		} else if (_request.getChunked() == true) { // this should be completed
@@ -163,7 +160,6 @@ void ClientFD::getBody() {
 			//			}
 		} else {
 			_state = END;
-//			process();
 		}
 	}
 }
@@ -172,39 +168,32 @@ int32_t ClientFD::getRemainderBytes() const {
 	return BUFFERSIZE > _left ? _left : BUFFERSIZE;
 }
 
-void ClientFD::cleanClientFD(){
+void ClientFD::cleanClientFD() {
 	_request.clean();
 	_response.clean();
 	_requestInterface = nullptr;
-	_config = nullptr;
-	_location = nullptr;
-//	delete _fileFD;
-	_fileFD = nullptr;
-	 _state = HEADER;
-	 _buffer.clear();
+	_config           = nullptr;
+	_location         = nullptr;
+	_fileFD           = nullptr;
+	_state            = HEADER;
+	_buffer.clear();
 	_data.clear();
 	_body.clear();
-	 _bytes = 0;
-	_left = 0;
+	_bytes = 0;
+	_left  = 0;
 	_total = 0;
-
-//	int               _fd;
-//	int               _index;
-//	time_t            _tick;
-//	bool              _closed;
 }
 
 void ClientFD::ready() {
-	//	this->_request.printAttributesInRequestClass(); // REMOVE LATER
 	if (_state == END) {
+		std::cout << __PRETTY_FUNCTION__ << std::endl;
 		_request.setBody(_body);
 		// this->_request.printAttributesInRequestClass(); // REMOVE LATER
 		std::cout
-			<< __PRETTY_FUNCTION__ << ": " << this->_requestInterface << " " << this << " "
+			<< __PRETTY_FUNCTION__ << ": " << this->_requestInterface << " " << this
+			<< " "
 			<< "\033[31;4m <- IF THIS IS NOT NULL/0x0 we are creating memory leaks\033[0m"
 			<< std::endl;
-		//		if (_requestInterface)
-		//			delete _requestInterface;
 		if (this->_request.getCgi() == true) {
 			this->_requestInterface = new CGIRequest(*this);
 		} else {
@@ -214,22 +203,9 @@ void ClientFD::ready() {
 }
 
 void ClientFD::process() {
-//	switch (_state) {
-//		case HEADER:
-//			std::cout << "HEADER" << std::endl;
-			//			this->_request.printAttributesInRequestClass(); // REMOVE LATER
-			getHeader(); // change name? @ronald
-//			break;
-//		case BODY:
-//			std::cout << "BODY" << std::endl;
-			//			this->_request.printAttributesInRequestClass(); // REMOVE LATER
-			getBody(); // change name? @ronald
-//			break;
-//		case END:
-//			std::cout << "END" << std::endl;
-			ready(); // maybe even change this name @ronald
-//			break;
-//	}
+	getHeader(); // change name? @ronald //receivehHeader?
+	getBody(); // change name? @ronald //receiveBody?
+	ready(); // sendresponse?
 }
 
 /* receive data */
@@ -258,7 +234,7 @@ void ClientFD::pollout() {
 	if (_left == 0) {
 		resetBytes();
 		_data = std::string("");
-//		std::cout << _request
+		//		std::cout << _request
 		delete _requestInterface;
 		_requestInterface = nullptr;
 		if (_request.getConnectionAvailable() == false) {
@@ -273,9 +249,7 @@ void ClientFD::pollout() {
 					_state = BODY;
 				}
 			}
-//			resetBytes();
-//			_data = std::string("");
-			if (_state != BODY){
+			if (_state != BODY) {
 				cleanClientFD();
 			}
 			Server::_pfds[_index].events = POLLIN;

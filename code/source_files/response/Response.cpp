@@ -56,7 +56,7 @@ void Response::createResponse() {
 }
 
 ///* called in ClientFD after fileFD is read */
-//void Response::processResponse(ClientFD *Client, std::string messageBody,
+// void Response::processResponse(ClientFD *Client, std::string messageBody,
 //								  std::string StatusCode) {
 //	/* check errorpages */
 //	if (StatusCode.at(0) < '4') {
@@ -71,7 +71,7 @@ void Response::createResponse() {
 //	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);
 //	Client->_response.createResponse(); // thinking about merging those two
 //	Client->sendResponse(Client->_index);
-//}
+// }
 
 void Response::clean() {
 	this->_response.clear();

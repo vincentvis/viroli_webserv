@@ -54,7 +54,6 @@ void FileFD::pollout() {
 		std::cout << "finished writing\n";
 		_closed = true;
 		_requestInterface->processResponse(_client, "", "201");
-
 		// file made, ready for response
 	}
 }
