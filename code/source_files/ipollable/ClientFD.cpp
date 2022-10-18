@@ -2,9 +2,9 @@
 
 ClientFD::ClientFD(Server *server, int fd, int index) :
 	_server(server), _state(HEADER), _buffer(BUFFERSIZE, 0), _data(), _bytes(0), _left(0),
-	_total(0), _fd(fd), _index(index), _tick(), _closed(false) {
+	_total(0), _fd(fd), _index(index), _tick(), _closed(false),
+	_requestInterface(nullptr) {
 	time(&_tick);
-	_requestInterface = nullptr;
 }
 
 ClientFD::~ClientFD() {
@@ -102,7 +102,7 @@ void ClientFD::sendResponse(int index) { // remove index parameter?
 
 void ClientFD::getHeader() {
 	if (_state == HEADER) {
-	std::cout << __PRETTY_FUNCTION__ << std::endl;
+		std::cout << __PRETTY_FUNCTION__ << std::endl;
 		size_t end = 0;
 		if ((end = _data.find(CRLF_END)) != std::string::npos) {
 			try {
@@ -204,8 +204,8 @@ void ClientFD::ready() {
 
 void ClientFD::process() {
 	getHeader(); // change name? @ronald //receivehHeader?
-	getBody(); // change name? @ronald //receiveBody?
-	ready(); // sendresponse?
+	getBody();   // change name? @ronald //receiveBody?
+	ready();     // sendresponse?
 }
 
 /* receive data */
@@ -233,8 +233,6 @@ void ClientFD::pollout() {
 	/* what to do after all data is sent? */
 	if (_left == 0) {
 		resetBytes();
-		_data = std::string("");
-		//		std::cout << _request
 		delete _requestInterface;
 		_requestInterface = nullptr;
 		if (_request.getConnectionAvailable() == false) {
