@@ -61,4 +61,5 @@ class ClientFD : public IPollable {
 		bool        isClosed() const;
 		void        process();
 		void        setIndex(int32_t index);
+		void 		cleanClientFD();
 };

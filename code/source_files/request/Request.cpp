@@ -1,7 +1,7 @@
 #include "request/Request.hpp"
-//#include "server/Server.hpp"
+// #include "server/Server.hpp"
 #include "config/Config.hpp"
-//#include "utils/Utils.hpp"
+#include "utils/Defines.hpp"
 
 // Various ad hoc limitations on request-line length are found in practice. It is
 // RECOMMENDED that all HTTP senders and recipients support, at a minimum, request-line
@@ -113,22 +113,17 @@ void Request::ParseRequest(std::string BUF) {
 bool Request::methodsAllowed(Config *Conf) {
 	Location                *Loc   = Conf->findLocation(*this);
 
-		std::vector<std::string> allow = Conf->getAllow(Loc);
+	std::vector<std::string> allow = Conf->getAllow(Loc);
 	return (std::find(allow.begin(), allow.end(), getMethod()) != allow.end());
 }
 
 bool Request::checkValidMethod() {
-	std::map<std::string, Request::e_RequestType>::iterator itr =
-		_MethodKeys.find(getMethod());
-
-		switch (itr->second) {
-		case GET:
-		case POST:
-		case DELETE:
-			return true;
-		default:
-			return false;
+	if (getMethod() == Utils::post_string || getMethod() == Utils::get_string ||
+		getMethod() == Utils::delete_string)
+	{
+		return true;
 	}
+	return false;
 }
 
 void Request::ValidateRequest(Config *Conf) {
@@ -216,6 +211,24 @@ bool Request::uriIsDir() const {
 		return (true);
 	}
 	return (false);
+}
+
+void Request::clean() {
+	this->_method.clear();
+	this->_uri.clear();
+	this->_query.clear();
+	this->_HTTPVersion.clear();
+	this->_body.clear();
+	this->_connection.clear();
+	this->_location.clear();
+	this->_expect.clear();
+	this->_header.clear();
+	this->_headerAvailable         = false;
+	this->_ContentLength           = 0;
+	this->_CGI                     = false;
+	this->_TransferEncodingChunked = false;
+	this->_ContentLengthAvailable  = false;
+	this->_ConnectionAvailable     = true;
 }
 
 /* !REMOVE later, print function used for testing */
