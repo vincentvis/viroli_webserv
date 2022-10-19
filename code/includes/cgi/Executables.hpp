@@ -21,15 +21,17 @@ class Executables {
 		}
 
 		static bool isCgiRequest(const std::string &uri) {
-			std::map<std::string, std::string>::iterator it =
-				getInstance()._executables.begin();
-			while (it != getInstance()._end) {
-				if (it->second == uri) {
-					return (true);
-				}
-				it++;
+			std::string::size_type dot_pos = uri.find_last_of(".");
+			if (dot_pos == std::string::npos || dot_pos >= uri.length()) {
+				return (false);
 			}
-			return (false);
+			std::string                                  ext = uri.substr(dot_pos + 1);
+			std::map<std::string, std::string>::iterator it =
+				getInstance()._executables.find(ext);
+			if (it == getInstance()._executables.end()) {
+				return (false);
+			}
+			return (true);
 		}
 
 	private:
