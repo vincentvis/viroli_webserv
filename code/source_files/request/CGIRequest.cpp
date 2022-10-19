@@ -19,29 +19,12 @@ void CGIRequest::CheckMethod(ClientFD &Client) {
 	}
 }
 
-void CGIRequest::processResponse(ClientFD *Client, std::string messageBody,
-								 std::string StatusCode) {
-	/* check errorpages */
-	if (StatusCode.at(0) < '4') {
-		Client->_response.findAndSetContentType(Client->_request);
-		Client->_response.setMessageBody(messageBody);
-	} else {
-		Client->_response.setContentType("text/html");
-		Client->_response.generateErrorPage(StatusCode,
-											&Client->_config->getErrorPages());
-	}
-	/* generate response */
-	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);
-	Client->_response.createResponse();
-	Client->sendResponse(Client->_index);
-}
-
 void CGIRequest::GETRequest(ClientFD &Client) {
 	std::cout << "\033[32m[CGI] " << Client._request.getMethod() << " "
 			  << Client._request.getUri() << std::endl;
 	std::cout << "\033[4mQUERY: " << Client._request.getQuery() << "\033[0m" << std::endl;
 
-	Cgi exec(Client._request.getUri(), Client._config->getRoot(Client._location));
+	Cgi exec(Client._request.getFileStat());
 }
 
 void CGIRequest::POSTRequest(ClientFD &Client) {

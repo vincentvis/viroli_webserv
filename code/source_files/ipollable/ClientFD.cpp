@@ -19,8 +19,11 @@ void ClientFD::resetBytes() {
 void ClientFD::receive(size_t len) {
 	_bytes = recv(_fd, _buffer.data(), len, 0);
 
+	if (_bytes == -1) {
+		std::cout << __PRETTY_FUNCTION__ << "| bytes: " << _bytes << std::endl;
+	}
 	if (_bytes == 0) {
-		_state = END;
+		process();
 	}
 	if (_bytes > 0) {
 		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
@@ -74,63 +77,72 @@ void ClientFD::receiveChunked() {
 
 void ClientFD::receiveLength() {
 	if (_left == 0) {
-		// _body = _data; //this can be erased?
 		_left = _request.getContentLength();
 	}
 	if (_bytes > 0) {
 		_total += _bytes;
-		// _body.append(_buffer.begin(), _buffer.begin() + _bytes);  // this can be
-		// erased?
 	}
-	if (_total < _left) { // this can be erased?
-						  // std::cout << "total: " << _total;
-						  // std::cout << " | left: " << _left << std::endl;
+	if (_total < _left) {
+		// std::cout << _data.size() << std::endl;
 	}
 	if (_total == _left) {
 		_body  = _data;
 		_state = END;
+		return;
 	}
+	// std::cout << "total: " << _total;
+	// std::cout << " | left: " << _left << std::endl;
+	// std::cout << "data:\n" << _data << "\n\n\n\n\n$" << std::endl;
 }
 
-void ClientFD::sendResponse(int index) { // remove index parameter?
-	Server::_pfds[index].events = POLLOUT;
+void ClientFD::sendResponse() { // remove index parameter?
+	Server::_pfds[_index].events = POLLOUT;
 	_data  = _response.getResponse(); // this should work at a certain moment
 	_bytes = 0;                       // ronald check are these oke?
 	_total = 0;                       // ronald check are these oke?
 	_left  = _data.size();            // ronald check are these oke?
 }
 
-void ClientFD::getHeader() {
+void ClientFD::receiveHeader() {
 	if (_state == HEADER) {
-		std::cout << __PRETTY_FUNCTION__ << "(" << __LINE__ << ")" << std::endl;
+		// std::cout << __PRETTY_FUNCTION__ << std::endl;
 		size_t end = 0;
 		if ((end = _data.find(CRLF_END)) != std::string::npos) {
 			try {
 				this->_request.ParseRequest(this->_data);
+				this->_request.printAttributesInRequestClass();
 				this->_config   = this->_server->findConfig(this->_request);
 				this->_location = this->_config->findLocation(this->_request);
 				this->_request.ValidateRequest(this->_config, this->_location);
 			} catch (const Utils::ErrorPageException &e) {
-				// CHECK IF THIS IS `delete`'ed  at some point..
-				this->_requestInterface = new HttpRequest(*this);
-				//				std::cerr << "THINGS STILL GO WRONG AT THIS POINT. the
-				// above line is a " 							 "quick fix to not
-				// segfault!!"
-				//						  << std::endl;
-				this->_requestInterface->processResponse(this, "", e.what());
+				this->_response.processResponse(this, "", e.what());
 			} catch (const std::exception &e) {
 				COUT_DEBUGMSG << "temp error" << e.what() << std::endl;
 				// other exceptions like std::string! should be finished later/how?
 			}
-			_data  = _data.substr(end + CRLF_LEN2);
-			_total = _data.size();
+			_data  = _data.substr(end + CRLF_LEN2); // continue with potential body
 			_bytes = 0;
-			_state = BODY;
-			if (this->_request.getMethod() == Utils::post_string &&
-				this->_request.getExpect() == "100-continue")
-			{
-				this->_requestInterface = new HttpRequest(*this);
-				this->_requestInterface->processResponse(this, "", "100");
+			_left  = 0;
+			if (_request.getChunked() == true) { // _total is the sum of all the chunks
+				_total = 0;
+			} else if (_request.contentLenAvailable() == true) {
+				_total = _data.size();
+			}
+
+			if (_request.getMethod() == "GET") {
+				_state = BODY;
+			} else if (_request.getMethod() == "DELETE") {
+				_state = END;
+			} else if (_request.getMethod() == "POST") {
+				if (_request.getExpect() == "100-continue") {
+					//					_state = END;
+					this->_response.processResponse(this, "", "100");
+					_state = BODY;
+				} else {
+					_state = BODY;
+				}
+			} else {
+				_state = END;
 			}
 		}
 	}
@@ -139,7 +151,7 @@ std::string ClientFD::getBodyStr() const {
 	return _body;
 }
 
-void ClientFD::getBody() {
+void ClientFD::receiveBody() {
 	if (_state == BODY) {
 		std::cout << __PRETTY_FUNCTION__ << "(" << __LINE__ << ")" << std::endl;
 		if (_request.contentLenAvailable() == true) {
@@ -158,7 +170,12 @@ void ClientFD::getBody() {
 			//									 // create response and stops here
 			//				_state = END;
 			//			}
+
+
+			// body is expected but no content-length or chunked -> throw error?
 		} else {
+			// when body is expected but no chunked or content-length present
+			// this can be caught earlier
 			_state = END;
 		}
 	}
@@ -184,32 +201,39 @@ void ClientFD::cleanClientFD() {
 	_total = 0;
 }
 
+
 void ClientFD::ready() {
 	if (_state == END) {
-		if (this->_request.getMethod().empty()) {
-			_state = HEADER;
-			return;
+		// std::cout << __PRETTY_FUNCTION__ << std::endl;
+		std::cout << __PRETTY_FUNCTION__ << ": " << this->_requestInterface << " " << this
+				  << " "
+				  << "\033[31;4m <- IF THIS IS NOT NULL/0x0 we are creating memory "
+					 "leaks\033[0m"
+				  << std::endl;
+		std::cout << __PRETTY_FUNCTION__ << "| size body: " << _body.size() << std::endl;
+		if (_request.getMethod() == Utils::post_string && !_body.empty()) {
+			_request.setBody(_body);
 		}
-		_request.setBody(_body);
-		// this->_request.printAttributesInRequestClass(); // REMOVE LATER
-		std::cout
-			<< __PRETTY_FUNCTION__ << "(" << __LINE__ << ")"
-			<< "(" << __LINE__ << ")"
-			<< ": " << this->_requestInterface << " " << this << " "
-			<< "\033[31;4m <- IF THIS IS NOT NULL/0x0 we are creating memory leaks\033[0m"
-			<< std::endl;
 		if (this->_request.getCgi() == true) {
 			this->_requestInterface = new CGIRequest(*this);
 		} else {
 			this->_requestInterface = new HttpRequest(*this);
 		}
+		//		if (this->_request.getMethod() == Utils::post_string &&
+		//			this->_request.getExpect() == "100-continue")
+		//		{
+		//			this->_response.processResponse(this, "", "100");
+		//		}
 	}
 }
 
+
+// maybe: receiveHeader(), receiveBody(), ready() should be enclosed within a
+// try catch block for the error responses.
 void ClientFD::process() {
-	getHeader(); // change name? @ronald //receivehHeader?
-	getBody();   // change name? @ronald //receiveBody?
-	ready();     // sendresponse?
+	receiveHeader();
+	receiveBody();
+	ready();
 }
 
 /* receive data */
@@ -219,9 +243,7 @@ void ClientFD::pollin() {
 	process();
 }
 
-
 /* send data */
-/* need to know connection status (keep-alive|close) */
 void ClientFD::pollout() {
 	time(&_tick);
 	/* make sure to not go out of bounds with the buffer */
@@ -236,29 +258,26 @@ void ClientFD::pollout() {
 	}
 	/* what to do after all data is sent? */
 	if (_left == 0) {
-		resetBytes();
 		delete _requestInterface;
 		_requestInterface = nullptr;
+
+		// close fd and remove pollable and pfd
 		if (_request.getConnectionAvailable() == false) {
 			_closed = true;
 		} else {
-			_state = HEADER;
-			std::cout << "send next request" << std::endl;
-			if (_request.getHeaderAvailable() == true) {
-				if (_request.getMethod() == Utils::post_string &&
-					_request.getExpect() == "100-continue" && _request.getBody().empty())
-				{
-					_state = BODY;
-				}
-			}
-			if (_state != BODY) {
+			resetBytes();
+			if (_request.getMethod() == Utils::post_string &&
+				_request.getExpect() == "100-continue" && _request.getBody().empty())
+			{
+				_data.clear();
+				_state = BODY;
+			} else {
 				cleanClientFD();
 			}
-			Server::_pfds[_index].events = POLLIN;
+			Server::_pfds[_index].events = POLLIN; // accept new request
 		}
 	}
 }
-
 
 int ClientFD::getFileDescriptor() const {
 	return _fd;

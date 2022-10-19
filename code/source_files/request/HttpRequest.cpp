@@ -33,16 +33,16 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 			try {
 				Autoindex autoindex(path);
 				Client._response.setContentType("text/html");
-				processResponse(&Client, autoindex.getHtml(), "200");
+				Client._response.processResponse(&Client, autoindex.getHtml(), "200");
 				return;
 			} catch (const Utils::AutoindexException &e) {
-				processResponse(&Client, "", "404");
+				Client._response.processResponse(&Client, "", "404");
 				return;
 			} catch (const std::exception &e) {
 				// all other exceptions?
 				// but what to do?
 				// internal server error for now
-				processResponse(&Client, "", "500");
+				Client._response.processResponse(&Client, "", "500");
 				return;
 			}
 		}
@@ -69,7 +69,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		fd = open(path.c_str(), O_RDONLY);
 	}
 	if (fd == -1) {
-		processResponse(&Client, "", "404");
+		Client._response.processResponse(&Client, "", "404");
 		return;
 	}
 	/* add fileFd to poll */
@@ -88,23 +88,23 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 // 400-499 is Client error.
 // 500-599 is Server error.
 
-/* called in ClientFD after fileFD is read */
-void HttpRequest::processResponse(ClientFD *Client, std::string messageBody,
-								  std::string StatusCode) {
-	/* check errorpages */
-	if (StatusCode.at(0) < '4') {
-		Client->_response.findAndSetContentType(Client->_request);
-		Client->_response.setMessageBody(messageBody);
-	} else {
-		Client->_response.setContentType("text/html");
-		Client->_response.generateErrorPage(StatusCode,
-											&Client->_config->getErrorPages());
-	}
-	/* generate response */
-	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);
-	Client->_response.createResponse(); // thinking about merging those two
-	Client->sendResponse(Client->_index);
-}
+///* called in ClientFD after fileFD is read */
+//void HttpRequest::processResponse(ClientFD *Client, std::string messageBody,
+//								  std::string StatusCode) {
+//	/* check errorpages */
+//	if (StatusCode.at(0) < '4') {
+//		Client->_response.findAndSetContentType(Client->_request);
+//		Client->_response.setMessageBody(messageBody);
+//	} else {
+//		Client->_response.setContentType("text/html");
+//		Client->_response.generateErrorPage(StatusCode,
+//											&Client->_config->getErrorPages());
+//	}
+//	/* generate response */
+//	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);
+//	Client->_response.createResponse(); // thinking about merging those two
+//	Client->sendResponse(Client->_index);
+//}
 
 // void HttpRequest::GETRequest(ClientFD &Client) {
 //	/* create path */
@@ -144,7 +144,7 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 	int fd = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change
 
 	if (fd == -1) {
-		processResponse(&Client, "", "404");
+		Client._response.processResponse(&Client, "", "404");
 	} else {
 		//		set location in response header
 		Client._fileFD = reinterpret_cast<FileFD *>(

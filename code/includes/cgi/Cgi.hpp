@@ -6,7 +6,7 @@
 
 class Cgi {
 	public:
-		Cgi(std::string uri, const std::string &root);
+		Cgi(const FileStat &filestats);
 		~Cgi();
 
 	private:

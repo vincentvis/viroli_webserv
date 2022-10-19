@@ -12,7 +12,6 @@
 #include <string>
 
 class Server;
-
 class Config;
 
 class Request {
@@ -38,9 +37,6 @@ class Request {
 		Request();
 		~Request();
 
-		enum e_RequestType { GET, POST, DELETE }; // make static
-
-		static std::map<std::string, e_RequestType>  _MethodKeys; // make static
 		std::map<std::string, std::string>::iterator _itr;
 		void printAttributesInRequestClass(); // !used for testing; REMOVE later
 		void ParseRequest(std::string BUF);
