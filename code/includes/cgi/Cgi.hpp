@@ -1,11 +1,12 @@
 #pragma once
 
 #include "cgi/Pipes.hpp"
+#include "utils/FileStat.hpp"
 #include <unistd.h>
 
 class Cgi {
 	public:
-		// Cgi();
+		Cgi(std::string uri, const std::string &root);
 		~Cgi();
 
 	private:

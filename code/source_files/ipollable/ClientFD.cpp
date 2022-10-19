@@ -109,7 +109,7 @@ void ClientFD::getHeader() {
 				this->_request.ParseRequest(this->_data);
 				this->_config   = this->_server->findConfig(this->_request);
 				this->_location = this->_config->findLocation(this->_request);
-				this->_request.ValidateRequest(this->_config);
+				this->_request.ValidateRequest(this->_config, this->_location);
 			} catch (const Utils::ErrorPageException &e) {
 				// CHECK IF THIS IS `delete`'ed  at some point..
 				this->_requestInterface = new HttpRequest(*this);

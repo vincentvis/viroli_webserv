@@ -5,6 +5,7 @@
 #include "server/Server.hpp"
 #include "utils/Utils.hpp"
 
+#include "utils/FileStat.hpp"
 #include <iostream>
 #include <string>
 

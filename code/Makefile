@@ -37,7 +37,7 @@ CLASSES		:= config/ConfigParser\
 				server/Location\
 				server/Server\
 				utils/Utils\
-				utils/Files\
+				utils/FileStat\
 				ipollable/IPollable\
 				ipollable/ClientFD\
 				ipollable/ServerFD\
