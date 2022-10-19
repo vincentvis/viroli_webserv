@@ -120,7 +120,6 @@ void ClientFD::receiveHeader() {
 				std::cout << "temp error" << e.what() << std::endl;
 				// other exceptions like std::string! should be finished later/how?
 			}
-
 			_data  = _data.substr(end + CRLF_LEN2); // continue with potential body
 			_bytes = 0;
 			_left  = 0;
@@ -136,7 +135,9 @@ void ClientFD::receiveHeader() {
 				_state = END;
 			} else if (_request.getMethod() == "POST") {
 				if (_request.getExpect() == "100-continue") {
-					_state = END;
+//					_state = END;
+					this->_response.processResponse(this, "", "100");
+					_state = BODY;
 				} else {
 					_state = BODY;
 				}
@@ -210,8 +211,7 @@ void ClientFD::ready() {
 					 "leaks\033[0m"
 				  << std::endl;
 		std::cout << __PRETTY_FUNCTION__ << "| size body: " << _body.size() << std::endl;
-
-		if (_request.getMethod() == "POST" && !_body.empty()) {
+		if (_request.getMethod() == Utils::post_string && !_body.empty()) {
 			_request.setBody(_body);
 		}
 		if (this->_request.getCgi() == true) {
@@ -219,11 +219,11 @@ void ClientFD::ready() {
 		} else {
 			this->_requestInterface = new HttpRequest(*this);
 		}
-		if (this->_request.getMethod() == Utils::post_string &&
-			this->_request.getExpect() == "100-continue")
-		{
-			this->_response.processResponse(this, "", "100");
-		}
+//		if (this->_request.getMethod() == Utils::post_string &&
+//			this->_request.getExpect() == "100-continue")
+//		{
+//			this->_response.processResponse(this, "", "100");
+//		}
 	}
 }
 
