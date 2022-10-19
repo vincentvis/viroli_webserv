@@ -43,6 +43,7 @@ void FileFD::setData(std::string data) {
 
 void FileFD::pollout() {
 	time(&_tick);
+
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
 	_bytes = write(_fd, _buffer.data(), getRemainderBytes());
 	if (_bytes) {
@@ -50,7 +51,6 @@ void FileFD::pollout() {
 		_left -= _bytes;
 	}
 	if (_left == 0) {
-//		 close(_fd); // should this be erased?
 		std::cout << "finished writing\n";
 		_closed = true;
 		_client->_response.processResponse(_client, "", "201");
@@ -72,7 +72,7 @@ void FileFD::timeout() {
 	time(&timeout);
 	if (difftime(timeout, _tick) > 10) {
 		std::cout << "TIMEOUT\n"; // will have to send a response
-		_closed = true; // this must be removed?
+		_closed = true;           // this must be removed?
 	}
 }
 

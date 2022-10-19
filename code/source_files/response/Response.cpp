@@ -11,7 +11,7 @@ void Response::setMessageBody(std::string MessageBody) {
 
 /* called in ClientFD after fileFD is read */
 void Response::processResponse(ClientFD *Client, std::string messageBody,
-								  std::string StatusCode) {
+							   std::string StatusCode) {
 	/* check errorpages */
 	if (StatusCode.at(0) < '4') {
 		Client->_response.findAndSetContentType(Client->_request);
@@ -24,7 +24,7 @@ void Response::processResponse(ClientFD *Client, std::string messageBody,
 	/* generate response */
 	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);
 	Client->_response.createResponse(); // thinking about merging those two
-	Client->sendResponse(Client->_index);
+	Client->sendResponse();
 }
 
 
