@@ -32,25 +32,26 @@ INC_DIR		:= includes
 MAIN		:= $(SRC_DIR)/main.cpp
 
 # a list of classes without the .cpp suffix!
-CLASSES		:= config/ConfigParser\
+CLASSES		:= \
+				autoindex/Autoindex\
 				config/Config\
+				config/ConfigParser\
+				ipollable/ClientFD\
+				ipollable/FileFD\
+				ipollable/IPollable\
+				ipollable/ServerFD\
+				request/CGIRequest\
 				server/Location\
 				server/Server\
-				utils/Utils\
 				utils/FileStat\
-				ipollable/IPollable\
-				ipollable/ClientFD\
-				ipollable/ServerFD\
-				ipollable/FileFD\
-				request/CGIRequest\
+				utils/Utils\
+        		response/HttpStatus\
+                cgi/Cgi\
+                cgi/Pipes\
                 request/HttpRequest\
                 request/Request\
                 request/RequestInterface\
-                response/Response\
-        		response/HttpStatus\
-				autoindex/Autoindex\
-                cgi/Cgi\
-                cgi/Pipes
+                response/Response
 
 OBJECTS		:= $(CLASSES:%=$(OBJ_DIR)/%.o)
 OBJECTS     += $(OBJ_DIR)/main.o

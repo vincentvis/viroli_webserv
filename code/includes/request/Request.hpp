@@ -25,7 +25,7 @@ class Request {
 		std::string                        _connection;
 		std::string                        _location;
 		std::string                        _expect;
-		FileStat                           _file;
+		FileStat                           _filestats;
 		bool                               _ConnectionAvailable;
 		bool                               _CGI;
 		bool                               _TransferEncodingChunked;
@@ -65,5 +65,6 @@ class Request {
 		bool                               getHeaderAvailable() const;
 		bool                               checkValidMethod();
 		bool                               uriIsDir() const;
+		FileStat const                    &getFileStat() const;
 		void                               clean();
 };

@@ -136,12 +136,9 @@ void Request::ValidateRequest(Config *Conf, Location *Loc) {
 		throw Utils::ErrorPageException("505");
 	}
 
-	FileStat f(Conf->getRoot(Loc), this->_uri);
-	_file = f;
-
+	_filestats = FileStat(Conf->getRoot(Loc), this->_uri);
 	/* set CGI for initialisation request interface */
-	// if (this->_uri.find(".py") == this->_uri.length() - 3) // should be tested
-	if (Executables::isCgiRequest(this->_file)) {
+	if (Executables::isCgiRequest(this->_filestats)) {
 		this->_CGI = true;
 	}
 }
@@ -215,6 +212,10 @@ bool Request::uriIsDir() const {
 		return (true);
 	}
 	return (false);
+}
+
+FileStat const &Request::getFileStat() const {
+	return _filestats;
 }
 
 void Request::clean() {
