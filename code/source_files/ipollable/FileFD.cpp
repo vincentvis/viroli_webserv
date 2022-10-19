@@ -51,7 +51,7 @@ void FileFD::pollout() {
 	}
 	if (_left == 0) {
 		//		 close(_fd); // should this be erased?
-		std::cout << "finished writing\n";
+		COUT_DEBUGMSG << "finished writing\n";
 		_closed = true;
 		_requestInterface->processResponse(_client, "", "201");
 		// file made, ready for response
