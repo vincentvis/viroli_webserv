@@ -83,10 +83,10 @@ int32_t Server::getFileDescriptor() const {
 }
 
 void Server::removePollable(int index) {
-//	std::cout << "size _pfds (pre-removal): " << Server::_pfds.size();
-//	std::cout << "  | size _pollables (pre-removal): " << Server::_pollables.size()
-//			  << std::endl;
-//	std::cout << "fd to be closed: " << Server::_pfds[index].fd << std::endl;
+	//	std::cout << "size _pfds (pre-removal): " << Server::_pfds.size();
+	//	std::cout << "  | size _pollables (pre-removal): " << Server::_pollables.size()
+	//			  << std::endl;
+	//	std::cout << "fd to be closed: " << Server::_pfds[index].fd << std::endl;
 
 
 	close(Server::_pfds[index].fd);
@@ -106,10 +106,10 @@ void Server::removePollable(int index) {
 	/* remove last element in vector */
 	Server::_pfds.pop_back();
 
-//	std::cout << "size _pfds (post-removal): " << Server::_pfds.size();
-//	std::cout << " | size _pollables (post-removal): " << Server::_pollables.size()
-//			  << std::endl;
-//	std::cout << "succesful removal\n";
+	//	std::cout << "size _pfds (post-removal): " << Server::_pfds.size();
+	//	std::cout << " | size _pollables (post-removal): " << Server::_pollables.size()
+	//			  << std::endl;
+	//	std::cout << "succesful removal\n";
 }
 
 /* events var might be not needed */
@@ -136,13 +136,13 @@ void Server::run() {
 			}
 			if (it != _pollables.end()) {
 				/* find on what file descriptor event occurred */
-				if (Server::_pfds[i].revents & (POLLIN | POLLOUT)) {
-					/* file descriptor exists */
-					if (Server::_pfds[i].revents & POLLIN) {
-						it->second->pollin();
-					} else if (Server::_pfds[i].revents & POLLOUT) {
-						it->second->pollout();
-					}
+				if (Server::_pfds[i].revents & POLLIN) {
+					it->second->pollin();
+				} else if (Server::_pfds[i].revents & POLLOUT) {
+					it->second->pollout();
+				} else if (Server::_pfds[i].revents & POLLHUP) { // tmp
+					std::cout << ">>> POLLHUP\n";                // tmp
+					exit(EXIT_FAILURE);                          // tmp
 				}
 				/* file descriptor pollable doesn't exist */
 			} else {

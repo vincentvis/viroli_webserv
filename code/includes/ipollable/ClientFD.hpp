@@ -1,15 +1,15 @@
 #pragma once
 
 #include "ipollable/IPollable.hpp"
+#include "request/CGIRequest.hpp"
+#include "request/HttpRequest.hpp"
 #include "response/Response.hpp"
 #include "server/Server.hpp"
-#include "request/HttpRequest.hpp"
-#include "request/CGIRequest.hpp"
 #include <string>
 #include <vector>
 
 class FileFD;
-//class Response;
+// class Response;
 class RequestInterface;
 
 class ClientFD : public IPollable {
@@ -43,19 +43,19 @@ class ClientFD : public IPollable {
 		void        resetBytes();
 		int         getFileDescriptor() const;
 		size_t      extractChunkedSize(size_t pos);
-		void        getHeader();
-		void        getBody();
+		void        receiveHeader();
+		void        receiveBody();
 		std::string getBodyStr() const;
 		void        receive(size_t len);
 		void        receiveChunked();
 		void        receiveLength();
 		void        ready();
 		Server     *getServer() const;
-		void        sendResponse(int index);
+		void        sendResponse();
 		int32_t     getRemainderBytes() const;
 		void        timeout();
 		bool        isClosed() const;
 		void        process();
 		void        setIndex(int32_t index);
-		void 		cleanClientFD();
+		void        cleanClientFD();
 };
