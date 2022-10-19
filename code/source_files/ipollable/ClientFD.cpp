@@ -90,9 +90,9 @@ void ClientFD::receiveLength() {
 		_state = END;
 		return;
 	}
-	std::cout << "total: " << _total;
-	std::cout << " | left: " << _left << std::endl;
-	std::cout << "data:\n" << _data << "\n\n\n\n\n$" << std::endl;
+	// std::cout << "total: " << _total;
+	// std::cout << " | left: " << _left << std::endl;
+	// std::cout << "data:\n" << _data << "\n\n\n\n\n$" << std::endl;
 }
 
 void ClientFD::sendResponse() { // remove index parameter?
@@ -135,7 +135,7 @@ void ClientFD::receiveHeader() {
 				_state = END;
 			} else if (_request.getMethod() == "POST") {
 				if (_request.getExpect() == "100-continue") {
-//					_state = END;
+					//					_state = END;
 					this->_response.processResponse(this, "", "100");
 					_state = BODY;
 				} else {
@@ -219,11 +219,11 @@ void ClientFD::ready() {
 		} else {
 			this->_requestInterface = new HttpRequest(*this);
 		}
-//		if (this->_request.getMethod() == Utils::post_string &&
-//			this->_request.getExpect() == "100-continue")
-//		{
-//			this->_response.processResponse(this, "", "100");
-//		}
+		//		if (this->_request.getMethod() == Utils::post_string &&
+		//			this->_request.getExpect() == "100-continue")
+		//		{
+		//			this->_response.processResponse(this, "", "100");
+		//		}
 	}
 }
 
@@ -231,9 +231,9 @@ void ClientFD::ready() {
 // maybe: receiveHeader(), receiveBody(), ready() should be enclosed within a
 // try catch block for the error responses.
 void ClientFD::process() {
-	receiveHeader(); // change name? @ronald //receivehHeader?
-	receiveBody();   // change name? @ronald //receiveBody?
-	ready();         // sendresponse?
+	receiveHeader();
+	receiveBody();
+	ready();
 }
 
 /* receive data */
