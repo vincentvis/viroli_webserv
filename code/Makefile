@@ -37,6 +37,7 @@ CLASSES		:= config/ConfigParser\
 				server/Location\
 				server/Server\
 				utils/Utils\
+				utils/Files\
 				ipollable/IPollable\
 				ipollable/ClientFD\
 				ipollable/ServerFD\
@@ -48,7 +49,7 @@ CLASSES		:= config/ConfigParser\
                 response/Response\
         		response/HttpStatus\
 				autoindex/Autoindex\
-                cgi/Exec\
+                cgi/Cgi\
                 cgi/Pipes
 
 OBJECTS		:= $(CLASSES:%=$(OBJ_DIR)/%.o)

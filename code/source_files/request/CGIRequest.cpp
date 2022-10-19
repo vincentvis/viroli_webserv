@@ -1,4 +1,5 @@
 #include "request/CGIRequest.hpp"
+#include "cgi/Cgi.hpp"
 
 CGIRequest::CGIRequest() {
 }
@@ -39,6 +40,7 @@ void CGIRequest::GETRequest(ClientFD &Client) {
 	std::cout << "\033[32m[CGI] " << Client._request.getMethod() << " "
 			  << Client._request.getUri() << std::endl;
 	std::cout << "\033[4mQUERY: " << Client._request.getQuery() << "\033[0m" << std::endl;
+	Cgi exec(Client._request.getUri(), Client._config->getRoot(Client._location));
 }
 
 void CGIRequest::POSTRequest(ClientFD &Client) {

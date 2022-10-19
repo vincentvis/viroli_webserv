@@ -8,8 +8,6 @@
 #include <iostream>
 #include <string>
 
-#include "cgi/Exec.hpp"
-
 int main(int argc, char const *argv[]) {
 	std::vector<Server *> servers;
 	servers.reserve(100); // placeholder
