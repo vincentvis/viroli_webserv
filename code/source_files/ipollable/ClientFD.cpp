@@ -97,30 +97,45 @@ void ClientFD::receiveLength() {
 
 void ClientFD::sendResponse() { // remove index parameter?
 	Server::_pfds[_index].events = POLLOUT;
-	_data  = _response.getResponse(); // this should work at a certain moment
-	_bytes = 0;                       // ronald check are these oke?
-	_total = 0;                       // ronald check are these oke?
-	_left  = _data.size();            // ronald check are these oke?
+	_data = _response.getResponse(); // this should work at a certain moment
+	std::cout << "DATA SIZE() 2: " << _data.size() << std::endl;
+	_bytes = 0;            // ronald check are these oke?
+	_total = 0;            // ronald check are these oke?
+	_left  = _data.size(); // ronald check are these oke?
 }
+
+/*
+-> receive bytes:
+  -> header is present:
+	-> POST request:
+	  -> 'Expect: 100-continue' is present:
+		-> (part of) body is present:
+		  -> omit sending 100-continue response
+		-> send 100-continue response
+*/
 
 void ClientFD::receiveHeader() {
 	if (_state == HEADER) {
 		// std::cout << __PRETTY_FUNCTION__ << std::endl;
 		size_t end = 0;
 		if ((end = _data.find(CRLF_END)) != std::string::npos) {
-			try {
-				this->_request.ParseRequest(this->_data);
-				this->_request.printAttributesInRequestClass();
-				this->_config   = this->_server->findConfig(this->_request);
-				this->_location = this->_config->findLocation(this->_request);
-				this->_request.ValidateRequest(this->_config);
-			} catch (const Utils::ErrorPageException &e) {
-				this->_response.processResponse(this, "", e.what());
-			} catch (const std::exception &e) {
-				std::cout << "temp error" << e.what() << std::endl;
-				// other exceptions like std::string! should be finished later/how?
-			}
-			_data  = _data.substr(end + CRLF_LEN2); // continue with potential body
+			// try {
+			this->_request.ParseRequest(this->_data);
+			this->_request.printAttributesInRequestClass();
+			this->_config   = this->_server->findConfig(this->_request);
+			this->_location = this->_config->findLocation(this->_request);
+			this->_request.ValidateRequest(this->_config);
+			// } catch (const Utils::ErrorPageException &e) {
+			// 	std::cout << "hoeioeieoifeoifeoi\n";
+			// 	std::cout << e.what() << std::endl;
+			// 	this->_response.processResponse(this, "", e.what());
+			// } catch (const std::exception &e) {
+			// 	std::cout << "temp error" << e.what() << std::endl;
+			// 	// other exceptions like std::string! should be finished later/how?
+			// }
+
+			_data = _data.substr(end + CRLF_LEN2); // continue with potential body
+			std::cout << "DATA SIZE(): " << _data.size() << std::endl;
 			_bytes = 0;
 			_left  = 0;
 			if (_request.getChunked() == true) { // _total is the sum of all the chunks
@@ -135,7 +150,6 @@ void ClientFD::receiveHeader() {
 				_state = END;
 			} else if (_request.getMethod() == "POST") {
 				if (_request.getExpect() == "100-continue") {
-					//					_state = END;
 					this->_response.processResponse(this, "", "100");
 					_state = BODY;
 				} else {
@@ -201,16 +215,17 @@ void ClientFD::cleanClientFD() {
 	_total = 0;
 }
 
-
-void ClientFD::ready() {
+void ClientFD::respond() {
 	if (_state == END) {
-		// std::cout << __PRETTY_FUNCTION__ << std::endl;
-		std::cout << __PRETTY_FUNCTION__ << ": " << this->_requestInterface << " " << this
-				  << " "
-				  << "\033[31;4m <- IF THIS IS NOT NULL/0x0 we are creating memory "
-					 "leaks\033[0m"
-				  << std::endl;
-		std::cout << __PRETTY_FUNCTION__ << "| size body: " << _body.size() << std::endl;
+		{ // std::cout << __PRETTY_FUNCTION__ << std::endl;
+			std::cout << __PRETTY_FUNCTION__ << ": " << this->_requestInterface << " "
+					  << this << " "
+					  << "\033[31;4m <- IF THIS IS NOT NULL/0x0 we are creating memory "
+						 "leaks\033[0m"
+					  << std::endl;
+			std::cout << __PRETTY_FUNCTION__ << "| size body: " << _body.size()
+					  << std::endl;
+		}
 		if (_request.getMethod() == Utils::post_string && !_body.empty()) {
 			_request.setBody(_body);
 		}
@@ -219,21 +234,23 @@ void ClientFD::ready() {
 		} else {
 			this->_requestInterface = new HttpRequest(*this);
 		}
-		//		if (this->_request.getMethod() == Utils::post_string &&
-		//			this->_request.getExpect() == "100-continue")
-		//		{
-		//			this->_response.processResponse(this, "", "100");
-		//		}
 	}
 }
 
-
-// maybe: receiveHeader(), receiveBody(), ready() should be enclosed within a
+// maybe: receiveHeader(), receiveBody(), respond() should be enclosed within a
 // try catch block for the error responses.
 void ClientFD::process() {
-	receiveHeader();
-	receiveBody();
-	ready();
+	try {
+		receiveHeader();
+		receiveBody();
+		respond();
+	} catch (const Utils::ErrorPageException &e) {
+		std::cout << "STATUS ERROR: " << e.what() << std::endl;
+		this->_response.processResponse(this, "", e.what());
+	} catch (const std::exception &e) {
+		std::cout << "temp error" << e.what() << std::endl;
+		// other exceptions like std::string! should be finished later/how?
+	}
 }
 
 /* receive data */

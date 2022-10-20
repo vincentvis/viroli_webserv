@@ -49,7 +49,7 @@ class ClientFD : public IPollable {
 		void        receive(size_t len);
 		void        receiveChunked();
 		void        receiveLength();
-		void        ready();
+		void        respond();
 		Server     *getServer() const;
 		void        sendResponse();
 		int32_t     getRemainderBytes() const;
