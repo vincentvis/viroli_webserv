@@ -14,7 +14,7 @@ class RequestInterface;
 
 class ClientFD : public IPollable {
 	public:
-		enum State { HEADER, BODY, END };
+		enum State { HEADER, BODY, RESPOND, ERROR };
 
 		Request           _request;
 		RequestInterface *_requestInterface;
@@ -25,7 +25,8 @@ class ClientFD : public IPollable {
 		Response          _response;
 		State             _state;
 		std::vector<char> _buffer;
-		std::string       _data;
+		std::string       _inbound;
+		std::string       _outbound;
 		std::string       _body;
 		int               _bytes;
 		int64_t           _left;
@@ -34,6 +35,7 @@ class ClientFD : public IPollable {
 		int               _index;
 		time_t            _tick;
 		bool              _closed;
+
 
 		ClientFD(Server *server, int fd, int index);
 		~ClientFD();
