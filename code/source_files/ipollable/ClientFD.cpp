@@ -20,8 +20,9 @@ void ClientFD::receive(size_t len) {
 	_bytes = recv(_fd, _buffer.data(), len, 0);
 
 	if (_bytes == -1) {
-		throw(Utils::ErrorPageException("500"));
-		_closed = true;
+		// throw(Utils::ErrorPageException("500"));
+		// _closed = true;
+		_bytes = 0; // Rhyno and Pascal ???
 	} else if (_bytes == 0) {
 		process();
 	} else if (_bytes > 0) {
@@ -219,7 +220,6 @@ void ClientFD::respond() {
 		_request.getExpect() == Utils::continue_string && _inbound.empty())
 	{
 		this->_response.processResponse(this, "", "100");
-		_state = BODY;
 	} else if (this->_request.getCgi() == true) {
 		this->_requestInterface = new CGIRequest(*this);
 	} else {
@@ -281,7 +281,7 @@ void ClientFD::pollout() {
 		delete _requestInterface;
 		_requestInterface = nullptr;
 
-		/* sent an error respsonse, reset to accept new requests */
+		/* sent error response; reset to accept new requests */
 		if (_state == ERROR) {
 			cleanClientFD();
 
@@ -289,14 +289,14 @@ void ClientFD::pollout() {
 		} else if (_request.getConnectionAvailable() == false) {
 			_closed = true;
 
-			/* 100-continue response has been sent */
+			/* 100-continue response sent; reset byte counters for receiving body */
 		} else if (_request.getMethod() == Utils::post_string &&
 				   _request.getExpect() == Utils::continue_string)
 		{
-			/* reset counters used for sending and receiving body next */
 			resetBytes();
+			_state = BODY;
 
-			/* sent response, reset to accept new requests */
+			/* sent response; reset to accept new requests */
 		} else {
 			cleanClientFD();
 		}
