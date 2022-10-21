@@ -24,7 +24,7 @@ void ClientFD::receive(size_t len) {
 		// _closed = true;
 		_bytes = 0; // Rhyno and Pascal ???
 	} else if (_bytes == 0) {
-		process();
+		throw(std::runtime_error("shutdown"));
 	} else if (_bytes > 0) {
 		_inbound.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
@@ -35,12 +35,12 @@ void ClientFD::receiveChunked() {
 	size_t            pos = 0;
 
 	while (_state == BODY) {
-		/* no known chunk size and not present in _inbound, receive more bytes */
+		/* no known chunk size and not present in _inbound; receive more bytes */
 		if ((_left == 0) && ((pos = _inbound.find("\r\n")) == std::string::npos)) {
 			break;
 		}
 
-		/* no known chunk size, look for chunk size in _inbound */
+		/* no known chunk size; look for chunk size in _inbound */
 		if ((_left == 0) && ((pos = _inbound.find("\r\n")) != std::string::npos)) {
 			stream << std::hex << _inbound.substr(0, pos);
 			stream >> _left;
@@ -74,7 +74,7 @@ void ClientFD::receiveChunked() {
 				_inbound = _inbound.substr(_left + CRLF_LEN);
 				_left    = 0;
 
-				/* chunk not present, receive more bytes */
+				/* chunk not present; receive more bytes */
 			} else {
 				break;
 			}
@@ -93,7 +93,7 @@ void ClientFD::receiveLength() {
 		_total += _bytes;
 	}
 
-	/* received the amount of bytes specified by content-length */
+	/* received all the bytes specified by content-length */
 	if (_total == _left) {
 		_body  = _inbound;
 		_state = RESPOND;
@@ -154,7 +154,7 @@ std::string ClientFD::getBodyStr() const {
 }
 
 void ClientFD::receiveBody() {
-	std::cout << __PRETTY_FUNCTION__ << std::endl;
+	// std::cout << __PRETTY_FUNCTION__ << std::endl;
 	// std::cout << __PRETTY_FUNCTION__ << std::endl;
 	if (_request.contentLenAvailable() == true) {
 		receiveLength();
@@ -251,8 +251,13 @@ void ClientFD::process() {
 /* receive data */
 void ClientFD::pollin() {
 	time(&_tick);
-	receive(BUFFERSIZE);
-	process();
+	try {
+		receive(BUFFERSIZE);
+		process();
+	} catch (const std::exception &e) {
+		std::cerr << e.what() << std::endl;
+		_closed = true;
+	}
 }
 
 /* send data */

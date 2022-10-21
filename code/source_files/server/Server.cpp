@@ -106,10 +106,10 @@ void Server::removePollable(int index) {
 	/* remove last element in vector */
 	Server::_pfds.pop_back();
 
-	// std::cout << "size _pfds (post-removal): " << Server::_pfds.size();
-	// std::cout << " | size _pollables (post-removal): " << Server::_pollables.size()
-	// 		  << std::endl;
-	// std::cout << "succesful removal\n";
+	std::cout << "size _pfds (post-removal): " << Server::_pfds.size();
+	std::cout << " | size _pollables (post-removal): " << Server::_pollables.size()
+			  << std::endl;
+	std::cout << "succesful removal\n";
 }
 
 /* events var might be not needed */
