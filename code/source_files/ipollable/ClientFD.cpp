@@ -19,10 +19,10 @@ void ClientFD::resetBytes() {
 void ClientFD::receive(size_t len) {
 	_bytes = recv(_fd, _buffer.data(), len, 0);
 
+	/* poll notified there is data ready, recv however returns EAGAIN (-1) */
 	if (_bytes == -1) {
-		// throw(Utils::ErrorPageException("500"));
-		// _closed = true;
-		_bytes = 0; // Rhyno and Pascal ???
+		throw(Utils::ErrorPageException("500"));
+		// _bytes = 0; // Rhyno and Pascal ???
 	} else if (_bytes == 0) {
 		throw(std::runtime_error("shutdown"));
 	} else if (_bytes > 0) {
@@ -271,14 +271,13 @@ void ClientFD::pollout() {
 
 	/* per subject, remove client on error */
 	if (_bytes == -1) {
-		_closed = true;
-		return;
-	} else if (_bytes > 0) {
+		throw(std::runtime_error("error on send"));
+	} else if (_bytes >= 0) {
 		_total += _bytes;
 		_left -= _bytes;
 	}
 
-	/* what to do after all data is sent? */
+	/* data is sent */
 	if (_left == 0) {
 		/* accept incoming activity again */
 		Server::_pfds[_index].events = POLLIN;
