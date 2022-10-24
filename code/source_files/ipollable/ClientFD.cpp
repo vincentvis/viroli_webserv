@@ -23,7 +23,7 @@ void ClientFD::receive(size_t len) {
 	if (_bytes == -1) {
 		throw(Utils::ErrorPageException("500"));
 	} else if (_bytes == 0) {
-		throw(std::runtime_error("connection closed by client"));
+		throw(std::runtime_error("Connection closed by client"));
 	} else if (_bytes > 0) {
 		_inbound.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
@@ -208,12 +208,9 @@ void ClientFD::process() {
 			respond();
 		}
 	} catch (const Utils::ErrorPageException &e) {
-		std::cerr << "STATUS ERROR: " << e.what() << std::endl;
 		_state = ERROR;
+		std::cerr << "Error code: " << e.what() << std::endl;
 		this->_response.processResponse(this, "", e.what());
-	} catch (const std::exception &e) {
-		std::cerr << "temp error" << e.what() << std::endl;
-		// other exceptions like std::string! should be finished later/how?
 	}
 }
 
