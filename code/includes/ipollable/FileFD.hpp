@@ -8,7 +8,7 @@
 
 class FileFD : public IPollable {
 	public:
-		enum State { PROCESS, END };
+		enum State { PROCESS, READY };
 
 		State             _state;
 		Server           *_server;

@@ -1,0 +1,3 @@
+curl -X POST -F 'image=@/home/user/Pictures/wallpaper.jpg' localhost:8080/upload
+
+curl -v --data-binary "@pinda.jpg" localhost:8080/uploads/pinda.jpg

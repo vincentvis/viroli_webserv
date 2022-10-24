@@ -114,6 +114,7 @@ bool Request::checkValidMethod() {
 	return false;
 }
 
+
 void Request::ValidateRequest(Config *Conf, Location *Loc) {
 	/* check method */
 	if (checkValidMethod() == false) {

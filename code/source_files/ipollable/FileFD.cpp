@@ -15,11 +15,11 @@ void FileFD::pollin() {
 	if (_bytes < 0) {
 		_closed = true;
 		_client->_response.processResponse(_client, "", "500");
-		_state = END;
+		_state = READY;
 	} else if (_bytes == 0) {
 		_closed = true;
 		_client->_response.processResponse(_client, _data, "200");
-		_state = END;
+		_state = READY;
 		// body ready initialize it with response
 	} else if (_bytes > 0) {
 		_total += _bytes;
@@ -42,6 +42,7 @@ void FileFD::setData(std::string data) {
 }
 
 void FileFD::pollout() {
+	std::cout << __PRETTY_FUNCTION__ << std::endl;
 	time(&_tick);
 
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
