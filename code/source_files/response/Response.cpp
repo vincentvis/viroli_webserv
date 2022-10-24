@@ -54,22 +54,30 @@ void Response::setBasicHeaders(std::string status, ClientFD *Client) {
 	Client->_response.createStatusLine(status, Client);
 
 	/* Headers */
-	addHeaderIfNotSet("Date", getDate());
-	addHeaderIfNotSet("Server", "VIROLI_Server/26.3.8");
 
+	/* add Date */
+	addHeaderIfNotSet(Utils::date_string, getDate());
+
+	/* add serverName */
+	addHeaderIfNotSet(Utils::server_string, Utils::serverType_string);
+
+	/* add contentType */
 	if (!this->_messageBody.empty()) {
-		addHeaderIfNotSet("Content-type", MimeTypes::findMimeType(Client->_request.getUri()));
+		addHeaderIfNotSet(Utils::contentType_string, MimeTypes::findMimeType(Client->_request.getUri()));
 	}
+	/* add connection */
 	if (Client->_request.getConnectionAvailable() == false) {
-		addHeaderIfNotSet("Connection", Client->_request.getConnectionInfo());
+		addHeaderIfNotSet(Utils::connection_string, Client->_request.getConnectionInfo());
 	} else {
-		addHeaderIfNotSet("Connection", "Keep-Alive");
+		addHeaderIfNotSet(Utils::connection_string, "Keep-Alive");
 	}
-	if (Client->_request.getMethod() == "GET") {
-		addHeaderIfNotSet("Content-Length", Utils::to_string(this->_messageBody.length()));
+	/* add content length */
+	if (Client->_request.getMethod() == Utils::get_string) {
+		addHeaderIfNotSet(Utils::contentLength_string, Utils::to_string(this->_messageBody.length()));
 	}
-	if (Client->_request.getMethod() == "POST") { // do you agree we only set location with post;
-		addHeaderIfNotSet("Location", Client->_request.getUri());
+	/* add location */
+	if (Client->_request.getMethod() == Utils::post_string) { // do you agree we only set location with post;
+		addHeaderIfNotSet(Utils::location_string, Client->_request.getUri());
 	}
 }
 
