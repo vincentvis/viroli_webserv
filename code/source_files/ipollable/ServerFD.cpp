@@ -51,6 +51,10 @@ bool ServerFD::isClosed() const {
 	return _closed;
 }
 
+void ServerFD::setClosed() {
+	_closed = true;
+}
+
 void ServerFD::setIndex(int32_t index) {
 	_index = index;
 }
