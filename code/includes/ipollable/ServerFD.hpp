@@ -16,7 +16,7 @@ class ServerFD : public IPollable {
 
 		void    pollin();
 		void    pollout();
-		int     getFileDescriptor() const;
+		int     getFD() const;
 		Server *getServer() const;
 		void    timeout();
 		bool    isClosed() const;

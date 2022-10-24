@@ -69,7 +69,7 @@ void FileFD::pollout() {
 	}
 }
 
-int FileFD::getFileDescriptor() const {
+int FileFD::getFD() const {
 	return _fd;
 }
 

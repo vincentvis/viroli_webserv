@@ -307,8 +307,7 @@ void ClientFD::pollout() {
 	}
 }
 
-
-int ClientFD::getFileDescriptor() const {
+int ClientFD::getFD() const {
 	return _fd;
 }
 

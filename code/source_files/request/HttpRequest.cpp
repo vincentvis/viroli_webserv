@@ -30,8 +30,8 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	path += uri;
 	int fd;
 
-	if (Client._request.uriIsDir()) {
-		if (Client._config->getAutoIndex(Client._location) == "on") {
+	if (Client._config->getAutoIndex(Client._location) == "on") {
+		if (Client._request.uriIsDir()) {
 			try {
 				Autoindex autoindex(path);
 				Client._response.setContentType("text/html");
@@ -75,11 +75,9 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		return;
 	}
 	/* add fileFd to poll */
-	Client._fileFD = reinterpret_cast<FileFD *>(
-		Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
-//	if (!Client.getBodyStr().empty()){
-//		Client._fileFD->setData(Client.getBodyStr());
-//	}
+	Client._fileFD =
+		reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
+			Client._server, fd, FILEPOLL, POLLIN));
 	Client._fileFD->setRequestInterface(this, &Client);
 }
 
@@ -91,7 +89,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 // 500-599 is Server error.
 
 ///* called in ClientFD after fileFD is read */
-//void HttpRequest::processResponse(ClientFD *Client, std::string messageBody,
+// void HttpRequest::processResponse(ClientFD *Client, std::string messageBody,
 //								  std::string StatusCode) {
 //	/* check errorpages */
 //	if (StatusCode.at(0) < '4') {
@@ -106,7 +104,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 //	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);
 //	Client->_response.createResponse(); // thinking about merging those two
 //	Client->sendResponse(Client->_index);
-//}
+// }
 
 // void HttpRequest::GETRequest(ClientFD &Client) {
 //	/* create path */
@@ -134,7 +132,8 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 	//			uri = Client._config->getRoot();
 	//		}
 	//		uri  = uri + Client._request.getUri();
-//	std::cout << "POSTRequest:: Client request body.size(): " << Client._request.getBody().size() << std::endl;
+	//	std::cout << "POSTRequest:: Client request body.size(): " <<
+	// Client._request.getBody().size() << std::endl;
 	std::string path = Client._config->getRoot(Client._location);
 	std::string uri  = Client._request.getUri();
 	if (*path.rbegin() != '/' && (uri.empty() == false && uri.at(0) != '/')) {
@@ -148,8 +147,9 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 		Client._response.processResponse(&Client, "", "404");
 	} else {
 		//		set location in response header
-		Client._fileFD = reinterpret_cast<FileFD *>(
-			Server::addPollable(Client._server, fd, FILEPOLL, POLLOUT));
+		Client._fileFD =
+			reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
+				Client._server, fd, FILEPOLL, POLLOUT));
 		if (!Client.getBodyStr().empty()) {
 			Client._fileFD->setData(Client._request.getBody());
 		}

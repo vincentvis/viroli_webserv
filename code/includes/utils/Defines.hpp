@@ -9,6 +9,8 @@
 #define CRLF_LEN2       4
 #define TIMEOUT_SECONDS 5
 
+enum ePollType { SERVERFD, CLIENTFD, FILEFD };
+
 namespace Utils {
 
 const std::string get_string("GET");
