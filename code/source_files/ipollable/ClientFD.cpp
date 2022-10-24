@@ -35,13 +35,15 @@ void ClientFD::receiveChunked() {
 	size_t            pos = 0;
 
 	while (_state == BODY) {
+		pos = _inbound.find("\r\n");
+
 		/* no known chunk size and not present in _inbound, receive more bytes */
-		if ((_left == 0) && ((pos = _inbound.find("\r\n")) == std::string::npos)) {
+		if (_left == 0 && pos == std::string::npos) {
 			break;
 		}
 
 		/* no known chunk size, look for chunk size in _inbound */
-		if ((_left == 0) && ((pos = _inbound.find("\r\n")) != std::string::npos)) {
+		if (_left == 0 && pos != std::string::npos) {
 			stream << std::hex << _inbound.substr(0, pos);
 			stream >> _left;
 			_inbound = _inbound.substr(pos + CRLF_LEN);
@@ -102,21 +104,11 @@ void ClientFD::receiveLength() {
 
 void ClientFD::sendResponse() {
 	Server::_pfds[_index].events = POLLOUT;
-	_outbound = _response.getResponse(); // this should work at a certain moment
-	_bytes    = 0;                       // ronald check are these oke?
-	_total    = 0;                       // ronald check are these oke?
-	_left     = _outbound.size();        // ronald check are these oke?
+	_outbound                    = _response.getResponse();
+	_bytes                       = 0;
+	_total                       = 0;
+	_left                        = _outbound.size();
 }
-
-/*
--> receive bytes:
-  -> header is present:
-	-> POST request:
-	  -> 'Expect: 100-continue' is present:
-		-> (part of) body is present:
-		  -> omit sending 100-continue response
-		-> send 100-continue response
-*/
 
 void ClientFD::receiveHeader() {
 	size_t end = 0;
@@ -154,30 +146,12 @@ std::string ClientFD::getBodyStr() const {
 }
 
 void ClientFD::receiveBody() {
-	std::cout << __PRETTY_FUNCTION__ << std::endl;
 	// std::cout << __PRETTY_FUNCTION__ << std::endl;
 	if (_request.contentLenAvailable() == true) {
 		receiveLength();
-	} else if (_request.getChunked() == true) { // this should be completed
-		// in received chunked throw errors if error catch will create a error
-		// response -> RONALD :)!
-		//			try {
+	} else if (_request.getChunked() == true) {
 		receiveChunked();
-		//		}
-		//			catch (const Utils::ErrorPageException &e) {
-		//				this->_response.initResponse(
-		//					e.what(), this->_config,
-		//					this->_request); // make sure if error it sets it
-		// immidiately to
-		//									 // create response and stops here
-		//				_state = RESPOND;
-		//			}
-
-
-		// body is expected but no content-length or chunked -> throw error?
 	} else {
-		// when body is expected but no chunked or content-length present
-		// this can be caught earlier
 		_state = RESPOND;
 	}
 }
@@ -204,18 +178,12 @@ void ClientFD::cleanClientFD() {
 }
 
 void ClientFD::respond() {
-	{ // std::cout << __PRETTY_FUNCTION__ << std::endl;
-		std::cout << __PRETTY_FUNCTION__ << ": " << this->_requestInterface << " " << this
-				  << " "
-				  << "\033[31;4m <- IF THIS IS NOT NULL/0x0 we are creating memory "
-					 "leaks\033[0m"
-				  << std::endl;
-		std::cout << __PRETTY_FUNCTION__ << "| size body: " << _body.size() << std::endl;
-	}
+	/* discard body when request is not POST */
 	if (_request.getMethod() == Utils::post_string && !_body.empty()) {
 		_request.setBody(_body);
 	}
-	/* when no body is present send 100-continue response */
+
+	/* when no body is present in POST request send 100-continue response */
 	if (_request.getMethod() == Utils::post_string &&
 		_request.getExpect() == Utils::continue_string && _inbound.empty())
 	{
@@ -302,7 +270,6 @@ void ClientFD::pollout() {
 		}
 	}
 }
-
 
 int ClientFD::getFileDescriptor() const {
 	return _fd;
