@@ -42,12 +42,12 @@ int main(int argc, char const *argv[]) {
 		std::cout << "pfd: " << it->fd << std::endl;
 	}
 
-	std::cout << "std::map<int32_t, IPollables> _pollables: \n";
-	for (std::map<int32_t, IPollable *>::iterator it = Server::_pollables.begin();
+	std::cout << "std::vector<IPollable*> _pollables: \n";
+	for (std::vector<IPollable *>::iterator it = Server::_pollables.begin();
 		 it != Server::_pollables.end(); ++it)
 	{
-		std::cout << "fd: " << it->first << " | IPollable fd: " << it->second->getFD();
-		std::cout << " | port: " << it->second->getServer()->getPort() << std::endl;
+		std::cout << "IPollable fd: " << (*it)->getFD();
+		std::cout << " | port: " << (*it)->getServer()->getPort() << std::endl;
 	}
 
 	try {

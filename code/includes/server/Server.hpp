@@ -45,14 +45,15 @@ class Server {
 		friend class ConfigParser;
 
 
-		uint16_t                              getPort() const;
-		int32_t                               getFD() const;
-		static void                           run();
-		static void                           removePollable(int index);
+		uint16_t    getPort() const;
+		int32_t     getFD() const;
+		static void run();
+		static void removePollable(int index);
 
-		static std::map<int32_t, IPollable *> _pollables;
-		static std::vector<struct pollfd>     _pfds;
-		std::vector<Config *>                 _configs;
+		// static std::map<int32_t, IPollable *> _replace;
+		static std::vector<IPollable *>   _pollables;
+		static std::vector<struct pollfd> _pfds;
+		std::vector<Config *>             _configs;
 
 	protected:
 		int32_t  _fd;

@@ -91,6 +91,10 @@ bool FileFD::isClosed() const {
 	return _closed;
 }
 
+void FileFD::setClosed() {
+	_closed = true;
+}
+
 void FileFD::setIndex(int32_t index) {
 	_index = index;
 }

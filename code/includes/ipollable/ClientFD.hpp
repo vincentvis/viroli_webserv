@@ -57,6 +57,7 @@ class ClientFD : public IPollable {
 		int32_t     getRemainderBytes() const;
 		void        timeout();
 		bool        isClosed() const;
+		void        setClosed();
 		void        process();
 		void        setIndex(int32_t index);
 		void        cleanClientFD();

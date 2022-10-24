@@ -16,6 +16,7 @@ class IPollable {
 		virtual void    pollout()               = 0;
 		virtual void    timeout()               = 0;
 		virtual bool    isClosed() const        = 0;
+		virtual void    setClosed()             = 0;
 		virtual int     getFD() const           = 0;
 		virtual Server *getServer() const       = 0;
 		virtual void    setIndex(int32_t index) = 0;

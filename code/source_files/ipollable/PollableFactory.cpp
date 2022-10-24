@@ -4,7 +4,8 @@ IPollable *PollableFactory::createClientFD(Server *serv, int fd, int event) {
 	struct pollfd pfd      = {fd, event, 0};
 	IPollable    *pollable = new ClientFD(serv, fd, Server::_pfds.size());
 
-	Server::_pollables.insert(std::make_pair(fd, pollable));
+	// Server::_replace.insert(std::make_pair(fd, pollable));
+	Server::_pollables.push_back(pollable);
 	Server::_pfds.push_back(pfd);
 	return pollable;
 }
@@ -13,7 +14,8 @@ IPollable *PollableFactory::createServerFD(Server *serv, int fd, int event) {
 	struct pollfd pfd      = {fd, event, 0};
 	IPollable    *pollable = new ServerFD(serv, fd, Server::_pfds.size());
 
-	Server::_pollables.insert(std::make_pair(fd, pollable));
+	// Server::_replace.insert(std::make_pair(fd, pollable));
+	Server::_pollables.push_back(pollable);
 	Server::_pfds.push_back(pfd);
 	return pollable;
 }
@@ -22,7 +24,8 @@ IPollable *PollableFactory::createFileFD(Server *serv, int fd, int event) {
 	struct pollfd pfd      = {fd, event, 0};
 	IPollable    *pollable = new FileFD(serv, fd, Server::_pfds.size());
 
-	Server::_pollables.insert(std::make_pair(fd, pollable));
+	// Server::_replace.insert(std::make_pair(fd, pollable));
+	Server::_pollables.push_back(pollable);
 	Server::_pfds.push_back(pfd);
 	return pollable;
 }
