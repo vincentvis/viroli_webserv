@@ -1,5 +1,6 @@
 #include "response/Response.hpp"
 #include "ipollable/ClientFD.hpp"
+#include "config/MimeTypes.hpp"
 
 Response::Response() {
 	this->_respReady = false;
@@ -9,136 +10,91 @@ void Response::setMessageBody(std::string MessageBody) {
 	this->_messageBody = MessageBody;
 }
 
-/* called in ClientFD after fileFD is read */
-void Response::processResponse(ClientFD *Client, std::string messageBody,
-							   std::string StatusCode) {
-	/* check errorpages */
-	if (StatusCode.at(0) < '4') {
-		Client->_response.findAndSetContentType(Client->_request);
-		Client->_response.setMessageBody(messageBody);
-	} else {
-		Client->_response.setContentType("text/html");
-		Client->_response.generateErrorPage(StatusCode,
-											&Client->_config->getErrorPages());
+void Response::addHeader(std::string name, std::string value) {
+	_responseHeader[name] = value;
+}
+
+void Response::addHeader(std::string name, size_t value) {
+	_responseHeader[name] = Utils::to_string(value);
+}
+
+ void Response::addHeaderIfNotSet(std::string name, std::string value) {
+	if (_responseHeader.find(name) != _responseHeader.end()) {
+		_responseHeader[name] = value;
 	}
-	/* generate response */
-	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);
-	Client->_response.createResponse(); // thinking about merging those two
-	Client->sendResponse();
+ }
+
+ void Response::addHeaderIfNotSet(std::string name, size_t value) {
+	if (_responseHeader.find(name) != _responseHeader.end()) {
+		_responseHeader[name] = Utils::to_string(value);
+	}
+ }
+
+ std::string Response::getResponse() const {
+	 return this->_responseString;
+ }
+
+ std::string Response::getDate() {
+	 // do something to get date and time;
+	 return "Mon, 10 Oct 2022 00:43:49 GMT";
+ }
+
+
+void Response::createStatusLine(std::string Status, ClientFD *Client) {
+	this->_statusLine.append(Client->_request.getHTTPVersion());
+	this->_statusLine.append(" ");
+	this->_statusLine.append(Status);
+	this->_statusLine.append(" ");
+	this->_statusLine.append(HttpStatus::getReasonPhrase(Status));
 }
 
 
-void Response::initResponse(std::string status, Config *Conf, const Request &Req) {
-	(void)Conf;
+void Response::setBasicHeaders(std::string status, ClientFD *Client) {
 	/* Status Line */
-	this->_httpVersion  = Req.getHTTPVersion();
-	this->_statusCode   = status;
-	this->_reasonPhrase = HttpStatus::getReasonPhrase(status);
+	Client->_response.createStatusLine(status, Client);
 
-	/* Http Header */
-	this->_date       = "Date: " + getDate() + CRLF;
-	this->_serverType = "Server: VIROLI_Server/26.3.8" CRLF;
-	if (!this->_messageBody.empty()) {
-		this->_contentType = "Content-type: " + getContentType() + CRLF;
-	}
-	if (Req.getConnectionAvailable() == false) {
-		this->_connection = "Connection: " + Req.getConnectionInfo() + CRLF;
-	} else {
-		this->_connection = "Connection: Keep-Alive" CRLF;
-	}
-
-	//	/* Message Body */ REMOVE IF NOT NEEDED LATER
-	//		this->_messageBody = already set
-
-	if (Req.getMethod() == "GET") {
-		this->_contentLen =
-			"Content-Length: " + Utils::to_string(this->_messageBody.length()) + CRLF;
-	}
-	if (Req.getMethod() == "POST") {
-		this->_location = "Location: " + Req.getUri() + CRLF; // with or without
-	}
-}
-
-void Response::createResponse() {
-	// contentlen is empty if the method is not get, is that oke for creating its response
-	// allocation wise? checks around these
-	std::string StatusLine =
-		this->_httpVersion + " " + this->_statusCode + " " + this->_reasonPhrase + CRLF;
-	std::string HTTPHeader = this->_date + this->_serverType + this->_contentLen +
-							 this->_contentType + this->_location + this->_connection +
-							 CRLF; // CRLF leesbaarheid
+	/* Headers */
+	addHeaderIfNotSet("Date", getDate());
+	addHeaderIfNotSet("Server", "VIROLI_Server/26.3.8");
 
 	if (!this->_messageBody.empty()) {
-		this->_messageBody += CRLF;
+		addHeaderIfNotSet("Content-type", MimeTypes::findMimeType(Client->_request.getUri()));
 	}
-
-	this->_response = StatusLine + HTTPHeader + this->_messageBody;
-}
-
-///* called in ClientFD after fileFD is read */
-// void Response::processResponse(ClientFD *Client, std::string messageBody,
-//								  std::string StatusCode) {
-//	/* check errorpages */
-//	if (StatusCode.at(0) < '4') {
-//		Client->_response.findAndSetContentType(Client->_request);
-//		Client->_response.setMessageBody(messageBody);
-//	} else {
-//		Client->_response.setContentType("text/html");
-//		Client->_response.generateErrorPage(StatusCode,
-//											&Client->_config->getErrorPages());
-//	}
-//	/* generate response */
-//	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);
-//	Client->_response.createResponse(); // thinking about merging those two
-//	Client->sendResponse(Client->_index);
-// }
-
-void Response::clean() {
-	this->_response.clear();
-	this->_respReady = false;
-	this->_httpVersion.clear();
-	this->_statusCode.clear();
-	this->_reasonPhrase.clear();
-	this->_date.clear();
-	this->_serverType.clear();
-	this->_contentType.clear();
-	this->_contentTypeIsSet = false;
-	this->_contentLen.clear();
-	this->_connection.clear();
-	this->_location.clear();
-	this->_messageBody.clear();
-}
-
-std::string Response::getResponse() const {
-	return this->_response;
-}
-
-std::string Response::getDate() {
-	// do something to get date and time;
-	return "Mon, 10 Oct 2022 00:43:49 GMT";
-}
-
-std::string Response::getContentType() const {
-	return this->_contentType;
-}
-
-void Response::setContentType(std::string ContentType) {
-	this->_contentType      = ContentType;
-	this->_contentTypeIsSet = true;
-}
-
-void Response::findAndSetContentType(const Request &Req) {
-	if (this->_contentTypeIsSet) {
-		return;
-	}
-	if (Utils::ends_with(Req.getUri(), ".html")) {
-		this->_contentType = "text/html";
-	} else if (Utils::ends_with(Req.getUri(), ".jpg")) {
-		this->_contentType = "media type";
-	} else if (Utils::ends_with(Req.getUri(), ".css")) {
-		this->_contentType = "text/css";
+	if (Client->_request.getConnectionAvailable() == false) {
+		addHeaderIfNotSet("Connection", Client->_request.getConnectionInfo());
 	} else {
-		this->_contentType = "text/plain";
+		addHeaderIfNotSet("Connection", "Keep-Alive");
+	}
+	if (Client->_request.getMethod() == "GET") {
+		addHeaderIfNotSet("Content-Length", Utils::to_string(this->_messageBody.length()));
+	}
+	if (Client->_request.getMethod() == "POST") { // do you agree we only set location with post;
+		addHeaderIfNotSet("Location", Client->_request.getUri());
+	}
+}
+
+void Response::createResponseString() {
+	/* Add Status Line to response string */
+	_responseString.append(_statusLine);
+	_responseString.append(CRLF);
+
+	std::map<std::string, std::string>::iterator it  = _responseHeader.begin();
+	std::map<std::string, std::string>::iterator end = _responseHeader.end();
+
+	while (it != end) {
+		_responseString.append(it->first);
+		_responseString.append(": ");
+		_responseString.append(it->second);
+		_responseString.append(CRLF);
+		it++;
+	}
+	/* add second CRLF to mark end of header */
+	_responseString.append(CRLF);
+
+	/* Add  message body to response string */
+	if (!_messageBody.empty()){
+		_responseString.append(_messageBody);
+		_responseString.append(CRLF); // ?
 	}
 }
 
@@ -153,6 +109,44 @@ void Response::generateErrorPage(
 		}
 	}
 	this->_messageBody = HttpStatus::generateErrorPage(status);
+}
+
+
+/* called in ClientFD after fileFD is read */
+void Response::processResponse(ClientFD *Client, std::string messageBody,
+							   std::string StatusCode) {
+	// maybe message body can be deleted?
+	/* check errorpages, set contentType */
+	if (StatusCode.at(0) < '4') {
+//		Client->_response.findAndSetContentType(Client->_request);
+		Client->_response.setMessageBody(messageBody); // not sure if this is needed?
+	} else {
+		Client->_response.addHeader("Content-type", "text/html");
+		Client->_response.generateErrorPage(StatusCode,
+											&Client->_config->getErrorPages());
+	}
+	/* generate response */
+	Client->_response.setBasicHeaders(StatusCode, Client);
+	Client->_response.createResponseString();
+	std::cout << "response header: [" << _responseString << "]" <<  std::endl;
+	Client->sendResponse();
+}
+
+void Response::clean() {
+	this->_responseString.clear();
+	this->_respReady = false;
+	this->_responseHeader.clear(); // clear map
+								   //	this->_httpVersion.clear();
+								   //	this->_statusCode.clear();
+								   //	this->_reasonPhrase.clear();
+								   //	this->_date.clear();
+								   //	this->_serverType.clear();
+								   //	this->_contentType.clear();
+								   //	this->_contentTypeIsSet = false;
+								   //	this->_contentLen.clear();
+								   //	this->_connection.clear();
+								   //	this->_location.clear();
+								   //	this->_messageBody.clear();
 }
 
 Response::~Response() {
