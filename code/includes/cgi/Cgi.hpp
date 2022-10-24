@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cgi/Env.hpp"
 #include "cgi/Pipes.hpp"
 #include "utils/FileStat.hpp"
 #include <unistd.h>
