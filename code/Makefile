@@ -46,6 +46,7 @@ CLASSES		:= \
 				utils/FileStat\
 				utils/Utils\
         		response/HttpStatus\
+                cgi/Env\
                 cgi/Cgi\
                 cgi/Pipes\
                 request/HttpRequest\

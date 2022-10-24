@@ -2,6 +2,7 @@
 
 #include "utils/Defines.hpp"
 #include "utils/Exception.hpp"
+#include <fcntl.h>
 #include <string>
 #include <unistd.h>
 
@@ -16,6 +17,7 @@ class Pipes {
 		void closeForChild();
 		void tryClose(int fd);
 		void openPipes();
+		void setPipesNonBlock();
 
 		int  toCgi[2];
 		int  toServer[2];

@@ -19,9 +19,12 @@ print("""<!DOCTYPE html>
 <body>
 """)
 
+print("<h1>val1: {0}</h1>".format(input_data.getvalue("val1")))
+print("<h1>val2: {0}</h1>".format(input_data.getvalue("val2")))
+
 try:
-    num1 = int(input_data["val1"].value)
-    num2 = int(input_data["val2"].value)
+    num1 = int(input_data.getvalue("val1"))
+    num2 = int(input_data.getvalue("val2"))
 except:
     print("<h1>Sorry, the script cannot turn your inputs into numbers (integers).</h1>\n</body>\n</html>")
     raise SystemExit(0)

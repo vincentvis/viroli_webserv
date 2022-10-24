@@ -43,3 +43,13 @@ void Pipes::openPipes() {
 		throw Utils::ErrorPageException("500");
 	}
 }
+
+void Pipes::setPipesNonBlock() {
+	if (fcntl(toServer[READ_FD], F_SETFL, O_NONBLOCK) == SYS_ERR) {
+		throw Utils::ErrorPageException("500");
+	}
+	if (fcntl(toServer[WRITE_FD], F_SETFL, O_NONBLOCK) == SYS_ERR) {
+		tryClose(toServer[READ_FD]);
+		throw Utils::ErrorPageException("500");
+	}
+}
