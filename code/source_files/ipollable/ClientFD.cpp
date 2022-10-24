@@ -22,9 +22,8 @@ void ClientFD::receive(size_t len) {
 	/* poll notified there is data ready, recv however returns EAGAIN (-1) */
 	if (_bytes == -1) {
 		throw(Utils::ErrorPageException("500"));
-		// _bytes = 0; // Rhyno and Pascal ???
 	} else if (_bytes == 0) {
-		throw(std::runtime_error("shutdown"));
+		throw(std::runtime_error("connection closed by client"));
 	} else if (_bytes > 0) {
 		_inbound.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
@@ -53,7 +52,7 @@ void ClientFD::receiveChunked() {
 
 				/* body exceeds the config limit */
 				if (_total > _config->getMaxBodySize()) {
-					throw(Utils::ErrorPageException("413")); // <----------------- CHECK?
+					throw(Utils::ErrorPageException("413"));
 				}
 
 				/* ending chunk received */
@@ -112,6 +111,7 @@ void ClientFD::sendResponse() {
 
 void ClientFD::receiveHeader() {
 	size_t end = 0;
+
 	if ((end = _inbound.find(CRLF_END)) != std::string::npos) {
 		this->_request.ParseRequest(this->_inbound);
 		this->_request.printAttributesInRequestClass();
@@ -127,6 +127,7 @@ void ClientFD::receiveHeader() {
 		/* 'chunked': _total is sum of all chunk sizes */
 		if (_request.getChunked() == true) {
 			_total = 0;
+
 			/* 'content-length': _total is set to data already received */
 		} else if (_request.contentLenAvailable() == true) {
 			_total = _inbound.size();
