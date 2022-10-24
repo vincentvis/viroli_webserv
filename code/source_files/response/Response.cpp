@@ -1,5 +1,6 @@
 #include "response/Response.hpp"
 #include "ipollable/ClientFD.hpp"
+#include "config/MimeTypes.hpp"
 
 Response::Response() {
 	this->_respReady = false;
@@ -131,15 +132,7 @@ void Response::findAndSetContentType(const Request &Req) {
 	if (this->_contentTypeIsSet) {
 		return;
 	}
-	if (Utils::ends_with(Req.getUri(), ".html")) {
-		this->_contentType = "text/html";
-	} else if (Utils::ends_with(Req.getUri(), ".jpg")) {
-		this->_contentType = "media type";
-	} else if (Utils::ends_with(Req.getUri(), ".css")) {
-		this->_contentType = "text/css";
-	} else {
-		this->_contentType = "text/plain";
-	}
+	this->_contentType = MimeTypes::findMimeType(Req.getUri());
 }
 
 void Response::generateErrorPage(
