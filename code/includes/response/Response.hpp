@@ -18,7 +18,6 @@ class Response {
 		std::string                        _statusLine;
 		std::map<std::string, std::string> _responseHeader;
 		std::string                        _responseString;
-		bool                               _respReady;
 		std::string _messageBody;
 		/*
 		 * when succesfull : the resource requested by the client, or some information

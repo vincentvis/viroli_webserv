@@ -3,7 +3,6 @@
 #include "config/MimeTypes.hpp"
 
 Response::Response() {
-	this->_respReady = false;
 }
 
 void Response::setMessageBody(std::string MessageBody) {
@@ -54,7 +53,6 @@ void Response::setBasicHeaders(std::string status, ClientFD *Client) {
 	Client->_response.createStatusLine(status, Client);
 
 	/* Headers */
-
 	/* add Date */
 	addHeaderIfNotSet(Utils::date_string, getDate());
 
@@ -83,6 +81,7 @@ void Response::setBasicHeaders(std::string status, ClientFD *Client) {
 
 void Response::createResponseString() {
 	/* Add Status Line to response string */
+	std::cout << "CREATE RESPONSE STRING" << std::endl;
 	_responseString.append(_statusLine);
 	_responseString.append(CRLF);
 
@@ -95,6 +94,7 @@ void Response::createResponseString() {
 		_responseString.append(it->second);
 		_responseString.append(CRLF);
 		it++;
+		std::cout << "map: " << _responseString.append(it->first) << std::endl;
 	}
 	/* add second CRLF to mark end of header */
 	_responseString.append(CRLF);
@@ -130,7 +130,7 @@ void Response::processResponse(ClientFD *Client, std::string messageBody,
 //		Client->_response.findAndSetContentType(Client->_request);
 		Client->_response.setMessageBody(messageBody); // not sure if this is needed?
 	} else {
-		Client->_response.addHeader("Content-type", "text/html");
+		Client->_response.addHeader(Utils::contentType_string, "text/html");
 		Client->_response.generateErrorPage(StatusCode,
 											&Client->_config->getErrorPages());
 	}
@@ -138,24 +138,28 @@ void Response::processResponse(ClientFD *Client, std::string messageBody,
 	Client->_response.setBasicHeaders(StatusCode, Client);
 	Client->_response.createResponseString();
 	std::cout << "response header: [" << _responseString << "]" <<  std::endl;
+	this->_responseHeader.clear();
+	this->_statusLine.clear();
 	Client->sendResponse();
 }
 
 void Response::clean() {
 	this->_responseString.clear();
-	this->_respReady = false;
-	this->_responseHeader.clear(); // clear map
-								   //	this->_httpVersion.clear();
-								   //	this->_statusCode.clear();
-								   //	this->_reasonPhrase.clear();
-								   //	this->_date.clear();
-								   //	this->_serverType.clear();
-								   //	this->_contentType.clear();
-								   //	this->_contentTypeIsSet = false;
-								   //	this->_contentLen.clear();
-								   //	this->_connection.clear();
-								   //	this->_location.clear();
-								   //	this->_messageBody.clear();
+	this->_responseHeader.clear();
+	this->_statusLine.clear();
+	this->_messageBody.clear();
+	// clear map
+//								   	this->_httpVersion.clear();
+//								   	this->_statusCode.clear();
+//								   	this->_reasonPhrase.clear();
+//								   	this->_date.clear();
+//								   	this->_serverType.clear();
+//								   	this->_contentType.clear();
+//								   	this->_contentTypeIsSet = false;
+//								   	this->_contentLen.clear();
+//								   	this->_connection.clear();
+//								   	this->_location.clear();
+
 }
 
 Response::~Response() {
