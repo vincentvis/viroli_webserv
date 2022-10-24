@@ -10,7 +10,8 @@ FileFD::~FileFD() {
 }
 
 void FileFD::pollin() {
-	time(&_tick);
+	updateTick();
+	_client->updateTick();
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
 
 	/* error during read; close pollable; send error response */
@@ -46,7 +47,8 @@ void FileFD::setData(std::string data) {
 
 void FileFD::pollout() {
 	std::cout << __PRETTY_FUNCTION__ << std::endl;
-	time(&_tick);
+	updateTick();
+	_client->updateTick();
 
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
 	_bytes = write(_fd, _buffer.data(), getRemainderBytes());
@@ -93,4 +95,8 @@ bool FileFD::isClosed() const {
 
 void FileFD::setIndex(int32_t index) {
 	_index = index;
+}
+
+void FileFD::updateTick() {
+	time(&_tick);
 }

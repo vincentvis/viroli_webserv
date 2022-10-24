@@ -60,4 +60,5 @@ class ClientFD : public IPollable {
 		void        process();
 		void        setIndex(int32_t index);
 		void        cleanClientFD();
+		void        updateTick();
 };

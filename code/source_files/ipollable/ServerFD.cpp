@@ -31,7 +31,8 @@ void ServerFD::pollin() {
 	std::cout << "new connection accepted\n";
 	Server::addPollable(_server, newfd, CLIENTPOLL, POLLIN);
 	// struct pollfd pfd = {newfd, POLLIN, 0};
-	// Server::addPollable(pfd, new ClientFD(_server, newfd, Server::_pfds.size())); //can this be deleted?
+	// Server::addPollable(pfd, new ClientFD(_server, newfd, Server::_pfds.size())); //can
+	// this be deleted?
 }
 
 /* do nothing on POLLOUT event */
@@ -55,4 +56,7 @@ bool ServerFD::isClosed() const {
 
 void ServerFD::setIndex(int32_t index) {
 	_index = index;
+}
+
+void ServerFD::updateTick() {
 }

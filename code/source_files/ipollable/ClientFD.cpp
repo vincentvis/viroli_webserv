@@ -23,7 +23,8 @@ void ClientFD::receive(size_t len) {
 	if (_bytes == -1) {
 		throw(Utils::ErrorPageException("500"));
 	} else if (_bytes == 0) {
-		throw(std::runtime_error("Connection closed by client"));
+		throw(std::runtime_error(std::string(std::asctime(std::localtime(&_tick))) +
+								 "Connection closed by client"));
 	} else if (_bytes > 0) {
 		_inbound.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
@@ -216,7 +217,7 @@ void ClientFD::process() {
 
 /* receive data */
 void ClientFD::pollin() {
-	time(&_tick);
+	updateTick();
 	try {
 		receive(BUFFERSIZE);
 		process();
@@ -228,7 +229,7 @@ void ClientFD::pollin() {
 
 /* send data */
 void ClientFD::pollout() {
-	time(&_tick);
+	updateTick();
 
 	/* make sure to not go out of bounds with the buffer */
 	_buffer.assign(_outbound.begin() + _total,
@@ -297,4 +298,8 @@ bool ClientFD::isClosed() const {
 
 void ClientFD::setIndex(int32_t index) {
 	_index = index;
+}
+
+void ClientFD::updateTick() {
+	time(&_tick);
 }
