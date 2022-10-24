@@ -96,6 +96,7 @@ void Response::createResponseString() {
 		_responseString.append(_messageBody);
 		_responseString.append(CRLF); // ?
 	}
+
 }
 
 void Response::generateErrorPage(
