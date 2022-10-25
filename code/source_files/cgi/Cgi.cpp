@@ -41,6 +41,11 @@ Cgi Cgi::setQueryString(std::string queryString) {
 	return (*this);
 }
 
+Cgi Cgi::setEnv(std::string key, std::string value) {
+	_env.setVar(key, value);
+	return (*this);
+}
+
 char *const *Cgi::makeArgv() const {
 	std::vector<std::string>::const_iterator it   = _args.begin();
 	std::vector<std::string>::const_iterator end  = _args.end();

@@ -58,6 +58,8 @@ int main(int argc, char const *argv[]) {
 
 	try {
 		Server::run();
+	} catch (const std::runtime_error &e) {
+		std::cerr << e.what() << std::endl;
 	} catch (std::string &e) {
 		std::cout << "error in main\n";
 		std::cout << e << std::endl;

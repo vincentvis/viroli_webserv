@@ -11,6 +11,8 @@ CGIRequest::CGIRequest(ClientFD &Client) {
 		exec.setQueryString(Client._request.getQuery());
 	} else if (Client._request.getMethod() == Utils::post_string) {
 		exec.setQueryString(Client._request.getBody());
+		exec.setEnv("CONTENT_LENGTH",
+					Utils::to_string(Client._request.getContentLength()));
 	}
 
 	// CheckMethod(Client);

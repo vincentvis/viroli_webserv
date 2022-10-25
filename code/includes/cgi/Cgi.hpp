@@ -17,6 +17,7 @@ class Cgi {
 		std::string  getStatusCode() const;
 		Cgi          setQueryString(std::string queryString);
 		char *const *makeArgv() const;
+		Cgi          setEnv(std::string key, std::string value);
 
 	private:
 		Cgi();

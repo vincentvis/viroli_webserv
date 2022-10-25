@@ -187,7 +187,7 @@ void ClientFD::respond() {
 	if (_request.getMethod() == Utils::post_string &&
 		_request.getExpect() == Utils::continue_string && _inbound.empty())
 	{
-		this->_response.generateResponse(this,"100");
+		this->_response.generateResponse(this, "100");
 	} else if (this->_request.getCgi() == true) {
 		this->_requestInterface = new CGIRequest(*this);
 	} else {
