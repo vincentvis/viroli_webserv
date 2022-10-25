@@ -8,7 +8,8 @@
 
 class Cgi {
 	public:
-		Cgi(const FileStat &filestats, std::string const &method);
+		Cgi(const FileStat &filestats, std::string const &method, uint16_t port,
+			std::string servername);
 		~Cgi();
 		void         setBody(std::string &body);
 		void         setQuery(std::string &body);

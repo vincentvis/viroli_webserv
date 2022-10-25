@@ -18,7 +18,7 @@ CgiVars CgiVars::setDefaultsForEnv(void) {
 	}
 	setVar("GATEWAY_INTERFACE", "CGI/1.1");
 	setVar("SERVER_PROTOCOL", "HTTP/1.1");
-	setVar("SERVER_SOFTWARE", "VIROLI_Server/26.3.8");
+	setVar("SERVER_SOFTWARE", Utils::serverType_string);
 	return (*this);
 }
 

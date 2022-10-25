@@ -1,7 +1,9 @@
 #include "cgi/Cgi.hpp"
 #include "cgi/Executables.hpp"
 
-Cgi::Cgi(const FileStat &filestats, std::string const &method) : _source(filestats) {
+Cgi::Cgi(const FileStat &filestats, std::string const &method, uint16_t port,
+		 std::string servername) :
+	_source(filestats) {
 	if (_source.isReg() == false) {
 		_done       = true;
 		_statusCode = "404";
@@ -22,7 +24,15 @@ Cgi::Cgi(const FileStat &filestats, std::string const &method) : _source(filesta
 		return;
 	}
 	_args.push_back(_source.getFull());
+
+	// REMOTE_ADDR omitted because no functions to handle this are allowed in the subject
+	_env.setVar("SCRIPT_NAME", _source.getFilename());
 	_env.setVar("HTTP_METHOD", method);
+	_env.setVar("SERVER_PORT", Utils::to_string(port));
+	if (Utils::starts_with(servername, "http") == false) {
+		servername = "http://" + servername;
+	}
+	_env.setVar("SERVER_NAME", servername);
 
 	try {
 		_pipes.openPipes();

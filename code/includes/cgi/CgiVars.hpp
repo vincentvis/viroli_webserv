@@ -1,5 +1,6 @@
 #pragma once
 
+#include "utils/Defines.hpp"
 #include <cstdlib>
 #include <string.h>
 #include <string>

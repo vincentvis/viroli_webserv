@@ -38,13 +38,16 @@ class Config {
 		std::map<std::string, std::string> const &getErrorPages() const;
 
 		bool                                      getAllowUpload() const;
-		bool                         getAllowUpload(Location *const primary) const;
+		bool                            getAllowUpload(Location *const primary) const;
 
-		std::string const           &getAutoIndex() const;
-		std::string const           &getAutoIndex(Location *const primary) const;
+		std::string const              &getAutoIndex() const;
+		std::string const              &getAutoIndex(Location *const primary) const;
 
-		bool                         containsServerName(std::string to_search);
-		std::vector<Location> const &getLocations();
+		bool                            containsServerName(std::string to_search);
+		std::vector<Location> const    &getLocations();
+
+		std::vector<std::string> const &getServerNames() const;
+		std::string                     getFirstServerName() const;
 
 	protected:
 		int32_t                            _priority;
