@@ -15,6 +15,7 @@ void FileFD::pollin() {
 
 	/* error during read; close pollable; send error response */
 	if (_bytes == -1) {
+		std::cerr << "Error on read\n";
 		_closed = true;
 		_client->_response.processResponse(_client, "", "500");
 
@@ -53,6 +54,7 @@ void FileFD::pollout() {
 
 	/* error during write; close pollable; send error response */
 	if (_bytes == -1) {
+		std::cerr << "Error on write\n";
 		_closed = true;
 		_client->_response.processResponse(_client, "", "500");
 
@@ -82,7 +84,7 @@ void FileFD::timeout() {
 
 	time(&timeout);
 	if (difftime(timeout, _tick) > 10) {
-		std::cout << "TIMEOUT\n"; // will have to send a response
+		std::cerr << "Timeout\n"; // will have to send a response
 		_closed = true;           // this must be removed?
 	}
 }

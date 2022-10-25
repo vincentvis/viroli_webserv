@@ -220,7 +220,7 @@ void ClientFD::pollin() {
 	try {
 		receive(BUFFERSIZE);
 		process();
-	} catch (const std::exception &e) {
+	} catch (const std::runtime_error &e) {
 		std::cerr << e.what() << std::endl;
 		_closed = true;
 	}
@@ -237,7 +237,7 @@ void ClientFD::pollout() {
 
 	/* per subject, remove client on error */
 	if (_bytes == -1) {
-		throw(std::runtime_error("error on send"));
+		throw(std::runtime_error("Error on send"));
 	} else if (_bytes >= 0) {
 		_total += _bytes;
 		_left -= _bytes;
@@ -286,7 +286,7 @@ void ClientFD::timeout() {
 
 	time(&timeout);
 	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
-		std::cout << "TIMEOUT\n"; // generate a response error. close connection
+		std::cerr << "Timeout\n";
 		_closed = true;
 	}
 }
