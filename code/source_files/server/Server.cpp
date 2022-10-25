@@ -56,25 +56,25 @@ Server::Server(uint16_t port, std::vector<Config *> configs) :
 	int opt                = 1;
 
 	if ((_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-		throw(std::string("error on socket()")); // placeholder
+		throw(std::runtime_error("Error on socket"));
 	}
 	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
 		close(_fd);
-		throw(std::string("error on setsockopt()")); // placeholder
+		throw(std::runtime_error("Error on setsockopt"));
 	}
 	if (fcntl(_fd, F_SETFL, O_NONBLOCK) < 0) {
 		close(_fd);
-		throw(std::string("error on fcntl()")); // placeholder
+		throw(std::runtime_error("Error on fcntl"));
 	}
 	if (bind(_fd, reinterpret_cast<sockaddr *>(&server),
 			 static_cast<socklen_t>(sizeof(server))) < 0)
 	{
 		close(_fd);
-		throw(std::string("error on bind()")); // placeholder
+		throw(std::runtime_error("Error on bind"));
 	}
-	if (listen(_fd, MAXCONNECTIONS) < 0) {
+	if (listen(_fd, SOMAXCONN) < 0) {
 		close(_fd);
-		throw(std::string("error on listen()")); // placeholder
+		throw(std::runtime_error("Error on listen"));
 	}
 }
 
@@ -119,7 +119,7 @@ void Server::run() {
 
 	while (true) {
 		if ((poll(Server::_pfds.data(), Server::_pfds.size(), 0)) < 0) {
-			throw(std::string("error on poll()")); // placeholder
+			throw(std::runtime_error("Error on poll, closing program"));
 		}
 		/* check events and timeout */
 		for (size_t i = 0; i < Server::_pfds.size(); ++i) {
