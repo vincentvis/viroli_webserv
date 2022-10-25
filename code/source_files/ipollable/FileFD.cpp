@@ -22,7 +22,7 @@ void FileFD::pollin() {
 		/* done reading; close pollable; send response with data */
 	} else if (_bytes == 0) {
 		_closed = true;
-		_client->_response.processResponse(_client, _data, "200");
+		_client->_response.generateResponse(_client, _data, "200");
 
 		/* append buffer to data */
 	} else if (_bytes > 0) {
@@ -67,7 +67,7 @@ void FileFD::pollout() {
 	/* done writing; close pollable; send response */
 	if (_left == 0) {
 		_closed = true;
-		_client->_response.processResponse(_client, "", "201");
+		_client->_response.generateResponse(_client,  "201");
 	}
 }
 
