@@ -3,8 +3,6 @@
 #include "ipollable/ClientFD.hpp"
 
 Response::Response() {
-	_it  = _responseHeader.begin();
-	_end = _responseHeader.end();
 }
 
 void Response::setMessageBody(std::string MessageBody) {
@@ -31,7 +29,7 @@ void Response::addHeaderIfNotSet(std::string name, size_t value) {
 	}
 }
 
-std::string Response::getResponse() const {
+std::string Response::getResponseString() const {
 	return this->_responseString;
 }
 
@@ -40,19 +38,23 @@ std::string Response::getDate() {
 	return "Mon, 10 Oct 2022 00:43:49 GMT";
 }
 
-
-void Response::createStatusLine(std::string Status, ClientFD *Client) {
-	this->_statusLine.append(Client->_request.getHTTPVersion());
-	this->_statusLine.append(" ");
-	this->_statusLine.append(Status);
-	this->_statusLine.append(" ");
-	this->_statusLine.append(HttpStatus::getReasonPhrase(Status));
+std::string Response::getStatusCode() const{
+	return this->_statusCode;
 }
 
 
-void Response::setBasicHeaders(std::string status, ClientFD *Client) {
+void Response::createStatusLine(ClientFD *Client) {
+	this->_statusLine.append(Client->_request.getHTTPVersion());
+	this->_statusLine.append(" ");
+	this->_statusLine.append(getStatusCode());
+	this->_statusLine.append(" ");
+	this->_statusLine.append(HttpStatus::getReasonPhrase(getStatusCode()));
+}
+
+
+void Response::setBasicHeaders( ClientFD *Client) {
 	/* Status Line */
-	Client->_response.createStatusLine(status, Client);
+	createStatusLine(Client);
 
 	/* Headers */
 	/* add Date */
@@ -79,9 +81,13 @@ void Response::setBasicHeaders(std::string status, ClientFD *Client) {
 	}
 	/* add location */
 	if (Client->_request.getMethod() == Utils::post_string)
-	{ // do you agree we only set location with post;
+	{ // do you agree we only set location with post?
 		addHeaderIfNotSet(Utils::location_string, Client->_request.getUri());
 	}
+}
+
+void Response::setStatusCode(std::string statusCode) {
+	this->_statusCode = statusCode;
 }
 
 void Response::createResponseString() {
@@ -109,6 +115,9 @@ void Response::createResponseString() {
 	if (!_messageBody.empty()) {
 		_responseString.append(_messageBody);
 	}
+	/* clear Map and statusLine for next request */
+	this->_responseHeader.clear();
+	this->_statusLine.clear();
 }
 
 void Response::generateErrorPage(
@@ -124,44 +133,53 @@ void Response::generateErrorPage(
 	this->_messageBody = HttpStatus::generateErrorPage(status);
 }
 
+/* generates errorResponse || statusCode is set and message body is set */
+void Response::ErrorResponse(ClientFD *Client, std::string StatusCode) {
+	setStatusCode(StatusCode);
+	addHeader(Utils::contentType_string, "text/html");
+	generateErrorPage(StatusCode, &Client->_config->getErrorPages());
+	setBasicHeaders(Client);
+
+	createResponseString();
+	Client->sendResponse();
+}
 
 /* called in ClientFD after fileFD is read */
-void Response::processResponse(ClientFD *Client, std::string messageBody,
+void Response::generateResponse(ClientFD *Client, std::string messageBody,
 							   std::string StatusCode) {
+	setStatusCode(StatusCode);
+	setMessageBody(messageBody);
+	setBasicHeaders(Client);
 
-	/* check errorpages, set contentType */
-	if (StatusCode.at(0) < '4') {
-		Client->_response.setMessageBody(messageBody); // not sure if this is needed?
-	} else {
-		Client->_response.addHeader(Utils::contentType_string, "text/html");
-		Client->_response.generateErrorPage(StatusCode,
-											&Client->_config->getErrorPages());
-	}
+	createResponseString();
+	Client->sendResponse();
+}
 
-	/* generate response */
-	Client->_response.setBasicHeaders(StatusCode, Client);
-	Client->_response.createResponseString();
-	this->_responseHeader.clear();
-	this->_statusLine.clear();
+/*  statusCode is set and message body is set */
+void Response::generateResponse(ClientFD *Client, std::string StatusCode) {
+	setStatusCode(StatusCode);
+	setBasicHeaders(Client);
+	createResponseString();
+	Client->sendResponse();
+}
+
+/* generates response if there is a messagebody its set && statusCode is set */
+void Response::generateResponse(ClientFD *Client) {
+	setBasicHeaders(Client);
+	createResponseString();
 	Client->sendResponse();
 }
 
 void Response::clean() {
-	this->_responseString.clear();
-	this->_responseHeader.clear();
 	this->_statusLine.clear();
+	this->_responseHeader.clear();
+	this->_responseString.clear();
 	this->_messageBody.clear();
-	// clear map
-	//								   	this->_httpVersion.clear();
-	//								   	this->_statusCode.clear();
-	//								   	this->_reasonPhrase.clear();
-	//								   	this->_date.clear();
-	//								   	this->_serverType.clear();
-	//								   	this->_contentType.clear();
-	//								   	this->_contentTypeIsSet = false;
-	//								   	this->_contentLen.clear();
-	//								   	this->_connection.clear();
-	//								   	this->_location.clear();
+	this->_statusCode.clear();
+
+//	how to clear these?
+//	std::map<std::string, std::string>::iterator _it;
+//	std::map<std::string, std::string>::iterator _end;
 }
 
 Response::~Response() {
