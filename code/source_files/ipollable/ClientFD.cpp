@@ -19,12 +19,13 @@ void ClientFD::resetBytes() {
 void ClientFD::receive(size_t len) {
 	_bytes = recv(_fd, _buffer.data(), len, 0);
 
-	/* poll notified there is data ready, recv however returns EAGAIN (-1) */
+	/* recv call would block; ignore and try again */
 	if (_bytes == -1) {
-		throw(Utils::ErrorPageException("500"));
+		throw(std::runtime_error("Error on receiving data, closing connection"));
 	} else if (_bytes == 0) {
 		throw(std::runtime_error("Connection closed by client"));
 	} else if (_bytes > 0) {
+		time(&_tick);
 		_inbound.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
 }
@@ -216,7 +217,6 @@ void ClientFD::process() {
 
 /* receive data */
 void ClientFD::pollin() {
-	time(&_tick);
 	try {
 		receive(BUFFERSIZE);
 		process();
@@ -228,17 +228,16 @@ void ClientFD::pollin() {
 
 /* send data */
 void ClientFD::pollout() {
-	time(&_tick);
-
 	/* make sure to not go out of bounds with the buffer */
 	_buffer.assign(_outbound.begin() + _total,
 				   _outbound.begin() + _total + getRemainderBytes());
 	_bytes = send(_fd, _buffer.data(), getRemainderBytes(), 0);
 
-	/* per subject, remove client on error */
+	/* send call would block; ignore and try again */
 	if (_bytes == -1) {
-		throw(std::runtime_error("Error on send"));
+		throw(std::runtime_error("Error on sending data, closing connection"));
 	} else if (_bytes >= 0) {
+		time(&_tick);
 		_total += _bytes;
 		_left -= _bytes;
 	}
