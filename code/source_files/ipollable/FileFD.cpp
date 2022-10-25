@@ -12,18 +12,15 @@ FileFD::~FileFD() {
 void FileFD::pollin() {
 	time(&_tick);
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
-	std::cout << ">>>>> FileFD::pollin\n";
 
 	/* error during read; close pollable; send error response */
 	if (_bytes == -1) {
 		_closed = true;
-		std::cout << ">>>>> error reading\n";
 		_client->_response.processResponse(_client, "", "500");
 
 		/* done reading; close pollable; send response with data */
 	} else if (_bytes == 0) {
 		_closed = true;
-		std::cout << ">>>>> done readin\n";
 		_client->_response.processResponse(_client, _data, "200");
 
 		/* append buffer to data */

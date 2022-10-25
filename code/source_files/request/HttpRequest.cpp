@@ -30,8 +30,8 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	path += uri;
 	int fd;
 
-	if (Client._config->getAutoIndex(Client._location) == "on") {
-		if (Client._request.uriIsDir()) {
+	if (Client._request.uriIsDir()) {
+		if (Client._config->getAutoIndex(Client._location) == "on") {
 			try {
 				Autoindex autoindex(path);
 				Client._response.setContentType("text/html");
@@ -69,7 +69,6 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		}
 	} else {
 		fd = open(path.c_str(), O_RDONLY);
-		std::cout << path.c_str() << "\n";
 	}
 	if (fd == -1) {
 		Client._response.processResponse(&Client, "", "404");
@@ -79,6 +78,9 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	Client._fileFD =
 		reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
 			Client._server, fd, FILEPOLL, POLLIN));
+	//	if (!Client.getBodyStr().empty()){
+	//		Client._fileFD->setData(Client.getBodyStr());
+	//	}
 	Client._fileFD->setRequestInterface(this, &Client);
 }
 
