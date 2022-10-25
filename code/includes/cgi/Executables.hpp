@@ -16,7 +16,7 @@ class Executables {
 		static const std::string &getExecutable(const std::string &ext) {
 			std::map<std::string, std::string>::iterator it =
 				getInstance()._executables.find(ext);
-			if (it != getInstance()._executables.end()) {
+			if (it != getInstance()._end) {
 				return (it->second);
 			}
 			return (Utils::default_executable);
@@ -30,7 +30,7 @@ class Executables {
 			}
 			std::map<std::string, std::string>::iterator it =
 				getInstance()._executables.find(file.getExtension());
-			if (it == getInstance()._executables.end()) {
+			if (it == getInstance()._end) {
 				return (false);
 			}
 			return (true);
@@ -42,7 +42,7 @@ class Executables {
 			}
 			std::map<std::string, std::string>::iterator it =
 				getInstance()._executables.find(file.getExtension());
-			if (it == getInstance()._executables.end()) {
+			if (it == getInstance()._end) {
 				return (false);
 			}
 			return (true);
