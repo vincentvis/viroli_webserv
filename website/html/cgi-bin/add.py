@@ -22,6 +22,9 @@ print("""<!DOCTYPE html>
 print("<h1>val1: {0}</h1>".format(input_data.getvalue("val1")))
 print("<h1>val2: {0}</h1>".format(input_data.getvalue("val2")))
 
+print ("Number of arguments:", len(sys.argv), "arguments")
+print ("Argument List:", str(sys.argv))
+
 try:
     num1 = int(input_data.getvalue("val1"))
     num2 = int(input_data.getvalue("val2"))

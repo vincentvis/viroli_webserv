@@ -8,7 +8,7 @@
 
 class Cgi {
 	public:
-		Cgi(const FileStat &filestats);
+		Cgi(const FileStat &filestats, std::string const &method);
 		~Cgi();
 		void         setBody(std::string &body);
 		void         setQuery(std::string &body);
@@ -22,7 +22,7 @@ class Cgi {
 		Cgi();
 		FileStat const          &_source;
 		std::string              _executor_name;
-		std::string              _executor_path;
+		std::string              _executable;
 		std::string              _script_name;
 		std::string              _statusCode;
 		bool                     _done;

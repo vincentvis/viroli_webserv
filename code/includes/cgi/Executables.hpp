@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utils/Defines.hpp"
+#include "utils/Exception.hpp"
 #include "utils/FileStat.hpp"
 #include "utils/Utils.hpp"
 #include <map>
@@ -16,7 +17,7 @@ class Executables {
 		static const std::string &getExecutable(const std::string &ext) {
 			std::map<std::string, std::string>::iterator it =
 				getInstance()._executables.find(ext);
-			if (it != getInstance()._executables.end()) {
+			if (it != getInstance()._end) {
 				return (it->second);
 			}
 			return (Utils::default_executable);
@@ -30,7 +31,7 @@ class Executables {
 			}
 			std::map<std::string, std::string>::iterator it =
 				getInstance()._executables.find(file.getExtension());
-			if (it == getInstance()._executables.end()) {
+			if (it == getInstance()._end) {
 				return (false);
 			}
 			return (true);
@@ -42,10 +43,33 @@ class Executables {
 			}
 			std::map<std::string, std::string>::iterator it =
 				getInstance()._executables.find(file.getExtension());
-			if (it == getInstance()._executables.end()) {
+			if (it == getInstance()._end) {
 				return (false);
 			}
 			return (true);
+		}
+
+		static std::string findExecutableInPath(std::string &executable_name) {
+			char *envpath = getenv("PATH");
+			if (envpath == NULL) {
+				throw Utils::ErrorPageException("500");
+			}
+			std::string            pathvar = std::string(envpath);
+			std::string::size_type offset  = 0;
+			std::string::size_type pos     = pathvar.find(":", offset);
+			while (pos != std::string::npos) {
+				std::string path = pathvar.substr(offset, pos - offset);
+				FileStat    executable(path, executable_name);
+				if (executable.isExecutable()) {
+					std::cout << "found executable: " << executable.getFull()
+							  << std::endl;
+					return (executable.getFull());
+				}
+				offset = pos + 1;
+				pos    = pathvar.find(":", offset);
+			}
+			throw std::runtime_error("Executable not found in path");
+			return ("");
 		}
 
 	private:
