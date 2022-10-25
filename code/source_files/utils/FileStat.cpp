@@ -10,29 +10,7 @@ FileStat::FileStat(std::string fullpath) : _fullpath(fullpath) {
 	if (stat_ret == -1) {
 		_isOk = false;
 	}
-
-	// split if it is a file
-	if (isReg()) {
-		std::string::size_type last_slash = fullpath.find_last_of("/");
-		if (last_slash == std::string::npos) {
-			_filename = fullpath;
-			_path     = "./";
-		} else {
-			_filename = fullpath.substr(last_slash + 1);
-			_path     = fullpath.substr(0, last_slash + 1);
-		}
-		_fullpath                      = _path + _filename;
-		std::string::size_type dot_pos = _filename.find_last_of(".");
-		if (dot_pos != std::string::npos) {
-			_extension = _filename.substr(dot_pos + 1);
-		}
-	}
-	if (isDir()) {
-		_path = fullpath;
-		if (*_path.rbegin() != '/') {
-			_path.append("/");
-		}
-	}
+	setFilenameAndPathFromFullpath();
 }
 
 FileStat::FileStat(std::string path, std::string filename) :
@@ -51,11 +29,30 @@ FileStat::FileStat(std::string path, std::string filename) :
 	if (stat_ret == -1) {
 		_isOk = false;
 	}
+	setFilenameAndPathFromFullpath();
+}
 
+void FileStat::setFilenameAndPathFromFullpath(void) {
+	// split if it is a file
 	if (isReg()) {
+		std::string::size_type last_slash = _fullpath.find_last_of("/");
+		if (last_slash == std::string::npos) {
+			_filename = _fullpath;
+			_path     = "./";
+		} else {
+			_filename = _fullpath.substr(last_slash + 1);
+			_path     = _fullpath.substr(0, last_slash + 1);
+		}
+		_fullpath                      = _path + _filename;
 		std::string::size_type dot_pos = _filename.find_last_of(".");
 		if (dot_pos != std::string::npos) {
 			_extension = _filename.substr(dot_pos + 1);
+		}
+	}
+	if (isDir()) {
+		_path = _fullpath;
+		if (*_path.rbegin() != '/') {
+			_path.append("/");
 		}
 	}
 }
