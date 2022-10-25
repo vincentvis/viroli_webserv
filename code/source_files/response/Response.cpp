@@ -132,7 +132,6 @@ void Response::generateErrorPage(
 	this->_messageBody = HttpStatus::generateErrorPage(status);
 }
 
-/* generates generateErrorResponse || statusCode is set and message body is set */
 void Response::generateErrorResponse(ClientFD *Client, std::string StatusCode) {
 	setStatusCode(StatusCode);
 	addHeader(Utils::contentType_string, "text/html");
@@ -143,7 +142,6 @@ void Response::generateErrorResponse(ClientFD *Client, std::string StatusCode) {
 	Client->sendResponse();
 }
 
-/* called in ClientFD after fileFD is read */
 void Response::generateResponse(ClientFD *Client, std::string messageBody,
 								std::string StatusCode) {
 	setStatusCode(StatusCode);
@@ -154,7 +152,6 @@ void Response::generateResponse(ClientFD *Client, std::string messageBody,
 	Client->sendResponse();
 }
 
-/*  statusCode is set and message body is set */
 void Response::generateResponse(ClientFD *Client, std::string StatusCode) {
 	setStatusCode(StatusCode);
 	setBasicHeaders(Client);
@@ -163,7 +160,6 @@ void Response::generateResponse(ClientFD *Client, std::string StatusCode) {
 	Client->sendResponse();
 }
 
-/* generates response if there is a messagebody its set && statusCode is set */
 void Response::generateResponse(ClientFD *Client) {
 	setBasicHeaders(Client);
 	createResponseString();
