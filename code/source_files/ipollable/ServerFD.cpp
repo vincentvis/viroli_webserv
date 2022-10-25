@@ -29,7 +29,7 @@ void ServerFD::pollin() {
 	}
 
 	std::cout << "new connection accepted\n";
-	PollableFactory::getInstance().createPollable(_server, newfd, CLIENTFD, POLLIN);
+	PollableFactory::getInstance().createPollable(_server, newfd, CLIENTPOLL, POLLIN);
 }
 
 /* do nothing on POLLOUT event */

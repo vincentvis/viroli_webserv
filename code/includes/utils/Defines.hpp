@@ -9,7 +9,7 @@
 #define CRLF_LEN2       4
 #define TIMEOUT_SECONDS 5
 
-enum ePollType { SERVERFD, CLIENTFD, FILEFD };
+enum ePollType { SERVERPOLL, CLIENTPOLL, FILEPOLL };
 
 namespace Utils {
 

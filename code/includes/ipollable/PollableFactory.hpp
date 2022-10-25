@@ -1,7 +1,5 @@
 #pragma once
 
-// #include "server/Server.hpp"
-
 #include "ipollable/ClientFD.hpp"
 #include "ipollable/FileFD.hpp"
 #include "ipollable/ServerFD.hpp"
