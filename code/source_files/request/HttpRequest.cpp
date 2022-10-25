@@ -34,7 +34,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		if (Client._config->getAutoIndex(Client._location) == "on") {
 			try {
 				Autoindex autoindex(path);
-				Client._response.addHeader("Content-Type:", "text/html");
+				Client._response.addHeader("Content-Type", "text/html");
 				Client._response.processResponse(&Client, autoindex.getHtml(), "200");
 				return;
 			} catch (const Utils::AutoindexException &e) {
