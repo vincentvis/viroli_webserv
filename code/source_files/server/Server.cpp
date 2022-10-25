@@ -131,13 +131,12 @@ void Server::run() {
 			}
 
 			/* find on what file descriptor an event occurred */
-			if (Server::_pfds[i].revents & POLLHUP) { // tmp
-				std::cout << ">>> POLLHUP\n";         // tmp
-				Server::_pollables[i]->setClosed();
-			} else if (Server::_pfds[i].revents & POLLIN) {
+			if (Server::_pfds[i].revents & (POLLIN | POLLHUP)) {
 				Server::_pollables[i]->pollin();
 			} else if (Server::_pfds[i].revents & POLLOUT) {
 				Server::_pollables[i]->pollout();
+			} else if (Server::_pfds[i].revents & POLLERR) {
+				Server::_pollables[i]->setClosed();
 			}
 		}
 	}
