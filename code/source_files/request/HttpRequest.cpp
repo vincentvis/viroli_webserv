@@ -38,13 +38,13 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 				Client._response.generateResponse(&Client, autoindex.getHtml(), "200");
 				return;
 			} catch (const Utils::AutoindexException &e) {
-				Client._response.ErrorResponse(&Client, "404");
+				Client._response.generateErrorResponse(&Client, "404");
 				return;
 			} catch (const std::exception &e) {
 				// all other exceptions?
 				// but what to do?
 				// internal server error for now
-				Client._response.ErrorResponse(&Client,  "500");
+				Client._response.generateErrorResponse(&Client,  "500");
 				return;
 			}
 		}
@@ -71,7 +71,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		fd = open(path.c_str(), O_RDONLY);
 	}
 	if (fd == -1) {
-		Client._response.ErrorResponse(&Client, "404");
+		Client._response.generateErrorResponse(&Client, "404");
 		return;
 	}
 	/* add fileFd to poll */
@@ -101,7 +101,7 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 	int fd = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change
 
 	if (fd == -1) {
-		Client._response.ErrorResponse(&Client,  "404");
+		Client._response.generateErrorResponse(&Client,  "404");
 	} else {
 		//		set location in response header
 		Client._fileFD = reinterpret_cast<FileFD *>(

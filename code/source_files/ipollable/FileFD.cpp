@@ -14,7 +14,7 @@ void FileFD::pollin() {
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
 	if (_bytes < 0) {
 		_closed = true;
-		_client->_response.ErrorResponse(_client, "500");
+		_client->_response.generateErrorResponse(_client, "500");
 		_state = READY;
 	} else if (_bytes == 0) {
 		_closed = true;

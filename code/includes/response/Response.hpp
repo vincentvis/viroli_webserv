@@ -41,7 +41,7 @@ class Response {
 		void        addHeaderIfNotSet(std::string name, size_t value);
 		void        createStatusLine();
 		void        createHeaderString();
-		void		ErrorResponse(ClientFD *Client, std::string StatusCode);
+		void		generateErrorResponse(ClientFD *Client, std::string StatusCode);
 		void        generateResponse(ClientFD *Client, std::string messageBody,
 									std::string StatusCode);
 		void        generateResponse(ClientFD *Client, std::string StatusCode);

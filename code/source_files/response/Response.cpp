@@ -133,8 +133,8 @@ void Response::generateErrorPage(
 	this->_messageBody = HttpStatus::generateErrorPage(status);
 }
 
-/* generates errorResponse || statusCode is set and message body is set */
-void Response::ErrorResponse(ClientFD *Client, std::string StatusCode) {
+/* generates generateErrorResponse || statusCode is set and message body is set */
+void Response::generateErrorResponse(ClientFD *Client, std::string StatusCode) {
 	setStatusCode(StatusCode);
 	addHeader(Utils::contentType_string, "text/html");
 	generateErrorPage(StatusCode, &Client->_config->getErrorPages());

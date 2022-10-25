@@ -209,7 +209,7 @@ void ClientFD::process() {
 	} catch (const Utils::ErrorPageException &e) {
 		std::cerr << "STATUS ERROR: " << e.what() << std::endl;
 		_state = ERROR;
-		this->_response.ErrorResponse(this, e.what());
+		this->_response.generateErrorResponse(this, e.what());
 	} catch (const std::exception &e) {
 		std::cerr << "temp error" << e.what() << std::endl;
 		// other exceptions like std::string! should be finished later/how?
