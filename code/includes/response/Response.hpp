@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 
+
 // Statuscode range:
 //	100-199 is classed as Informational.
 //	200-299 is Successful.
@@ -19,8 +20,6 @@ class Response {
 		std::string                                  _responseString;
 		std::string                                  _messageBody;
 		std::string                                  _statusCode;
-		std::map<std::string, std::string>::iterator _it;
-		std::map<std::string, std::string>::iterator _end;
 
 	public:
 		Response();

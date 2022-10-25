@@ -51,10 +51,6 @@ void Response::createStatusLine(ClientFD *Client) {
 }
 
 void Response::setBasicHeaders(ClientFD *Client) {
-	/* Status Line */
-	createStatusLine(Client);
-
-	/* Headers */
 	/* add Date */
 	addHeaderIfNotSet(Utils::date_string, getDate());
 
@@ -75,7 +71,7 @@ void Response::setBasicHeaders(ClientFD *Client) {
 	/* add content length */
 	if (Client->_request.getMethod() == Utils::get_string) {
 		addHeaderIfNotSet(Utils::contentLength_string,
-						  Utils::to_string(this->_messageBody.length()));
+						  this->_messageBody.length());
 	}
 	/* add location */
 	if (Client->_request.getMethod() == Utils::post_string)
@@ -89,14 +85,14 @@ void Response::setStatusCode(std::string statusCode) {
 }
 
 void Response::createResponseString() {
-	this->_responseString.clear();
+	_responseString.clear();
 	/* Add Status Line to response string */
 	_responseString.append(_statusLine);
 	_responseString.append(CRLF);
 
 	/*Add Headers to response string */
-	_it  = _responseHeader.begin();
-	_end = _responseHeader.end();
+	std::map<std::string, std::string>::iterator _it  = _responseHeader.begin();
+	std::map<std::string, std::string>::iterator _end = _responseHeader.end();
 
 	while (_it != _end) {
 		_responseString.append(_it->first);
@@ -136,6 +132,7 @@ void Response::generateErrorResponse(ClientFD *Client, std::string StatusCode) {
 	setStatusCode(StatusCode);
 	addHeader(Utils::contentType_string, "text/html");
 	generateErrorPage(StatusCode, &Client->_config->getErrorPages());
+	createStatusLine(Client);
 	setBasicHeaders(Client);
 
 	createResponseString();
@@ -146,6 +143,7 @@ void Response::generateResponse(ClientFD *Client, std::string messageBody,
 								std::string StatusCode) {
 	setStatusCode(StatusCode);
 	setMessageBody(messageBody);
+	createStatusLine(Client);
 	setBasicHeaders(Client);
 
 	createResponseString();
@@ -154,6 +152,7 @@ void Response::generateResponse(ClientFD *Client, std::string messageBody,
 
 void Response::generateResponse(ClientFD *Client, std::string StatusCode) {
 	setStatusCode(StatusCode);
+	createStatusLine(Client);
 	setBasicHeaders(Client);
 
 	createResponseString();
@@ -161,6 +160,7 @@ void Response::generateResponse(ClientFD *Client, std::string StatusCode) {
 }
 
 void Response::generateResponse(ClientFD *Client) {
+	createStatusLine(Client);
 	setBasicHeaders(Client);
 	createResponseString();
 	Client->sendResponse();
