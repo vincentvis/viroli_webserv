@@ -82,22 +82,17 @@ void ConfigParser::getErrorPageContent(Config *config) {
 	std::map<std::string, std::string>::iterator it  = config->_errorPages.begin();
 	std::map<std::string, std::string>::iterator end = config->_errorPages.end();
 	while (it != end) {
-		std::string path = config->_root + it->second;
-		if (*config->_root.rbegin() != '/' && it->second.at(0) != '/') {
-			path = config->_root + "/" + it->second;
-		}
+		FileStat      fileinfo(config->_root, it->second);
+
 		std::ifstream file;
-		file.open(path.c_str(), std::ios_base::in);
-		if (file.is_open() == false) {
-			std::cerr << "Could not open error page file \"" << path
-					  << "\", using default error page" << std::endl;
-			keys_to_delete.push_back(it->first);
-			it++;
-			// ignore because we cannot find it..
-			continue;
+		if (fileinfo.isReg()) {
+			file.open(fileinfo.getFull().c_str(), std::ios_base::in);
 		}
-		if (file.bad()) {
-			std::cerr << "Could not open error page file \"" << path
+		if (file.is_open() == false || file.bad()) {
+			if (file.is_open()) {
+				file.close();
+			}
+			std::cerr << "Could not open error page file \"" << fileinfo.getFilename()
 					  << "\", using default error page" << std::endl;
 			keys_to_delete.push_back(it->first);
 			it++;

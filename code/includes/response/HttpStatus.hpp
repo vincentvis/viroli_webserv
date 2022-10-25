@@ -16,7 +16,12 @@ class HttpStatus {
 			std::map<std::string, std::string>::iterator it =
 				getInstance()._statusses.find(status);
 			if (it == getInstance()._statusses.end()) {
-				return ("WHAT ARE YOU DOING?!");
+				if (status.at(0) >= '1' && status.at(0) <= '5') {
+					it = getInstance()._statusses.find(status.substr(0, 1).append("00"));
+				}
+				if (it == getInstance()._statusses.end()) {
+					it = getInstance()._statusses.find("418");
+				}
 			}
 			return (getInstance().getFromTemplate(it->first, it->second));
 		}

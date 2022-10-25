@@ -117,7 +117,7 @@ void ClientFD::receiveHeader() {
 		this->_request.printAttributesInRequestClass();
 		this->_config   = this->_server->findConfig(this->_request);
 		this->_location = this->_config->findLocation(this->_request);
-		this->_request.ValidateRequest(this->_config);
+		this->_request.ValidateRequest(this->_config, this->_location);
 
 		/* truncate header */
 		_inbound = _inbound.substr(end + CRLF_LEN2);
