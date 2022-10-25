@@ -172,9 +172,6 @@ void Response::clean() {
 	this->_responseString.clear();
 	this->_messageBody.clear();
 	this->_statusCode.clear();
-	//	how to clear these and is it necessary?
-	//	std::map<std::string, std::string>::iterator _it;
-	//	std::map<std::string, std::string>::iterator _end;
 }
 
 Response::~Response() {
