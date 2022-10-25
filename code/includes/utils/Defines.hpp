@@ -17,5 +17,6 @@ const std::string delete_string("DELETE");
 const std::string continue_string("100-continue");
 const std::string on_string("on");
 const std::string off_string("off");
+const std::string default_executable("bash");
 
 } // namespace Utils

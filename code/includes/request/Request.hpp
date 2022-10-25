@@ -1,11 +1,15 @@
 #pragma once
 
+#include "cgi/Executables.hpp"
 #include "config/Config.hpp"
+#include "server/Location.hpp"
 #include "utils/Exception.hpp"
+#include "utils/FileStat.hpp"
 #include "utils/Utils.hpp"
 #include <algorithm>
 #include <iostream>
 #include <map>
+#include <string>
 
 class Server;
 class Config;
@@ -20,6 +24,7 @@ class Request {
 		std::string                        _connection;
 		std::string                        _location;
 		std::string                        _expect;
+		FileStat                           _filestats;
 		bool                               _ConnectionAvailable;
 		bool                               _CGI;
 		bool                               _TransferEncodingChunked;
@@ -35,8 +40,8 @@ class Request {
 		std::map<std::string, std::string>::iterator _itr;
 		void printAttributesInRequestClass(); // !used for testing; REMOVE later
 		void ParseRequest(std::string BUF);
-		void ValidateRequest(Config *Conf);
-		bool methodsAllowed(Config *Conf);
+		void ValidateRequest(Config *Conf, Location *Loc);
+		bool methodsAllowed(Config *Conf, Location *Loc);
 
 		void setBody(std::string NewBody);
 		std::map<std::string, std::string> getHeaderMap() const;
@@ -56,5 +61,6 @@ class Request {
 		bool                               getHeaderAvailable() const;
 		bool                               checkValidMethod();
 		bool                               uriIsDir() const;
+		FileStat const                    &getFileStat() const;
 		void                               clean();
 };
