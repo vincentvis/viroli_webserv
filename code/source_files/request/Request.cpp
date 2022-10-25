@@ -141,7 +141,7 @@ void Request::setBody(std::string NewBody) {
 	this->_body = NewBody;
 }
 
-std::map<std::string, std::string> Request::getHeaderMap() const {
+std::map<std::string, std::string> const &Request::getHeaderMap() const {
 	return this->_header;
 }
 
