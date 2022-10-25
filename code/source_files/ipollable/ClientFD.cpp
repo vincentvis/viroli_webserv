@@ -19,7 +19,6 @@ void ClientFD::resetBytes() {
 void ClientFD::receive(size_t len) {
 	_bytes = recv(_fd, _buffer.data(), len, 0);
 
-	/* recv call would block; ignore and try again */
 	if (_bytes == -1) {
 		throw(std::runtime_error("Error on receiving data, closing connection"));
 	} else if (_bytes == 0) {
@@ -228,12 +227,10 @@ void ClientFD::pollin() {
 
 /* send data */
 void ClientFD::pollout() {
-	/* make sure to not go out of bounds with the buffer */
 	_buffer.assign(_outbound.begin() + _total,
 				   _outbound.begin() + _total + getRemainderBytes());
 	_bytes = send(_fd, _buffer.data(), getRemainderBytes(), 0);
 
-	/* send call would block; ignore and try again */
 	if (_bytes == -1) {
 		throw(std::runtime_error("Error on sending data, closing connection"));
 	} else if (_bytes >= 0) {
