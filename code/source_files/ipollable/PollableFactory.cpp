@@ -4,6 +4,8 @@ IPollable *PollableFactory::createClientFD(Server *serv, int fd, int event) {
 	struct pollfd pfd      = {fd, event, 0};
 	IPollable    *pollable = new ClientFD(serv, fd, Server::_pfds.size());
 
+	std::cout << ">>>>>>> ClientFD created\n";
+
 	Server::_pollables.push_back(pollable);
 	Server::_pfds.push_back(pfd);
 	return pollable;
@@ -22,6 +24,8 @@ IPollable *PollableFactory::createFileFD(Server *serv, int fd, int event) {
 	struct pollfd pfd      = {fd, event, 0};
 	IPollable    *pollable = new FileFD(serv, fd, Server::_pfds.size());
 
+	std::cout << ">>>>>>> FileFD created\n";
+	std::cout << ">>>>>>> " << event << "\n";
 	Server::_pollables.push_back(pollable);
 	Server::_pfds.push_back(pfd);
 	return pollable;

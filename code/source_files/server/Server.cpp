@@ -125,18 +125,23 @@ void Server::run() {
 			assert(Server::_pollables[i]->getFD() != -1); // remove eventually
 			Server::_pollables[i]->timeout();
 			if (Server::_pollables[i]->isClosed() == true) {
+				std::cout << ">>>>> remove\n";
 				removePollable(i);
 				--i;
 				continue;
 			}
 
 			/* find on what file descriptor an event occurred */
-			if (Server::_pfds[i].revents & (POLLIN | POLLHUP)) {
+			if (Server::_pfds[i].revents & POLLIN) {
+				std::cout << ">>>>>> pollin\n";
 				Server::_pollables[i]->pollin();
 			} else if (Server::_pfds[i].revents & POLLOUT) {
+				std::cout << ">>>>>> pollout\n";
 				Server::_pollables[i]->pollout();
 			} else if (Server::_pfds[i].revents & POLLERR) {
+				std::cout << ">>>>>> pollerr\n";
 				Server::_pollables[i]->setClosed();
+				exit(EXIT_FAILURE);
 			}
 		}
 	}
