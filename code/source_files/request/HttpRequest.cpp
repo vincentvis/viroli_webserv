@@ -69,6 +69,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		}
 	} else {
 		fd = open(path.c_str(), O_RDONLY);
+		std::cout << path.c_str() << "\n";
 	}
 	if (fd == -1) {
 		Client._response.processResponse(&Client, "", "404");
