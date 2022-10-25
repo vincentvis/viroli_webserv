@@ -5,7 +5,6 @@
 #include <iostream>
 #include <map>
 
-
 // Statuscode range:
 //	100-199 is classed as Informational.
 //	200-299 is Successful.
@@ -22,12 +21,6 @@ class Response {
 		std::string                                  _statusCode;
 		std::map<std::string, std::string>::iterator _it;
 		std::map<std::string, std::string>::iterator _end;
-		/*
-		 * when succesfull : the resource requested by the client, or some information
-		 * about the status of the action requested by the client. when unsuccesfull :
-		 * provide further information about the reasons for the error, or about some
-		 * action the client needs to take to complete the request successfully.
-		 */
 
 	public:
 		Response();
@@ -39,13 +32,11 @@ class Response {
 		void        addHeader(std::string name, size_t value);
 		void        addHeaderIfNotSet(std::string name, std::string value);
 		void        addHeaderIfNotSet(std::string name, size_t value);
-		void        createStatusLine();
-		void        createHeaderString();
-		void		generateErrorResponse(ClientFD *Client, std::string StatusCode);
+		void        generateErrorResponse(ClientFD *Client, std::string StatusCode);
 		void        generateResponse(ClientFD *Client, std::string messageBody,
-									std::string StatusCode);
+									 std::string StatusCode);
 		void        generateResponse(ClientFD *Client, std::string StatusCode);
-		void		generateResponse(ClientFD *Client);
+		void        generateResponse(ClientFD *Client);
 		void        setBasicHeaders(ClientFD *Client);
 		void        setStatusCode(std::string statusCode);
 		std::string getResponseString() const;

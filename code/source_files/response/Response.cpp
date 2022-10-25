@@ -38,10 +38,9 @@ std::string Response::getDate() {
 	return "Mon, 10 Oct 2022 00:43:49 GMT";
 }
 
-std::string Response::getStatusCode() const{
+std::string Response::getStatusCode() const {
 	return this->_statusCode;
 }
-
 
 void Response::createStatusLine(ClientFD *Client) {
 	this->_statusLine.append(Client->_request.getHTTPVersion());
@@ -51,8 +50,7 @@ void Response::createStatusLine(ClientFD *Client) {
 	this->_statusLine.append(HttpStatus::getReasonPhrase(getStatusCode()));
 }
 
-
-void Response::setBasicHeaders( ClientFD *Client) {
+void Response::setBasicHeaders(ClientFD *Client) {
 	/* Status Line */
 	createStatusLine(Client);
 
@@ -91,7 +89,7 @@ void Response::setStatusCode(std::string statusCode) {
 }
 
 void Response::createResponseString() {
-	this->_responseString.clear(); // should be removed
+	this->_responseString.clear();
 	/* Add Status Line to response string */
 	_responseString.append(_statusLine);
 	_responseString.append(CRLF);
@@ -115,6 +113,7 @@ void Response::createResponseString() {
 	if (!_messageBody.empty()) {
 		_responseString.append(_messageBody);
 	}
+
 	/* clear Map and statusLine for next request */
 	this->_responseHeader.clear();
 	this->_statusLine.clear();
@@ -146,7 +145,7 @@ void Response::generateErrorResponse(ClientFD *Client, std::string StatusCode) {
 
 /* called in ClientFD after fileFD is read */
 void Response::generateResponse(ClientFD *Client, std::string messageBody,
-							   std::string StatusCode) {
+								std::string StatusCode) {
 	setStatusCode(StatusCode);
 	setMessageBody(messageBody);
 	setBasicHeaders(Client);
@@ -159,6 +158,7 @@ void Response::generateResponse(ClientFD *Client, std::string messageBody,
 void Response::generateResponse(ClientFD *Client, std::string StatusCode) {
 	setStatusCode(StatusCode);
 	setBasicHeaders(Client);
+
 	createResponseString();
 	Client->sendResponse();
 }
@@ -176,10 +176,9 @@ void Response::clean() {
 	this->_responseString.clear();
 	this->_messageBody.clear();
 	this->_statusCode.clear();
-
-//	how to clear these?
-//	std::map<std::string, std::string>::iterator _it;
-//	std::map<std::string, std::string>::iterator _end;
+	//	how to clear these and is it necessary?
+	//	std::map<std::string, std::string>::iterator _it;
+	//	std::map<std::string, std::string>::iterator _end;
 }
 
 Response::~Response() {
