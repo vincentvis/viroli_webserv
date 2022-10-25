@@ -114,13 +114,12 @@ bool Request::checkValidMethod() {
 	return false;
 }
 
-
 void Request::ValidateRequest(Config *Conf, Location *Loc) {
 	/* check method */
 	if (checkValidMethod() == false) {
-		throw Utils::ErrorPageException("405");
 		// not sure if this is the right number; the method given by the
 		// client could be "DOG"
+		throw Utils::ErrorPageException("405");
 	}
 	if (methodsAllowed(Conf, Loc) == false) {
 		throw Utils::ErrorPageException("405");

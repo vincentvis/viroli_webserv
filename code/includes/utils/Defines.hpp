@@ -23,5 +23,12 @@ const std::string continue_string("100-continue");
 const std::string on_string("on");
 const std::string off_string("off");
 const std::string default_executable("bash");
+const std::string date_string("Date");
+const std::string server_string("Server");
+const std::string serverType_string("VIROLI_Server/26.3.8");
+const std::string contentType_string("Content-Type");
+const std::string connection_string("Connection");
+const std::string contentLength_string("Content-Length");
+const std::string location_string("Location");
 
 } // namespace Utils

@@ -88,6 +88,9 @@ void ConfigParser::getErrorPageContent(Config *config) {
 			file.open(fileinfo.getFull().c_str(), std::ios_base::in);
 		}
 		if (file.is_open() == false || file.bad()) {
+			if (file.is_open()) {
+				file.close();
+			}
 			std::cerr << "Could not open error page file \"" << fileinfo.getFilename()
 					  << "\", using default error page" << std::endl;
 			keys_to_delete.push_back(it->first);
