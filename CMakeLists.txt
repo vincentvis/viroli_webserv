@@ -41,6 +41,13 @@ add_executable(webserv
         code/source_files/config/MimeTypes.cpp
         code/includes/config/MimeTypes.hpp
         code/source_files/response/HttpStatus.cpp
-        code/includes/response/HttpStatus.hpp)
+        code/includes/response/HttpStatus.hpp
+        code/includes/cgi/Executables.hpp
+        code/source_files/cgi/Cgi.cpp
+        code/includes/cgi/Cgi.hpp
+        code/source_files/cgi/Pipes.cpp
+        code/includes/cgi/Pipes.hpp
+        code/source_files/cgi/CgiVars.cpp
+        code/includes/cgi/CgiVars.hpp)
 
 #target_link_libraries(webserv PUBLIC libft)

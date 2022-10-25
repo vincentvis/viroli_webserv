@@ -1,15 +1,17 @@
 #include "cgi/Cgi.hpp"
 #include "cgi/Executables.hpp"
 
-Cgi::Cgi(const FileStat &filestats) {
-	if (filestats.isReg() == false) {
+Cgi::Cgi(const FileStat &filestats) : _source(filestats) {
+	if (_source.isReg() == false) {
 		_done       = true;
 		_statusCode = "404";
 		return;
 	}
-	this->_script_name   = filestats.getFilename();
-	this->_executor_name = Executables::getExecutable(filestats.getExtension());
+	this->_script_name   = _source.getFilename();
+	this->_executor_name = Executables::getExecutable(_source.getExtension());
 	std::cout << "Script executor: " << this->_executor_name << std::endl;
+	std::cout << "Script name: " << this->_script_name << std::endl;
+	std::cout << "Script path: " << _source.getPath() << std::endl;
 
 	try {
 		_pipes.openPipes();

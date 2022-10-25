@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cgi/Env.hpp"
+#include "cgi/CgiVars.hpp"
 #include "cgi/Pipes.hpp"
 #include "utils/FileStat.hpp"
 #include <unistd.h>
@@ -20,11 +20,13 @@ class Cgi {
 		Cgi();
 		void operator=(Cgi const &);
 		Cgi(Cgi const &);
-		std::string _executor_name;
-		std::string _executor_path;
-		std::string _script_name;
-		std::string _statusCode;
-		bool        _done;
-		Pipes       _pipes;
-		Env         _env;
+		FileStat const &_source;
+		std::string     _executor_name;
+		std::string     _executor_path;
+		std::string     _script_name;
+		std::string     _statusCode;
+		bool            _done;
+		Pipes           _pipes;
+		CgiVars         _env;
+		CgiVars         _args;
 };
