@@ -35,11 +35,13 @@ char *const *CgiVars::toCharPtrs() {
 	int    i    = 0;
 
 	while (it != end) {
-		envp[i] = new char[it->first.length() + it->second.length() + 2];
+		envp[i] = new char[it->first.length() + it->second.length() + 3];
 		memcpy(envp[i], it->first.c_str(), it->first.length());
 		envp[i][it->first.length()] = '=';
 		memcpy(envp[i] + it->first.length() + 1, it->second.c_str(), it->second.length());
+		envp[i][it->first.length() + it->second.length()]     = 0;
 		envp[i][it->first.length() + it->second.length() + 1] = 0;
+		DEBUGSTART << "envp[" << i << "]: '" << envp[i] << "'" << DEBUGEND;
 
 		it++;
 		i++;

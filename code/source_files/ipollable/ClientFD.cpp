@@ -114,7 +114,7 @@ void ClientFD::receiveHeader() {
 	size_t end = 0;
 	if ((end = _inbound.find(CRLF_END)) != std::string::npos) {
 		this->_request.ParseRequest(this->_inbound);
-		this->_request.printAttributesInRequestClass();
+		// this->_request.printAttributesInRequestClass();
 		this->_config   = this->_server->findConfig(this->_request);
 		this->_location = this->_config->findLocation(this->_request);
 		this->_request.ValidateRequest(this->_config, this->_location);

@@ -12,6 +12,8 @@
 #define COUT_DEBUGMSG \
 	std::cout << "\033[37m" << __PRETTY_FUNCTION__ << "[" << __LINE__ << "]: \033[0m"
 
+#define DEBUGSTART std::cerr << "\033[32;4m"
+#define DEBUGEND   "\033[0m\n"
 
 namespace Utils {
 

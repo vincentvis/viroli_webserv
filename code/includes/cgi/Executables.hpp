@@ -41,9 +41,11 @@ class Executables {
 			if (file.isReg() == false) {
 				return (false);
 			}
+			std::cerr << "find ext [" << file.getExtension() << "]" << std::endl;
 			std::map<std::string, std::string>::iterator it =
 				getInstance()._executables.find(file.getExtension());
 			if (it == getInstance()._end) {
+				std::cerr << "it is end\n";
 				return (false);
 			}
 			return (true);
@@ -61,8 +63,6 @@ class Executables {
 				std::string path = pathvar.substr(offset, pos - offset);
 				FileStat    executable(path, executable_name);
 				if (executable.isExecutable()) {
-					std::cout << "found executable: " << executable.getFull()
-							  << std::endl;
 					return (executable.getFull());
 				}
 				offset = pos + 1;
@@ -76,7 +76,7 @@ class Executables {
 		std::map<std::string, std::string>           _executables;
 		std::map<std::string, std::string>::iterator _end;
 		Executables() {
-			_executables["py"] = "python";
+			_executables["py"] = "python3";
 			_executables["sh"] = "bash";
 			_end               = _executables.end();
 		}

@@ -5,6 +5,7 @@ CGIRequest::CGIRequest() {
 }
 
 CGIRequest::CGIRequest(ClientFD &Client) {
+	std::cerr << "CGIIIIIIIIIIIIIIIIIIIII \n";
 	CheckMethod(Client);
 }
 
@@ -19,7 +20,7 @@ void CGIRequest::CheckMethod(ClientFD &Client) {
 }
 
 void CGIRequest::GETRequest(ClientFD &Client) {
-	Cgi cgi(Client._request.getFileStatNonConst(), Client._request.getMethod(),
+	Cgi cgi(Client._request.getFileStatCopy(), Client._request.getMethod(),
 			Client._server->getPort(), Client._config->getFirstServerName());
 
 	cgi.setQueryString(Client._request.getQuery());
@@ -44,7 +45,7 @@ void CGIRequest::GETRequest(ClientFD &Client) {
 }
 
 void CGIRequest::POSTRequest(ClientFD &Client) {
-	Cgi cgi(Client._request.getFileStatNonConst(), Client._request.getMethod(),
+	Cgi cgi(Client._request.getFileStatCopy(), Client._request.getMethod(),
 			Client._server->getPort(), Client._config->getFirstServerName());
 
 	// cgi.setQueryString(Client._request.getBody());

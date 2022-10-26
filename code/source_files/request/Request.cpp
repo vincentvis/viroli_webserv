@@ -209,11 +209,11 @@ bool Request::uriIsDir() const {
 }
 
 FileStat const &Request::getFileStat() const {
-	return _filestats;
+	return this->_filestats;
 }
 
-FileStat Request::getFileStatNonConst() {
-	return _filestats;
+FileStat Request::getFileStatCopy() const {
+	return this->_filestats;
 }
 
 void Request::clean() {

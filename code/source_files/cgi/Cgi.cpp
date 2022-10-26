@@ -24,6 +24,7 @@ Cgi::Cgi(FileStat filestats, std::string const &method, uint16_t port,
 		_statusCode = "500";
 		return;
 	}
+	_args.push_back(this->_executable);
 	_args.push_back(_source.getFull());
 
 	// REMOTE_ADDR omitted because no functions to handle this are allowed in the subject
@@ -77,6 +78,7 @@ Cgi::~Cgi() {
 int Cgi::execute(void) {
 	pid_t pid = fork();
 
+
 	if (pid == -1) {
 		_status     = ERROR;
 		_statusCode = "500";
@@ -92,11 +94,18 @@ int Cgi::execute(void) {
 		if (dup2(_pipes.toServer[WRITE_FD], STDOUT_FILENO) == SYS_ERR) {
 			exit(1);
 		}
+		DEBUGSTART << "Before EXECVE - '" << _executable.c_str() << "'" << DEBUGEND;
 		execve(_executable.c_str(), makeArgv(), _env.toCharPtrs());
 		exit(1);
 	}
 	_pipes.closeForParent();
 	_pipes.setPipesNonBlock();
+	char buff[10000];
+	int  x = read(_pipes.toServer[READ_FD], buff, 10000);
+	DEBUGSTART << "PID: " << pid << " parent.. " << DEBUGEND;
+	DEBUGSTART << "read: " << x << std::endl;
+	DEBUGSTART << "Buffer: [" << buff << "]" << std::endl;
+
 	return (0);
 }
 
@@ -117,8 +126,11 @@ char *const *Cgi::makeArgv() const {
 	int                                      i    = 0;
 
 	while (it != end) {
-		argv[i] = new char[it->length() + 1];
-		memcpy(argv[i], it->c_str(), it->length() + 1);
+		argv[i] = new char[it->length() + 2];
+		memcpy(argv[i], it->c_str(), it->length());
+		argv[i][it->length()]     = 0;
+		argv[i][it->length() + 1] = 0;
+		DEBUGSTART << "argv[" << i << "]: '" << argv[i] << "'" << DEBUGEND;
 		it++;
 		i++;
 	}

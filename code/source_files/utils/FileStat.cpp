@@ -5,7 +5,9 @@ FileStat::FileStat() {
 }
 
 FileStat::FileStat(std::string fullpath) : _fullpath(fullpath) {
-	_isOk        = true;
+	_isOk = true;
+
+	// what if fullpath is a file or a directory? should we check for slash at the end..
 	int stat_ret = stat(_fullpath.c_str(), &_stat);
 	if (stat_ret == -1) {
 		_isOk = false;
@@ -13,16 +15,25 @@ FileStat::FileStat(std::string fullpath) : _fullpath(fullpath) {
 	setFilenameAndPathFromFullpath();
 }
 
-FileStat::FileStat(std::string path, std::string filename) :
-	_path(path), _filename(filename) {
-	while (_filename.at(0) == '/') {
-		_filename = _filename.substr(1);
+FileStat::FileStat(std::string path, std::string filename) {
+	while (filename.empty() == false && filename.at(0) == '/') {
+		filename = filename.substr(1);
 	}
-	if (*_path.rbegin() != '/') {
-		_path.append("/");
+	if (path.empty() == false && *path.rbegin() != '/') {
+		path.append("/");
 	}
-	_fullpath    = _path + _filename;
+	_fullpath = path + filename;
 
+	// this is important to have here since it gets messed up if filename is empty or
+	// if the file does not exist
+	if (*_fullpath.rbegin() == '/') {
+		_path     = _fullpath;
+		_filename = "";
+	} else {
+		std::string::size_type last_slash = _fullpath.find_last_of("/");
+		_path                             = _fullpath.substr(0, last_slash + 1);
+		_filename                         = _fullpath.substr(last_slash + 1);
+	}
 
 	_isOk        = true;
 	int stat_ret = stat(_fullpath.c_str(), &_stat);
