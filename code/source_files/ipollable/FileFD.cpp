@@ -17,7 +17,7 @@ void FileFD::pollin() {
 	if (_bytes == -1) {
 		std::cerr << "Error on read\n";
 		_closed = true;
-		_client->_response.processResponse(_client, "", "500");
+		_client->_response.generateErrorResponse(_client, "500");
 
 		/* done reading; close pollable; send response with data */
 	} else if (_bytes == 0) {
@@ -56,7 +56,7 @@ void FileFD::pollout() {
 	if (_bytes == -1) {
 		std::cerr << "Error on write\n";
 		_closed = true;
-		_client->_response.processResponse(_client, "", "500");
+		_client->_response.generateErrorResponse(_client, "500");
 
 		/* move to next segment to write in next iteratation */
 	} else if (_bytes >= 0) {

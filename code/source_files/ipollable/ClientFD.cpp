@@ -210,7 +210,7 @@ void ClientFD::process() {
 	} catch (const Utils::ErrorPageException &e) {
 		_state = ERROR;
 		std::cerr << "Error code: " << e.what() << std::endl;
-		this->_response.processResponse(this, "", e.what());
+		this->_response.generateErrorResponse(this, e.what());
 	}
 }
 
