@@ -17,14 +17,13 @@ void FileFD::pollin() {
 	/* error during read; close pollable; send error response */
 	if (_bytes == -1) {
 		_closed = true;
-		_client->_response.processResponse(_client, "", "500");
-
-		/* done reading; close pollable; send response with data */
+		_client->_response.generateErrorResponse(_client, "500");
+		_state = READY;
 	} else if (_bytes == 0) {
 		_closed = true;
-		_client->_response.processResponse(_client, _data, "200");
-
-		/* append buffer to data */
+		_client->_response.generateResponse(_client, _data, "200");
+		_state = READY;
+		// body ready initialize it with response
 	} else if (_bytes > 0) {
 		_total += _bytes;
 		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
@@ -56,7 +55,7 @@ void FileFD::pollout() {
 	/* error during write; close pollable; send error response */
 	if (_bytes == -1) {
 		_closed = true;
-		_client->_response.processResponse(_client, "", "500");
+		_client->_response.generateErrorResponse(_client, "500");
 
 		/* move to next segment to write in next iteratation */
 	} else if (_bytes >= 0) {
@@ -67,7 +66,8 @@ void FileFD::pollout() {
 	/* done writing; close pollable; send response */
 	if (_left == 0) {
 		_closed = true;
-		_client->_response.processResponse(_client, "", "201");
+		_client->_response.generateResponse(_client,  "201");
+		// file made, ready for response
 	}
 }
 
