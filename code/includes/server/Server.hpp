@@ -24,9 +24,9 @@
 #include <unistd.h>
 #include <utility>
 #include <vector>
+#include <csignal>
 
 #define BUFFERSIZE     10000 // tmp
-#define MAXCONNECTIONS 100   // tmp
 
 class IPollable;
 
@@ -48,7 +48,6 @@ class Server {
 		static void run();
 		static void removePollable(int index);
 
-		// static std::map<int32_t, IPollable *> _replace;
 		static std::vector<IPollable *>   _pollables;
 		static std::vector<struct pollfd> _pfds;
 		std::vector<Config *>             _configs;

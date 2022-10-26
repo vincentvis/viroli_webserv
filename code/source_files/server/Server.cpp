@@ -1,6 +1,5 @@
 #include "server/Server.hpp"
-#include <cassert>
-#include <csignal>
+#include <cassert> // remove in prod
 
 Server::Server() {
 	this->_port = 0;
@@ -72,7 +71,7 @@ Server::Server(uint16_t port, std::vector<Config *> configs) :
 		close(_fd);
 		throw(std::string("error on bind()")); // placeholder
 	}
-	if (listen(_fd, MAXCONNECTIONS) < 0) {
+	if (listen(_fd, SOMAXCONN) < 0) {
 		close(_fd);
 		throw(std::string("error on listen()")); // placeholder
 	}
@@ -137,7 +136,6 @@ void Server::run() {
 				Server::_pollables[i]->pollout();
 			} else if (Server::_pfds[i].revents & POLLERR) {
 				Server::_pollables[i]->setClosed();
-				exit(EXIT_FAILURE);
 			}
 		}
 	}
