@@ -34,17 +34,17 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		if (Client._config->getAutoIndex(Client._location) == "on") {
 			try {
 				Autoindex autoindex(path);
-				Client._response.setContentType("text/html");
-				Client._response.processResponse(&Client, autoindex.getHtml(), "200");
+				Client._response.addHeader(Utils::contentType_string, "text/html");
+				Client._response.generateResponse(&Client, autoindex.getHtml(), "200");
 				return;
 			} catch (const Utils::AutoindexException &e) {
-				Client._response.processResponse(&Client, "", "404");
+				Client._response.generateErrorResponse(&Client, "404");
 				return;
 			} catch (const std::exception &e) {
 				// all other exceptions?
 				// but what to do?
 				// internal server error for now
-				Client._response.processResponse(&Client, "", "500");
+				Client._response.generateErrorResponse(&Client,  "500");
 				return;
 			}
 		}
@@ -71,7 +71,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		fd = open(path.c_str(), O_RDONLY);
 	}
 	if (fd == -1) {
-		Client._response.processResponse(&Client, "", "404");
+		Client._response.generateErrorResponse(&Client, "404");
 		return;
 	}
 	/* add fileFd to poll */
@@ -83,50 +83,6 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	//	}
 	Client._fileFD->setRequestInterface(this, &Client);
 }
-
-// Statuscode range:
-// 100-199 is classed as Informational.
-// 200-299 is Successful.
-// 300-399 is Redirection.
-// 400-499 is Client error.
-// 500-599 is Server error.
-
-///* called in ClientFD after fileFD is read */
-// void HttpRequest::processResponse(ClientFD *Client, std::string messageBody,
-//								  std::string StatusCode) {
-//	/* check errorpages */
-//	if (StatusCode.at(0) < '4') {
-//		Client->_response.findAndSetContentType(Client->_request);
-//		Client->_response.setMessageBody(messageBody);
-//	} else {
-//		Client->_response.setContentType("text/html");
-//		Client->_response.generateErrorPage(StatusCode,
-//											&Client->_config->getErrorPages());
-//	}
-//	/* generate response */
-//	Client->_response.initResponse(StatusCode, Client->_config, Client->_request);
-//	Client->_response.createResponse(); // thinking about merging those two
-//	Client->sendResponse(Client->_index);
-// }
-
-// void HttpRequest::GETRequest(ClientFD &Client) {
-//	/* create path */
-//	std::string uri = Client._location->getRoot();
-//	if (uri.empty()) {
-//		uri = Client._config->getRoot();
-//	}
-//	uri   = uri + Client._request.getUri();
-//
-//	/* add fileFd to poll */
-//	int fd = open(uri.c_str(), O_RDONLY); // O_NONBLOCK?
-//	if (fd == -1) {
-//		processResponse(&Client, "", "404");
-//	} else {
-//		Client._fileFD = reinterpret_cast<FileFD *>(
-//			Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
-//		Client._fileFD->setRequestInterface(this, &Client);
-//	}
-// }
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
 	//	200 turn into 201 if the file is valid
@@ -143,11 +99,11 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 		path += "/";
 	}
 	path += uri;
-	std::cout << path << std::endl;
+//	std::cout << path << std::endl;
 	int fd = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change
 
 	if (fd == -1) {
-		Client._response.processResponse(&Client, "", "404");
+		Client._response.generateErrorResponse(&Client,  "404");
 	} else {
 		//		set location in response header
 		Client._fileFD =

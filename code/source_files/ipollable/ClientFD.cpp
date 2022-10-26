@@ -104,7 +104,7 @@ void ClientFD::receiveLength() {
 
 void ClientFD::sendResponse() {
 	Server::_pfds[_index].events = POLLOUT;
-	_outbound                    = _response.getResponse();
+	_outbound                    = _response.getResponseString();
 	_bytes                       = 0;
 	_total                       = 0;
 	_left                        = _outbound.size();
@@ -127,7 +127,7 @@ void ClientFD::receiveHeader() {
 		this->_request.printAttributesInRequestClass();
 		this->_config   = this->_server->findConfig(this->_request);
 		this->_location = this->_config->findLocation(this->_request);
-		this->_request.ValidateRequest(this->_config);
+		this->_request.ValidateRequest(this->_config, this->_location);
 
 		/* truncate header */
 		_inbound = _inbound.substr(end + CRLF_LEN2);
@@ -197,7 +197,7 @@ void ClientFD::respond() {
 	if (_request.getMethod() == Utils::post_string &&
 		_request.getExpect() == Utils::continue_string && _inbound.empty())
 	{
-		this->_response.processResponse(this, "", "100");
+		this->_response.generateResponse(this,"100");
 	} else if (this->_request.getCgi() == true) {
 		this->_requestInterface = new CGIRequest(*this);
 	} else {
@@ -219,7 +219,7 @@ void ClientFD::process() {
 	} catch (const Utils::ErrorPageException &e) {
 		std::cerr << "STATUS ERROR: " << e.what() << std::endl;
 		_state = ERROR;
-		this->_response.processResponse(this, "", e.what());
+		this->_response.generateErrorResponse(this, e.what());
 	} catch (const std::exception &e) {
 		std::cerr << "temp error" << e.what() << std::endl;
 		// other exceptions like std::string! should be finished later/how?
