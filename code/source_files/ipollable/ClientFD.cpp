@@ -103,7 +103,7 @@ void ClientFD::receiveLength() {
 
 void ClientFD::sendResponse() {
 	Server::_pfds[_index].events = POLLOUT;
-	_outbound                    = _response.getResponse();
+	_outbound                    = _response.getResponseString();
 	_bytes                       = 0;
 	_total                       = 0;
 	_left                        = _outbound.size();
@@ -188,7 +188,7 @@ void ClientFD::respond() {
 	if (_request.getMethod() == Utils::post_string &&
 		_request.getExpect() == Utils::continue_string && _inbound.empty())
 	{
-		this->_response.processResponse(this, "", "100");
+		this->_response.generateResponse(this,"100");
 	} else if (this->_request.getCgi() == true) {
 		this->_requestInterface = new CGIRequest(*this);
 	} else {
