@@ -115,12 +115,19 @@ void Server::removePollable(int index) {
 /* events var might be not needed */
 void Server::run() {
 	std::map<int32_t, IPollable *>::iterator it;
+	int                                      ret;
+
 	signal(SIGPIPE, SIG_IGN);
 
 	while (true) {
-		if ((poll(Server::_pfds.data(), Server::_pfds.size(), 0)) < 0) {
-			throw(std::runtime_error("Error on poll, closing program"));
+		if ((ret = poll(Server::_pfds.data(), Server::_pfds.size(), 0)) < 0) {
+			if (errno == EAGAIN) {
+				continue;
+			} else {
+				throw(std::runtime_error("Error on poll, closing program"));
+			}
 		}
+
 		/* check events and timeout */
 		for (size_t i = 0; i < Server::_pfds.size(); ++i) {
 			it = Server::_pollables.find(Server::_pfds[i].fd);

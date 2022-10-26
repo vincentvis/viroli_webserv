@@ -17,6 +17,7 @@ void ClientFD::resetBytes() {
 }
 
 void ClientFD::receive(size_t len) {
+	time(&_tick);
 	_bytes = recv(_fd, _buffer.data(), len, 0);
 
 	if (_bytes == -1) {
@@ -24,7 +25,6 @@ void ClientFD::receive(size_t len) {
 	} else if (_bytes == 0) {
 		throw(std::runtime_error("Connection closed by client"));
 	} else if (_bytes > 0) {
-		time(&_tick);
 		_inbound.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
 }
@@ -227,45 +227,51 @@ void ClientFD::pollin() {
 
 /* send data */
 void ClientFD::pollout() {
-	_buffer.assign(_outbound.begin() + _total,
-				   _outbound.begin() + _total + getRemainderBytes());
-	_bytes = send(_fd, _buffer.data(), getRemainderBytes(), 0);
-
-	if (_bytes == -1) {
-		throw(std::runtime_error("Error on sending data, closing connection"));
-	} else if (_bytes >= 0) {
+	try {
 		time(&_tick);
-		_total += _bytes;
-		_left -= _bytes;
-	}
+		_buffer.assign(_outbound.begin() + _total,
+					   _outbound.begin() + _total + getRemainderBytes());
+		_bytes = send(_fd, _buffer.data(), getRemainderBytes(), 0);
 
-	/* data is sent */
-	if (_left == 0) {
-		/* accept incoming activity again */
-		Server::_pfds[_index].events = POLLIN;
-
-		delete _requestInterface;
-		_requestInterface = nullptr;
-
-		/* sent error response; reset to accept new requests */
-		if (_state == ERROR) {
-			cleanClientFD();
-
-			/* close fd and remove pollable and pollfd struct */
-		} else if (_request.getConnectionAvailable() == false) {
+		if (_bytes == -1) {
 			_closed = true;
-
-			/* 100-continue response sent; reset byte counters for receiving body */
-		} else if (_request.getMethod() == Utils::post_string &&
-				   _request.getExpect() == Utils::continue_string)
-		{
-			resetBytes();
-			_state = BODY;
-
-			/* sent response; reset to accept new requests */
-		} else {
-			cleanClientFD();
+			return;
+		} else if (_bytes >= 0) {
+			_total += _bytes;
+			_left -= _bytes;
 		}
+
+		/* data is sent */
+		if (_left == 0) {
+			/* accept incoming activity again */
+			Server::_pfds[_index].events = POLLIN;
+
+			delete _requestInterface;
+			_requestInterface = nullptr;
+
+			/* sent error response; reset to accept new requests */
+			if (_state == ERROR) {
+				cleanClientFD();
+
+				/* close fd and remove pollable and pollfd struct */
+			} else if (_request.getConnectionAvailable() == false) {
+				_closed = true;
+
+				/* 100-continue response sent; reset byte counters for receiving body */
+			} else if (_request.getMethod() == Utils::post_string &&
+					   _request.getExpect() == Utils::continue_string)
+			{
+				resetBytes();
+				_state = BODY;
+
+				/* sent response; reset to accept new requests */
+			} else {
+				cleanClientFD();
+			}
+		}
+	} catch (const std::runtime_error &e) {
+		std::cerr << e.what();
+		_closed = true;
 	}
 }
 
