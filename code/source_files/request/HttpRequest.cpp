@@ -121,7 +121,13 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 		Client._fileFD->setRequestInterface(this, &Client);
 	}
 }
-#include "utils/FileStat.hpp"
+
+//If a DELETE method is successfully applied, the origin server SHOULD send
+// a 202 (Accepted) status code if the action will likely succeed but has not yet been enacted,
+//	a 204 (No Content) status code if the action has been enacted and no further information is to be supplied, or
+//	a 200 (OK) status code if the action has been enacted and the response message includes a representation describing the status.
+
+
 void HttpRequest::DELETERequest(ClientFD &Client) {
 	std::cout << "fileName" <<  Client._request.getFileStat().getFilename() << std::endl;
 	std::cout << "pathName" <<  Client._request.getFileStat().getPath() << std::endl;
@@ -130,6 +136,13 @@ void HttpRequest::DELETERequest(ClientFD &Client) {
 //	std::cout << fileName <<std::endl;
 //	if (Client._request.getFileStat().isDir() == true)
 //		std::cout << Client._request.getFileStat().getPath() << std::endl;
+
+//	if(remove(fileName) != 0){
+//		Client._response.generateErrorResponse(405); //?
+//	}
+//	else{
+//		Client._response.generateResponse(Client, 200);
+//	}
 }
 
 HttpRequest::~HttpRequest() {
