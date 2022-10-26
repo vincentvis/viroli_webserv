@@ -208,6 +208,10 @@ bool Request::uriIsDir() const {
 	return (false);
 }
 
+FileStat const &Request::getFileStat() const{
+	return this->_filestats;
+}
+
 void Request::clean() {
 	this->_method.clear();
 	this->_uri.clear();

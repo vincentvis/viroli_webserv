@@ -6,7 +6,16 @@ HttpRequest::HttpRequest() {
 }
 
 HttpRequest::HttpRequest(ClientFD &Client) {
-	CheckMethod(Client);
+	if (Client._request.getMethod() == Utils::get_string) {
+		GETRequest(Client);
+	}
+	if (Client._request.getMethod() == Utils::post_string) {
+		POSTRequest(Client);
+	}
+	if (Client._request.getMethod() == Utils::delete_string) {
+		DELETERequest(Client);
+	}
+//	CheckMethod(Client);
 }
 
 void HttpRequest::CheckMethod(ClientFD &Client) {
@@ -112,14 +121,15 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 		Client._fileFD->setRequestInterface(this, &Client);
 	}
 }
-
+#include "utils/FileStat.hpp"
 void HttpRequest::DELETERequest(ClientFD &Client) {
-	(void)Client;
-	std::cout << "DELETE REQUEST UNDER CONSTRUCTION" << std::endl;
-	//	Client._response.setContentType("text/plain");
-	//	Client._response.initResponse("200", Client._config, Client._request);
-	//	Client._response.createResponse();
-	//	Client.sendResponse(Client._index);
+	std::cout << "fileName" <<  Client._request.getFileStat().getFilename() << std::endl;
+	std::cout << "pathName" <<  Client._request.getFileStat().getPath() << std::endl;
+	std::cout << "getExtention" <<  Client._request.getFileStat().getExtension()) << std::endl;
+	std::cout << "getFull" <<  Client._request.getFileStat().getFull() << std::endl;
+//	std::cout << fileName <<std::endl;
+//	if (Client._request.getFileStat().isDir() == true)
+//		std::cout << Client._request.getFileStat().getPath() << std::endl;
 }
 
 HttpRequest::~HttpRequest() {
