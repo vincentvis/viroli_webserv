@@ -19,10 +19,21 @@ void CGIRequest::CheckMethod(ClientFD &Client) {
 }
 
 void CGIRequest::GETRequest(ClientFD &Client) {
-	Cgi exec(Client._request.getFileStat(), Client._request.getMethod(),
-			 Client._server->getPort(), Client._config->getFirstServerName());
+	Cgi cgi(Client._request.getFileStatNonConst(), Client._request.getMethod(),
+			Client._server->getPort(), Client._config->getFirstServerName());
 
-	exec.setQueryString(Client._request.getQuery());
+	cgi.setQueryString(Client._request.getQuery());
+	if (cgi.getStatus() == Cgi::ERROR) {
+		Client._response.generateErrorResponse(&Client, cgi.getStatusCode());
+		return;
+	}
+
+	try {
+		cgi.execute();
+	} catch (const Utils::ErrorPageException &e) {
+		Client._response.generateErrorResponse(&Client, e.what());
+		return;
+	}
 
 
 	//
@@ -33,15 +44,20 @@ void CGIRequest::GETRequest(ClientFD &Client) {
 }
 
 void CGIRequest::POSTRequest(ClientFD &Client) {
-	Cgi exec(Client._request.getFileStat(), Client._request.getMethod(),
-			 Client._server->getPort(), Client._config->getFirstServerName());
+	Cgi cgi(Client._request.getFileStatNonConst(), Client._request.getMethod(),
+			Client._server->getPort(), Client._config->getFirstServerName());
 
-	// exec.setQueryString(Client._request.getBody());
-	exec.setEnv("CONTENT_LENGTH", Utils::to_string(Client._request.getContentLength()));
+	// cgi.setQueryString(Client._request.getBody());
+	cgi.setEnv("CONTENT_LENGTH", Utils::to_string(Client._request.getContentLength()));
 	std::map<std::string, std::string>::const_iterator contentType =
 		Client._request.getHeaderMap().find("Content-Type");
 	if (contentType != Client._request.getHeaderMap().end()) {
-		exec.setEnv("CONTENT_TYPE", contentType->second);
+		cgi.setEnv("CONTENT_TYPE", contentType->second);
+	}
+	if (cgi.getStatus() == Cgi::ERROR) {
+		cgi.cleanup();
+		Client._response.generateErrorResponse(&Client, cgi.getStatusCode());
+		return;
 	}
 
 

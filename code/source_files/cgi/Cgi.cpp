@@ -1,11 +1,12 @@
 #include "cgi/Cgi.hpp"
 #include "cgi/Executables.hpp"
 
-Cgi::Cgi(const FileStat &filestats, std::string const &method, uint16_t port,
+Cgi::Cgi(FileStat filestats, std::string const &method, uint16_t port,
 		 std::string servername) :
 	_source(filestats) {
+	_status = CONTINUE;
 	if (_source.isReg() == false) {
-		_done       = true;
+		_status     = ERROR;
 		_statusCode = "404";
 		return;
 	}
@@ -14,12 +15,12 @@ Cgi::Cgi(const FileStat &filestats, std::string const &method, uint16_t port,
 	try {
 		this->_executable = Executables::findExecutableInPath(this->_executor_name);
 	} catch (const Utils::ErrorPageException &e) {
-		_done       = true;
+		_status     = ERROR;
 		_statusCode = e.what();
 		return;
 	} catch (const std::runtime_error &e) {
 		std::cerr << e.what() << std::endl;
-		_done       = true;
+		_status     = ERROR;
 		_statusCode = "500";
 		return;
 	}
@@ -37,13 +38,66 @@ Cgi::Cgi(const FileStat &filestats, std::string const &method, uint16_t port,
 	try {
 		_pipes.openPipes();
 	} catch (const Utils::ErrorPageException &e) {
-		_done       = true;
+		_status     = ERROR;
 		_statusCode = e.what();
 		return;
 	}
 }
 
+Cgi::Cgi(const Cgi &other) : _source(other._source) {
+	*this = other;
+}
+
+Cgi &Cgi::operator=(const Cgi &other) {
+	if (this != &other) {
+		this->_source        = other._source;
+		this->_executor_name = other._executor_name;
+		this->_executable    = other._executable;
+		this->_script_name   = other._script_name;
+		this->_statusCode    = other._statusCode;
+		this->_status        = other._status;
+		this->_env           = other._env;
+		this->_args          = other._args;
+
+		try {
+			this->_pipes.openPipes();
+		} catch (const Utils::ErrorPageException &e) {
+			this->_status     = ERROR;
+			this->_statusCode = e.what();
+			return (*this);
+		}
+	}
+	return (*this);
+}
+
 Cgi::~Cgi() {
+	cleanup();
+}
+
+int Cgi::execute(void) {
+	pid_t pid = fork();
+
+	if (pid == -1) {
+		_status     = ERROR;
+		_statusCode = "500";
+		return (-1);
+	}
+
+	if (pid == 0) {
+		// child
+		_pipes.closeForChild();
+		if (dup2(_pipes.toCgi[READ_FD], STDIN_FILENO) == SYS_ERR) {
+			exit(1);
+		}
+		if (dup2(_pipes.toServer[WRITE_FD], STDOUT_FILENO) == SYS_ERR) {
+			exit(1);
+		}
+		execve(_executable.c_str(), makeArgv(), _env.toCharPtrs());
+		exit(1);
+	}
+	_pipes.closeForParent();
+	_pipes.setPipesNonBlock();
+	return (0);
 }
 
 Cgi Cgi::setQueryString(std::string queryString) {
@@ -71,10 +125,17 @@ char *const *Cgi::makeArgv() const {
 	return (argv);
 }
 
-bool Cgi::isDone() const {
-	return (_done);
+Cgi::cgi_status Cgi::getStatus() const {
+	return (_status);
 }
 
-std::string Cgi::getStatusCode() const {
+std::string const &Cgi::getStatusCode() const {
 	return (_statusCode);
+}
+
+void Cgi::cleanup(void) {
+	_pipes.tryClose(_pipes.toCgi[READ_FD]);
+	_pipes.tryClose(_pipes.toCgi[WRITE_FD]);
+	_pipes.tryClose(_pipes.toServer[READ_FD]);
+	_pipes.tryClose(_pipes.toServer[WRITE_FD]);
 }

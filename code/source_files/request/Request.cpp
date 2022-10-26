@@ -212,6 +212,10 @@ FileStat const &Request::getFileStat() const {
 	return _filestats;
 }
 
+FileStat Request::getFileStatNonConst() {
+	return _filestats;
+}
+
 void Request::clean() {
 	this->_method.clear();
 	this->_uri.clear();

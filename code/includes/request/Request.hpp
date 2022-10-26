@@ -62,5 +62,6 @@ class Request {
 		bool                                      checkValidMethod();
 		bool                                      uriIsDir() const;
 		FileStat const                           &getFileStat() const;
+		FileStat                                  getFileStatNonConst();
 		void                                      clean();
 };
