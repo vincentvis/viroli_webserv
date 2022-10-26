@@ -40,7 +40,7 @@ FileStat::FileStat(std::string path, std::string filename) {
 	if (stat_ret == -1) {
 		_isOk = false;
 	}
-	// setFilenameAndPathFromFullpath();
+	setFilenameAndPathFromFullpath();
 }
 
 void FileStat::setFilenameAndPathFromFullpath(void) {
