@@ -28,4 +28,5 @@ class FileStat {
 		std::string _extension;
 		std::string _fullpath;
 		bool        _isOk;
+		void        setFilenameAndPathFromFullpath(void);
 };
