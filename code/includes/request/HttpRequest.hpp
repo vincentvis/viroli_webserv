@@ -9,7 +9,6 @@
 
 class HttpRequest : public RequestInterface {
 	private:
-		void CheckMethod(ClientFD &Client);
 		void GETRequest(ClientFD &Client);
 		void POSTRequest(ClientFD &Client);
 		void DELETERequest(ClientFD &Client);

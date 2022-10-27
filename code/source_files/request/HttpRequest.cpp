@@ -15,28 +15,21 @@ HttpRequest::HttpRequest(ClientFD &Client) {
 	if (Client._request.getMethod() == Utils::delete_string) {
 		DELETERequest(Client);
 	}
-//	CheckMethod(Client);
-}
-
-void HttpRequest::CheckMethod(ClientFD &Client) {
-	if (Client._request.getMethod() == Utils::get_string) {
-		GETRequest(Client);
-	}
-	if (Client._request.getMethod() == Utils::post_string) {
-		POSTRequest(Client);
-	}
-	if (Client._request.getMethod() == Utils::delete_string) {
-		DELETERequest(Client);
-	}
 }
 
 void HttpRequest::GETRequest(ClientFD &Client) {
-	std::string path = Client._config->getRoot(Client._location);
-	std::string uri  = Client._request.getUri();
-	if (*path.rbegin() != '/' && (uri.empty() == false && uri.at(0) != '/')) {
-		path += "/";
-	}
-	path += uri;
+
+		std::cout << "fileName [" <<  Client._request.getFileStat().getFilename() << "]" << std::endl;
+		std::cout << "pathName [" <<  Client._request.getFileStat().getPath() << "]" << std::endl;
+		std::cout << "getExtention [" <<  Client._request.getFileStat().getExtension() << "]" << std::endl;
+		std::cout << "getFull [" <<  Client._request.getFileStat().getFull() << "]" << std::endl;
+//	std::string path = Client._config->getRoot(Client._location);
+//	std::string uri  = Client._request.getUri();
+//	if (*path.rbegin() != '/' && (uri.empty() == false && uri.at(0) != '/')) {
+//		path += "/";
+//	}
+//	path += uri;
+	std::string path = Client._request.getFileStat().getFull();
 	int fd;
 
 	if (Client._request.uriIsDir()) {
@@ -47,14 +40,12 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 				Client._response.generateResponse(&Client, autoindex.getHtml(), "200");
 				return;
 			} catch (const Utils::AutoindexException &e) {
-				Client._response.generateErrorResponse(&Client, "404");
-				return;
+				throw Utils::ErrorPageException("404");
 			} catch (const std::exception &e) {
 				// all other exceptions?
 				// but what to do?
 				// internal server error for now
-				Client._response.generateErrorResponse(&Client,  "500");
-				return;
+				throw Utils::ErrorPageException("500");
 			}
 		}
 		std::vector<std::string> indexes = Client._config->getIndex(Client._location);
@@ -80,15 +71,11 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		fd = open(path.c_str(), O_RDONLY);
 	}
 	if (fd == -1) {
-		Client._response.generateErrorResponse(&Client, "404");
-		return;
+		throw Utils::ErrorPageException("404"); // if change back to errorResponse do RETURN!
 	}
 	/* add fileFd to poll */
 	Client._fileFD = reinterpret_cast<FileFD *>(
 		Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
-//	if (!Client.getBodyStr().empty()){
-//		Client._fileFD->setData(Client.getBodyStr());
-//	}
 	Client._fileFD->setRequestInterface(this, &Client);
 }
 
@@ -100,7 +87,7 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 //	std::cout << "getFull [" <<  Client._request.getFileStat().getFull() << "]" << std::endl;
 	int fd = open(Client._request.getFileStat().getFull().c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change?
 	if (fd == -1) {
-		throw Utils::ErrorPageException("404"); //of Client._response.generateErrorResponse(&Client,  "404");
+		throw Utils::ErrorPageException("404");
 	} else {
 		//		set location in response header
 		Client._fileFD = reinterpret_cast<FileFD *>(
@@ -119,7 +106,7 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 
 void HttpRequest::DELETERequest(ClientFD &Client) {
 	if (remove(Client._request.getFileStat().getFull().c_str()) != 0){
-		throw Utils::ErrorPageException("404"); //of Client._response.generateErrorResponse(&Client,  "404"); // and would you agree with 404?
+		throw Utils::ErrorPageException("404"); // would you agree with 404?
 	}
 	else {
 		Client._response.generateResponse(&Client, "200");
