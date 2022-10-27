@@ -93,6 +93,11 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 }
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
+
+	std::cout << "fileName [" <<  Client._request.getFileStat().getFilename() << "]" << std::endl;
+	std::cout << "pathName [" <<  Client._request.getFileStat().getPath() << "]" << std::endl;
+	std::cout << "getExtention [" <<  Client._request.getFileStat().getExtension() << "]" << std::endl;
+	std::cout << "getFull [" <<  Client._request.getFileStat().getFull() << "]" << std::endl;
 	//	200 turn into 201 if the file is valid
 	//		std::string uri = Client._location->getRoot();
 	//		if (uri.empty()) {
@@ -127,22 +132,13 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 //	a 204 (No Content) status code if the action has been enacted and no further information is to be supplied, or
 //	a 200 (OK) status code if the action has been enacted and the response message includes a representation describing the status.
 
-
 void HttpRequest::DELETERequest(ClientFD &Client) {
-	std::cout << "fileName" <<  Client._request.getFileStat().getFilename() << std::endl;
-	std::cout << "pathName" <<  Client._request.getFileStat().getPath() << std::endl;
-	std::cout << "getExtention" <<  Client._request.getFileStat().getExtension() << std::endl;
-	std::cout << "getFull" <<  Client._request.getFileStat().getFull() << std::endl;
-//	std::cout << fileName <<std::endl;
-//	if (Client._request.getFileStat().isDir() == true)
-//		std::cout << Client._request.getFileStat().getPath() << std::endl;
-
-//	if(remove(fileName) != 0){
-//		Client._response.generateErrorResponse(405); //?
-//	}
-//	else{
-//		Client._response.generateResponse(Client, 200);
-//	}
+	if (remove(Client._request.getFileStat().getFull().c_str()) != 0){
+		throw Utils::ErrorPageException("404"); // would you agree with 404?
+	}
+	else {
+		Client._response.generateResponse(&Client, "200");
+	}
 }
 
 HttpRequest::~HttpRequest() {

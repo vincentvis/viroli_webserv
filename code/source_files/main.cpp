@@ -21,46 +21,46 @@ int main(int argc, char const *argv[]) {
 		return (1);
 	}
 
+		Server *serv;
 
-	Server *serv;
+		//
+		std::map<uint16_t, std::vector<Config *> >           ports = config.getPortMap();
+		std::map<uint16_t, std::vector<Config *> >::iterator it    = ports.begin();
+		std::map<uint16_t, std::vector<Config *> >::iterator end   = ports.end();
+		while (it != end) {
+			serv = new Server(it->first, it->second);
+			Server::addPollable(serv, serv->getFileDescriptor(), SERVERPOLL, POLLIN);
 
-	//
-	std::map<uint16_t, std::vector<Config *> >           ports = config.getPortMap();
-	std::map<uint16_t, std::vector<Config *> >::iterator it    = ports.begin();
-	std::map<uint16_t, std::vector<Config *> >::iterator end   = ports.end();
-	while (it != end) {
-		serv = new Server(it->first, it->second);
-		Server::addPollable(serv, serv->getFileDescriptor(), SERVERPOLL, POLLIN);
+			// struct pollfd pfd = {serv->getFileDescriptor(), POLLIN, 0};
+			// Server::addPollable(pfd, new ServerFD(serv, pfd.fd, Server::_pfds.size()));
 
-		// struct pollfd pfd = {serv->getFileDescriptor(), POLLIN, 0};
-		// Server::addPollable(pfd, new ServerFD(serv, pfd.fd, Server::_pfds.size()));
+			// Server::addPoll(serv);
+			// servers.push_back(serv);
+			it++;
+		}
 
-		// Server::addPoll(serv);
-		// servers.push_back(serv);
-		it++;
-	}
+		std::cout << "std::vector<uint16_t> _pfds: \n";
+		for (std::vector<struct pollfd>::iterator it = Server::_pfds.begin();
+			 it != Server::_pfds.end(); ++it)
+		{
+			std::cout << "pfd: " << it->fd << std::endl;
+		}
 
-	std::cout << "std::vector<uint16_t> _pfds: \n";
-	for (std::vector<struct pollfd>::iterator it = Server::_pfds.begin();
-		 it != Server::_pfds.end(); ++it)
-	{
-		std::cout << "pfd: " << it->fd << std::endl;
-	}
+		std::cout << "std::map<int32_t, IPollables> _pollables: \n";
+		for (std::map<int32_t, IPollable *>::iterator it = Server::_pollables.begin();
+			 it != Server::_pollables.end(); ++it)
+		{
+			std::cout << "fd: " << it->first
+					  << " | IPollable fd: " << it->second->getFileDescriptor();
+			std::cout << " | port: " << it->second->getServer()->getPort() << std::endl;
+		}
 
-	std::cout << "std::map<int32_t, IPollables> _pollables: \n";
-	for (std::map<int32_t, IPollable *>::iterator it = Server::_pollables.begin();
-		 it != Server::_pollables.end(); ++it)
-	{
-		std::cout << "fd: " << it->first
-				  << " | IPollable fd: " << it->second->getFileDescriptor();
-		std::cout << " | port: " << it->second->getServer()->getPort() << std::endl;
-	}
 
 	try {
 		Server::run();
-	} catch (std::string &e) {
+	} catch (std::exception &e) {
 		std::cout << "error in main\n";
-		std::cout << e << std::endl;
+		std::cout << e.what() << std::endl;
 	}
 
 	return 0;
