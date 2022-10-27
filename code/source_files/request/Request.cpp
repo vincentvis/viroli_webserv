@@ -208,7 +208,12 @@ bool Request::uriIsDir() const {
 	return (false);
 }
 
-FileStat const &Request::getFileStat() const{
+
+FileStat const &Request::getFileStat() const {
+	return this->_filestats;
+}
+
+FileStat Request::getFileStatCopy() const {
 	return this->_filestats;
 }
 
