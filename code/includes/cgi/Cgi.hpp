@@ -10,6 +10,7 @@
 class Cgi {
 	public:
 		enum cgi_status { CONTINUE, ERROR, DONE };
+		enum request_type { GET, POST, DELETE };
 		Cgi(FileStat filestats, std::string const &method, uint16_t port,
 			std::string servername);
 		Cgi(const Cgi &other);
@@ -24,15 +25,13 @@ class Cgi {
 		char *const       *makeArgv() const;
 		Cgi                setEnv(std::string key, std::string value);
 		void               cleanup(void);
-		int                execute(ClientFD &Client);
+		int execute(ClientFD &Client, CGIRequest *interface, enum request_type);
 
 	protected:
 		FileStat                 _source;
 		std::string              _executor_name;
 		std::string              _executable;
 		std::string              _script_name;
-		std::string              _statusCode;
-		cgi_status               _status;
 		Pipes                    _pipes;
 		CgiVars                  _env;
 		std::vector<std::string> _args;

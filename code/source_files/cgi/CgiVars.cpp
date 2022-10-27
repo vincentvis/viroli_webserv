@@ -40,7 +40,6 @@ char *const *CgiVars::toCharPtrs() {
 		envp[i][it->first.length()] = '=';
 		memcpy(envp[i] + it->first.length() + 1, it->second.c_str(), it->second.length());
 		envp[i][it->first.length() + it->second.length() + 1] = 0;
-		DEBUGSTART << "envp[" << i << "]: '" << envp[i] << "'" << DEBUGEND;
 
 		it++;
 		i++;

@@ -41,11 +41,9 @@ class Executables {
 			if (file.isReg() == false) {
 				return (false);
 			}
-			std::cerr << "find ext [" << file.getExtension() << "]" << std::endl;
 			std::map<std::string, std::string>::iterator it =
 				getInstance()._executables.find(file.getExtension());
 			if (it == getInstance()._end) {
-				std::cerr << "it is end\n";
 				return (false);
 			}
 			return (true);
@@ -54,7 +52,7 @@ class Executables {
 		static std::string findExecutableInPath(std::string &executable_name) {
 			char *envpath = getenv("PATH");
 			if (envpath == NULL) {
-				throw Utils::ErrorPageException("500");
+				throw Utils::ErrorPageException("502");
 			}
 			std::string            pathvar = std::string(envpath);
 			std::string::size_type offset  = 0;
@@ -68,7 +66,7 @@ class Executables {
 				offset = pos + 1;
 				pos    = pathvar.find(":", offset);
 			}
-			throw std::runtime_error("Executable not found in path");
+			throw Utils::ErrorPageException("502");
 			return ("");
 		}
 

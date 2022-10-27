@@ -5,11 +5,6 @@ CGIRequest::CGIRequest() {
 }
 
 CGIRequest::CGIRequest(ClientFD &Client) {
-	std::cerr << "CGIIIIIIIIIIIIIIIIIIIII \n";
-	CheckMethod(Client);
-}
-
-void CGIRequest::CheckMethod(ClientFD &Client) {
 	if (Client._request.getMethod() == Utils::get_string) {
 		GETRequest(Client);
 	} else if (Client._request.getMethod() == Utils::post_string) {
@@ -24,17 +19,9 @@ void CGIRequest::GETRequest(ClientFD &Client) {
 			Client._server->getPort(), Client._config->getFirstServerName());
 
 	cgi.setQueryString(Client._request.getQuery());
-	if (cgi.getStatus() == Cgi::ERROR) {
-		Client._response.generateErrorResponse(&Client, cgi.getStatusCode());
-		return;
-	}
 
-	try {
-		cgi.execute(Client);
-	} catch (const Utils::ErrorPageException &e) {
-		Client._response.generateErrorResponse(&Client, e.what());
-		return;
-	}
+	DEBUGSTART << "Execute CGI get" << DEBUGEND;
+	cgi.execute(Client, this, Cgi::GET);
 
 
 	//
@@ -54,11 +41,6 @@ void CGIRequest::POSTRequest(ClientFD &Client) {
 		Client._request.getHeaderMap().find("Content-Type");
 	if (contentType != Client._request.getHeaderMap().end()) {
 		cgi.setEnv("CONTENT_TYPE", contentType->second);
-	}
-	if (cgi.getStatus() == Cgi::ERROR) {
-		cgi.cleanup();
-		Client._response.generateErrorResponse(&Client, cgi.getStatusCode());
-		return;
 	}
 
 

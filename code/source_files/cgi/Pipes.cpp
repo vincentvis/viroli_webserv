@@ -35,21 +35,21 @@ void Pipes::closeForChild() {
 
 void Pipes::openPipes() {
 	if (pipe(toCgi) < 0) {
-		throw Utils::ErrorPageException("500");
+		throw Utils::ErrorPageException("502");
 	}
 	if (pipe(toServer) < 0) {
 		tryClose(toCgi[READ_FD]);
 		tryClose(toCgi[WRITE_FD]);
-		throw Utils::ErrorPageException("500");
+		throw Utils::ErrorPageException("502");
 	}
 }
 
 void Pipes::setPipesNonBlock() {
 	if (fcntl(toServer[READ_FD], F_SETFL, O_NONBLOCK) == SYS_ERR) {
-		throw Utils::ErrorPageException("500");
+		throw Utils::ErrorPageException("502");
 	}
-	if (fcntl(toServer[WRITE_FD], F_SETFL, O_NONBLOCK) == SYS_ERR) {
+	if (fcntl(toCgi[WRITE_FD], F_SETFL, O_NONBLOCK) == SYS_ERR) {
 		tryClose(toServer[READ_FD]);
-		throw Utils::ErrorPageException("500");
+		throw Utils::ErrorPageException("502");
 	}
 }

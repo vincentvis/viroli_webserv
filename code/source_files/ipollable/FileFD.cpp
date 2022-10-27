@@ -4,12 +4,14 @@ FileFD::FileFD(Server *server, int fd, int index) :
 	_state(PROCESS), _server(server), _buffer(BUFFERSIZE, 0), _data(), _bytes(0),
 	_left(0), _total(0), _fd(fd), _index(index), _tick(), _closed(false) {
 	time(&_tick);
+	DEBUGSTART << "File FD with fd: " << _fd << DEBUGEND;
 }
 
 FileFD::~FileFD() {
 }
 
 void FileFD::pollin() {
+	DEBUGSTART << "POLLIN---- Reading from " << _fd << DEBUGEND;
 	time(&_tick);
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
 	if (_bytes < 0) {
@@ -55,7 +57,7 @@ void FileFD::pollout() {
 		//		 close(_fd); // should this be erased?
 		COUT_DEBUGMSG << "finished writing\n";
 		_closed = true;
-		_client->_response.generateResponse(_client,  "201");
+		_client->_response.generateResponse(_client, "201");
 		// file made, ready for response
 	}
 }

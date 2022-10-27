@@ -6,10 +6,6 @@ HttpRequest::HttpRequest() {
 }
 
 HttpRequest::HttpRequest(ClientFD &Client) {
-	CheckMethod(Client);
-}
-
-void HttpRequest::CheckMethod(ClientFD &Client) {
 	if (Client._request.getMethod() == Utils::get_string) {
 		GETRequest(Client);
 	} else if (Client._request.getMethod() == Utils::post_string) {
@@ -42,7 +38,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 				// all other exceptions?
 				// but what to do?
 				// internal server error for now
-				Client._response.generateErrorResponse(&Client,  "500");
+				Client._response.generateErrorResponse(&Client, "500");
 				return;
 			}
 		}
@@ -96,11 +92,11 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 		path += "/";
 	}
 	path += uri;
-//	std::cout << path << std::endl;
+	//	std::cout << path << std::endl;
 	int fd = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change
 
 	if (fd == -1) {
-		Client._response.generateErrorResponse(&Client,  "404");
+		Client._response.generateErrorResponse(&Client, "404");
 	} else {
 		//		set location in response header
 		Client._fileFD = reinterpret_cast<FileFD *>(
