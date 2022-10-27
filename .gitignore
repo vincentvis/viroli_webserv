@@ -39,4 +39,3 @@ cmake-build-debug
 webserv
 *.dSYM
 valgrind-out.txt
-/website/html/uploads/
