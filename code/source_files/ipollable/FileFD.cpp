@@ -1,8 +1,8 @@
 #include "ipollable/FileFD.hpp"
 
 FileFD::FileFD(Server *server, int fd, int index) :
-	_state(PROCESS), _server(server), _buffer(BUFFERSIZE, 0), _data(), _bytes(0),
-	_left(0), _total(0), _fd(fd), _index(index), _tick(), _closed(false) {
+	_state(PROCESS), _server(server), _data(), _bytes(0), _left(0), _total(0), _fd(fd),
+	_index(index), _tick(), _closed(false) {
 	time(&_tick);
 }
 
@@ -11,7 +11,7 @@ FileFD::~FileFD() {
 
 void FileFD::pollin() {
 	time(&_tick);
-	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
+	_bytes = read(_fd, Buffer::getInstance().getBuff().data(), BUFFERSIZE);
 	if (_bytes < 0) {
 		_closed = true;
 		_client->_response.generateErrorResponse(_client, "500");
@@ -23,7 +23,8 @@ void FileFD::pollin() {
 		// body ready initialize it with response
 	} else if (_bytes > 0) {
 		_total += _bytes;
-		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
+		_data.append(Buffer::getInstance().getBuff().begin(),
+					 Buffer::getInstance().getBuff().begin() + _bytes);
 	}
 }
 
@@ -45,8 +46,9 @@ void FileFD::pollout() {
 	std::cout << __PRETTY_FUNCTION__ << std::endl;
 	time(&_tick);
 
-	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
-	_bytes = write(_fd, _buffer.data(), getRemainderBytes());
+	Buffer::getInstance().getBuff().assign(_data.begin() + _total,
+										   _data.begin() + _total + getRemainderBytes());
+	_bytes = write(_fd, Buffer::getInstance().getBuff().data(), getRemainderBytes());
 	if (_bytes) {
 		_total += _bytes;
 		_left -= _bytes;
@@ -54,7 +56,7 @@ void FileFD::pollout() {
 	if (_left == 0) {
 		std::cout << "finished writing\n";
 		_closed = true;
-		_client->_response.generateResponse(_client,  "201");
+		_client->_response.generateResponse(_client, "201");
 		// file made, ready for response
 	}
 }

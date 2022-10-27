@@ -8,6 +8,7 @@
 #define CRLF_LEN        2
 #define CRLF_LEN2       4
 #define TIMEOUT_SECONDS 5
+#define BUFFERSIZE      10000 // tmp
 
 namespace Utils {
 

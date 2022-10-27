@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ipollable/Buffer.hpp"
 #include "ipollable/IPollable.hpp"
 #include "server/Server.hpp"
 #include <cstring>

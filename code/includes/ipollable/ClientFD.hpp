@@ -24,7 +24,6 @@ class ClientFD : public IPollable {
 		FileFD           *_fileFD;
 		Response          _response;
 		State             _state;
-		std::vector<char> _buffer;
 		std::string       _inbound;
 		std::string       _outbound;
 		std::string       _body;

@@ -8,6 +8,7 @@
 #include "utils/Utils.hpp"
 
 #include <arpa/inet.h>
+#include <array>
 #include <cstring>
 #include <ctime>
 #include <fcntl.h>
@@ -24,8 +25,7 @@
 #include <utility>
 #include <vector>
 
-#define BUFFERSIZE     10000 // tmp
-#define MAXCONNECTIONS 100   // tmp
+#define MAXCONNECTIONS 100 // tmp
 
 enum Pollable { SERVERPOLL, CLIENTPOLL, FILEPOLL };
 
