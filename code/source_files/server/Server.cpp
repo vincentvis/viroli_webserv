@@ -56,25 +56,25 @@ Server::Server(uint16_t port, std::vector<Config *> configs) :
 	int opt                = 1;
 
 	if ((_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-		throw(std::runtime_error("Error on socket"));
+		throw(Utils::SocketListenException("Error on socket"));
 	}
 	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
 		close(_fd);
-		throw(std::runtime_error("Error on setsockopt"));
+		throw(Utils::SocketListenException("Error on setsockopt"));
 	}
 	if (fcntl(_fd, F_SETFL, O_NONBLOCK) < 0) {
 		close(_fd);
-		throw(std::runtime_error("Error on fcntl"));
+		throw(Utils::SocketListenException("Error on fcntl"));
 	}
 	if (bind(_fd, reinterpret_cast<sockaddr *>(&server),
 			 static_cast<socklen_t>(sizeof(server))) < 0)
 	{
 		close(_fd);
-		throw(std::runtime_error("Error on bind"));
+		throw(Utils::SocketListenException("Error on bind"));
 	}
 	if (listen(_fd, SOMAXCONN) < 0) {
 		close(_fd);
-		throw(std::runtime_error("Error on listen"));
+		throw(Utils::SocketListenException("Error on listen"));
 	}
 }
 
@@ -124,7 +124,7 @@ void Server::run() {
 			if (errno == EAGAIN) {
 				continue;
 			} else {
-				throw(std::runtime_error("Error on poll, closing program"));
+				throw(Utils::PollException("Error on poll, closing program"));
 			}
 		}
 
@@ -140,6 +140,7 @@ void Server::run() {
 				--i;
 				continue;
 			}
+
 			if (it != _pollables.end()) {
 				/* find on what file descriptor event occurred */
 				if (Server::_pfds[i].revents & POLLIN) {
@@ -157,6 +158,7 @@ void Server::run() {
 		}
 	}
 }
+
 
 IPollable *Server::addPollable(Server *server, int32_t fd, Pollable type, int16_t event) {
 	struct pollfd pfd = {fd, event, 0};

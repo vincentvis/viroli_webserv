@@ -21,9 +21,9 @@ void ClientFD::receive(size_t len) {
 	_bytes = recv(_fd, _buffer.data(), len, 0);
 
 	if (_bytes == -1) {
-		throw(std::runtime_error("Error on receiving data, closing connection"));
+		throw(Utils::SocketReceiveException("Error on receive"));
 	} else if (_bytes == 0) {
-		throw(std::runtime_error("Connection closed by client"));
+		throw(Utils::SocketShutdownException("Connection closed by client"));
 	} else if (_bytes > 0) {
 		_inbound.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
@@ -67,7 +67,7 @@ void ClientFD::receiveChunked() {
 			/* chunk present in _inbound */
 			if (_left + CRLF_LEN <= static_cast<int64_t>(_inbound.size())) {
 				if (_inbound.substr(_left, CRLF_LEN).find("\r\n") == std::string::npos) {
-					throw(std::string("expected CRLF not found")); // placeholder
+					throw(Utils::ErrorPageException("400"));
 				}
 
 				/* extract chunk from _inbound and append to _body */
@@ -188,7 +188,7 @@ void ClientFD::respond() {
 	if (_request.getMethod() == Utils::post_string &&
 		_request.getExpect() == Utils::continue_string && _inbound.empty())
 	{
-		this->_response.generateResponse(this,"100");
+		this->_response.generateResponse(this, "100");
 	} else if (this->_request.getCgi() == true) {
 		this->_requestInterface = new CGIRequest(*this);
 	} else {
@@ -197,20 +197,14 @@ void ClientFD::respond() {
 }
 
 void ClientFD::process() {
-	try {
-		if (_state == HEADER) {
-			receiveHeader();
-		}
-		if (_state == BODY) {
-			receiveBody();
-		}
-		if (_state == RESPOND) {
-			respond();
-		}
-	} catch (const Utils::ErrorPageException &e) {
-		_state = ERROR;
-		std::cerr << "Error code: " << e.what() << std::endl;
-		this->_response.generateErrorResponse(this, e.what());
+	if (_state == HEADER) {
+		receiveHeader();
+	}
+	if (_state == BODY) {
+		receiveBody();
+	}
+	if (_state == RESPOND) {
+		respond();
 	}
 }
 
@@ -219,7 +213,14 @@ void ClientFD::pollin() {
 	try {
 		receive(BUFFERSIZE);
 		process();
-	} catch (const std::runtime_error &e) {
+	} catch (const Utils::ErrorPageException &e) {
+		_state = ERROR;
+		std::cerr << e.what() << std::endl;
+		this->_response.generateErrorResponse(this, e.what());
+	} catch (const Utils::SocketShutdownException &e) {
+		std::cerr << e.what() << std::endl;
+		_closed = true;
+	} catch (const Utils::SocketReceiveException &e) {
 		std::cerr << e.what() << std::endl;
 		_closed = true;
 	}
@@ -234,8 +235,7 @@ void ClientFD::pollout() {
 		_bytes = send(_fd, _buffer.data(), getRemainderBytes(), 0);
 
 		if (_bytes == -1) {
-			_closed = true;
-			return;
+			throw(Utils::SocketSendException("Error on send"));
 		} else if (_bytes >= 0) {
 			_total += _bytes;
 			_left -= _bytes;
@@ -257,7 +257,8 @@ void ClientFD::pollout() {
 			} else if (_request.getConnectionAvailable() == false) {
 				_closed = true;
 
-				/* 100-continue response sent; reset byte counters for receiving body */
+				/* 100-continue response sent; reset byte counters for receiving body
+				 */
 			} else if (_request.getMethod() == Utils::post_string &&
 					   _request.getExpect() == Utils::continue_string)
 			{
@@ -269,8 +270,8 @@ void ClientFD::pollout() {
 				cleanClientFD();
 			}
 		}
-	} catch (const std::runtime_error &e) {
-		std::cerr << e.what();
+	} catch (const Utils::SocketSendException &e) {
+		std::cerr << e.what() << std::endl;
 		_closed = true;
 	}
 }

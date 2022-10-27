@@ -58,13 +58,18 @@ int main(int argc, char const *argv[]) {
 
 	try {
 		Server::run();
-	} catch (const std::runtime_error &e) {
+	} catch (const Utils::PollException &e) {
 		std::cerr << e.what();
 		return (EXIT_FAILURE);
-	} catch (std::string &e) {
-		std::cout << "error in main\n";
-		std::cout << e << std::endl;
+	} catch (const Utils::SocketAcceptException &e) {
+		std::cerr << e.what();
+		return (EXIT_FAILURE);
+	} catch (const Utils::SocketListenException &e) {
+		std::cerr << e.what();
+		return (EXIT_FAILURE);
+	} catch (const std::exception &e) {
+		std::cerr << e.what();
+		return (EXIT_FAILURE);
 	}
-
-	return 0;
+	return (EXIT_SUCCESS);
 }
