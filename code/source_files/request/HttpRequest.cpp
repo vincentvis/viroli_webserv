@@ -64,8 +64,19 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
 	Client._fileFD->setRequestInterface(this, &Client);
 }
+#include "config/MimeTypes.hpp"
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
+	/* check if requested file is valid */
+
+
+	/* check if path to upload exists// is already done ? */
+
+	/* check if file exists */
+//	Client._request.getFileStat().getFilename();
+	
+//	std::string con = MimeTypes::findMimeType(Client, Client._request.getFileStat().getFilename());
+
 	int fd = open(Client._request.getFileStat().getFull().c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change?
 	if (fd == -1) {
 		throw Utils::ErrorPageException("404");
