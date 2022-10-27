@@ -21,12 +21,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e2292327-578d-405e-a0b9-eb2349ccdcd8" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/.ninja_deps" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/.ninja_deps" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/.ninja_log" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/.ninja_log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/webserv.dir/code/source_files/request/HttpRequest.cpp.o" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/webserv.dir/code/source_files/request/HttpRequest.cpp.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/Testing/Temporary/LastTest.log" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Testing/Temporary/LastTest.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmake-build-debug/webserv" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/webserv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/code/source_files/request/HttpRequest.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/code/source_files/request/HttpRequest.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/website/config/default.config" beforeDir="false" afterPath="$PROJECT_DIR$/website/config/default.config" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,7 +89,7 @@
       <workItem from="1666858589071" duration="32000" />
       <workItem from="1666858627979" duration="1994000" />
       <workItem from="1666861085457" duration="1000" />
-      <workItem from="1666867307049" duration="589000" />
+      <workItem from="1666867304016" duration="12568000" />
     </task>
     <servers />
   </component>
