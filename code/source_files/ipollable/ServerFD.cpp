@@ -2,6 +2,7 @@
 
 ServerFD::ServerFD(Server *server, int fd, int index) :
 	_server(server), _fd(fd), _index(index), _closed(false) {
+	updateTick();
 }
 
 ServerFD::~ServerFD() {

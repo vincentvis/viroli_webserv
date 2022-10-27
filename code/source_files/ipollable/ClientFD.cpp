@@ -4,7 +4,7 @@ ClientFD::ClientFD(Server *server, int fd, int index) :
 	_requestInterface(nullptr), _server(server), _state(HEADER), _buffer(BUFFERSIZE, 0),
 	_inbound(), _outbound(), _body(), _bytes(0), _left(0), _total(0), _fd(fd),
 	_index(index), _tick(), _closed(false) {
-	time(&_tick);
+	updateTick();
 }
 
 ClientFD::~ClientFD() {
