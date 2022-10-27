@@ -4,7 +4,7 @@ ClientFD::ClientFD(Server *server, int fd, int index) :
 	_requestInterface(nullptr), _server(server), _state(HEADER), _buffer(BUFFERSIZE, 0),
 	_inbound(), _outbound(), _body(), _bytes(0), _left(0), _total(0), _fd(fd),
 	_index(index), _tick(), _closed(false) {
-	time(&_tick);
+	updateTick();
 }
 
 ClientFD::~ClientFD() {
@@ -19,12 +19,12 @@ void ClientFD::resetBytes() {
 void ClientFD::receive(size_t len) {
 	_bytes = recv(_fd, _buffer.data(), len, 0);
 
+	/* poll notified there is data ready, recv however returns EAGAIN (-1) */
 	if (_bytes == -1) {
-		// throw(Utils::ErrorPageException("500"));
-		// _closed = true;
-		_bytes = 0; // Rhyno and Pascal ???
+		throw(Utils::ErrorPageException("500"));
 	} else if (_bytes == 0) {
-		process();
+		throw(std::runtime_error(std::string(std::asctime(std::localtime(&_tick))) +
+								 "Connection closed by client"));
 	} else if (_bytes > 0) {
 		_inbound.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
@@ -53,7 +53,7 @@ void ClientFD::receiveChunked() {
 
 				/* body exceeds the config limit */
 				if (_total > _config->getMaxBodySize()) {
-					throw(Utils::ErrorPageException("413")); // <----------------- CHECK?
+					throw(Utils::ErrorPageException("413"));
 				}
 
 				/* ending chunk received */
@@ -76,7 +76,7 @@ void ClientFD::receiveChunked() {
 				_inbound = _inbound.substr(_left + CRLF_LEN);
 				_left    = 0;
 
-				/* chunk not present, receive more bytes */
+				/* chunk not present; receive more bytes */
 			} else {
 				break;
 			}
@@ -95,7 +95,7 @@ void ClientFD::receiveLength() {
 		_total += _bytes;
 	}
 
-	/* received the amount of bytes specified by content-length */
+	/* received all the bytes specified by content-length */
 	if (_total == _left) {
 		_body  = _inbound;
 		_state = RESPOND;
@@ -112,6 +112,7 @@ void ClientFD::sendResponse() {
 
 void ClientFD::receiveHeader() {
 	size_t end = 0;
+
 	if ((end = _inbound.find(CRLF_END)) != std::string::npos) {
 		this->_request.ParseRequest(this->_inbound);
 		// this->_request.printAttributesInRequestClass();
@@ -127,6 +128,7 @@ void ClientFD::receiveHeader() {
 		/* 'chunked': _total is sum of all chunk sizes */
 		if (_request.getChunked() == true) {
 			_total = 0;
+
 			/* 'content-length': _total is set to data already received */
 		} else if (_request.contentLenAvailable() == true) {
 			_total = _inbound.size();
@@ -207,7 +209,6 @@ void ClientFD::process() {
 			respond();
 		}
 	} catch (const Utils::ErrorPageException &e) {
-		std::cerr << "STATUS ERROR: " << e.what() << std::endl;
 		_state = ERROR;
 		this->_response.generateErrorResponse(this, e.what());
 	} catch (const std::exception &e) {
@@ -218,14 +219,19 @@ void ClientFD::process() {
 
 /* receive data */
 void ClientFD::pollin() {
-	time(&_tick);
-	receive(BUFFERSIZE);
-	process();
+	updateTick();
+	try {
+		receive(BUFFERSIZE);
+		process();
+	} catch (const std::exception &e) {
+		std::cerr << e.what() << std::endl;
+		_closed = true;
+	}
 }
 
 /* send data */
 void ClientFD::pollout() {
-	time(&_tick);
+	updateTick();
 
 	/* make sure to not go out of bounds with the buffer */
 	_buffer.assign(_outbound.begin() + _total,
@@ -234,14 +240,13 @@ void ClientFD::pollout() {
 
 	/* per subject, remove client on error */
 	if (_bytes == -1) {
-		_closed = true;
-		return;
-	} else if (_bytes > 0) {
+		throw(std::runtime_error("error on send"));
+	} else if (_bytes >= 0) {
 		_total += _bytes;
 		_left -= _bytes;
 	}
 
-	/* what to do after all data is sent? */
+	/* data is sent */
 	if (_left == 0) {
 		/* accept incoming activity again */
 		Server::_pfds[_index].events = POLLIN;
@@ -295,4 +300,12 @@ bool ClientFD::isClosed() const {
 
 void ClientFD::setIndex(int32_t index) {
 	_index = index;
+}
+
+void ClientFD::updateTick() {
+	time(&_tick);
+}
+
+const time_t &ClientFD::getTick() const {
+	return _tick;
 }
