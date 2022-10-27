@@ -305,3 +305,7 @@ void ClientFD::setIndex(int32_t index) {
 void ClientFD::updateTick() {
 	time(&_tick);
 }
+
+const time_t &ClientFD::getTick() const {
+	return _tick;
+}

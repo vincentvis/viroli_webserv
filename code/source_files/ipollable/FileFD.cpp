@@ -66,7 +66,7 @@ void FileFD::pollout() {
 	/* done writing; close pollable; send response */
 	if (_left == 0) {
 		_closed = true;
-		_client->_response.generateResponse(_client,  "201");
+		_client->_response.generateResponse(_client, "201");
 		// file made, ready for response
 	}
 }
@@ -83,7 +83,7 @@ void FileFD::timeout() {
 	time_t timeout;
 
 	time(&timeout);
-	if (difftime(timeout, _tick) > 10) {
+	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
 		std::cout << "TIMEOUT\n"; // will have to send a response
 		_closed = true;           // this must be removed?
 	}

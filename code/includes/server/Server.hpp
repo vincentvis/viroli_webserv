@@ -24,7 +24,7 @@
 #include <utility>
 #include <vector>
 
-#define BUFFERSIZE 1 // tmp
+#define BUFFERSIZE 10000 // tmp
 
 enum Pollable { SERVERPOLL, CLIENTPOLL, FILEPOLL };
 

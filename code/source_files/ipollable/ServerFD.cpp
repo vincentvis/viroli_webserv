@@ -9,10 +9,11 @@ ServerFD::~ServerFD() {
 
 /* accept new ClientFD */
 void ServerFD::pollin() {
-	int newfd = 0;
-	int opt   = 1;
-	// struct sockaddr_in client = {0, 0, 0, {0}, {0}};
+	int                newfd = 0;
+	int                opt   = 1;
 	struct sockaddr_in client;
+
+	updateTick();
 	memset(&client, 0, sizeof(client));
 	socklen_t addrlen = sizeof(client);
 
@@ -28,14 +29,9 @@ void ServerFD::pollin() {
 		throw(std::string("error on ServerFD::fcntl()")); // placeholder
 	}
 
-	std::cout << "new connection accepted\n";
 	Server::addPollable(_server, newfd, CLIENTPOLL, POLLIN);
-	// struct pollfd pfd = {newfd, POLLIN, 0};
-	// Server::addPollable(pfd, new ClientFD(_server, newfd, Server::_pfds.size())); //can
-	// this be deleted?
 }
 
-/* do nothing on POLLOUT event */
 void ServerFD::pollout() {
 }
 
@@ -59,4 +55,9 @@ void ServerFD::setIndex(int32_t index) {
 }
 
 void ServerFD::updateTick() {
+	time(&_tick);
+}
+
+const time_t &ServerFD::getTick() const {
+	return _tick;
 }
