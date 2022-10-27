@@ -131,7 +131,7 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 void HttpRequest::DELETERequest(ClientFD &Client) {
 	std::cout << "fileName" <<  Client._request.getFileStat().getFilename() << std::endl;
 	std::cout << "pathName" <<  Client._request.getFileStat().getPath() << std::endl;
-	std::cout << "getExtention" <<  Client._request.getFileStat().getExtension()) << std::endl;
+	std::cout << "getExtention" <<  Client._request.getFileStat().getExtension() << std::endl;
 	std::cout << "getFull" <<  Client._request.getFileStat().getFull() << std::endl;
 //	std::cout << fileName <<std::endl;
 //	if (Client._request.getFileStat().isDir() == true)
