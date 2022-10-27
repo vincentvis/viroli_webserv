@@ -18,22 +18,6 @@ HttpRequest::HttpRequest(ClientFD &Client) {
 }
 
 void HttpRequest::GETRequest(ClientFD &Client) {
-
-//	std::cout << "fileName [" <<  Client._request.getFileStat().getFilename() << "]" << std::endl;
-//	std::cout << "pathName [" <<  Client._request.getFileStat().getPath() << "]" << std::endl;
-//	std::cout << "getExtention [" <<  Client._request.getFileStat().getExtension() << "]" << std::endl;
-//	std::cout << "getFull [" <<  Client._request.getFileStat().getFull() << "]" << std::endl;
-//	std::cout << "getFull [" <<  Client._request.getFileStat().isDir() << "]" << std::endl;
-//	std::cout << "getFull [" <<  Client._request.getFileStat().isExecutable() << "]" << std::endl;
-//	std::cout << "getFull [" <<  Client._request.getFileStat().isReadable() << "]" << std::endl;
-//	std::cout << "getFull [" <<  Client._request.getFileStat().isReg() << "]" << std::endl;
-//	std::cout << "getFull [" <<  Client._request.getFileStat().isWriteable() << "]" << std::endl;
-	//	std::string path = Client._config->getRoot(Client._location); // I think we can delete this right?
-	//	std::string uri  = Client._request.getUri();
-	//	if (*path.rbegin() != '/' && (uri.empty() == false && uri.at(0) != '/')) {
-	//		path += "/";
-	//	}
-	//	path += uri;
 	std::string path = Client._request.getFileStat().getFull();
 	int fd;
 
@@ -54,7 +38,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		std::vector<std::string>::const_iterator it  = indexes.begin();
 		std::vector<std::string>::const_iterator end = indexes.end();
 		std::string                              tmp;
-//		if (*path.rbegin() != '/') { // not sure if we need this?
+//		if (*path.rbegin() != '/') { // this can be deleted now right?
 //			path += "/";
 //		}
 		fd = -1;
@@ -82,16 +66,11 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 }
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
-
-//	std::cout << "fileName [" <<  Client._request.getFileStat().getFilename() << "]" << std::endl;
-//	std::cout << "pathName [" <<  Client._request.getFileStat().getPath() << "]" << std::endl;
-//	std::cout << "getExtention [" <<  Client._request.getFileStat().getExtension() << "]" << std::endl;
-//	std::cout << "getFull [" <<  Client._request.getFileStat().getFull() << "]" << std::endl;
 	int fd = open(Client._request.getFileStat().getFull().c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change?
 	if (fd == -1) {
 		throw Utils::ErrorPageException("404");
 	} else {
-		//		set location in response header
+		//		set location in response header ?is this still necessary?
 		Client._fileFD = reinterpret_cast<FileFD *>(
 			Server::addPollable(Client._server, fd, FILEPOLL, POLLOUT));
 		if (!Client.getBodyStr().empty()) {

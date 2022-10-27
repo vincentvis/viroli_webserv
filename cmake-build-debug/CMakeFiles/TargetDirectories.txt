@@ -1,0 +1,3 @@
+/Users/livlamin/Documents/Li/Post/cmake-build-debug/CMakeFiles/webserv.dir
+/Users/livlamin/Documents/Li/Post/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/livlamin/Documents/Li/Post/cmake-build-debug/CMakeFiles/rebuild_cache.dir
