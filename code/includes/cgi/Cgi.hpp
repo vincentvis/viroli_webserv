@@ -2,6 +2,7 @@
 
 #include "cgi/CgiVars.hpp"
 #include "cgi/Pipes.hpp"
+#include "ipollable/ClientFD.hpp"
 #include "utils/FileStat.hpp"
 #include <string.h>
 #include <unistd.h>
@@ -23,7 +24,7 @@ class Cgi {
 		char *const       *makeArgv() const;
 		Cgi                setEnv(std::string key, std::string value);
 		void               cleanup(void);
-		int                execute(void);
+		int                execute(ClientFD &Client);
 
 	protected:
 		FileStat                 _source;

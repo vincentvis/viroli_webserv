@@ -75,16 +75,23 @@ Cgi::~Cgi() {
 	cleanup();
 }
 
-int Cgi::execute(void) {
+int Cgi::execute(ClientFD &Client) {
 	pid_t pid = fork();
 
 
 	if (pid == -1) {
 		_status     = ERROR;
-		_statusCode = "500";
+		_statusCode = "502";
 		return (-1);
 	}
 
+	if (pid != 0) {
+		_pipes.closeForParent();
+		_pipes.setPipesNonBlock();
+		Client._fileFD = reinterpret_cast<FileFD *>(Server::addPollable(
+			Client._server, _pipes.toServer[READ_FD], FILEPOLL, POLLIN));
+		// Client._fileFD->setRequestInterface(this, &Client);
+	}
 	if (pid == 0) {
 		// child
 		_pipes.closeForChild();
@@ -98,13 +105,6 @@ int Cgi::execute(void) {
 		execve(_executable.c_str(), makeArgv(), _env.toCharPtrs());
 		exit(1);
 	}
-	_pipes.closeForParent();
-	_pipes.setPipesNonBlock();
-	char buff[10000];
-	int  x = read(_pipes.toServer[READ_FD], buff, 10000);
-	DEBUGSTART << "PID: " << pid << " parent.. " << DEBUGEND;
-	DEBUGSTART << "read: " << x << std::endl;
-	DEBUGSTART << "Buffer: [" << buff << "]" << std::endl;
 
 	return (0);
 }

@@ -30,7 +30,7 @@ void CGIRequest::GETRequest(ClientFD &Client) {
 	}
 
 	try {
-		cgi.execute();
+		cgi.execute(Client);
 	} catch (const Utils::ErrorPageException &e) {
 		Client._response.generateErrorResponse(&Client, e.what());
 		return;
