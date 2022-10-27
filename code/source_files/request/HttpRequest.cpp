@@ -55,7 +55,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	}
 	if (fd == -1) {
 		throw Utils::ErrorPageException(
-			"404"); // if change back to errorResponse do RETURN!
+			"404");
 	}
 	/* add fileFd to poll */
 	Client._fileFD = reinterpret_cast<FileFD *>(
@@ -65,7 +65,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
 	int fd = open(Client._request.getFileStat().getFull().c_str(),
-				  O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change?
+				  O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // do you agree?
 	if (fd == -1) {
 		throw Utils::ErrorPageException("404");
 	} else {
