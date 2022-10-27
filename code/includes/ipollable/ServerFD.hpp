@@ -10,15 +10,18 @@ class ServerFD : public IPollable {
 		int     _fd;
 		int     _index;
 		bool    _closed;
+		time_t  _tick;
 
 		ServerFD(Server *server, int fd, int index);
 		~ServerFD();
 
-		void    pollin();
-		void    pollout();
-		int     getFileDescriptor() const;
-		Server *getServer() const;
-		void    timeout();
-		bool    isClosed() const;
-		void    setIndex(int32_t index);
+		void          pollin();
+		void          pollout();
+		int           getFileDescriptor() const;
+		Server       *getServer() const;
+		void          timeout();
+		bool          isClosed() const;
+		void          setIndex(int32_t index);
+		void          updateTick();
+		const time_t &getTick() const;
 };

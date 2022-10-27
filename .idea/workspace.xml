@@ -21,7 +21,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e2292327-578d-405e-a0b9-eb2349ccdcd8" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/includes/ipollable/ClientFD.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/code/includes/ipollable/ClientFD.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/includes/ipollable/FileFD.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/code/includes/ipollable/FileFD.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/includes/ipollable/IPollable.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/code/includes/ipollable/IPollable.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/includes/ipollable/ServerFD.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/code/includes/ipollable/ServerFD.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/includes/server/Server.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/code/includes/server/Server.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/source_files/ipollable/ClientFD.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/code/source_files/ipollable/ClientFD.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/source_files/ipollable/FileFD.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/code/source_files/ipollable/FileFD.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/source_files/ipollable/ServerFD.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/code/source_files/ipollable/ServerFD.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/source_files/server/Server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/code/source_files/server/Server.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/website/config/default.config" beforeDir="false" afterPath="$PROJECT_DIR$/website/config/default.config" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
