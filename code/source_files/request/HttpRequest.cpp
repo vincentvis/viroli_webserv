@@ -94,28 +94,13 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
 
-	std::cout << "fileName [" <<  Client._request.getFileStat().getFilename() << "]" << std::endl;
-	std::cout << "pathName [" <<  Client._request.getFileStat().getPath() << "]" << std::endl;
-	std::cout << "getExtention [" <<  Client._request.getFileStat().getExtension() << "]" << std::endl;
-	std::cout << "getFull [" <<  Client._request.getFileStat().getFull() << "]" << std::endl;
-	//	200 turn into 201 if the file is valid
-	//		std::string uri = Client._location->getRoot();
-	//		if (uri.empty()) {
-	//			uri = Client._config->getRoot();
-	//		}
-	//		uri  = uri + Client._request.getUri();
-//	std::cout << "POSTRequest:: Client request body.size(): " << Client._request.getBody().size() << std::endl;
-	std::string path = Client._config->getRoot(Client._location);
-	std::string uri  = Client._request.getUri();
-	if (*path.rbegin() != '/' && (uri.empty() == false && uri.at(0) != '/')) {
-		path += "/";
-	}
-	path += uri;
-//	std::cout << path << std::endl;
-	int fd = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change
-
+//	std::cout << "fileName [" <<  Client._request.getFileStat().getFilename() << "]" << std::endl;
+//	std::cout << "pathName [" <<  Client._request.getFileStat().getPath() << "]" << std::endl;
+//	std::cout << "getExtention [" <<  Client._request.getFileStat().getExtension() << "]" << std::endl;
+//	std::cout << "getFull [" <<  Client._request.getFileStat().getFull() << "]" << std::endl;
+	int fd = open(Client._request.getFileStat().getFull().c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change?
 	if (fd == -1) {
-		Client._response.generateErrorResponse(&Client,  "404");
+		throw Utils::ErrorPageException("404"); //of Client._response.generateErrorResponse(&Client,  "404");
 	} else {
 		//		set location in response header
 		Client._fileFD = reinterpret_cast<FileFD *>(
@@ -134,7 +119,7 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 
 void HttpRequest::DELETERequest(ClientFD &Client) {
 	if (remove(Client._request.getFileStat().getFull().c_str()) != 0){
-		throw Utils::ErrorPageException("404"); // would you agree with 404?
+		throw Utils::ErrorPageException("404"); //of Client._response.generateErrorResponse(&Client,  "404"); // and would you agree with 404?
 	}
 	else {
 		Client._response.generateResponse(&Client, "200");
