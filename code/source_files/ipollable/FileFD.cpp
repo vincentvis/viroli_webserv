@@ -11,10 +11,10 @@ FileFD::~FileFD() {
 }
 
 void FileFD::pollin() {
-	DEBUGSTART << "POLLIN---- Reading from " << _fd << DEBUGEND;
 	updateTick();
 	_client->updateTick();
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
+	DEBUGSTART << "POLLIN---- Reading from " << _fd << ", data: " << _bytes << DEBUGEND;
 
 	/* error during read; close pollable; send error response */
 	if (_bytes == -1) {

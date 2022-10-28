@@ -4,6 +4,7 @@
 #include "cgi/Pipes.hpp"
 #include "ipollable/ClientFD.hpp"
 #include "utils/FileStat.hpp"
+#include <cstdlib>
 #include <string.h>
 #include <unistd.h>
 
@@ -17,7 +18,7 @@ class Cgi {
 		Cgi &operator=(const Cgi &other);
 		~Cgi();
 		void               setBody(std::string &body);
-		void               setQuery(std::string &body);
+		void               setQuery(std::string &query);
 
 		cgi_status         getStatus() const;
 		std::string const &getStatusCode() const;
@@ -32,7 +33,12 @@ class Cgi {
 		std::string              _executor_name;
 		std::string              _executable;
 		std::string              _script_name;
+		std::string              _query;
+
+		char                    *_buff;
 		Pipes                    _pipes;
+		int                      _fd;
+
 		CgiVars                  _env;
 		std::vector<std::string> _args;
 

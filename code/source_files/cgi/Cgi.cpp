@@ -11,8 +11,8 @@ Cgi::Cgi(FileStat filestats, std::string const &method, uint16_t port,
 	this->_executor_name = Executables::getExecutable(_source.getExtension());
 	this->_executable    = Executables::findExecutableInPath(this->_executor_name);
 
-	_args.push_back(this->_executable);
-	_args.push_back(_source.getFull());
+	// _args.push_back(this->_executable);
+	// _args.push_back(_source.getFull());
 
 	// REMOTE_ADDR omitted because no functions to handle this are allowed in the subject
 	_env.setVar("SCRIPT_NAME", _source.getFilename());
@@ -22,7 +22,18 @@ Cgi::Cgi(FileStat filestats, std::string const &method, uint16_t port,
 		servername = "http://" + servername;
 	}
 	_env.setVar("SERVER_NAME", servername);
-	_pipes.openPipes();
+
+	_buff = new char[32];
+	memcpy(_buff, "/tmp/viroli_cgi_file___XXXXXX\0", 30);
+	_fd = mkstemp(_buff); // should catch erro of this
+	std::cerr << "FD= " << _fd << ", _buff: " << _buff << std::endl;
+
+	// fcntl(_fd, F_SETFL, O_NONBLOCK); // should catch erro of this
+	std::cerr << "FD is nonblock now = " << fcntl(_fd, F_SETFL, O_NONBLOCK) << std::endl;
+
+	// int mkostemp(char *template, int flags);
+
+	// _pipes.openPipes();
 }
 
 Cgi::Cgi(const Cgi &other) : _source(other._source) {
@@ -38,7 +49,7 @@ Cgi &Cgi::operator=(const Cgi &other) {
 		this->_env           = other._env;
 		this->_args          = other._args;
 
-		this->_pipes.openPipes();
+		// this->_pipes.openPipes();
 	}
 	return (*this);
 }
@@ -56,33 +67,44 @@ int Cgi::execute(ClientFD &Client, CGIRequest *interface, enum request_type type
 
 	if (pid != 0) {
 		// _pipes.closeForParent();
-		DEBUGSTART << "Added " << _pipes.toServer[WRITE_FD] << " to pollable ot read from"
-				   << DEBUGEND;
-		Client._fileFD = reinterpret_cast<FileFD *>(Server::addPollable(
-			Client._server, _pipes.toServer[WRITE_FD], FILEPOLL, POLLIN));
-		_pipes.setPipesNonBlock();
+		// DEBUGSTART << "Added " << _pipes.toServer[WRITE_FD] << " to pollable ot read
+		// from"
+		// << DEBUGEND;
+		std::cout << _fd << " is added to pollable filefd\n";
+		Client._fileFD = reinterpret_cast<FileFD *>(
+			Server::addPollable(Client._server, _fd, FILEPOLL, POLLIN));
+		// _pipes.setPipesNonBlock();
 		Client._fileFD->setRequestInterface(interface, &Client);
 	}
 	if (pid == 0) {
 		// child
 		// _pipes.closeForChild();
-		if (type == POST) {
-			if (dup2(_pipes.toCgi[READ_FD], STDIN_FILENO) == SYS_ERR) {
-				exit(1);
-			}
-		}
-		if (dup2(_pipes.toServer[WRITE_FD], STDOUT_FILENO) == SYS_ERR) {
-			exit(1);
-		}
-		std::cout << "LOOOOOOOOOL\n";
-		execve(_executable.c_str(), makeArgv(), _env.toCharPtrs());
+		// if (type == POST) {
+		// 	if (dup2(_pipes.toCgi[READ_FD], STDIN_FILENO) == SYS_ERR) {
+		// 		exit(1);
+		// 	}
+		// }
+		// if (dup2(_pipes.toServer[WRITE_FD], STDOUT_FILENO) == SYS_ERR) {
+		// 	exit(1);
+		// }
+		(void)type;
+		// dup2(_fd, STDOUT_FILENO);
+		_args.push_back("/bin/bash");
+		_args.push_back("-c");
+		std::string bashable = std::string("> ") + _buff + " " + _executable + " " +
+							   _source.getFull() + " \"" + _query + "\"";
+		std::cerr << "Bashable: [" << bashable << "]" << std::endl;
+		_args.push_back(bashable);
+		execve("/bin/bash", makeArgv(), _env.toCharPtrs());
+		// execve(_executable.c_str(), makeArgv(), _env.toCharPtrs());
 		exit(1);
 	}
 	return (0);
 }
 
 Cgi Cgi::setQueryString(std::string queryString) {
-	_args.push_back(queryString);
+	_query = queryString;
+	// _args.push_back(queryString);
 	return (*this);
 }
 
@@ -105,6 +127,7 @@ char *const *Cgi::makeArgv() const {
 		it++;
 		i++;
 	}
+	argv[i] = NULL;
 	return (argv);
 }
 
