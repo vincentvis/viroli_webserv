@@ -17,6 +17,7 @@ const std::string delete_string("DELETE");
 const std::string continue_string("100-continue");
 const std::string on_string("on");
 const std::string off_string("off");
+const std::string default_executable("bash");
 const std::string date_string("Date");
 const std::string server_string("Server");
 const std::string serverType_string("VIROLI_Server/26.3.8");

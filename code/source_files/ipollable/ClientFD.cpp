@@ -4,7 +4,7 @@ ClientFD::ClientFD(Server *server, int fd, int index) :
 	_requestInterface(nullptr), _server(server), _state(HEADER), _buffer(BUFFERSIZE, 0),
 	_inbound(), _outbound(), _body(), _bytes(0), _left(0), _total(0), _fd(fd),
 	_index(index), _tick(), _closed(false) {
-	time(&_tick);
+	updateTick();
 }
 
 ClientFD::~ClientFD() {
@@ -20,6 +20,7 @@ void ClientFD::receive(size_t len) {
 	time(&_tick);
 	_bytes = recv(_fd, _buffer.data(), len, 0);
 
+	/* poll notified there is data ready, recv however returns EAGAIN (-1) */
 	if (_bytes == -1) {
 		throw(Utils::SocketReceiveException("Error on receive"));
 	} else if (_bytes == 0) {
@@ -117,7 +118,7 @@ void ClientFD::receiveHeader() {
 		this->_request.printAttributesInRequestClass();
 		this->_config   = this->_server->findConfig(this->_request);
 		this->_location = this->_config->findLocation(this->_request);
-		this->_request.ValidateRequest(this->_config);
+		this->_request.ValidateRequest(this->_config, this->_location);
 
 		/* truncate header */
 		_inbound = _inbound.substr(end + CRLF_LEN2);
@@ -197,14 +198,22 @@ void ClientFD::respond() {
 }
 
 void ClientFD::process() {
-	if (_state == HEADER) {
-		receiveHeader();
-	}
-	if (_state == BODY) {
-		receiveBody();
-	}
-	if (_state == RESPOND) {
-		respond();
+	try {
+		if (_state == HEADER) {
+			receiveHeader();
+		}
+		if (_state == BODY) {
+			receiveBody();
+		}
+		if (_state == RESPOND) {
+			respond();
+		}
+	} catch (const Utils::ErrorPageException &e) {
+		_state = ERROR;
+		this->_response.generateErrorResponse(this, e.what());
+	} catch (const std::exception &e) {
+		_state = ERROR;
+		this->_response.generateErrorResponse(this, "500");
 	}
 }
 
@@ -300,4 +309,12 @@ bool ClientFD::isClosed() const {
 
 void ClientFD::setIndex(int32_t index) {
 	_index = index;
+}
+
+void ClientFD::updateTick() {
+	time(&_tick);
+}
+
+const time_t &ClientFD::getTick() const {
+	return _tick;
 }

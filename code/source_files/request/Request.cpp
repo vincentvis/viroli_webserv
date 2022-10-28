@@ -70,10 +70,6 @@ void Request::ParseRequest(std::string BUF) {
 		}
 	}
 
-	/* set CGI for initialisation request interface */
-	if (this->_uri.find(".py") == this->_uri.length() - 3) // should be tested
-		this->_CGI = true;
-
 	/* set content length and chunked for body creation in connectionClass */
 	this->_itr = _header.find("Content-Length");
 	if (this->_itr != _header.end()) {
@@ -104,9 +100,7 @@ void Request::ParseRequest(std::string BUF) {
 	this->_headerAvailable = true;
 }
 
-bool Request::methodsAllowed(Config *Conf) {
-	Location                *Loc   = Conf->findLocation(*this);
-
+bool Request::methodsAllowed(Config *Conf, Location *Loc) {
 	std::vector<std::string> allow = Conf->getAllow(Loc);
 	return (std::find(allow.begin(), allow.end(), getMethod()) != allow.end());
 }
@@ -120,20 +114,27 @@ bool Request::checkValidMethod() {
 	return false;
 }
 
-void Request::ValidateRequest(Config *Conf) {
+void Request::ValidateRequest(Config *Conf, Location *Loc) {
 	/* check method */
 	if (checkValidMethod() == false) {
-		throw Utils::ErrorPageException(
-			"405"); // not sure if this is the right number; the method given by the
-					// client could be "DOG"
+		// not sure if this is the right number; the method given by the
+		// client could be "DOG"
+		throw Utils::ErrorPageException("405");
 	}
-	if (methodsAllowed(Conf) == false) {
+	if (methodsAllowed(Conf, Loc) == false) {
 		throw Utils::ErrorPageException("405");
 	};
 
 	/* check if HTTP version is 1.1 */
-	if (this->_HTTPVersion != std::string("HTTP/1.1"))
+	if (this->_HTTPVersion != std::string("HTTP/1.1")) {
 		throw Utils::ErrorPageException("505");
+	}
+
+	_filestats = FileStat(Conf->getRoot(Loc), this->_uri);
+	/* set CGI for initialisation request interface */
+	if (Executables::isCgiRequest(this->_filestats)) {
+		this->_CGI = true;
+	}
 }
 
 void Request::setBody(std::string NewBody) {
@@ -205,6 +206,14 @@ bool Request::uriIsDir() const {
 		return (true);
 	}
 	return (false);
+}
+
+FileStat const &Request::getFileStat() const {
+	return this->_filestats;
+}
+
+FileStat Request::getFileStatCopy() const {
+	return this->_filestats;
 }
 
 void Request::clean() {

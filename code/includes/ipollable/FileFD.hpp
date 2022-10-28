@@ -40,4 +40,5 @@ class FileFD : public IPollable {
 		ClientFD         *_client;
 		bool              isClosed() const;
 		void              setIndex(int32_t index);
+		void              updateTick();
 };
