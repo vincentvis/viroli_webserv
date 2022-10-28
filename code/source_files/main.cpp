@@ -65,7 +65,7 @@ int main(int argc, char const *argv[]) {
 	try {
 		Server::run();
 	} catch (const Utils::SystemCallFailedException &e) {
-		std::cerr << e.what();
+		std::cerr << e.what() << std::endl;
 		return (EXIT_FAILURE);
 	}
 	return (EXIT_SUCCESS);

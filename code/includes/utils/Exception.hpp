@@ -24,6 +24,12 @@ struct SystemCallFailedException : std::runtime_error {
 		}
 };
 
+struct SystemCallFailedExceptionNoErrno : std::runtime_error {
+		SystemCallFailedExceptionNoErrno(const std::string &call) :
+			std::runtime_error("System call '" + call) {
+		}
+};
+
 struct SocketAcceptException : std::runtime_error {
 		SocketAcceptException(const std::string &msg) : std::runtime_error(msg){};
 };

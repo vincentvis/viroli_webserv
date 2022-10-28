@@ -20,7 +20,7 @@ void ClientFD::receive(size_t len) {
 	_bytes = recv(_fd, _buffer.data(), len, 0);
 
 	if (_bytes == -1) {
-		throw(Utils::SystemCallFailedException(__PRETTY_FUNCTION__));
+		throw(Utils::SystemCallFailedExceptionNoErrno("ClientFD::pollout::recv"));
 	} else if (_bytes == 0) {
 		setClosed();
 	} else if (_bytes > 0) {
@@ -228,7 +228,7 @@ void ClientFD::pollin() {
 		_state = ERROR;
 		std::cerr << e.what() << std::endl;
 		this->_response.generateErrorResponse(this, e.what());
-	} catch (const Utils::SystemCallFailedException &e) {
+	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
 		std::cerr << e.what() << std::endl;
 		setClosed();
 	}
@@ -244,7 +244,7 @@ void ClientFD::pollout() {
 		_bytes = send(_fd, _buffer.data(), getRemainderBytes(), 0);
 
 		if (_bytes == -1) {
-			throw(Utils::SystemCallFailedException(__PRETTY_FUNCTION__));
+			throw(Utils::SystemCallFailedExceptionNoErrno("ClientFD::pollout::send"));
 		} else if (_bytes >= 0) {
 			_total += _bytes;
 			_left -= _bytes;
@@ -279,7 +279,7 @@ void ClientFD::pollout() {
 				cleanClientFD();
 			}
 		}
-	} catch (const Utils::SystemCallFailedException &e) {
+	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
 		std::cerr << e.what() << std::endl;
 		setClosed();
 	}

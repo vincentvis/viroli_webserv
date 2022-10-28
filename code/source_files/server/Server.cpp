@@ -55,25 +55,25 @@ Server::Server(uint16_t port, std::vector<Config *> configs) :
 	int opt                = 1;
 
 	if ((_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-		throw(Utils::SystemCallFailedException(__PRETTY_FUNCTION__));
+		throw(Utils::SystemCallFailedException("Server::Server::socket"));
 	}
 	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
 		close(_fd);
-		throw(Utils::SystemCallFailedException(__PRETTY_FUNCTION__));
+		throw(Utils::SystemCallFailedException("Server::Server::setsockopt"));
 	}
 	if (fcntl(_fd, F_SETFL, O_NONBLOCK) < 0) {
 		close(_fd);
-		throw(Utils::SystemCallFailedException(__PRETTY_FUNCTION__));
+		throw(Utils::SystemCallFailedException("Server::Server::fcntl"));
 	}
 	if (bind(_fd, reinterpret_cast<sockaddr *>(&server),
 			 static_cast<socklen_t>(sizeof(server))) < 0)
 	{
 		close(_fd);
-		throw(Utils::SystemCallFailedException(__PRETTY_FUNCTION__));
+		throw(Utils::SystemCallFailedException("Server::Server::bind"));
 	}
 	if (listen(_fd, SOMAXCONN) < 0) {
 		close(_fd);
-		throw(Utils::SystemCallFailedException(__PRETTY_FUNCTION__));
+		throw(Utils::SystemCallFailedException("Server::Server::listen"));
 	}
 }
 
@@ -119,7 +119,7 @@ void Server::run() {
 			if (errno == EAGAIN) {
 				continue;
 			} else {
-				throw(Utils::SystemCallFailedException(__PRETTY_FUNCTION__));
+				throw(Utils::SystemCallFailedException("Server::run::poll"));
 			}
 		}
 
