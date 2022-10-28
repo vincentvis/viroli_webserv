@@ -17,7 +17,6 @@ void ClientFD::resetBytes() {
 }
 
 void ClientFD::receive(size_t len) {
-	updateTick();
 	_bytes = recv(_fd, _buffer.data(), len, 0);
 
 	if (_bytes == -1) {
@@ -220,6 +219,8 @@ void ClientFD::process() {
 
 /* receive data */
 void ClientFD::pollin() {
+	updateTick();
+
 	try {
 		receive(BUFFERSIZE);
 		process();
@@ -235,8 +236,9 @@ void ClientFD::pollin() {
 
 /* send data */
 void ClientFD::pollout() {
+	updateTick();
+
 	try {
-		updateTick();
 		_buffer.assign(_outbound.begin() + _total,
 					   _outbound.begin() + _total + getRemainderBytes());
 		_bytes = send(_fd, _buffer.data(), getRemainderBytes(), 0);
