@@ -12,7 +12,7 @@ class PollableFactory {
 	public:
 		typedef IPollable *(PollableFactory::*MemFunP)(Server *serv, int fd, int event);
 		static PollableFactory &getInstance();
-		IPollable              *createPollable(Server *serv, int fd, int type, int event);
+		IPollable *createPollable(Server *serv, int fd, PollableType type, int event);
 
 	private:
 		PollableFactory();

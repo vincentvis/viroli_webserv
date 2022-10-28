@@ -27,7 +27,8 @@ IPollable *PollableFactory::createFileFD(Server *serv, int fd, int event) {
 	return pollable;
 }
 
-IPollable *PollableFactory::createPollable(Server *serv, int fd, int type, int event) {
+IPollable *PollableFactory::createPollable(Server *serv, int fd, PollableType type,
+										   int event) {
 	assert((type == CLIENTPOLL || type == SERVERPOLL || type == FILEPOLL)); // tmp
 	assert((event == POLLIN || event == POLLOUT));                          // tmp
 

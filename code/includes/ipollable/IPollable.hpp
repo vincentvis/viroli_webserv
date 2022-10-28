@@ -3,10 +3,7 @@
 #include "utils/Defines.hpp"
 #include <ctime>
 
-
 enum { INVALID_FD = -1 };
-
-enum PollalbeType { SERVERPOLL, CLIENTPOLL, FILEPOLL };
 
 class Server;
 
