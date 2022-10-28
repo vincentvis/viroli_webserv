@@ -4,6 +4,7 @@
 #include "ipollable/ClientFD.hpp"
 #include "request/RequestInterface.hpp"
 #include "utils/Defines.hpp"
+#include <cerrno>
 #include <cstdio>
 #include <iostream>
 

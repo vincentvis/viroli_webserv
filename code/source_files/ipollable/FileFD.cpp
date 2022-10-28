@@ -71,7 +71,7 @@ void FileFD::pollout() {
 	}
 }
 
-int FileFD::getFileDescriptor() const {
+int FileFD::getFD() const {
 	return _fd;
 }
 
@@ -91,6 +91,10 @@ void FileFD::timeout() {
 
 bool FileFD::isClosed() const {
 	return _closed;
+}
+
+void FileFD::setClosed() {
+	_closed = true;
 }
 
 void FileFD::setIndex(int32_t index) {

@@ -57,19 +57,23 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		throw Utils::ErrorPageException("404");
 	}
 	/* add fileFd to poll */
-	Client._fileFD = reinterpret_cast<FileFD *>(
-		Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
+	Client._fileFD =
+		reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
+			Client._server, fd, FILEPOLL, POLLIN));
 	Client._fileFD->setRequestInterface(this, &Client);
 }
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
-	int fd = open(Client._request.getFileStat().getFull().c_str(),
-				  O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // do you agree?
+	std::string path = Client._request.getFileStat().getFull();
+	int         fd = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change
+
 	if (fd == -1) {
 		throw Utils::ErrorPageException("404");
 	} else {
-		Client._fileFD = reinterpret_cast<FileFD *>(
-			Server::addPollable(Client._server, fd, FILEPOLL, POLLOUT));
+		/* add fileFd to poll */
+		Client._fileFD =
+			reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
+				Client._server, fd, FILEPOLL, POLLOUT));
 		if (!Client.getBodyStr().empty()) {
 			Client._fileFD->setData(Client._request.getBody());
 		}
@@ -77,19 +81,21 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 	}
 }
 
-// If a DELETE method is successfully applied, the origin server SHOULD send
-// a 202 (Accepted) status code if the action will likely succeed but has not yet been
-// enacted,
-//	a 204 (No Content) status code if the action has been enacted and no further
-// information is to be supplied, or 	a 200 (OK) status code if the action has been
-// enacted and the response message includes a representation describing the status.
 void HttpRequest::DELETERequest(ClientFD &Client) {
+	int r = 0;
+	errno = 0;
 	if (Client._request.getFileStat().isReg() &&
-		remove(Client._request.getFileStat().getFull().c_str()) == 0)
+		(r = remove(Client._request.getFileStat().getFull().c_str())) == 0)
 	{
-		Client._response.generateResponse(&Client, "200");
+		Client._response.generateResponse(&Client, "204");
 	} else {
-		throw Utils::ErrorPageException("204");
+		if (r == -1){
+			if (errno == EACCES || errno == ECANCELED || errno == EFAULT || errno == EINVAL || errno == ENOENT || errno == EPERM || errno == EROFS || errno == EPERM){
+				throw Utils::ErrorPageException("406");
+			}
+		}
+		else
+			throw Utils::ErrorPageException("404");
 	}
 }
 
