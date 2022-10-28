@@ -179,6 +179,7 @@ void ClientFD::cleanClientFD() {
 	_config           = nullptr;
 	_location         = nullptr;
 	_fileFD           = nullptr;
+	_cgiFD            = nullptr;
 	_state            = HEADER;
 	_inbound.clear();
 	_outbound.clear();

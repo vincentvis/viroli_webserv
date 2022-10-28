@@ -11,6 +11,7 @@
 #include <vector>
 
 class FileFD;
+class CgiFD;
 // class Response;
 class RequestInterface;
 
@@ -24,6 +25,7 @@ class ClientFD : public IPollable {
 		Location         *_location;
 		Server           *_server;
 		FileFD           *_fileFD;
+		CgiFD            *_cgiFD;
 		Response          _response;
 		State             _state;
 		std::vector<char> _buffer;

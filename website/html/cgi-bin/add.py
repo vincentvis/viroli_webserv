@@ -3,11 +3,11 @@ import os
 import sys
 
 cgitb.enable()
-input_data = cgi.FieldStorage()
 
 print("Content-Type: text/html") # HTML is following
-print("")                         # Leave a blank line
+print()                          # Leave a blank line
 
+input_data = cgi.FieldStorage()
 
 print("""<!DOCTYPE html>
 <html lang="en">

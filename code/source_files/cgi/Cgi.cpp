@@ -73,31 +73,17 @@ int Cgi::execute(ClientFD &Client, CGIRequest *interface, enum request_type type
 	}
 
 	if (pid != 0) {
-		// _pipes.closeForParent();
-		// DEBUGSTART << "Added " << _pipes.toServer[WRITE_FD] << " to pollable ot read
-		// from"
-		// << DEBUGEND;
-		std::cout << _fd << " is added to pollable filefd\n";
-		Client._fileFD = reinterpret_cast<FileFD *>(
-			Server::addPollable(Client._server, _fd, FILEPOLL, POLLIN));
-		// _pipes.setPipesNonBlock();
-		Client._fileFD->setRequestInterface(interface, &Client);
+		Client._cgiFD =
+			reinterpret_cast<CgiFD *>(PollableFactory::getInstance().createPollable(
+				Client._server, _fd, CGIPOLL, POLLIN));
+		Client._cgiFD->setRequestInterface(interface, &Client);
 	}
 	if (pid == 0) {
-		// child
-		// _pipes.closeForChild();
-		// if (type == POST) {
-		// 	if (dup2(_pipes.toCgi[READ_FD], STDIN_FILENO) == SYS_ERR) {
-		// 		exit(1);
-		// 	}
-		// }
-		// if (dup2(_pipes.toServer[WRITE_FD], STDOUT_FILENO) == SYS_ERR) {
-		// 	exit(1);
-		// }
 		(void)type;
-		// dup2(_fd, STDOUT_FILENO);
+		std::cerr << "change child working dir to \"" << _source.getPath() << "\""
+				  << std::endl;
 		chdir(_source.getPath().c_str());
-		std::cerr << "Bashable: [" << _bash_string << "]" << std::endl;
+		std::cerr << "running: [" << _bash_string << "]" << std::endl;
 		_args.push_back(_bash_string);
 		execve("/bin/bash", makeArgv(), _env.toCharPtrs());
 		// execve(_executable.c_str(), makeArgv(), _env.toCharPtrs());

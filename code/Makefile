@@ -38,6 +38,7 @@ CLASSES		:= \
 				config/ConfigParser\
 				ipollable/ClientFD\
 				ipollable/FileFD\
+				ipollable/CgiFD\
 				ipollable/IPollable\
 				ipollable/PollableFactory\
 				ipollable/ServerFD\
