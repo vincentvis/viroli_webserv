@@ -4,7 +4,7 @@
 #include "ipollable/ClientFD.hpp"
 #include "request/RequestInterface.hpp"
 #include "utils/Defines.hpp"
-#include <stdio.h>
+#include <cstdio>
 #include <iostream>
 
 class HttpRequest : public RequestInterface {
