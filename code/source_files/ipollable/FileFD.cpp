@@ -94,7 +94,7 @@ void FileFD::timeout() {
 	time_t timeout;
 
 	time(&timeout);
-	if (difftime(timeout, _tick) > 10) {
+	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
 		std::cerr << "Timeout\n";
 		setClosed();
 	}
