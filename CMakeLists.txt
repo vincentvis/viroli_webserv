@@ -19,6 +19,8 @@ add_executable(webserv
         code/source_files/config/ConfigParser.cpp
         code/includes/server/Location.hpp
         code/source_files/server/Location.cpp
+        code/includes/ipollable/PollableFactory.hpp
+        code/source_files/ipollable/PollableFactory.cpp
         code/includes/ipollable/IPollable.hpp
         code/source_files/ipollable/IPollable.cpp
         code/source_files/ipollable/FileFD.cpp

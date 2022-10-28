@@ -1,11 +1,8 @@
 
-#include "autoindex/Autoindex.hpp"
 #include "config/ConfigParser.hpp"
-// #include "ipollable/IPollable.hpp"
 #include "server/Server.hpp"
 #include "utils/Utils.hpp"
 
-#include "utils/FileStat.hpp"
 #include <iostream>
 #include <string>
 
@@ -22,9 +19,8 @@ int main(int argc, char const *argv[]) {
 		return (1);
 	}
 
-	Server *serv;
+	Server                                              *serv;
 
-	//
 	std::map<uint16_t, std::vector<Config *> >           ports = config.getPortMap();
 	std::map<uint16_t, std::vector<Config *> >::iterator it    = ports.begin();
 	std::map<uint16_t, std::vector<Config *> >::iterator end   = ports.end();

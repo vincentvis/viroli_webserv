@@ -16,15 +16,10 @@ HttpRequest::HttpRequest(ClientFD &Client) {
 }
 
 void HttpRequest::GETRequest(ClientFD &Client) {
-	std::string path = Client._config->getRoot(Client._location);
-	std::string uri  = Client._request.getUri();
-	if (*path.rbegin() != '/' && (uri.empty() == false && uri.at(0) != '/')) {
-		path += "/";
-	}
-	path += uri;
-	int fd;
+	std::string path = Client._request.getFileStat().getFull();
+	int         fd;
 
-	if (Client._request.uriIsDir()) {
+	if (Client._request.getFileStat().isDir()) {
 		if (Client._config->getAutoIndex(Client._location) == "on") {
 			try {
 				Autoindex autoindex(path);
@@ -32,23 +27,15 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 				Client._response.generateResponse(&Client, autoindex.getHtml(), "200");
 				return;
 			} catch (const Utils::AutoindexException &e) {
-				Client._response.generateErrorResponse(&Client, "404");
-				return;
+				throw Utils::ErrorPageException("404");
 			} catch (const std::exception &e) {
-				// all other exceptions?
-				// but what to do?
-				// internal server error for now
-				Client._response.generateErrorResponse(&Client, "500");
-				return;
+				throw Utils::ErrorPageException("500"); // internal server error?
 			}
 		}
 		std::vector<std::string> indexes = Client._config->getIndex(Client._location);
 		std::vector<std::string>::const_iterator it  = indexes.begin();
 		std::vector<std::string>::const_iterator end = indexes.end();
 		std::string                              tmp;
-		if (*path.rbegin() != '/') {
-			path += "/";
-		}
 		fd = -1;
 		while (it != end) {
 			tmp = path + *it;
@@ -65,41 +52,24 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		fd = open(path.c_str(), O_RDONLY);
 	}
 	if (fd == -1) {
-		Client._response.generateErrorResponse(&Client, "404");
-		return;
+		throw Utils::ErrorPageException("404");
 	}
 	/* add fileFd to poll */
 	Client._fileFD =
 		reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
 			Client._server, fd, FILEPOLL, POLLIN));
-	//	if (!Client.getBodyStr().empty()){
-	//		Client._fileFD->setData(Client.getBodyStr());
-	//	}
 	Client._fileFD->setRequestInterface(this, &Client);
 }
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
-	//	200 turn into 201 if the file is valid
-	//		std::string uri = Client._location->getRoot();
-	//		if (uri.empty()) {
-	//			uri = Client._config->getRoot();
-	//		}
-	//		uri  = uri + Client._request.getUri();
-	//	std::cout << "POSTRequest:: Client request body.size(): " <<
-	// Client._request.getBody().size() << std::endl;
-	std::string path = Client._config->getRoot(Client._location);
-	std::string uri  = Client._request.getUri();
-	if (*path.rbegin() != '/' && (uri.empty() == false && uri.at(0) != '/')) {
-		path += "/";
-	}
-	path += uri;
-	//	std::cout << path << std::endl;
-	int fd = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change
+	std::string path = Client._request.getFileStat().getFull();
+	int         fd   = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY,
+							S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 	if (fd == -1) {
-		Client._response.generateErrorResponse(&Client, "404");
+		throw Utils::ErrorPageException("404");
 	} else {
-		//		set location in response header
+		/* add fileFd to poll */
 		Client._fileFD =
 			reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
 				Client._server, fd, FILEPOLL, POLLOUT));
@@ -111,12 +81,23 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 }
 
 void HttpRequest::DELETERequest(ClientFD &Client) {
-	(void)Client;
-	COUT_DEBUGMSG << "DELETE REQUEST UNDER CONSTRUCTION" << std::endl;
-	//	Client._response.setContentType("text/plain");
-	//	Client._response.initResponse("200", Client._config, Client._request);
-	//	Client._response.createResponse();
-	//	Client.sendResponse(Client._index);
+	int r = 0;
+	errno = 0;
+	if (Client._request.getFileStat().isReg() &&
+		(r = remove(Client._request.getFileStat().getFull().c_str())) == 0)
+	{
+		Client._response.generateResponse(&Client, "204");
+	} else {
+		if (r == -1) {
+			if (errno == EACCES || errno == ECANCELED || errno == EFAULT ||
+				errno == EINVAL || errno == ENOENT || errno == EPERM || errno == EROFS ||
+				errno == EPERM)
+			{
+				throw Utils::ErrorPageException("406");
+			}
+		} else
+			throw Utils::ErrorPageException("404");
+	}
 }
 
 HttpRequest::~HttpRequest() {

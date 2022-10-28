@@ -62,16 +62,19 @@ void Response::setBasicHeaders(ClientFD *Client) {
 		addHeaderIfNotSet(Utils::contentType_string,
 						  MimeTypes::findMimeType(Client->_request.getUri()));
 	}
+
 	/* add connection */
 	if (Client->_request.getConnectionAvailable() == false) {
 		addHeaderIfNotSet(Utils::connection_string, Client->_request.getConnectionInfo());
 	} else {
 		addHeaderIfNotSet(Utils::connection_string, "Keep-Alive");
 	}
+
 	/* add content length */
 	if (Client->_request.getMethod() == Utils::get_string) {
 		addHeaderIfNotSet(Utils::contentLength_string, this->_messageBody.length());
 	}
+
 	/* add location */
 	if (Client->_request.getMethod() == Utils::post_string)
 	{ // do you agree we only set location with post?
@@ -183,9 +186,6 @@ void Response::clean() {
 	this->_responseString.clear();
 	this->_messageBody.clear();
 	this->_statusCode.clear();
-	//	how to clear these and is it necessary?
-	//	std::map<std::string, std::string>::iterator _it;
-	//	std::map<std::string, std::string>::iterator _end;
 }
 
 Response::~Response() {
