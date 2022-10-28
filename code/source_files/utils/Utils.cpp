@@ -101,4 +101,28 @@ std::string getExtensionFromString(const std::string &source) {
 	return ext;
 }
 
+std::string strToLower(std::string original) {
+	int i = 0;
+	while (original[i]) {
+		original[i] = tolower(original[i]);
+		i++;
+	}
+	return original;
+}
+
+/* check if string contains solely letters, digits or a '-' */
+bool validateFieldName(const std::string &original) {
+	int i = 0;
+	if (!isalpha(original[i])) {
+		return false;
+	}
+	while (original[i]) {
+		if (!isdigit(original[i]) && !isalpha(original[i]) && original[i] != '-') {
+			return false;
+		}
+		i++;
+	}
+	return true;
+}
+
 } // namespace Utils

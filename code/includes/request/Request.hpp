@@ -41,6 +41,7 @@ class Request {
 		void printAttributesInRequestClass(); // !used for testing; REMOVE later
 		void ParseRequest(std::string BUF);
 		void ValidateRequest(Config *Conf, Location *Loc);
+		bool validateHeaderMap();
 		bool methodsAllowed(Config *Conf, Location *Loc);
 
 		void setBody(std::string NewBody);

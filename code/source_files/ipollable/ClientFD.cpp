@@ -192,7 +192,6 @@ void ClientFD::respond() {
 	if (_request.getMethod() == Utils::post_string && !_body.empty()) {
 		_request.setBody(_body);
 	}
-
 	/* when no body is present in POST request send 100-continue response */
 	if (_request.getMethod() == Utils::post_string &&
 		_request.getExpect() == Utils::continue_string && _inbound.empty())
