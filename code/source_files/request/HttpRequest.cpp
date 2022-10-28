@@ -69,8 +69,9 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		return;
 	}
 	/* add fileFd to poll */
-	Client._fileFD = reinterpret_cast<FileFD *>(
-		Server::addPollable(Client._server, fd, FILEPOLL, POLLIN));
+	Client._fileFD =
+		reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
+			Client._server, fd, FILEPOLL, POLLIN));
 	//	if (!Client.getBodyStr().empty()){
 	//		Client._fileFD->setData(Client.getBodyStr());
 	//	}
@@ -99,8 +100,9 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 		Client._response.generateErrorResponse(&Client, "404");
 	} else {
 		//		set location in response header
-		Client._fileFD = reinterpret_cast<FileFD *>(
-			Server::addPollable(Client._server, fd, FILEPOLL, POLLOUT));
+		Client._fileFD =
+			reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
+				Client._server, fd, FILEPOLL, POLLOUT));
 		if (!Client.getBodyStr().empty()) {
 			Client._fileFD->setData(Client._request.getBody());
 		}

@@ -15,6 +15,8 @@
 #define DEBUGSTART std::cerr << "\033[32;4m"
 #define DEBUGEND   "\033[0m\n"
 
+enum PollableType { SERVERPOLL, CLIENTPOLL, FILEPOLL };
+
 namespace Utils {
 
 const std::string default_config_file("../website/config/default.config");

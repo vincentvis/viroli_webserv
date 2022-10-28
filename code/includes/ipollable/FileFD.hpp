@@ -28,7 +28,7 @@ class FileFD : public IPollable {
 
 		void              pollin();
 		void              pollout();
-		int               getFileDescriptor() const;
+		int               getFD() const;
 		void              readFile();
 		void              writeFile();
 		void              setData(std::string data);
@@ -39,6 +39,7 @@ class FileFD : public IPollable {
 		RequestInterface *_requestInterface;
 		ClientFD         *_client;
 		bool              isClosed() const;
+		void              setClosed();
 		void              setIndex(int32_t index);
 		void              updateTick();
 };
