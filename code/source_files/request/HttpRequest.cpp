@@ -64,6 +64,9 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 }
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
+    if (Client._request.getContentLength() == 0){
+        throw(Utils::ErrorPageException("404"));
+    }
 	int fd = open(Client._request.getFileStat().getFull().c_str(),
 				  O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // do you agree?
 	if (fd == -1) {
