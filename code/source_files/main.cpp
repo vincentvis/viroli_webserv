@@ -67,6 +67,9 @@ int main(int argc, char const *argv[]) {
 	} catch (const Utils::SystemCallFailedException &e) {
 		std::cerr << e.what() << std::endl;
 		return (EXIT_FAILURE);
+	} catch (const std::exception &e) {
+		std::cerr << e.what() << std::endl;
+		return (EXIT_FAILURE);
 	}
 	return (EXIT_SUCCESS);
 }
