@@ -3,14 +3,15 @@
 FileFD::FileFD(Server *server, int fd, int index) :
 	_state(PROCESS), _server(server), _buffer(BUFFERSIZE, 0), _data(), _bytes(0),
 	_left(0), _total(0), _fd(fd), _index(index), _tick(), _closed(false) {
-	time(&_tick);
+	updateTick();
 }
 
 FileFD::~FileFD() {
 }
 
 void FileFD::pollin() {
-	time(&_tick);
+	updateTick();
+	_client->updateTick();
 	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
 
 	/* error during read; close pollable; send error response */
@@ -45,7 +46,8 @@ void FileFD::setData(std::string data) {
 
 void FileFD::pollout() {
 	std::cout << __PRETTY_FUNCTION__ << std::endl;
-	time(&_tick);
+	updateTick();
+	_client->updateTick();
 
 	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
 	_bytes = write(_fd, _buffer.data(), getRemainderBytes());
@@ -64,7 +66,7 @@ void FileFD::pollout() {
 	/* done writing; close pollable; send response */
 	if (_left == 0) {
 		_closed = true;
-		_client->_response.generateResponse(_client,  "201");
+		_client->_response.generateResponse(_client, "201");
 		// file made, ready for response
 	}
 }
@@ -81,7 +83,7 @@ void FileFD::timeout() {
 	time_t timeout;
 
 	time(&timeout);
-	if (difftime(timeout, _tick) > 10) {
+	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
 		std::cout << "TIMEOUT\n"; // will have to send a response
 		_closed = true;           // this must be removed?
 	}
@@ -97,4 +99,8 @@ void FileFD::setClosed() {
 
 void FileFD::setIndex(int32_t index) {
 	_index = index;
+}
+
+void FileFD::updateTick() {
+	time(&_tick);
 }

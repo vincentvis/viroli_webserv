@@ -6,6 +6,8 @@
 
 enum { INVALID_FD = -1 };
 
+enum PollalbeType { SERVERPOLL, CLIENTPOLL, FILEPOLL };
+
 class Server;
 
 class IPollable {
@@ -20,4 +22,5 @@ class IPollable {
 		virtual int     getFD() const           = 0;
 		virtual Server *getServer() const       = 0;
 		virtual void    setIndex(int32_t index) = 0;
+		virtual void    updateTick()            = 0;
 };

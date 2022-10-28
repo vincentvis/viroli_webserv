@@ -2,6 +2,7 @@
 
 ServerFD::ServerFD(Server *server, int fd, int index) :
 	_server(server), _fd(fd), _index(index), _closed(false) {
+	updateTick();
 }
 
 ServerFD::~ServerFD() {
@@ -9,10 +10,11 @@ ServerFD::~ServerFD() {
 
 /* accept new ClientFD */
 void ServerFD::pollin() {
-	int newfd = 0;
-	int opt   = 1;
-	// struct sockaddr_in client = {0, 0, 0, {0}, {0}};
+	int                newfd = 0;
+	int                opt   = 1;
 	struct sockaddr_in client;
+
+	updateTick();
 	memset(&client, 0, sizeof(client));
 	socklen_t addrlen = sizeof(client);
 
@@ -32,7 +34,6 @@ void ServerFD::pollin() {
 	PollableFactory::getInstance().createPollable(_server, newfd, CLIENTPOLL, POLLIN);
 }
 
-/* do nothing on POLLOUT event */
 void ServerFD::pollout() {
 }
 
@@ -57,4 +58,12 @@ void ServerFD::setClosed() {
 
 void ServerFD::setIndex(int32_t index) {
 	_index = index;
+}
+
+void ServerFD::updateTick() {
+	time(&_tick);
+}
+
+const time_t &ServerFD::getTick() const {
+	return _tick;
 }

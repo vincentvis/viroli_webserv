@@ -9,6 +9,7 @@
 #include "utils/Utils.hpp"
 
 #include <arpa/inet.h>
+#include <csignal>
 #include <cstring>
 #include <ctime>
 #include <fcntl.h>
@@ -24,9 +25,8 @@
 #include <unistd.h>
 #include <utility>
 #include <vector>
-#include <csignal>
 
-#define BUFFERSIZE     10000 // tmp
+#define BUFFERSIZE 10000 // tmp
 
 class IPollable;
 
@@ -43,10 +43,10 @@ class Server {
 		friend class ConfigParser;
 
 
-		uint16_t    getPort() const;
-		int32_t     getFD() const;
-		static void run();
-		static void removePollable(int index);
+		uint16_t                          getPort() const;
+		int32_t                           getFD() const;
+		static void                       run();
+		static void                       removePollable(int index);
 
 		static std::vector<IPollable *>   _pollables;
 		static std::vector<struct pollfd> _pfds;

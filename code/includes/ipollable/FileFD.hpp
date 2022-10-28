@@ -41,4 +41,5 @@ class FileFD : public IPollable {
 		bool              isClosed() const;
 		void              setClosed();
 		void              setIndex(int32_t index);
+		void              updateTick();
 };
