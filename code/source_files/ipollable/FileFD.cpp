@@ -12,21 +12,28 @@ FileFD::~FileFD() {
 void FileFD::pollin() {
 	updateTick();
 	_client->updateTick();
-	_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
 
-	/* error during read; close pollable; send error response */
-	if (_bytes == -1) {
-		_closed = true;
+	try {
+		_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
+
+		/* error during read; close pollable; send error response */
+		if (_bytes == -1) {
+			throw(Utils::SystemCallFailedExceptionNoErrno("FileFD::pollin::read"));
+
+			/* done reading; close pollable; send response with data */
+		} else if (_bytes == 0) {
+			setClosed();
+			_client->_response.generateResponse(_client, _data, "200");
+
+			/* append buffer to data */
+		} else if (_bytes > 0) {
+			_total += _bytes;
+			_data.append(_buffer.begin(), _buffer.begin() + _bytes);
+		}
+	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
+		std::cerr << e.what() << std::endl;
+		setClosed();
 		_client->_response.generateErrorResponse(_client, "500");
-		_state = READY;
-	} else if (_bytes == 0) {
-		_closed = true;
-		_client->_response.generateResponse(_client, _data, "200");
-		_state = READY;
-		// body ready initialize it with response
-	} else if (_bytes > 0) {
-		_total += _bytes;
-		_data.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
 }
 
@@ -45,33 +52,37 @@ void FileFD::setData(std::string data) {
 }
 
 void FileFD::pollout() {
-	std::cout << __PRETTY_FUNCTION__ << std::endl;
 	updateTick();
 	_client->updateTick();
 
-	_buffer.assign(_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
-	_bytes = write(_fd, _buffer.data(), getRemainderBytes());
+	try {
+		_buffer.assign(_data.begin() + _total,
+					   _data.begin() + _total + getRemainderBytes());
+		_bytes = write(_fd, _buffer.data(), getRemainderBytes());
 
-	/* error during write; close pollable; send error response */
-	if (_bytes == -1) {
-		_closed = true;
+		/* error during write; close pollable; send error response */
+		if (_bytes == -1) {
+			throw(Utils::SystemCallFailedExceptionNoErrno("FileFD::pollout::write"));
+
+			/* move to next segment to write in next iteratation */
+		} else if (_bytes >= 0) {
+			_total += _bytes;
+			_left -= _bytes;
+		}
+
+		/* done writing; close pollable; send response */
+		if (_left == 0) {
+			setClosed();
+			_client->_response.generateResponse(_client, "201");
+		}
+	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
+		std::cerr << e.what() << std::endl;
+		setClosed();
 		_client->_response.generateErrorResponse(_client, "500");
-
-		/* move to next segment to write in next iteratation */
-	} else if (_bytes >= 0) {
-		_total += _bytes;
-		_left -= _bytes;
-	}
-
-	/* done writing; close pollable; send response */
-	if (_left == 0) {
-		_closed = true;
-		_client->_response.generateResponse(_client, "201");
-		// file made, ready for response
 	}
 }
 
-int FileFD::getFileDescriptor() const {
+int FileFD::getFD() const {
 	return _fd;
 }
 
@@ -84,13 +95,17 @@ void FileFD::timeout() {
 
 	time(&timeout);
 	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
-		std::cout << "TIMEOUT\n"; // will have to send a response
-		_closed = true;           // this must be removed?
+		std::cerr << "Timeout\n";
+		setClosed();
 	}
 }
 
 bool FileFD::isClosed() const {
 	return _closed;
+}
+
+void FileFD::setClosed() {
+	_closed = true;
 }
 
 void FileFD::setIndex(int32_t index) {
