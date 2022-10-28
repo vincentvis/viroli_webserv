@@ -113,7 +113,7 @@ bool	Request::validateHeaderMap(){
 			 return false;
 	}
 	return true;
-};
+}
 
 bool Request::methodsAllowed(Config *Conf, Location *Loc) {
 	std::vector<std::string> allow = Conf->getAllow(Loc);

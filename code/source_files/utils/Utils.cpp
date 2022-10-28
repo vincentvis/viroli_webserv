@@ -113,10 +113,13 @@ std::string strToLower(std::string original) {
 /* check if string contains solely letters, digits or a '-' */
 bool validateFieldValue(const std::string &original) {
 	int i = 0;
-
+	if (!isalpha(original[i])) {
+		return false;
+	}
 	while (original[i]) {
-		if (!isdigit(original[i]) && !isalpha(original[i]) && original[i] != '-')
+		if (!isdigit(original[i]) && !isalpha(original[i]) && original[i] != '-') {
 			return false;
+		}
 		i++;
 	}
 	return true;
