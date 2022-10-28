@@ -4,10 +4,6 @@ CGIRequest::CGIRequest() {
 }
 
 CGIRequest::CGIRequest(ClientFD &Client) {
-	CheckMethod(Client);
-}
-
-void CGIRequest::CheckMethod(ClientFD &Client) {
 	if (Client._request.getMethod() == Utils::get_string) {
 		GETRequest(Client);
 	}
