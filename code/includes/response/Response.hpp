@@ -15,11 +15,11 @@
 class ClientFD;
 class Response {
 	private:
-		std::string                                  _statusLine;
-		std::map<std::string, std::string>           _responseHeader;
-		std::string                                  _responseString;
-		std::string                                  _messageBody;
-		std::string                                  _statusCode;
+		std::string                        _statusLine;
+		std::map<std::string, std::string> _responseHeader;
+		std::string                        _responseString;
+		std::string                        _messageBody;
+		std::string                        _statusCode;
 
 	public:
 		Response();
@@ -36,6 +36,8 @@ class Response {
 									 std::string StatusCode);
 		void        generateResponse(ClientFD *Client, std::string StatusCode);
 		void        generateResponse(ClientFD *Client);
+		void        generateCGIResponse(ClientFD *client, std::string cgiOutput);
+
 		void        setBasicHeaders(ClientFD *Client);
 		void        setStatusCode(std::string statusCode);
 		std::string getResponseString() const;

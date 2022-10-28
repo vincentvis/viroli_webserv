@@ -86,6 +86,7 @@ int Cgi::execute(ClientFD &Client, CGIRequest *interface, enum request_type type
 		std::cerr << "running: [" << _bash_string << "]" << std::endl;
 		_args.push_back(_bash_string);
 		execve("/bin/bash", makeArgv(), _env.toCharPtrs());
+		remove(_buff);
 		// execve(_executable.c_str(), makeArgv(), _env.toCharPtrs());
 		exit(1);
 	}

@@ -10,20 +10,22 @@ CgiFD::~CgiFD() {
 }
 
 void CgiFD::pollin() {
-	updateTick();
-	_client->updateTick();
+	// updateTick();
+	// _client->updateTick();
+	static int num_tries = 0;
 
 	try {
 		_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
-
 		/* error during read; close pollable; send error response */
 		if (_bytes == -1) {
 			throw(Utils::SystemCallFailedExceptionNoErrno("CgiFD::pollin::read"));
 
 			/* done reading; close pollable; send response with data */
 		} else if (_bytes == 0) {
-			setClosed();
-			_client->_response.generateResponse(_client, _data, "200");
+			if (_data.empty() == false || num_tries > 1000000) {
+				num_tries = 0;
+				_client->_response.generateCGIResponse(_client, _data);
+			}
 
 			/* append buffer to data */
 		} else if (_bytes > 0) {

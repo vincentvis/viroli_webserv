@@ -4,8 +4,8 @@ import sys
 
 cgitb.enable()
 
-print("Content-Type: text/html") # HTML is following
-print()                          # Leave a blank line
+print("Content-Type: text/html\r") # HTML is following
+print("")                          # Leave a blank line
 
 input_data = cgi.FieldStorage()
 

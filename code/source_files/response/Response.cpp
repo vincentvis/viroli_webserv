@@ -70,8 +70,7 @@ void Response::setBasicHeaders(ClientFD *Client) {
 	}
 	/* add content length */
 	if (Client->_request.getMethod() == Utils::get_string) {
-		addHeaderIfNotSet(Utils::contentLength_string,
-						  this->_messageBody.length());
+		addHeaderIfNotSet(Utils::contentLength_string, this->_messageBody.length());
 	}
 	/* add location */
 	if (Client->_request.getMethod() == Utils::post_string)
@@ -161,6 +160,18 @@ void Response::generateResponse(ClientFD *Client, std::string StatusCode) {
 
 void Response::generateResponse(ClientFD *Client) {
 	createStatusLine(Client);
+	setBasicHeaders(Client);
+	createResponseString();
+	Client->sendResponse();
+}
+
+void Response::generateCGIResponse(ClientFD *Client, std::string cgiOutput) {
+	// if cgi contains a header, parse it and strip it from the body to be returned
+
+	// this should be possible gotten from the header of the cgi output
+	setStatusCode("200");
+	addHeader(Utils::contentType_string, "text/html");
+	setMessageBody(cgiOutput);
 	setBasicHeaders(Client);
 	createResponseString();
 	Client->sendResponse();
