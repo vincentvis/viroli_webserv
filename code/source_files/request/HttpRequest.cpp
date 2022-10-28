@@ -65,7 +65,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
 	std::string path = Client._request.getFileStat().getFull();
-	int         fd = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change
+	int         fd = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 	if (fd == -1) {
 		throw Utils::ErrorPageException("404");

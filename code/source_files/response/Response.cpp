@@ -62,7 +62,7 @@ void Response::setBasicHeaders(ClientFD *Client) {
 		addHeaderIfNotSet(Utils::contentType_string,
 						  MimeTypes::findMimeType(Client->_request.getUri()));
 	}
-	
+
 	/* add connection */
 	if (Client->_request.getConnectionAvailable() == false) {
 		addHeaderIfNotSet(Utils::connection_string, Client->_request.getConnectionInfo());
