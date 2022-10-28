@@ -109,7 +109,7 @@ void Request::ParseRequest(std::string BUF) {
 
 bool	Request::validateHeaderMap(){
 	for (this->_itr = _header.begin(); this->_itr != _header.end(); this->_itr++) {
-		 if (Utils::validateFieldValue(this->_itr->first) == false)
+		 if (Utils::validateFieldName(this->_itr->first) == false)
 			 return false;
 	}
 	return true;
