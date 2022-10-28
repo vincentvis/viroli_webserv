@@ -70,8 +70,7 @@ void Response::setBasicHeaders(ClientFD *Client) {
 	}
 	/* add content length */
 	if (Client->_request.getMethod() == Utils::get_string) {
-		addHeaderIfNotSet(Utils::contentLength_string,
-						  this->_messageBody.length());
+		addHeaderIfNotSet(Utils::contentLength_string, this->_messageBody.length());
 	}
 	/* add location */
 	if (Client->_request.getMethod() == Utils::post_string)
@@ -117,9 +116,11 @@ void Response::createResponseString() {
 
 void Response::generateErrorPage(
 	std::string status, const std::map<std::string, std::string> *customErrorPages) {
+	std::cout << "hallo\n";
 	if (customErrorPages && customErrorPages->empty() == false) {
 		std::map<std::string, std::string>::const_iterator custom =
 			customErrorPages->find(status);
+		std::cout << "hallo\n";
 		if (custom != customErrorPages->end()) {
 			this->_messageBody = custom->second;
 			return;
@@ -131,7 +132,9 @@ void Response::generateErrorPage(
 void Response::generateErrorResponse(ClientFD *Client, std::string StatusCode) {
 	setStatusCode(StatusCode);
 	addHeader(Utils::contentType_string, "text/html");
+	std::cout << "pooop\n";
 	generateErrorPage(StatusCode, &Client->_config->getErrorPages());
+	std::cout << "pooop\n";
 	createStatusLine(Client);
 	setBasicHeaders(Client);
 
