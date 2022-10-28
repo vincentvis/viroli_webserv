@@ -3,9 +3,6 @@
 Buffer::Buffer() : _buff(BUFFERSIZE, 0) {
 }
 
-Buffer::~Buffer() {
-}
-
 Buffer &Buffer::getInstance() {
 	static Buffer instance;
 

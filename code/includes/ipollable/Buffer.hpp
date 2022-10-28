@@ -5,12 +5,10 @@
 
 class Buffer {
 	public:
-		Buffer();
-		~Buffer();
-
 		static Buffer     &getInstance();
 		std::vector<char> &getBuff();
 
 	private:
+		Buffer();
 		std::vector<char> _buff;
 };
