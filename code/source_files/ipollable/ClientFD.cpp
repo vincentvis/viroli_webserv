@@ -111,6 +111,16 @@ void ClientFD::sendResponse() {
 	_left                        = _outbound.size();
 }
 
+/*
+-> receive bytes:
+  -> header is present:
+	-> POST request:
+	  -> 'Expect: 100-continue' is present:
+		-> (part of) body is present:
+		  -> omit sending 100-continue response
+		-> send 100-continue response
+*/
+
 void ClientFD::receiveHeader() {
 	size_t end = 0;
 
@@ -277,7 +287,7 @@ void ClientFD::pollout() {
 	}
 }
 
-int ClientFD::getFileDescriptor() const {
+int ClientFD::getFD() const {
 	return _fd;
 }
 
@@ -297,6 +307,10 @@ void ClientFD::timeout() {
 
 bool ClientFD::isClosed() const {
 	return _closed;
+}
+
+void ClientFD::setClosed() {
+	_closed = true;
 }
 
 void ClientFD::setIndex(int32_t index) {

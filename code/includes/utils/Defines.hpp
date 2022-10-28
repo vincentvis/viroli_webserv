@@ -10,6 +10,8 @@
 #define TIMEOUT_SECONDS 5
 #define BUFFERSIZE      10000 // tmp
 
+enum PollableType { SERVERPOLL, CLIENTPOLL, FILEPOLL };
+
 namespace Utils {
 
 const std::string get_string("GET");

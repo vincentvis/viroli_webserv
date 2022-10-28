@@ -42,7 +42,7 @@ class ClientFD : public IPollable {
 		void          pollin();
 		void          pollout();
 		void          resetBytes();
-		int           getFileDescriptor() const;
+		int           getFD() const;
 		size_t        extractChunkedSize(size_t pos);
 		void          receiveHeader();
 		void          receiveBody();
@@ -56,6 +56,7 @@ class ClientFD : public IPollable {
 		int32_t       getRemainderBytes() const;
 		void          timeout();
 		bool          isClosed() const;
+		void          setClosed();
 		void          process();
 		void          setIndex(int32_t index);
 		void          cleanClientFD();

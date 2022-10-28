@@ -4,11 +4,12 @@
 #include "ipollable/ClientFD.hpp"
 #include "ipollable/FileFD.hpp"
 #include "ipollable/IPollable.hpp"
+#include "ipollable/PollableFactory.hpp"
 #include "ipollable/ServerFD.hpp"
 #include "utils/Utils.hpp"
 
 #include <arpa/inet.h>
-#include <array>
+#include <csignal>
 #include <cstring>
 #include <ctime>
 #include <fcntl.h>
@@ -25,10 +26,6 @@
 #include <utility>
 #include <vector>
 
-#define BUFFERSIZE 10000 // tmp
-
-enum Pollable { SERVERPOLL, CLIENTPOLL, FILEPOLL };
-
 class IPollable;
 
 class Server {
@@ -44,16 +41,14 @@ class Server {
 		friend class ConfigParser;
 
 
-		uint16_t          getPort() const;
-		int32_t           getFileDescriptor() const;
-		static void       run();
-		static void       removePollable(int index);
-		static IPollable *addPollable(Server *server, int fd, Pollable type,
-									  int16_t event);
+		uint16_t                          getPort() const;
+		int32_t                           getFD() const;
+		static void                       run();
+		static void                       removePollable(int index);
 
-		static std::map<int32_t, IPollable *> _pollables;
-		static std::vector<struct pollfd>     _pfds;
-		std::vector<Config *>                 _configs;
+		static std::vector<IPollable *>   _pollables;
+		static std::vector<struct pollfd> _pfds;
+		std::vector<Config *>             _configs;
 
 	protected:
 		int32_t  _fd;
