@@ -10,7 +10,8 @@ FileFD::~FileFD() {
 }
 
 void FileFD::pollin() {
-	time(&_tick);
+	updateTick();
+	_client->updateTick();
 
 	try {
 		_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
@@ -51,7 +52,8 @@ void FileFD::setData(std::string data) {
 }
 
 void FileFD::pollout() {
-	time(&_tick);
+	updateTick();
+	_client->updateTick();
 
 	try {
 		_buffer.assign(_data.begin() + _total,
