@@ -72,7 +72,7 @@ Server::Server(uint16_t port, std::vector<Config *> configs) :
 		close(_fd);
 		throw(std::string("error on bind()")); // placeholder
 	}
-	if (listen(_fd, MAXCONNECTIONS) < 0) {
+	if (listen(_fd, SOMAXCONN) < 0) {
 		close(_fd);
 		throw(std::string("error on listen()")); // placeholder
 	}
@@ -115,11 +115,10 @@ void Server::removePollable(int index) {
 /* events var might be not needed */
 void Server::run() {
 	std::map<int32_t, IPollable *>::iterator it;
-	int                                      events = 0;
 	signal(SIGPIPE, SIG_IGN);
 
 	while (true) {
-		if ((events = poll(Server::_pfds.data(), Server::_pfds.size(), 0)) < 0) {
+		if ((poll(Server::_pfds.data(), Server::_pfds.size(), 0)) < 0) {
 			throw(std::string("error on poll()")); // placeholder
 		}
 		/* check events and timeout */

@@ -25,7 +25,7 @@
 #include <utility>
 #include <vector>
 
-#define MAXCONNECTIONS 100 // tmp
+#define BUFFERSIZE 10000 // tmp
 
 enum Pollable { SERVERPOLL, CLIENTPOLL, FILEPOLL };
 
