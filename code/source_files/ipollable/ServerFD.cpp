@@ -30,13 +30,14 @@ void ServerFD::pollin() {
 		throw(Utils::SocketAcceptException(__PRETTY_FUNCTION__));
 	}
 
-	Server::addPollable(_server, newfd, CLIENTPOLL, POLLIN);
+	std::cout << "new connection accepted\n";
+	PollableFactory::getInstance().createPollable(_server, newfd, CLIENTPOLL, POLLIN);
 }
 
 void ServerFD::pollout() {
 }
 
-int ServerFD::getFileDescriptor() const {
+int ServerFD::getFD() const {
 	return _fd;
 }
 
@@ -49,6 +50,10 @@ void ServerFD::timeout() {
 
 bool ServerFD::isClosed() const {
 	return _closed;
+}
+
+void ServerFD::setClosed() {
+	_closed = true;
 }
 
 void ServerFD::setIndex(int32_t index) {

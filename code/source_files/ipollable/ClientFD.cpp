@@ -23,7 +23,7 @@ void ClientFD::receive(size_t len) {
 	if (_bytes == -1) {
 		throw(Utils::SystemCallFailedException(__PRETTY_FUNCTION__));
 	} else if (_bytes == 0) {
-		_closed = true;
+		setClosed();
 	} else if (_bytes > 0) {
 		_inbound.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
@@ -108,6 +108,16 @@ void ClientFD::sendResponse() {
 	_total                       = 0;
 	_left                        = _outbound.size();
 }
+
+/*
+-> receive bytes:
+  -> header is present:
+	-> POST request:
+	  -> 'Expect: 100-continue' is present:
+		-> (part of) body is present:
+		  -> omit sending 100-continue response
+		-> send 100-continue response
+*/
 
 void ClientFD::receiveHeader() {
 	size_t end = 0;
@@ -219,7 +229,7 @@ void ClientFD::pollin() {
 		this->_response.generateErrorResponse(this, e.what());
 	} catch (const Utils::SystemCallFailedException &e) {
 		std::cerr << e.what() << std::endl;
-		_closed = true;
+		setClosed();
 	}
 }
 
@@ -252,7 +262,7 @@ void ClientFD::pollout() {
 
 				/* close fd and remove pollable and pollfd struct */
 			} else if (_request.getConnectionAvailable() == false) {
-				_closed = true;
+				setClosed();
 
 				/* 100-continue response sent; reset byte counters for receiving body
 				 */
@@ -269,11 +279,11 @@ void ClientFD::pollout() {
 		}
 	} catch (const Utils::SystemCallFailedException &e) {
 		std::cerr << e.what() << std::endl;
-		_closed = true;
+		setClosed();
 	}
 }
 
-int ClientFD::getFileDescriptor() const {
+int ClientFD::getFD() const {
 	return _fd;
 }
 
@@ -287,12 +297,16 @@ void ClientFD::timeout() {
 	time(&timeout);
 	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
 		std::cerr << "Timeout\n";
-		_closed = true;
+		setClosed();
 	}
 }
 
 bool ClientFD::isClosed() const {
 	return _closed;
+}
+
+void ClientFD::setClosed() {
+	_closed = true;
 }
 
 void ClientFD::setIndex(int32_t index) {
