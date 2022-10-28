@@ -223,6 +223,7 @@ bool Request::uriIsDir() const {
 	return (false);
 }
 
+
 FileStat const &Request::getFileStat() const {
 	return this->_filestats;
 }

@@ -19,6 +19,8 @@ add_executable(webserv
         code/source_files/config/ConfigParser.cpp
         code/includes/server/Location.hpp
         code/source_files/server/Location.cpp
+        code/includes/ipollable/PollableFactory.hpp
+        code/source_files/ipollable/PollableFactory.cpp
         code/includes/ipollable/IPollable.hpp
         code/source_files/ipollable/IPollable.cpp
         code/source_files/ipollable/FileFD.cpp
@@ -42,8 +44,8 @@ add_executable(webserv
         code/includes/config/MimeTypes.hpp
         code/source_files/response/HttpStatus.cpp
         code/includes/response/HttpStatus.hpp
-        code/includes/utils/FileStat.hpp
         code/source_files/utils/FileStat.cpp
+        code/includes/utils/FileStat.hpp
         code/includes/cgi/Executables.hpp)
 
 #target_link_libraries(webserv PUBLIC libft)
