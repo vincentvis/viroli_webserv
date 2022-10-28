@@ -54,8 +54,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		fd = open(path.c_str(), O_RDONLY);
 	}
 	if (fd == -1) {
-		throw Utils::ErrorPageException(
-			"404");
+		throw Utils::ErrorPageException("404");
 	}
 	/* add fileFd to poll */
 	Client._fileFD = reinterpret_cast<FileFD *>(
@@ -90,7 +89,7 @@ void HttpRequest::DELETERequest(ClientFD &Client) {
 	{
 		Client._response.generateResponse(&Client, "200");
 	} else {
-		throw Utils::ErrorPageException("404"); // would you agree with 404?
+		throw Utils::ErrorPageException("204");
 	}
 }
 
