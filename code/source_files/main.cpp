@@ -24,9 +24,21 @@ int main(int argc, char const *argv[]) {
 	std::map<uint16_t, std::vector<Config *> >::iterator it    = ports.begin();
 	std::map<uint16_t, std::vector<Config *> >::iterator end   = ports.end();
 	while (it != end) {
-		serv = new Server(it->first, it->second);
+		try {
+			serv = new Server(it->first, it->second);
+		} catch (const Utils::SystemCallFailedException &e) {
+			std::cerr << e.what() << std::endl;
+			exit(EXIT_FAILURE);
+		}
+
 		PollableFactory::getInstance().createPollable(serv, serv->getFD(), SERVERPOLL,
 													  POLLIN);
+
+		// struct pollfd pfd = {serv->getFileDescriptor(), POLLIN, 0};
+		// Server::addPollable(pfd, new ServerFD(serv, pfd.fd, Server::_pfds.size()));
+
+		// Server::addPoll(serv);
+		// servers.push_back(serv);
 		it++;
 	}
 
@@ -47,9 +59,12 @@ int main(int argc, char const *argv[]) {
 
 	try {
 		Server::run();
-	} catch (std::exception &e) {
-		std::cout << "error in main\n";
-		std::cout << e.what() << std::endl;
+	} catch (const Utils::SystemCallFailedException &e) {
+		std::cerr << e.what() << std::endl;
+		return (EXIT_FAILURE);
+	} catch (const std::exception &e) {
+		std::cerr << e.what() << std::endl;
+		return (EXIT_FAILURE);
 	}
-	return 0;
+	return (EXIT_SUCCESS);
 }

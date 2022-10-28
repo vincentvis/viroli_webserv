@@ -19,15 +19,15 @@ void ServerFD::pollin() {
 	socklen_t addrlen = sizeof(client);
 
 	if ((newfd = accept(_fd, reinterpret_cast<sockaddr *>(&client), &addrlen)) < 0) {
-		throw(std::string("error on ServerFD::pollin()")); // placeholder
+		throw(Utils::SocketAcceptException(__PRETTY_FUNCTION__));
 	}
 	if (setsockopt(newfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
 		close(newfd);
-		throw(std::string("error on ServerFD::setsockopt()")); // placeholder
+		throw(Utils::SocketAcceptException(__PRETTY_FUNCTION__));
 	}
 	if (fcntl(newfd, F_SETFL, O_NONBLOCK) < 0) {
 		close(newfd);
-		throw(std::string("error on ServerFD::fcntl()")); // placeholder
+		throw(Utils::SocketAcceptException(__PRETTY_FUNCTION__));
 	}
 
 	std::cout << "new connection accepted\n";
