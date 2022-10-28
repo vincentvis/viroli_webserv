@@ -46,8 +46,14 @@ void Request::ParseRequest(std::string BUF) {
 		endVal   = BUF.find("\r\n", startVal);
 		if (startVal == std::string::npos || endVal == std::string::npos)
 			break;
-		this->_header[BUF.substr(startKey, endKey - startKey)] =
+		this->_header[Utils::strToLower(BUF.substr(startKey, endKey - startKey))] =
 			Utils::trimWhitespaceCopy(BUF.substr(startVal, endVal - startVal));
+	}
+
+	/* validate Header Fields in HeaderMap */
+	if (validateHeaderMap() == false){
+		std::cout << "Header Fields are invalid" << std::cout;
+		throw Utils::ErrorPageException("405");
 	}
 
 	/* check and set query */
@@ -61,17 +67,18 @@ void Request::ParseRequest(std::string BUF) {
 	}
 
 	/* check and set connection */
-	this->_itr = _header.find("Connection");
+	this->_itr = _header.find("connection");
 	if (this->_itr != _header.end()) {
 		this->_connection = this->_itr->second;
 		/* if 'Connection: close' is specified */
 		if (this->_connection == std::string("close")) {
 			this->_ConnectionAvailable = false;
 		}
+		std::cout << this->_connection << std::endl;
 	}
 
 	/* set content length and chunked for body creation in connectionClass */
-	this->_itr = _header.find("Content-Length");
+	this->_itr = _header.find("content-length");
 	if (this->_itr != _header.end()) {
 		this->_ContentLengthAvailable = true;
 		try {
@@ -85,20 +92,28 @@ void Request::ParseRequest(std::string BUF) {
 		throw Utils::ErrorPageException("400");
 	}
 
-	this->_itr = _header.find("Transfer-Encoding");
+	this->_itr = _header.find("transfer-encoding");
 	if (this->_itr != _header.end()) {
 		if (this->_itr->second.find("chunked") != std::string::npos)
 			this->_TransferEncodingChunked = true;
 	}
 
 	/* check Expect */
-	this->_itr = _header.find("Expect");
+	this->_itr = _header.find("expect");
 	if (this->_itr != _header.end()) {
 		this->_expect = this->_itr->second;
 	}
 	/* after parsing header, set header available */
 	this->_headerAvailable = true;
 }
+
+bool	Request::validateHeaderMap(){
+	for (this->_itr = _header.begin(); this->_itr != _header.end(); this->_itr++) {
+		 if (Utils::validateFieldValue(this->_itr->first) == false)
+			 return false;
+	}
+	return true;
+};
 
 bool Request::methodsAllowed(Config *Conf, Location *Loc) {
 	std::vector<std::string> allow = Conf->getAllow(Loc);
