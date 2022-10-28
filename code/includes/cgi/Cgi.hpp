@@ -34,6 +34,7 @@ class Cgi {
 		std::string              _executable;
 		std::string              _script_name;
 		std::string              _query;
+		std::string              _bash_string;
 
 		char                    *_buff;
 		Pipes                    _pipes;

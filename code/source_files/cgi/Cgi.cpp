@@ -11,6 +11,9 @@ Cgi::Cgi(FileStat filestats, std::string const &method, uint16_t port,
 	this->_executor_name = Executables::getExecutable(_source.getExtension());
 	this->_executable    = Executables::findExecutableInPath(this->_executor_name);
 
+	_args.push_back("/bin/bash");
+	_args.push_back("-c");
+	_bash_string = "";
 	// _args.push_back(this->_executable);
 	// _args.push_back(_source.getFull());
 
@@ -28,8 +31,12 @@ Cgi::Cgi(FileStat filestats, std::string const &method, uint16_t port,
 	_fd = mkstemp(_buff); // should catch erro of this
 	std::cerr << "FD= " << _fd << ", _buff: " << _buff << std::endl;
 
+	_bash_string += std::string("> ") + _buff + " ";
+	_bash_string += _executable + " " + _source.getFilename();
+
 	// fcntl(_fd, F_SETFL, O_NONBLOCK); // should catch erro of this
-	std::cerr << "FD is nonblock now = " << fcntl(_fd, F_SETFL, O_NONBLOCK) << std::endl;
+	std::cerr << "FD(" << _fd << ")is nonblock now = " << fcntl(_fd, F_SETFL, O_NONBLOCK)
+			  << std::endl;
 
 	// int mkostemp(char *template, int flags);
 
@@ -89,12 +96,9 @@ int Cgi::execute(ClientFD &Client, CGIRequest *interface, enum request_type type
 		// }
 		(void)type;
 		// dup2(_fd, STDOUT_FILENO);
-		_args.push_back("/bin/bash");
-		_args.push_back("-c");
-		std::string bashable = std::string("> ") + _buff + " " + _executable + " " +
-							   _source.getFull() + " \"" + _query + "\"";
-		std::cerr << "Bashable: [" << bashable << "]" << std::endl;
-		_args.push_back(bashable);
+		chdir(_source.getPath().c_str());
+		std::cerr << "Bashable: [" << _bash_string << "]" << std::endl;
+		_args.push_back(_bash_string);
 		execve("/bin/bash", makeArgv(), _env.toCharPtrs());
 		// execve(_executable.c_str(), makeArgv(), _env.toCharPtrs());
 		exit(1);
@@ -104,6 +108,7 @@ int Cgi::execute(ClientFD &Client, CGIRequest *interface, enum request_type type
 
 Cgi Cgi::setQueryString(std::string queryString) {
 	_query = queryString;
+	_bash_string += " \"" + queryString + "\"";
 	// _args.push_back(queryString);
 	return (*this);
 }
