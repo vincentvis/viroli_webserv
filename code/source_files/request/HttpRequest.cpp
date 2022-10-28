@@ -65,7 +65,8 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
 	std::string path = Client._request.getFileStat().getFull();
-	int         fd = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	int         fd   = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY,
+							S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 	if (fd == -1) {
 		throw Utils::ErrorPageException("404");
@@ -89,12 +90,14 @@ void HttpRequest::DELETERequest(ClientFD &Client) {
 	{
 		Client._response.generateResponse(&Client, "204");
 	} else {
-		if (r == -1){
-			if (errno == EACCES || errno == ECANCELED || errno == EFAULT || errno == EINVAL || errno == ENOENT || errno == EPERM || errno == EROFS || errno == EPERM){
+		if (r == -1) {
+			if (errno == EACCES || errno == ECANCELED || errno == EFAULT ||
+				errno == EINVAL || errno == ENOENT || errno == EPERM || errno == EROFS ||
+				errno == EPERM)
+			{
 				throw Utils::ErrorPageException("406");
 			}
-		}
-		else
+		} else
 			throw Utils::ErrorPageException("404");
 	}
 }
