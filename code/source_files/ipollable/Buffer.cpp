@@ -1,6 +1,6 @@
 #include "ipollable/Buffer.hpp"
 
-Buffer::Buffer() : _buff(BUFFERSIZE) {
+Buffer::Buffer() : _buff(BUFFERSIZE, 0) {
 }
 
 Buffer::~Buffer() {
