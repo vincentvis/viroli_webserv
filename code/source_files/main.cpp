@@ -61,9 +61,6 @@ int main(int argc, char const *argv[]) {
 	} catch (const Utils::PollException &e) {
 		std::cerr << e.what();
 		return (EXIT_FAILURE);
-	} catch (const Utils::SocketAcceptException &e) {
-		std::cerr << e.what();
-		return (EXIT_FAILURE);
 	} catch (const Utils::SocketListenException &e) {
 		std::cerr << e.what();
 		return (EXIT_FAILURE);

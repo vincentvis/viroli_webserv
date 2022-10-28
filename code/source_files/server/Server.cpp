@@ -140,20 +140,21 @@ void Server::run() {
 				--i;
 				continue;
 			}
-
-			if (it != _pollables.end()) {
-				/* find on what file descriptor event occurred */
-				if (Server::_pfds[i].revents & POLLIN) {
-					it->second->pollin();
-				} else if (Server::_pfds[i].revents & POLLOUT) {
-					it->second->pollout();
-				} else if (Server::_pfds[i].revents & POLLHUP) { // tmp
-					std::cout << ">>> POLLHUP\n";                // tmp
-					exit(EXIT_FAILURE);                          // tmp
+			try {
+				if (it != _pollables.end()) {
+					/* find on what file descriptor event occurred */
+					if (Server::_pfds[i].revents & POLLIN) {
+						it->second->pollin();
+					} else if (Server::_pfds[i].revents & POLLOUT) {
+						it->second->pollout();
+					} else if (Server::_pfds[i].revents & POLLHUP) { // tmp
+						std::cout << ">>> POLLHUP\n";                // tmp
+						exit(EXIT_FAILURE);                          // tmp
+					}
+					/* file descriptor pollable doesn't exist */
 				}
-				/* file descriptor pollable doesn't exist */
-			} else {
-				throw(std::string("error on _pollables.find()")); // placholder
+			} catch (const Utils::SocketAcceptException &e) {
+				std::cerr << e.what() << std::endl;
 			}
 		}
 	}
