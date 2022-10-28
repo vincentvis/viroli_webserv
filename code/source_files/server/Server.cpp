@@ -55,25 +55,25 @@ Server::Server(uint16_t port, std::vector<Config *> configs) :
 	int opt                = 1;
 
 	if ((_fd = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-		throw(std::string("error on socket()")); // placeholder
+		throw(Utils::SystemCallFailedException("Server::Server::socket"));
 	}
 	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
 		close(_fd);
-		throw(std::string("error on setsockopt()")); // placeholder
+		throw(Utils::SystemCallFailedException("Server::Server::setsockopt"));
 	}
 	if (fcntl(_fd, F_SETFL, O_NONBLOCK) < 0) {
 		close(_fd);
-		throw(std::string("error on fcntl()")); // placeholder
+		throw(Utils::SystemCallFailedException("Server::Server::fcntl"));
 	}
 	if (bind(_fd, reinterpret_cast<sockaddr *>(&server),
 			 static_cast<socklen_t>(sizeof(server))) < 0)
 	{
 		close(_fd);
-		throw(std::string("error on bind()")); // placeholder
+		throw(Utils::SystemCallFailedException("Server::Server::bind"));
 	}
 	if (listen(_fd, SOMAXCONN) < 0) {
 		close(_fd);
-		throw(std::string("error on listen()")); // placeholder
+		throw(Utils::SystemCallFailedException("Server::Server::listen"));
 	}
 }
 
@@ -115,8 +115,12 @@ void Server::run() {
 	signal(SIGPIPE, SIG_IGN);
 
 	while (true) {
-		if ((poll(Server::_pfds.data(), Server::_pfds.size(), 0)) < 0) {
-			throw(std::string("error on poll()")); // placeholder
+		if (poll(Server::_pfds.data(), Server::_pfds.size(), 0) < 0) {
+			if (errno == EAGAIN) {
+				continue;
+			} else {
+				throw(Utils::SystemCallFailedException("Server::run::poll"));
+			}
 		}
 
 		/* check events and timeout */

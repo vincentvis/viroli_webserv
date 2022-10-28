@@ -19,12 +19,10 @@ void ClientFD::resetBytes() {
 void ClientFD::receive(size_t len) {
 	_bytes = recv(_fd, _buffer.data(), len, 0);
 
-	/* poll notified there is data ready, recv however returns EAGAIN (-1) */
 	if (_bytes == -1) {
-		throw(Utils::ErrorPageException("500"));
+		throw(Utils::SystemCallFailedExceptionNoErrno("ClientFD::pollout::recv"));
 	} else if (_bytes == 0) {
-		throw(std::runtime_error(std::string(std::asctime(std::localtime(&_tick))) +
-								 "Connection closed by client"));
+		setClosed();
 	} else if (_bytes > 0) {
 		_inbound.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
@@ -68,7 +66,7 @@ void ClientFD::receiveChunked() {
 			/* chunk present in _inbound */
 			if (_left + CRLF_LEN <= static_cast<int64_t>(_inbound.size())) {
 				if (_inbound.substr(_left, CRLF_LEN).find("\r\n") == std::string::npos) {
-					throw(std::string("expected CRLF not found")); // placeholder
+					throw(Utils::ErrorPageException("400"));
 				}
 
 				/* extract chunk from _inbound and append to _body */
@@ -209,34 +207,31 @@ void ClientFD::respond() {
 }
 
 void ClientFD::process() {
-	try {
-		if (_state == HEADER) {
-			receiveHeader();
-		}
-		if (_state == BODY) {
-			receiveBody();
-		}
-		if (_state == RESPOND) {
-			respond();
-		}
-	} catch (const Utils::ErrorPageException &e) {
-		_state = ERROR;
-		this->_response.generateErrorResponse(this, e.what());
-	} catch (const std::exception &e) {
-		std::cerr << "temp error" << e.what() << std::endl;
-		// other exceptions like std::string! should be finished later/how?
+	if (_state == HEADER) {
+		receiveHeader();
+	}
+	if (_state == BODY) {
+		receiveBody();
+	}
+	if (_state == RESPOND) {
+		respond();
 	}
 }
 
 /* receive data */
 void ClientFD::pollin() {
 	updateTick();
+
 	try {
 		receive(BUFFERSIZE);
 		process();
-	} catch (const std::exception &e) {
+	} catch (const Utils::ErrorPageException &e) {
+		_state = ERROR;
 		std::cerr << e.what() << std::endl;
-		_closed = true;
+		this->_response.generateErrorResponse(this, e.what());
+	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
+		std::cerr << e.what() << std::endl;
+		setClosed();
 	}
 }
 
@@ -244,46 +239,50 @@ void ClientFD::pollin() {
 void ClientFD::pollout() {
 	updateTick();
 
-	/* make sure to not go out of bounds with the buffer */
-	_buffer.assign(_outbound.begin() + _total,
-				   _outbound.begin() + _total + getRemainderBytes());
-	_bytes = send(_fd, _buffer.data(), getRemainderBytes(), 0);
+	try {
+		_buffer.assign(_outbound.begin() + _total,
+					   _outbound.begin() + _total + getRemainderBytes());
+		_bytes = send(_fd, _buffer.data(), getRemainderBytes(), 0);
 
-	/* per subject, remove client on error */
-	if (_bytes == -1) {
-		throw(std::runtime_error("error on send"));
-	} else if (_bytes >= 0) {
-		_total += _bytes;
-		_left -= _bytes;
-	}
-
-	/* data is sent */
-	if (_left == 0) {
-		/* accept incoming activity again */
-		Server::_pfds[_index].events = POLLIN;
-
-		delete _requestInterface;
-		_requestInterface = nullptr;
-
-		/* sent error response; reset to accept new requests */
-		if (_state == ERROR) {
-			cleanClientFD();
-
-			/* close fd and remove pollable and pollfd struct */
-		} else if (_request.getConnectionAvailable() == false) {
-			_closed = true;
-
-			/* 100-continue response sent; reset byte counters for receiving body */
-		} else if (_request.getMethod() == Utils::post_string &&
-				   _request.getExpect() == Utils::continue_string)
-		{
-			resetBytes();
-			_state = BODY;
-
-			/* sent response; reset to accept new requests */
-		} else {
-			cleanClientFD();
+		if (_bytes == -1) {
+			throw(Utils::SystemCallFailedExceptionNoErrno("ClientFD::pollout::send"));
+		} else if (_bytes >= 0) {
+			_total += _bytes;
+			_left -= _bytes;
 		}
+
+		/* data is sent */
+		if (_left == 0) {
+			/* accept incoming activity again */
+			Server::_pfds[_index].events = POLLIN;
+
+			delete _requestInterface;
+			_requestInterface = nullptr;
+
+			/* sent error response; reset to accept new requests */
+			if (_state == ERROR) {
+				cleanClientFD();
+
+				/* close fd and remove pollable and pollfd struct */
+			} else if (_request.getConnectionAvailable() == false) {
+				setClosed();
+
+				/* 100-continue response sent; reset byte counters for receiving body
+				 */
+			} else if (_request.getMethod() == Utils::post_string &&
+					   _request.getExpect() == Utils::continue_string)
+			{
+				resetBytes();
+				_state = BODY;
+
+				/* sent response; reset to accept new requests */
+			} else {
+				cleanClientFD();
+			}
+		}
+	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
+		std::cerr << e.what() << std::endl;
+		setClosed();
 	}
 }
 
@@ -300,8 +299,8 @@ void ClientFD::timeout() {
 
 	time(&timeout);
 	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
-		COUT_DEBUGMSG << "TIMEOUT\n"; // generate a response error. close connection
-		_closed = true;
+		COUT_DEBUGMSG << "clientFD Timeout\n";
+		setClosed();
 	}
 }
 
