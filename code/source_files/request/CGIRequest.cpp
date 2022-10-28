@@ -18,7 +18,9 @@ void CGIRequest::GETRequest(ClientFD &Client) {
 	Cgi cgi(Client._request.getFileStatCopy(), Client._request.getMethod(),
 			Client._server->getPort(), Client._config->getFirstServerName());
 
-	cgi.setQueryString(Client._request.getQuery());
+	if (Client._request.getQuery().empty() == false) {
+		cgi.setQueryString(Client._request.getQuery());
+	}
 
 	DEBUGSTART << "Execute CGI get" << DEBUGEND;
 	cgi.execute(Client, this, Cgi::GET);

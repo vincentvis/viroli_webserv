@@ -10,9 +10,7 @@ CgiFD::~CgiFD() {
 }
 
 void CgiFD::pollin() {
-	// updateTick();
-	// _client->updateTick();
-	static int num_tries = 0;
+	_client->updateTick();
 
 	try {
 		_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
@@ -22,13 +20,14 @@ void CgiFD::pollin() {
 
 			/* done reading; close pollable; send response with data */
 		} else if (_bytes == 0) {
-			if (_data.empty() == false || num_tries > 1000000) {
-				num_tries = 0;
+			if (_data.empty() == false) {
 				_client->_response.generateCGIResponse(_client, _data);
+				_data.clear();
 			}
-
 			/* append buffer to data */
 		} else if (_bytes > 0) {
+			std::cout << "CgiFD recieved " << _bytes << std::endl;
+			updateTick();
 			_total += _bytes;
 			_data.append(_buffer.begin(), _buffer.begin() + _bytes);
 		}

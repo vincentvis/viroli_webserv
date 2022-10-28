@@ -61,27 +61,32 @@ Cgi &Cgi::operator=(const Cgi &other) {
 	return (*this);
 }
 
+#include <cerrno>
+#include <cstring>
 Cgi::~Cgi() {
-	cleanup();
+	errno = 0;
+	std::cout << "[" << _pid << "] tmpfile (" << _buff << ") unlink: " << unlink(_buff)
+			  << " errno: " << strerror(errno) << std::endl;
+	errno = 0;
+	std::cout << "[" << _pid << "] tmpfile (" << _buff << ") removal: " << remove(_buff)
+			  << " errno: " << strerror(errno) << std::endl;
 }
 
 int Cgi::execute(ClientFD &Client, CGIRequest *interface, enum request_type type) {
-	pid_t pid = fork();
+	_pid = fork();
 
-	if (pid == -1) {
+	if (_pid == -1) {
 		throw Utils::ErrorPageException("502");
 	}
 
-	if (pid != 0) {
+	if (_pid != 0) {
 		Client._cgiFD =
 			reinterpret_cast<CgiFD *>(PollableFactory::getInstance().createPollable(
 				Client._server, _fd, CGIPOLL, POLLIN));
 		Client._cgiFD->setRequestInterface(interface, &Client);
 	}
-	if (pid == 0) {
+	if (_pid == 0) {
 		(void)type;
-		std::cerr << "change child working dir to \"" << _source.getPath() << "\""
-				  << std::endl;
 		chdir(_source.getPath().c_str());
 		std::cerr << "running: [" << _bash_string << "]" << std::endl;
 		_args.push_back(_bash_string);
@@ -121,11 +126,4 @@ char *const *Cgi::makeArgv() const {
 	}
 	argv[i] = NULL;
 	return (argv);
-}
-
-void Cgi::cleanup(void) {
-	_pipes.tryClose(_pipes.toCgi[READ_FD]);
-	_pipes.tryClose(_pipes.toCgi[WRITE_FD]);
-	_pipes.tryClose(_pipes.toServer[READ_FD]);
-	_pipes.tryClose(_pipes.toServer[WRITE_FD]);
 }

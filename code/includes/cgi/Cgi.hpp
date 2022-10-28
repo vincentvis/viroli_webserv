@@ -25,7 +25,6 @@ class Cgi {
 		Cgi                setQueryString(std::string queryString);
 		char *const       *makeArgv() const;
 		Cgi                setEnv(std::string key, std::string value);
-		void               cleanup(void);
 		int execute(ClientFD &Client, CGIRequest *interface, enum request_type);
 
 	protected:
@@ -35,6 +34,7 @@ class Cgi {
 		std::string              _script_name;
 		std::string              _query;
 		std::string              _bash_string;
+		pid_t                    _pid;
 
 		char                    *_buff;
 		Pipes                    _pipes;

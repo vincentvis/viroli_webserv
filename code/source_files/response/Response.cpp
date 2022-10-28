@@ -170,11 +170,58 @@ void Response::generateResponse(ClientFD *Client) {
 
 void Response::generateCGIResponse(ClientFD *Client, std::string cgiOutput) {
 	// if cgi contains a header, parse it and strip it from the body to be returned
+	std::string::size_type cgiHeaders = cgiOutput.find("\n\n");
+
+	std::cout << "\033[34;4mGenerate CGI response\033[0m" << std::endl;
+
+	setStatusCode("200");
+	addHeader(Utils::connection_string, "close");
+
+	if (cgiHeaders == std::string::npos) {
+		// no headers...
+		// just send everything I guess?
+		addHeader(Utils::contentType_string, "text/plain");
+		addHeader(Utils::contentLength_string, cgiOutput.length());
+		setMessageBody(cgiOutput);
+		setBasicHeaders(Client);
+		createResponseString();
+		Client->sendResponse();
+		return;
+	}
+	// there are headers, extract them and set them?
+	std::string headerPart = cgiOutput.substr(0, cgiHeaders + 1);
+	std::string bodyPart   = cgiOutput.substr(cgiHeaders + 3);
+
+	std::cout << "Parse these headers: [" << headerPart << "]" << std::endl;
+
+	while (headerPart.empty() == false) {
+		std::string::size_type name_end =
+			headerPart.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+										 "abcdefghijklmnopqrstuvwxyz"
+										 "0123456789-");
+		if (name_end == std::string::npos || headerPart.at(name_end) != ':') {
+			break;
+		}
+		std::string            key       = headerPart.substr(0, name_end);
+		std::string::size_type value_end = headerPart.find_first_of("\n", name_end + 1);
+		if (value_end == std::string::npos) {
+			break;
+		}
+		std::string value = headerPart.substr(name_end + 1, value_end - name_end - 1);
+		Utils::trimWhitespaceRef(value);
+		if (key == "Content-type") {
+			key = "Content-Type";
+		}
+		addHeader(key, value);
+		headerPart = headerPart.substr(value_end + 1);
+	}
+	// std::cout << "key: [" << key << "] next: " << headerPart.at(name_end) << "\n";
 
 	// this should be possible gotten from the header of the cgi output
-	setStatusCode("200");
+	addHeader(Utils::contentLength_string, bodyPart.length());
 	addHeader(Utils::contentType_string, "text/html");
-	setMessageBody(cgiOutput);
+
+	setMessageBody(bodyPart);
 	setBasicHeaders(Client);
 	createResponseString();
 	Client->sendResponse();
