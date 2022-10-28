@@ -29,7 +29,13 @@ int main(int argc, char const *argv[]) {
 	std::map<uint16_t, std::vector<Config *> >::iterator it    = ports.begin();
 	std::map<uint16_t, std::vector<Config *> >::iterator end   = ports.end();
 	while (it != end) {
-		serv = new Server(it->first, it->second);
+		try {
+			serv = new Server(it->first, it->second);
+		} catch (const Utils::SystemCallFailedException &e) {
+			std::cerr << e.what() << std::endl;
+			exit(EXIT_FAILURE);
+		}
+
 		Server::addPollable(serv, serv->getFileDescriptor(), SERVERPOLL, POLLIN);
 
 		// struct pollfd pfd = {serv->getFileDescriptor(), POLLIN, 0};
@@ -58,13 +64,7 @@ int main(int argc, char const *argv[]) {
 
 	try {
 		Server::run();
-	} catch (const Utils::PollException &e) {
-		std::cerr << e.what();
-		return (EXIT_FAILURE);
-	} catch (const Utils::SocketListenException &e) {
-		std::cerr << e.what();
-		return (EXIT_FAILURE);
-	} catch (const std::exception &e) {
+	} catch (const Utils::SystemCallFailedException &e) {
 		std::cerr << e.what();
 		return (EXIT_FAILURE);
 	}

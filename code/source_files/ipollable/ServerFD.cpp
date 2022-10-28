@@ -19,15 +19,15 @@ void ServerFD::pollin() {
 	socklen_t addrlen = sizeof(client);
 
 	if ((newfd = accept(_fd, reinterpret_cast<sockaddr *>(&client), &addrlen)) < 0) {
-		throw(Utils::SocketAcceptException("Error on accept"));
+		throw(Utils::SocketAcceptException(__PRETTY_FUNCTION__));
 	}
 	if (setsockopt(newfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
 		close(newfd);
-		throw(Utils::SocketAcceptException("Error on setsockopt"));
+		throw(Utils::SocketAcceptException(__PRETTY_FUNCTION__));
 	}
 	if (fcntl(newfd, F_SETFL, O_NONBLOCK) < 0) {
 		close(newfd);
-		throw(Utils::SocketAcceptException("Error on fcntl"));
+		throw(Utils::SocketAcceptException(__PRETTY_FUNCTION__));
 	}
 
 	Server::addPollable(_server, newfd, CLIENTPOLL, POLLIN);

@@ -20,11 +20,10 @@ void ClientFD::receive(size_t len) {
 	time(&_tick);
 	_bytes = recv(_fd, _buffer.data(), len, 0);
 
-	/* poll notified there is data ready, recv however returns EAGAIN (-1) */
 	if (_bytes == -1) {
-		throw(Utils::SocketReceiveException("Error on receive"));
+		throw(Utils::SystemCallFailedException(__PRETTY_FUNCTION__));
 	} else if (_bytes == 0) {
-		throw(Utils::SocketShutdownException("Connection closed by client"));
+		_closed = true;
 	} else if (_bytes > 0) {
 		_inbound.append(_buffer.begin(), _buffer.begin() + _bytes);
 	}
@@ -198,22 +197,14 @@ void ClientFD::respond() {
 }
 
 void ClientFD::process() {
-	try {
-		if (_state == HEADER) {
-			receiveHeader();
-		}
-		if (_state == BODY) {
-			receiveBody();
-		}
-		if (_state == RESPOND) {
-			respond();
-		}
-	} catch (const Utils::ErrorPageException &e) {
-		_state = ERROR;
-		this->_response.generateErrorResponse(this, e.what());
-	} catch (const std::exception &e) {
-		_state = ERROR;
-		this->_response.generateErrorResponse(this, "500");
+	if (_state == HEADER) {
+		receiveHeader();
+	}
+	if (_state == BODY) {
+		receiveBody();
+	}
+	if (_state == RESPOND) {
+		respond();
 	}
 }
 
@@ -226,10 +217,7 @@ void ClientFD::pollin() {
 		_state = ERROR;
 		std::cerr << e.what() << std::endl;
 		this->_response.generateErrorResponse(this, e.what());
-	} catch (const Utils::SocketShutdownException &e) {
-		std::cerr << e.what() << std::endl;
-		_closed = true;
-	} catch (const Utils::SocketReceiveException &e) {
+	} catch (const Utils::SystemCallFailedException &e) {
 		std::cerr << e.what() << std::endl;
 		_closed = true;
 	}
@@ -244,7 +232,7 @@ void ClientFD::pollout() {
 		_bytes = send(_fd, _buffer.data(), getRemainderBytes(), 0);
 
 		if (_bytes == -1) {
-			throw(Utils::SocketSendException("Error on send"));
+			throw(Utils::SystemCallFailedException(__PRETTY_FUNCTION__));
 		} else if (_bytes >= 0) {
 			_total += _bytes;
 			_left -= _bytes;
@@ -279,7 +267,7 @@ void ClientFD::pollout() {
 				cleanClientFD();
 			}
 		}
-	} catch (const Utils::SocketSendException &e) {
+	} catch (const Utils::SystemCallFailedException &e) {
 		std::cerr << e.what() << std::endl;
 		_closed = true;
 	}

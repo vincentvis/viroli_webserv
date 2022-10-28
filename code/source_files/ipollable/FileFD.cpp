@@ -17,7 +17,7 @@ void FileFD::pollin() {
 
 		/* error during read; close pollable; send error response */
 		if (_bytes == -1) {
-			throw(Utils::FileReadException("Error on read"));
+			throw(Utils::SystemCallFailedException(__PRETTY_FUNCTION__));
 
 			/* done reading; close pollable; send response with data */
 		} else if (_bytes == 0) {
@@ -29,7 +29,7 @@ void FileFD::pollin() {
 			_total += _bytes;
 			_data.append(_buffer.begin(), _buffer.begin() + _bytes);
 		}
-	} catch (const Utils::FileReadException &e) {
+	} catch (const Utils::SystemCallFailedException &e) {
 		std::cerr << e.what() << std::endl;
 		_closed = true;
 		_client->_response.generateErrorResponse(_client, "500");
@@ -60,7 +60,7 @@ void FileFD::pollout() {
 
 		/* error during write; close pollable; send error response */
 		if (_bytes == -1) {
-			throw(Utils::FileWriteException("Error on write"));
+			throw(Utils::SystemCallFailedException(__PRETTY_FUNCTION__));
 
 			/* move to next segment to write in next iteratation */
 		} else if (_bytes >= 0) {
@@ -73,7 +73,7 @@ void FileFD::pollout() {
 			_closed = true;
 			_client->_response.generateResponse(_client, "201");
 		}
-	} catch (const Utils::FileWriteException &e) {
+	} catch (const Utils::SystemCallFailedException &e) {
 		std::cerr << e.what() << std::endl;
 		_closed = true;
 		_client->_response.generateErrorResponse(_client, "500");
