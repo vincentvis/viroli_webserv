@@ -17,7 +17,7 @@ Config *Server::findConfig(const Request &request) const {
 	std::vector<Config *>::const_iterator              end    = this->_configs.end();
 
 	std::map<std::string, std::string>                 header = request.getHeaderMap();
-	std::map<std::string, std::string>::const_iterator host   = header.find("Host");
+	std::map<std::string, std::string>::const_iterator host   = header.find("host");
 
 	if (host == header.end()) {
 		return (*(this->_configs.begin()));
