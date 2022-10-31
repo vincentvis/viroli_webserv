@@ -5,7 +5,6 @@
 #include <iostream>
 #include <map>
 
-
 // Statuscode range:
 //	100-199 is classed as Informational.
 //	200-299 is Successful.
