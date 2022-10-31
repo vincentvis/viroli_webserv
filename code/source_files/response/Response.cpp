@@ -33,40 +33,17 @@ std::string Response::getResponseString() const {
 	return this->_responseString;
 }
 
- #include <ctime>
- #include <iomanip>
- #include <iostream>
+std::string Response::getDate() {
+	time_t     rawTime;
+	struct tm *now;
+	char       result[80];
 
- std::string Response::getDate() {
-	time_t now;
-	time(&now);
-	std::string result = asctime(localtime(&now));
-	int pos = result.find(" ");
-	result.insert(pos, ",");
-	std::string year = result.substr(result.length() - 4, 4);
-	result.append("GMT");
-//	Fri Oct 28 18:20:09 2022
-//	return "Mon, 10 Oct 2022 00:43:49 GMT";
+	time(&rawTime);
+	now = localtime(&rawTime);
+
+	strftime(result, sizeof(result), "%a, %d %b %G %T %Z", now);
 	return result;
 }
-
-//std::string Response::getDate() {
-//	time_t curr_time;
-//	tm    *curr_tm;
-//	char   date_string[100];
-//	char   time_string[100];
-//
-//	time(&curr_time);
-//	curr_tm = localtime(&curr_time);
-//
-//	strftime(date_string, 50, "Today is %B %d, %Y", curr_tm);
-//	strftime(time_string, 50, "Current time is %T", curr_tm);
-//
-//	cout << date_string << endl;
-//	cout << time_string << endl;
-////	return "Mon, 10 Oct 2022 00:43:49 GMT";
-//	return
-//}
 
 std::string Response::getStatusCode() const {
 	return this->_statusCode;
