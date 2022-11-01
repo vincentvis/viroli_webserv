@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ipollable/Buffer.hpp"
 #include "ipollable/IPollable.hpp"
 #include "request/RequestInterface.hpp"
 #include "server/Server.hpp"
@@ -23,7 +24,6 @@ class FileFD : public IPollable {
 		bool              _closed;
 		RequestInterface *_requestInterface;
 		ClientFD         *_client;
-
 
 		FileFD(Server *server, int fd, int index);
 		~FileFD();

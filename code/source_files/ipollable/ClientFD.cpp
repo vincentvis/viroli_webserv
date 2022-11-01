@@ -1,10 +1,10 @@
 #include "ipollable/ClientFD.hpp"
 
 ClientFD::ClientFD(Server *server, int fd, int index) :
-	_requestInterface(nullptr), _server(server), _state(HEADER), _buffer(BUFFERSIZE, 0),
-	_inbound(), _outbound(), _body(), _bytes(0), _left(0), _total(0), _fd(fd),
-	_index(index), _tick(), _closed(false) {
-	updateTick();
+	_requestInterface(nullptr), _server(server), _state(HEADER), _inbound(), _outbound(),
+	_body(), _bytes(0), _left(0), _total(0), _fd(fd), _index(index), _tick(),
+	_closed(false) {
+	time(&_tick);
 }
 
 ClientFD::~ClientFD() {
@@ -17,14 +17,15 @@ void ClientFD::resetCounters() {
 }
 
 void ClientFD::receiveHttpMessage() {
-	_bytes = recv(_fd, _buffer.data(), BUFFERSIZE, 0);
+	_bytes = recv(_fd, Buffer::getInstance().getBuff().data(), BUFFERSIZE, 0);
 
 	if (_bytes == -1) {
 		throw(Utils::SystemCallFailedExceptionNoErrno("ClientFD::pollout::recv"));
 	} else if (_bytes == 0) {
 		setClosed();
 	} else if (_bytes > 0) {
-		_inbound.append(_buffer.begin(), _buffer.begin() + _bytes);
+		_inbound.append(Buffer::getInstance().getBuff().begin(),
+						Buffer::getInstance().getBuff().begin() + _bytes);
 	}
 }
 
@@ -195,7 +196,7 @@ void ClientFD::clean() {
 	_state            = HEADER;
 	_inbound.clear();
 	_outbound.clear();
-	_buffer.clear();
+	Buffer::getInstance().getBuff().clear();
 	_body.clear();
 	_bytes = 0;
 	_left  = 0;
@@ -207,7 +208,6 @@ void ClientFD::respond() {
 	if (_request.getMethod() == Utils::post_string && !_body.empty()) {
 		_request.setBody(_body);
 	}
-
 	/* when no body is present in POST request send 100-continue response */
 	if (_request.getMethod() == Utils::post_string &&
 		_request.getExpect() == Utils::continue_string && _inbound.empty())
@@ -254,9 +254,10 @@ void ClientFD::pollout() {
 	updateTick();
 
 	try {
-		_buffer.assign(_outbound.begin() + _total,
-					   _outbound.begin() + _total + getRemainderBytes());
-		_bytes = send(_fd, _buffer.data(), getRemainderBytes(), 0);
+		Buffer::getInstance().getBuff().assign(
+			_outbound.begin() + _total, _outbound.begin() + _total + getRemainderBytes());
+		_bytes =
+			send(_fd, Buffer::getInstance().getBuff().data(), getRemainderBytes(), 0);
 
 		if (_bytes == -1) {
 			throw(Utils::SystemCallFailedExceptionNoErrno("ClientFD::pollout::send"));

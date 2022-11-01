@@ -1,9 +1,9 @@
 #include "ipollable/FileFD.hpp"
 
 FileFD::FileFD(Server *server, int fd, int index) :
-	_state(PROCESS), _server(server), _buffer(BUFFERSIZE, 0), _data(), _bytes(0),
-	_left(0), _total(0), _fd(fd), _index(index), _tick(), _closed(false) {
-	updateTick();
+	_state(PROCESS), _server(server), _data(), _bytes(0), _left(0), _total(0), _fd(fd),
+	_index(index), _tick(), _closed(false) {
+	time(&_tick);
 }
 
 FileFD::~FileFD() {
@@ -14,7 +14,7 @@ void FileFD::pollin() {
 	_client->updateTick();
 
 	try {
-		_bytes = read(_fd, _buffer.data(), BUFFERSIZE);
+		_bytes = read(_fd, Buffer::getInstance().getBuff().data(), BUFFERSIZE);
 
 		/* error during read; close pollable; send error response */
 		if (_bytes == -1) {
@@ -28,7 +28,8 @@ void FileFD::pollin() {
 			/* append buffer to data */
 		} else if (_bytes > 0) {
 			_total += _bytes;
-			_data.append(_buffer.begin(), _buffer.begin() + _bytes);
+			_data.append(Buffer::getInstance().getBuff().begin(),
+						 Buffer::getInstance().getBuff().begin() + _bytes);
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
 		std::cerr << e.what() << std::endl;
@@ -56,9 +57,9 @@ void FileFD::pollout() {
 	_client->updateTick();
 
 	try {
-		_buffer.assign(_data.begin() + _total,
-					   _data.begin() + _total + getRemainderBytes());
-		_bytes = write(_fd, _buffer.data(), getRemainderBytes());
+		Buffer::getInstance().getBuff().assign(
+			_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
+		_bytes = write(_fd, Buffer::getInstance().getBuff().data(), getRemainderBytes());
 
 		/* error during write; close pollable; send error response */
 		if (_bytes == -1) {
