@@ -112,6 +112,10 @@ void FileFD::setIndex(int32_t index) {
 	_index = index;
 }
 
+int32_t FileFD::getIndex() const {
+	return _index;
+}
+
 void FileFD::updateTick() {
 	time(&_tick);
 }

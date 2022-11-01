@@ -19,5 +19,6 @@ class IPollable {
 		virtual int     getFD() const           = 0;
 		virtual Server *getServer() const       = 0;
 		virtual void    setIndex(int32_t index) = 0;
+		virtual int32_t getIndex() const        = 0;
 		virtual void    updateTick()            = 0;
 };

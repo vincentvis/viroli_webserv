@@ -21,25 +21,26 @@ class FileFD : public IPollable {
 		int               _index;
 		time_t            _tick;
 		bool              _closed;
+		RequestInterface *_requestInterface;
+		ClientFD         *_client;
 
 
 		FileFD(Server *server, int fd, int index);
 		~FileFD();
 
-		void              pollin();
-		void              pollout();
-		int               getFD() const;
-		void              readFile();
-		void              writeFile();
-		void              setData(std::string data);
-		Server           *getServer() const;
-		int32_t           getRemainderBytes() const;
-		void              timeout();
-		void              setRequestInterface(RequestInterface *req, ClientFD *Client);
-		RequestInterface *_requestInterface;
-		ClientFD         *_client;
-		bool              isClosed() const;
-		void              setClosed();
-		void              setIndex(int32_t index);
-		void              updateTick();
+		void    pollin();
+		void    pollout();
+		int     getFD() const;
+		void    readFile();
+		void    writeFile();
+		void    setData(std::string data);
+		Server *getServer() const;
+		int32_t getRemainderBytes() const;
+		void    timeout();
+		void    setRequestInterface(RequestInterface *req, ClientFD *Client);
+		bool    isClosed() const;
+		void    setClosed();
+		void    setIndex(int32_t index);
+		int32_t getIndex() const;
+		void    updateTick();
 };

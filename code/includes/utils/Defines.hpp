@@ -9,6 +9,7 @@
 #define CRLF_LEN2       4
 #define TIMEOUT_SECONDS 5
 #define MAX_HEADER_SIZE 8192
+#define BUFFERSIZE      8192
 
 enum PollableType { SERVERPOLL, CLIENTPOLL, FILEPOLL };
 

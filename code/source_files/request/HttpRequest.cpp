@@ -44,7 +44,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 				// all other exceptions?
 				// but what to do?
 				// internal server error for now
-				Client._response.generateErrorResponse(&Client,  "500");
+				Client._response.generateErrorResponse(&Client, "500");
 				return;
 			}
 		}
@@ -78,8 +78,8 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	Client._fileFD =
 		reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
 			Client._server, fd, FILEPOLL, POLLIN));
-	//	if (!Client.getBodyStr().empty()){
-	//		Client._fileFD->setData(Client.getBodyStr());
+	//	if (!Client.getBody().empty()){
+	//		Client._fileFD->setData(Client.getBody());
 	//	}
 	Client._fileFD->setRequestInterface(this, &Client);
 }
@@ -99,17 +99,17 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 		path += "/";
 	}
 	path += uri;
-//	std::cout << path << std::endl;
+	//	std::cout << path << std::endl;
 	int fd = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY, S_IRWXU); // change
 
 	if (fd == -1) {
-		Client._response.generateErrorResponse(&Client,  "404");
+		Client._response.generateErrorResponse(&Client, "404");
 	} else {
 		//		set location in response header
 		Client._fileFD =
 			reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
 				Client._server, fd, FILEPOLL, POLLOUT));
-		if (!Client.getBodyStr().empty()) {
+		if (!Client.getBody().empty()) {
 			Client._fileFD->setData(Client._request.getBody());
 		}
 		Client._fileFD->setRequestInterface(this, &Client);

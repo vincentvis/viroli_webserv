@@ -133,13 +133,18 @@ void Server::run() {
 				continue;
 			}
 
-			/* find on what file descriptor an event occurred */
-			if (Server::_pfds[i].revents & (POLLIN | POLLHUP)) {
-				Server::_pollables[i]->pollin();
-			} else if (Server::_pfds[i].revents & POLLOUT) {
-				Server::_pollables[i]->pollout();
-			} else if (Server::_pfds[i].revents & POLLERR) {
-				Server::_pollables[i]->setClosed();
+			try {
+				/* find on what file descriptor an event occurred */
+				if (Server::_pfds[i].revents & (POLLIN | POLLHUP)) {
+					Server::_pollables[i]->pollin();
+				} else if (Server::_pfds[i].revents & POLLOUT) {
+					Server::_pollables[i]->pollout();
+				} else if (Server::_pfds[i].revents & POLLERR) {
+					Server::_pollables[i]->setClosed();
+				}
+			} catch (const Utils::SocketAcceptException &e) {
+				std::cerr << e.what() << std::endl;
+				continue;
 			}
 		}
 	}

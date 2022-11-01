@@ -19,18 +19,17 @@ void ServerFD::pollin() {
 	socklen_t addrlen = sizeof(client);
 
 	if ((newfd = accept(_fd, reinterpret_cast<sockaddr *>(&client), &addrlen)) < 0) {
-		throw(Utils::SocketAcceptException(__PRETTY_FUNCTION__));
+		throw(Utils::SocketAcceptException("ServerFD::pollin::accept"));
 	}
 	if (setsockopt(newfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
 		close(newfd);
-		throw(Utils::SocketAcceptException(__PRETTY_FUNCTION__));
+		throw(Utils::SocketAcceptException("ServerFD::pollin::setsockopt"));
 	}
 	if (fcntl(newfd, F_SETFL, O_NONBLOCK) < 0) {
 		close(newfd);
-		throw(Utils::SocketAcceptException(__PRETTY_FUNCTION__));
+		throw(Utils::SocketAcceptException("ServerFD::pollin::fcntl"));
 	}
 
-	std::cout << "new connection accepted\n";
 	PollableFactory::getInstance().createPollable(_server, newfd, CLIENTPOLL, POLLIN);
 }
 
@@ -58,6 +57,10 @@ void ServerFD::setClosed() {
 
 void ServerFD::setIndex(int32_t index) {
 	_index = index;
+}
+
+int32_t ServerFD::getIndex() const {
+	return _index;
 }
 
 void ServerFD::updateTick() {

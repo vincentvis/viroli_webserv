@@ -23,6 +23,7 @@ class ServerFD : public IPollable {
 		bool          isClosed() const;
 		void          setClosed();
 		void          setIndex(int32_t index);
+    int32_t getIndex() const;
 		void          updateTick();
 		const time_t &getTick() const;
 };
