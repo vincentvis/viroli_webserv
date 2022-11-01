@@ -26,8 +26,6 @@
 #include <utility>
 #include <vector>
 
-#define BUFFERSIZE 10000 // tmp
-
 class IPollable;
 
 class Server {
