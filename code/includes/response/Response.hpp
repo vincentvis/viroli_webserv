@@ -4,7 +4,7 @@
 #include "response/HttpStatus.hpp"
 #include <iostream>
 #include <map>
-#include <time.h>
+#include <ctime>
 
 // Statuscode range:
 //	100-199 is classed as Informational.
