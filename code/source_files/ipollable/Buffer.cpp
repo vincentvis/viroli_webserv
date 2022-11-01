@@ -1,6 +1,6 @@
 #include "ipollable/Buffer.hpp"
 
-Buffer::Buffer() : _buff(BUFFERSIZE, 0) {
+Buffer::Buffer() : _buff(BUFFER_SIZE, 0) {
 }
 
 Buffer &Buffer::getInstance() {

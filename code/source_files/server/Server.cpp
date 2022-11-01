@@ -81,7 +81,7 @@ int32_t Server::getFD() const {
 	return _fd;
 }
 
-void Server::removePollable(int index) {
+void Server::remove(int index) {
 	close(Server::_pfds[index].fd);
 
 	std::cout << "_pfd fd: " << Server::_pfds[index].fd
@@ -110,6 +110,12 @@ void Server::removePollable(int index) {
 	std::cout << "succesful removal\n";
 }
 
+void Server::clear() {
+	for (size_t i = Server::_pollables.size(); i < Server::_pollables.size(); ++i) {
+		remove(i);
+	}
+}
+
 /* events var might be not needed */
 void Server::run() {
 	signal(SIGPIPE, SIG_IGN);
@@ -128,7 +134,7 @@ void Server::run() {
 			assert(Server::_pollables[i]->getFD() != -1); // remove eventually
 			Server::_pollables[i]->timeout();
 			if (Server::_pollables[i]->isClosed() == true) {
-				removePollable(i);
+				remove(i);
 				--i;
 				continue;
 			}
@@ -144,7 +150,6 @@ void Server::run() {
 				}
 			} catch (const Utils::SocketAcceptException &e) {
 				std::cerr << e.what() << std::endl;
-				continue;
 			}
 		}
 	}

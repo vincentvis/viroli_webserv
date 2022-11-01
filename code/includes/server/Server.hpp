@@ -43,8 +43,9 @@ class Server {
 
 		uint16_t                          getPort() const;
 		int32_t                           getFD() const;
+		static void                       clear();
 		static void                       run();
-		static void                       removePollable(int index);
+		static void                       remove(int index);
 
 		static std::vector<IPollable *>   _pollables;
 		static std::vector<struct pollfd> _pfds;

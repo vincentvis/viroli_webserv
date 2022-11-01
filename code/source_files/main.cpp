@@ -18,7 +18,7 @@ int main(int argc, char const *argv[]) {
 		return (1);
 	}
 
-	Server *serv;
+	Server                                              *serv;
 
 	std::map<uint16_t, std::vector<Config *> >           ports = config.getPortMap();
 	std::map<uint16_t, std::vector<Config *> >::iterator it    = ports.begin();
@@ -61,10 +61,13 @@ int main(int argc, char const *argv[]) {
 		Server::run();
 	} catch (const Utils::SystemCallFailedException &e) {
 		std::cerr << e.what() << std::endl;
+		Server::clear();
 		return (EXIT_FAILURE);
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << std::endl;
+		Server::clear();
 		return (EXIT_FAILURE);
 	}
+	Server::clear();
 	return (EXIT_SUCCESS);
 }

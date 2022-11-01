@@ -17,7 +17,7 @@ void ClientFD::resetCounters() {
 }
 
 void ClientFD::receiveHttpMessage() {
-	_bytes = recv(_fd, Buffer::getInstance().getBuff().data(), BUFFERSIZE, 0);
+	_bytes = recv(_fd, Buffer::getInstance().getBuff().data(), BUFFER_SIZE, 0);
 
 	if (_bytes == -1) {
 		throw(Utils::SystemCallFailedExceptionNoErrno("ClientFD::pollout::recv"));
@@ -183,7 +183,7 @@ void ClientFD::receiveBody() {
 }
 
 int32_t ClientFD::getRemainderBytes() const {
-	return BUFFERSIZE > _left ? _left : BUFFERSIZE;
+	return BUFFER_SIZE > _left ? _left : BUFFER_SIZE;
 }
 
 void ClientFD::clean() {

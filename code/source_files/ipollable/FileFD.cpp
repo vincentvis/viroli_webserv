@@ -14,7 +14,7 @@ void FileFD::pollin() {
 	_client->updateTick();
 
 	try {
-		_bytes = read(_fd, Buffer::getInstance().getBuff().data(), BUFFERSIZE);
+		_bytes = read(_fd, Buffer::getInstance().getBuff().data(), BUFFER_SIZE);
 
 		/* error during read; close pollable; send error response */
 		if (_bytes == -1) {
@@ -44,7 +44,7 @@ void FileFD::setRequestInterface(RequestInterface *req, ClientFD *Client) {
 }
 
 int32_t FileFD::getRemainderBytes() const {
-	return BUFFERSIZE > _left ? _left : BUFFERSIZE;
+	return BUFFER_SIZE > _left ? _left : BUFFER_SIZE;
 }
 
 void FileFD::setData(std::string data) {
