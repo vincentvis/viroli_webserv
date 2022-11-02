@@ -179,14 +179,15 @@ void Response::generateCGIResponse(ClientFD *Client, std::string cgiOutput) {
 	// if cgi contains a header, parse it and strip it from the body to be returned
 	std::string::size_type cgiHeaders = cgiOutput.find("\n\n");
 
-
 	setStatusCode("200");
 	addHeader(Utils::connection_string, "close");
+
+	createStatusLine(Client);
 
 	if (cgiHeaders == std::string::npos) {
 		// no headers...
 		// just send everything I guess?
-		addHeader(Utils::contentType_string, "text/plain");
+		addHeader(Utils::contentType_string, "text/html");
 		addHeader(Utils::contentLength_string, cgiOutput.length());
 		setMessageBody(cgiOutput);
 		setBasicHeaders(Client);
@@ -194,15 +195,9 @@ void Response::generateCGIResponse(ClientFD *Client, std::string cgiOutput) {
 		Client->sendResponse();
 		return;
 	}
-	std::cout << "\033[33;4mGenerate CGI response\033[0m" << std::endl;
-	std::cerr << "found newlinenewline: " << cgiHeaders << std::endl;
 	// there are headers, extract them and set them?
 	std::string headerPart = cgiOutput.substr(0, cgiHeaders + 1);
 	std::string bodyPart   = cgiOutput.substr(cgiHeaders + 2);
-
-	std::cerr << "body at this point: \n" << bodyPart << std::endl;
-
-	std::cout << "Parse these headers: [" << headerPart << "]" << std::endl;
 
 	while (headerPart.empty() == false) {
 		std::string::size_type name_end =
@@ -219,17 +214,14 @@ void Response::generateCGIResponse(ClientFD *Client, std::string cgiOutput) {
 		}
 		std::string value = headerPart.substr(name_end + 1, value_end - name_end - 1);
 		Utils::trimWhitespaceRef(value);
-		if (key == "Content-type") {
-			key = "Content-Type";
-		}
-		std::cerr << "adding header " << key << " with value " << value << std::endl;
 		headerPart = headerPart.substr(value_end + 1);
+		addHeader(key, value);
 	}
 	// std::cout << "key: [" << key << "] next: " << headerPart.at(name_end) << "\n";
 
 	// this should be possible gotten from the header of the cgi output
 	addHeaderIfNotSet(Utils::contentLength_string, bodyPart.length());
-	addHeaderIfNotSet(Utils::contentType_string, "text/plain");
+	addHeaderIfNotSet(Utils::contentType_string, "text/html");
 
 	setMessageBody(bodyPart);
 	setBasicHeaders(Client);
