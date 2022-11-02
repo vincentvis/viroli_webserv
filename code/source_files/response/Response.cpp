@@ -111,10 +111,9 @@ void Response::createResponseString() {
 		it++;
 	}
 
-	/* add second CRLF to mark end of header */
-
 	/* Add  message body to response string */
 	if (!_messageBody.empty()) {
+		/* add second CRLF to mark end of header */
 		_responseString.append(CRLF);
 		_responseString.append(_messageBody);
 	}

@@ -5,6 +5,7 @@ ClientFD::ClientFD(Server *server, int fd, int index) :
 	_body(), _bytes(0), _left(0), _total(0), _fd(fd), _index(index), _tick(),
 	_closed(false) {
 	time(&_tick);
+	this->_config = *(this->_server->_configs.begin());
 }
 
 ClientFD::~ClientFD() {
