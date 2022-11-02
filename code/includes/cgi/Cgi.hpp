@@ -28,7 +28,9 @@ class Cgi {
 		Cgi                setQueryString(std::string queryString);
 		char *const       *makeArgv() const;
 		Cgi                setEnv(std::string key, std::string value);
-		int execute(ClientFD &Client, CGIRequest *interface, enum request_type);
+		int   execute(ClientFD &Client, CGIRequest *interface, enum request_type);
+
+		pid_t getPid() const;
 
 	protected:
 		FileStat                 _source;

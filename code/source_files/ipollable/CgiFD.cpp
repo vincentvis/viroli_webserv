@@ -23,6 +23,7 @@ void CgiFD::pollin() {
 			if (_data.empty() == false) {
 				_client->_response.generateCGIResponse(_client, _data);
 				_data.clear();
+				setClosed();
 			}
 			/* append buffer to data */
 		} else if (_bytes > 0) {

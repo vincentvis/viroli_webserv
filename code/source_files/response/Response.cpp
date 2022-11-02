@@ -112,10 +112,10 @@ void Response::createResponseString() {
 	}
 
 	/* add second CRLF to mark end of header */
-	_responseString.append(CRLF);
 
 	/* Add  message body to response string */
 	if (!_messageBody.empty()) {
+		_responseString.append(CRLF);
 		_responseString.append(_messageBody);
 	}
 
@@ -179,7 +179,6 @@ void Response::generateCGIResponse(ClientFD *Client, std::string cgiOutput) {
 	// if cgi contains a header, parse it and strip it from the body to be returned
 	std::string::size_type cgiHeaders = cgiOutput.find("\n\n");
 
-	std::cout << "\033[34;4mGenerate CGI response\033[0m" << std::endl;
 
 	setStatusCode("200");
 	addHeader(Utils::connection_string, "close");
@@ -195,9 +194,13 @@ void Response::generateCGIResponse(ClientFD *Client, std::string cgiOutput) {
 		Client->sendResponse();
 		return;
 	}
+	std::cout << "\033[33;4mGenerate CGI response\033[0m" << std::endl;
+	std::cerr << "found newlinenewline: " << cgiHeaders << std::endl;
 	// there are headers, extract them and set them?
 	std::string headerPart = cgiOutput.substr(0, cgiHeaders + 1);
-	std::string bodyPart   = cgiOutput.substr(cgiHeaders + 3);
+	std::string bodyPart   = cgiOutput.substr(cgiHeaders + 2);
+
+	std::cerr << "body at this point: \n" << bodyPart << std::endl;
 
 	std::cout << "Parse these headers: [" << headerPart << "]" << std::endl;
 
@@ -219,14 +222,14 @@ void Response::generateCGIResponse(ClientFD *Client, std::string cgiOutput) {
 		if (key == "Content-type") {
 			key = "Content-Type";
 		}
-		addHeader(key, value);
+		std::cerr << "adding header " << key << " with value " << value << std::endl;
 		headerPart = headerPart.substr(value_end + 1);
 	}
 	// std::cout << "key: [" << key << "] next: " << headerPart.at(name_end) << "\n";
 
 	// this should be possible gotten from the header of the cgi output
-	addHeader(Utils::contentLength_string, bodyPart.length());
-	addHeader(Utils::contentType_string, "text/html");
+	addHeaderIfNotSet(Utils::contentLength_string, bodyPart.length());
+	addHeaderIfNotSet(Utils::contentType_string, "text/plain");
 
 	setMessageBody(bodyPart);
 	setBasicHeaders(Client);

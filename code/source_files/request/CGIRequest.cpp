@@ -14,6 +14,8 @@ CGIRequest::CGIRequest(ClientFD &Client) {
 	}
 }
 
+#include <iomanip>
+
 void CGIRequest::GETRequest(ClientFD &Client) {
 	Cgi cgi(Client._request.getFileStatCopy(), Client._request.getMethod(),
 			Client._server->getPort(), Client._config->getFirstServerName());
@@ -22,15 +24,17 @@ void CGIRequest::GETRequest(ClientFD &Client) {
 		cgi.setQueryString(Client._request.getQuery());
 	}
 
-	DEBUGSTART << "Execute CGI get" << DEBUGEND;
+	DEBUGSTART << std::setw(4) << cgi.getPid() << ": Execute CGI get" << DEBUGEND;
 	cgi.execute(Client, this, Cgi::GET);
 
 
 	//
 	//
-	std::cout << "\033[32m[CGI] " << Client._request.getMethod() << " "
-			  << Client._request.getUri() << std::endl;
-	std::cout << "\033[4mQUERY: " << Client._request.getQuery() << "\033[0m" << std::endl;
+	std::cout << "\033[32m" << std::setw(4) << cgi.getPid() << ": [CGI] "
+			  << Client._request.getMethod() << " " << Client._request.getUri()
+			  << std::endl;
+	std::cout << "\033[4m" << std::setw(4) << cgi.getPid()
+			  << ": QUERY: " << Client._request.getQuery() << "\033[0m" << std::endl;
 }
 
 void CGIRequest::POSTRequest(ClientFD &Client) {
@@ -48,8 +52,9 @@ void CGIRequest::POSTRequest(ClientFD &Client) {
 
 	//
 	//
-	std::cout << "\033[32m[CGI] " << Client._request.getMethod() << " "
-			  << Client._request.getUri() << std::endl;
+	std::cout << "\033[32m" << std::setw(4) << cgi.getPid() << ": [CGI] "
+			  << Client._request.getMethod() << " " << Client._request.getUri()
+			  << std::endl;
 	std::cout << "\033[4mBODY: " << Client._request.getBody() << "\033[0m" << std::endl;
 }
 

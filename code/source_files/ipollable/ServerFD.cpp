@@ -27,6 +27,7 @@ void ServerFD::pollin() {
 	}
 	if (fcntl(newfd, F_SETFL, O_NONBLOCK) < 0) {
 		close(newfd);
+
 		throw(Utils::SocketAcceptException(__PRETTY_FUNCTION__));
 	}
 
