@@ -4,7 +4,7 @@
 #include "response/HttpStatus.hpp"
 #include <iostream>
 #include <map>
-
+#include <ctime>
 
 // Statuscode range:
 //	100-199 is classed as Informational.
@@ -12,6 +12,7 @@
 //	300-399 is Redirection.
 //	400-499 is Client error.
 //	500-599 is Server error.
+
 class ClientFD;
 class Response {
 	private:

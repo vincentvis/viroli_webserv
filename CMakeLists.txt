@@ -24,8 +24,13 @@ add_executable(webserv
         code/includes/ipollable/IPollable.hpp
         code/source_files/ipollable/IPollable.cpp
         code/source_files/ipollable/FileFD.cpp
+        code/includes/ipollable/FileFD.hpp
         code/source_files/ipollable/ClientFD.cpp
+        code/includes/ipollable/ClientFD.hpp
         code/source_files/ipollable/ServerFD.cpp
+        code/includes/ipollable/ServerFD.hpp
+        code/source_files/ipollable/Buffer.cpp
+        code/includes/ipollable/Buffer.hpp
         code/source_files/request/Request.cpp
         code/includes/request/Request.hpp
         code/source_files/request/RequestInterface.cpp
