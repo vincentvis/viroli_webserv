@@ -116,6 +116,7 @@ void Response::createResponseString() {
 		/* add second CRLF to mark end of header */
 		_responseString.append(CRLF);
 		_responseString.append(_messageBody);
+//		_responseString.append(CRLF);
 	}
 
 	/* clear Map and statusLine for next request */

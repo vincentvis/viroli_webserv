@@ -5,6 +5,7 @@ ClientFD::ClientFD(Server *server, int fd, int index) :
 	_body(), _bytes(0), _left(0), _total(0), _fd(fd), _index(index), _tick(),
 	_closed(false) {
 	time(&_tick);
+	this->_config = *(this->_server->_configs.begin());
 }
 
 ClientFD::~ClientFD() {
@@ -123,7 +124,6 @@ void ClientFD::receiveHeader() {
 	size_t end = 0;
 
 	if ((end = _inbound.find(CRLF_END)) != std::string::npos) {
-		this->_config = *(this->_server->_configs.begin());
 		this->_request.ParseRequest(this->_inbound);
 		this->_request.printAttributesInRequestClass();
 		this->_config   = this->_server->findConfig(this->_request);
