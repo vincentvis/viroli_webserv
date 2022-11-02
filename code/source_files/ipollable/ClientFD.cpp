@@ -120,9 +120,13 @@ void ClientFD::sendResponse() {
 */
 
 void ClientFD::receiveHeader() {
-	size_t end = 0;
+	size_t end = _inbound.find(CRLF_END);
 
-	if ((end = _inbound.find(CRLF_END)) != std::string::npos) {
+	if (end != std::string::npos && end > MAX_HEADER_SIZE) {
+		throw(Utils::ErrorPageException("413"));
+	} else if (end == std::string::npos && _inbound.size() > MAX_HEADER_SIZE) {
+		throw(Utils::ErrorPageException("413"));
+	} else if (end != std::string::npos) {
 		this->_request.ParseRequest(this->_inbound);
 		this->_request.printAttributesInRequestClass();
 		this->_config   = this->_server->findConfig(this->_request);
