@@ -123,6 +123,7 @@ void ClientFD::receiveHeader() {
 	size_t end = 0;
 
 	if ((end = _inbound.find(CRLF_END)) != std::string::npos) {
+		this->_config = *(this->_server->_configs.begin());
 		this->_request.ParseRequest(this->_inbound);
 		this->_request.printAttributesInRequestClass();
 		this->_config   = this->_server->findConfig(this->_request);
