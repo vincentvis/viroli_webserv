@@ -100,15 +100,15 @@ void Response::createResponseString() {
 	_responseString.append(CRLF);
 
 	/*Add Headers to response string */
-	std::map<std::string, std::string>::iterator _it  = _responseHeader.begin();
-	std::map<std::string, std::string>::iterator _end = _responseHeader.end();
+	std::map<std::string, std::string>::iterator it  = _responseHeader.begin();
+	std::map<std::string, std::string>::iterator end = _responseHeader.end();
 
-	while (_it != _end) {
-		_responseString.append(_it->first);
+	while (it != end) {
+		_responseString.append(it->first);
 		_responseString.append(": ");
-		_responseString.append(_it->second);
+		_responseString.append(it->second);
 		_responseString.append(CRLF);
-		_it++;
+		it++;
 	}
 
 	/* add second CRLF to mark end of header */
