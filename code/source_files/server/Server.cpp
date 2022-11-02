@@ -84,8 +84,8 @@ int32_t Server::getFD() const {
 void Server::remove(int index) {
 	IPollable *obsolete = Server::_pollables.at(index);
 
-	std::cout << "pre: " << obsolete->getFD() << std::endl;
-	std::cout << "addr: " << obsolete << std::endl;
+	// std::cout << "pre: " << obsolete->getFD() << std::endl;
+	// std::cout << "addr: " << obsolete << std::endl;
 
 	// shutdown(Server::_pfds[index].fd, SHUT_RDWR);
 	close(Server::_pfds[index].fd);
@@ -97,12 +97,12 @@ void Server::remove(int index) {
 		Server::_pollables[index]->setIndex(index);
 	}
 
-	std::cout << "post: " << obsolete->getFD() << std::endl;
-	std::cout << "addr: " << obsolete << std::endl;
+	// std::cout << "post: " << obsolete->getFD() << std::endl;
+	// std::cout << "addr: " << obsolete << std::endl;
 	delete obsolete;
 	obsolete = nullptr;
 
-	std::cout << "addr: " << obsolete << std::endl;
+	// std::cout << "addr: " << obsolete << std::endl;
 
 	// close(Server::_pfds[index].fd);
 
@@ -125,7 +125,7 @@ void Server::remove(int index) {
 }
 
 void Server::clear() {
-	for (size_t i = Server::_pollables.size(); i < Server::_pollables.size(); ++i) {
+	for (size_t i = 0; i < Server::_pollables.size(); ++i) {
 		remove(i);
 	}
 }
