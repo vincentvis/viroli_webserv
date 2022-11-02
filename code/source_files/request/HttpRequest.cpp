@@ -64,6 +64,8 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 }
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
+//	if (Client._request.getContentLength() == 0) //not sure if we need to do this?
+//		Client._response.generateResponse(&Client, "200");
 	std::string path = Client._request.getFileStat().getFull();
 	int         fd   = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY,
 							S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
