@@ -34,8 +34,15 @@ std::string Response::getResponseString() const {
 }
 
 std::string Response::getDate() {
-	// do something to get date and time;
-	return "Mon, 10 Oct 2022 00:43:49 GMT";
+	time_t     rawTime;
+	struct tm *now;
+	char       result[80];
+
+	time(&rawTime);
+	now = localtime(&rawTime);
+
+	strftime(result, sizeof(result), "%a, %d %b %G %T %Z", now);
+	return result;
 }
 
 std::string Response::getStatusCode() const {
