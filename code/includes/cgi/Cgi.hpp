@@ -3,8 +3,11 @@
 #include "cgi/CgiVars.hpp"
 #include "cgi/Pipes.hpp"
 #include "ipollable/ClientFD.hpp"
+#include "utils/Exception.hpp"
 #include "utils/FileStat.hpp"
+#include <cerrno>
 #include <cstdlib>
+#include <cstring>
 #include <string.h>
 #include <unistd.h>
 
@@ -38,6 +41,7 @@ class Cgi {
 
 		char                    *_buff;
 		Pipes                    _pipes;
+		char                    *_tmpnam;
 		int                      _fd;
 
 		CgiVars                  _env;

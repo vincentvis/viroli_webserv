@@ -4,9 +4,11 @@
 Cgi::Cgi(FileStat filestats, std::string const &method, uint16_t port,
 		 std::string servername) :
 	_source(filestats) {
+	std::cerr << __PRETTY_FUNCTION__ << std::endl;
 	if (_source.isReg() == false) {
 		throw Utils::ErrorPageException("404");
 	}
+	this->_pid           = 0;
 	this->_script_name   = _source.getFilename();
 	this->_executor_name = Executables::getExecutable(_source.getExtension());
 	this->_executable    = Executables::findExecutableInPath(this->_executor_name);
@@ -26,17 +28,24 @@ Cgi::Cgi(FileStat filestats, std::string const &method, uint16_t port,
 	}
 	_env.setVar("SERVER_NAME", servername);
 
-	_buff = new char[32];
-	memcpy(_buff, "/tmp/viroli_cgi_file___XXXXXX\0", 30);
-	_fd = mkstemp(_buff); // should catch erro of this
-	std::cerr << "FD= " << _fd << ", _buff: " << _buff << std::endl;
+	// crate temp name with tempnam internal buffer
+	// _buff = tmpnam(NULL);
 
-	_bash_string += std::string("> ") + _buff + " ";
+	_buff = new char[80];
+	memcpy(_buff, "/tmp/viroli_cgi_file___XXXXXX\0", 30);
+	_tmpnam = mktemp(_buff); // should catch erro of this
+	// std::cerr << "FD= " << _fd << ", _buff: " << _buff << std::endl;
+	if (_tmpnam == NULL) {
+		throw Utils::SystemCallFailedException("mktemp()");
+	}
+
+	_bash_string += std::string("> ") + _tmpnam + " ";
 	_bash_string += _executable + " " + _source.getFilename();
 
 	// fcntl(_fd, F_SETFL, O_NONBLOCK); // should catch erro of this
-	std::cerr << "FD(" << _fd << ")is nonblock now = " << fcntl(_fd, F_SETFL, O_NONBLOCK)
-			  << std::endl;
+	// std::cerr << "FD(" << _fd << ")is nonblock now = " << fcntl(_fd, F_SETFL,
+	// O_NONBLOCK)
+	// << std::endl;
 
 	// int mkostemp(char *template, int flags);
 
@@ -44,10 +53,12 @@ Cgi::Cgi(FileStat filestats, std::string const &method, uint16_t port,
 }
 
 Cgi::Cgi(const Cgi &other) : _source(other._source) {
+	std::cerr << __PRETTY_FUNCTION__ << std::endl;
 	*this = other;
 }
 
 Cgi &Cgi::operator=(const Cgi &other) {
+	std::cerr << __PRETTY_FUNCTION__ << std::endl;
 	if (this != &other) {
 		this->_source        = other._source;
 		this->_executor_name = other._executor_name;
@@ -56,35 +67,34 @@ Cgi &Cgi::operator=(const Cgi &other) {
 		this->_env           = other._env;
 		this->_args          = other._args;
 
+		// this probably should copy stuff from char pointers!!
+
 		// this->_pipes.openPipes();
 	}
 	return (*this);
 }
 
-#include <cerrno>
-#include <cstring>
 Cgi::~Cgi() {
-	errno = 0;
-	std::cout << "[" << _pid << "] tmpfile (" << _buff << ") unlink: " << unlink(_buff)
-			  << " errno: " << strerror(errno) << std::endl;
-	errno = 0;
-	std::cout << "[" << _pid << "] tmpfile (" << _buff << ") removal: " << remove(_buff)
-			  << " errno: " << strerror(errno) << std::endl;
+	std::cerr << __PRETTY_FUNCTION__ << " pid: " << _pid << std::endl;
+	// errno = 0;
+	// std::cout << "[" << _pid << "] tmpfile (" << _buff << ") unlink: " << unlink(_buff)
+	// << " errno: " << strerror(errno) << std::endl;
+	if (_pid != 0) {
+		errno = 0;
+		std::cout << "[" << _pid << "] tmpfile (" << _buff
+				  << ") removal: " << remove(_buff) << " errno: " << strerror(errno)
+				  << std::endl;
+	}
 }
 
 int Cgi::execute(ClientFD &Client, CGIRequest *interface, enum request_type type) {
+	std::cerr << __PRETTY_FUNCTION__ << std::endl;
 	_pid = fork();
 
 	if (_pid == -1) {
 		throw Utils::ErrorPageException("502");
 	}
 
-	if (_pid != 0) {
-		Client._cgiFD =
-			reinterpret_cast<CgiFD *>(PollableFactory::getInstance().createPollable(
-				Client._server, _fd, CGIPOLL, POLLIN));
-		Client._cgiFD->setRequestInterface(interface, &Client);
-	}
 	if (_pid == 0) {
 		(void)type;
 		chdir(_source.getPath().c_str());
@@ -95,10 +105,18 @@ int Cgi::execute(ClientFD &Client, CGIRequest *interface, enum request_type type
 		// execve(_executable.c_str(), makeArgv(), _env.toCharPtrs());
 		exit(1);
 	}
+	if (_pid != 0) {
+		_fd = open(_buff, O_CREAT | O_RDONLY, 0777);
+		Client._cgiFD =
+			reinterpret_cast<CgiFD *>(PollableFactory::getInstance().createPollable(
+				Client._server, _fd, CGIPOLL, POLLIN));
+		Client._cgiFD->setRequestInterface(interface, &Client);
+	}
 	return (0);
 }
 
 Cgi Cgi::setQueryString(std::string queryString) {
+	std::cerr << __PRETTY_FUNCTION__ << std::endl;
 	_query = queryString;
 	_bash_string += " \"" + queryString + "\"";
 	// _args.push_back(queryString);
@@ -106,11 +124,13 @@ Cgi Cgi::setQueryString(std::string queryString) {
 }
 
 Cgi Cgi::setEnv(std::string key, std::string value) {
+	std::cerr << __PRETTY_FUNCTION__ << std::endl;
 	_env.setVar(key, value);
 	return (*this);
 }
 
 char *const *Cgi::makeArgv() const {
+	std::cerr << __PRETTY_FUNCTION__ << std::endl;
 	std::vector<std::string>::const_iterator it   = _args.begin();
 	std::vector<std::string>::const_iterator end  = _args.end();
 	char                                   **argv = new char *[_args.size() + 1];
