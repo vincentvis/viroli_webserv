@@ -20,6 +20,7 @@ void ClientFD::receiveHttpMessage() {
 	_bytes = recv(_fd, Buffer::getInstance().getBuff().data(), BUFFER_SIZE, 0);
 
 	if (_bytes == -1) {
+		std::cerr << strerror(errno) << std::endl;
 		throw(Utils::SystemCallFailedExceptionNoErrno("ClientFD::pollout::recv"));
 	} else if (_bytes == 0) {
 		setClosed();
@@ -80,6 +81,13 @@ bool ClientFD::endOfChunked() {
 	return (false);
 }
 
+bool ClientFD::chunkedSizeUnavailable(size_t pos) {
+	if (_left == 0 && pos == std::string::npos) {
+		return (true);
+	}
+	return (false);
+}
+
 void ClientFD::receiveChunked() {
 	size_t pos = 0;
 
@@ -87,7 +95,7 @@ void ClientFD::receiveChunked() {
 		pos = _inbound.find("\r\n");
 
 		/* no known chunk size and not yet received; receive more bytes */
-		if (_left == 0 && pos == std::string::npos) {
+		if (chunkedSizeUnavailable(pos)) {
 			break;
 		}
 
@@ -123,7 +131,7 @@ void ClientFD::receiveLength() {
 	}
 }
 
-void ClientFD::sendResponse() {
+void ClientFD::setupResponse() {
 	Server::_pfds[_index].events = POLLOUT;
 	_outbound                    = _response.getResponseString();
 	_bytes                       = 0;
@@ -182,7 +190,7 @@ void ClientFD::receiveBody() {
 	}
 }
 
-int32_t ClientFD::getRemainderBytes() const {
+int32_t ClientFD::getSendSize() const {
 	return BUFFER_SIZE > _left ? _left : BUFFER_SIZE;
 }
 
@@ -255,11 +263,11 @@ void ClientFD::pollout() {
 
 	try {
 		Buffer::getInstance().getBuff().assign(
-			_outbound.begin() + _total, _outbound.begin() + _total + getRemainderBytes());
-		_bytes =
-			send(_fd, Buffer::getInstance().getBuff().data(), getRemainderBytes(), 0);
+			_outbound.begin() + _total, _outbound.begin() + _total + getSendSize());
+		_bytes = send(_fd, Buffer::getInstance().getBuff().data(), getSendSize(), 0);
 
 		if (_bytes == -1) {
+			std::cerr << strerror(errno) << std::endl;
 			throw(Utils::SystemCallFailedExceptionNoErrno("ClientFD::pollout::send"));
 		} else if (_bytes >= 0) {
 			_total += _bytes;
@@ -314,7 +322,7 @@ void ClientFD::timeout() {
 
 	time(&timeout);
 	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
-		std::cerr << "Timeout\n";
+		std::cerr << "ClientFD::timeout\n";
 		setClosed();
 	}
 }

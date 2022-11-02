@@ -33,12 +33,6 @@ int main(int argc, char const *argv[]) {
 
 		PollableFactory::getInstance().createPollable(serv, serv->getFD(), SERVERPOLL,
 													  POLLIN);
-
-		// struct pollfd pfd = {serv->getFileDescriptor(), POLLIN, 0};
-		// Server::addPollable(pfd, new ServerFD(serv, pfd.fd, Server::_pfds.size()));
-
-		// Server::addPoll(serv);
-		// servers.push_back(serv);
 		it++;
 	}
 

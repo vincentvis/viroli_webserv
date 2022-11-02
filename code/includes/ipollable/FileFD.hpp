@@ -35,7 +35,7 @@ class FileFD : public IPollable {
 		void    writeFile();
 		void    setData(std::string data);
 		Server *getServer() const;
-		int32_t getRemainderBytes() const;
+		int32_t getWriteSize() const;
 		void    timeout();
 		void    setRequestInterface(RequestInterface *req, ClientFD *Client);
 		bool    isClosed() const;

@@ -48,14 +48,15 @@ class ClientFD : public IPollable {
 		std::string   getBody() const;
 		void          receiveHttpMessage();
 		void          receiveChunked();
+		bool          chunkedSizeUnavailable(size_t pos);
 		bool          getChunkedSize(size_t pos);
 		bool          getChunked();
 		bool          endOfChunked();
 		void          receiveLength();
 		void          respond();
 		Server       *getServer() const;
-		void          sendResponse();
-		int32_t       getRemainderBytes() const;
+		void          setupResponse();
+		int32_t       getSendSize() const;
 		void          timeout();
 		bool          isClosed() const;
 		void          setClosed();

@@ -11,7 +11,8 @@ FileFD::~FileFD() {
 
 void FileFD::pollin() {
 	updateTick();
-	_client->updateTick();
+	if (_client)
+		_client->updateTick();
 
 	try {
 		_bytes = read(_fd, Buffer::getInstance().getBuff().data(), BUFFER_SIZE);
@@ -23,7 +24,9 @@ void FileFD::pollin() {
 			/* done reading; close pollable; send response with data */
 		} else if (_bytes == 0) {
 			setClosed();
-			_client->_response.generateResponse(_client, _data, "200");
+			if (_client && _client->isClosed() == false) {
+				_client->_response.generateResponse(_client, _data, "200");
+			}
 
 			/* append buffer to data */
 		} else if (_bytes > 0) {
@@ -34,32 +37,25 @@ void FileFD::pollin() {
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
 		std::cerr << e.what() << std::endl;
 		setClosed();
-		_client->_response.generateErrorResponse(_client, "500");
+		if (_client && _client->isClosed() == false) {
+			_client->_response.generateErrorResponse(_client, "500");
+		}
 	}
 }
 
-void FileFD::setRequestInterface(RequestInterface *req, ClientFD *Client) {
-	_requestInterface = req;
-	_client           = Client;
-}
-
-int32_t FileFD::getRemainderBytes() const {
+int32_t FileFD::getWriteSize() const {
 	return BUFFER_SIZE > _left ? _left : BUFFER_SIZE;
-}
-
-void FileFD::setData(std::string data) {
-	_data = data;
-	_left = _data.size();
 }
 
 void FileFD::pollout() {
 	updateTick();
-	_client->updateTick();
+	if (_client)
+		_client->updateTick();
 
 	try {
-		Buffer::getInstance().getBuff().assign(
-			_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
-		_bytes = write(_fd, Buffer::getInstance().getBuff().data(), getRemainderBytes());
+		Buffer::getInstance().getBuff().assign(_data.begin() + _total,
+											   _data.begin() + _total + getWriteSize());
+		_bytes = write(_fd, Buffer::getInstance().getBuff().data(), getWriteSize());
 
 		/* error during write; close pollable; send error response */
 		if (_bytes == -1) {
@@ -74,12 +70,15 @@ void FileFD::pollout() {
 		/* done writing; close pollable; send response */
 		if (_left == 0) {
 			setClosed();
-			_client->_response.generateResponse(_client, "201");
+			if (_client && _client->isClosed() == false) {
+				_client->_response.generateResponse(_client, "201");
+			}
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
 		std::cerr << e.what() << std::endl;
 		setClosed();
-		_client->_response.generateErrorResponse(_client, "500");
+		if (_client)
+			_client->_response.generateErrorResponse(_client, "500");
 	}
 }
 
@@ -96,7 +95,7 @@ void FileFD::timeout() {
 
 	time(&timeout);
 	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
-		std::cerr << "Timeout\n";
+		std::cerr << "FileFD::timeout\n";
 		setClosed();
 	}
 }
@@ -119,4 +118,14 @@ int32_t FileFD::getIndex() const {
 
 void FileFD::updateTick() {
 	time(&_tick);
+}
+
+void FileFD::setData(std::string data) {
+	_data = data;
+	_left = _data.size();
+}
+
+void FileFD::setRequestInterface(RequestInterface *req, ClientFD *Client) {
+	_requestInterface = req;
+	_client           = Client;
 }

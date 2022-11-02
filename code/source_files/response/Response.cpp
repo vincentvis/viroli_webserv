@@ -149,7 +149,7 @@ void Response::generateErrorResponse(ClientFD *Client, std::string StatusCode) {
 	createStatusLine(Client);
 	setBasicHeaders(Client);
 	createResponseString();
-	Client->sendResponse();
+	Client->setupResponse();
 }
 
 void Response::generateResponse(ClientFD *Client, std::string messageBody,
@@ -160,7 +160,7 @@ void Response::generateResponse(ClientFD *Client, std::string messageBody,
 	setBasicHeaders(Client);
 
 	createResponseString();
-	Client->sendResponse();
+	Client->setupResponse();
 }
 
 void Response::generateResponse(ClientFD *Client, std::string StatusCode) {
@@ -169,14 +169,14 @@ void Response::generateResponse(ClientFD *Client, std::string StatusCode) {
 	setBasicHeaders(Client);
 
 	createResponseString();
-	Client->sendResponse();
+	Client->setupResponse();
 }
 
 void Response::generateResponse(ClientFD *Client) {
 	createStatusLine(Client);
 	setBasicHeaders(Client);
 	createResponseString();
-	Client->sendResponse();
+	Client->setupResponse();
 }
 
 void Response::clean() {
