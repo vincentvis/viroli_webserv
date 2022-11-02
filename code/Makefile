@@ -42,6 +42,7 @@ CLASSES		:= \
 				ipollable/IPollable\
 				ipollable/PollableFactory\
 				ipollable/ServerFD\
+				ipollable/Buffer\
 				request/CGIRequest\
 				server/Location\
 				server/Server\

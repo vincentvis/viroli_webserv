@@ -8,6 +8,7 @@
 #define CRLF_LEN        2
 #define CRLF_LEN2       4
 #define TIMEOUT_SECONDS 5
+#define BUFFERSIZE      10000 // tmp
 
 #define COUT_DEBUGMSG \
 	std::cout << "\033[37m" << __PRETTY_FUNCTION__ << "[" << __LINE__ << "]: \033[0m"
