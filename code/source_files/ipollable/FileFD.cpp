@@ -19,9 +19,8 @@ void FileFD::pollin() {
 
 			/* done reading; close pollable; send response with data */
 		} else if (_bytes == 0) {
-			setClosed();
 			_client->_response.generateResponse(_client, _data, "200");
-			_client->_children = false;
+			setClosed();
 
 			/* append buffer to data */
 		} else if (_bytes > 0) {
@@ -31,8 +30,8 @@ void FileFD::pollin() {
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
 		std::cerr << e.what() << std::endl;
-		setClosed();
 		_client->_response.generateErrorResponse(_client, "500");
+		setClosed();
 	}
 }
 
@@ -61,15 +60,13 @@ void FileFD::pollout() {
 
 		/* done writing; close pollable; send response */
 		if (_left == 0) {
-			setClosed();
 			_client->_response.generateResponse(_client, "201");
-			_client->_children = false;
+			setClosed();
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
 		std::cerr << e.what() << std::endl;
-		setClosed();
 		_client->_response.generateErrorResponse(_client, "500");
-		_client->_children = false;
+		setClosed();
 	}
 }
 
@@ -96,7 +93,8 @@ bool FileFD::isClosed() const {
 }
 
 void FileFD::setClosed() {
-	_closed = true;
+	_closed            = true;
+	_client->_children = false;
 }
 
 void FileFD::setIndex(int32_t index) {
