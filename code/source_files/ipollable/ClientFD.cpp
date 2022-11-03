@@ -11,6 +11,7 @@ ClientFD::ClientFD(Server *server, int fd, int index) :
 ClientFD::~ClientFD() {
 	if (this->_requestInterface) {
 		delete _requestInterface;
+		_requestInterface = nullptr;
 	}
 }
 

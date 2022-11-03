@@ -12,7 +12,7 @@ class CgiVars {
 		CgiVars();
 		CgiVars setVar(std::string, std::string);
 		CgiVars setDefaultsForEnv(void);
-		void    setInChild(void);
+		void    loadInChildEnv(void);
 
 	private:
 		std::vector<std::pair<std::string, std::string> > _vars;

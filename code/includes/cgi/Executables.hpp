@@ -49,27 +49,6 @@ class Executables {
 			return (true);
 		}
 
-		static std::string findExecutableInPath(std::string &executable_name) {
-			char *envpath = getenv("PATH");
-			if (envpath == NULL) {
-				throw Utils::ErrorPageException("502");
-			}
-			std::string            pathvar = std::string(envpath);
-			std::string::size_type offset  = 0;
-			std::string::size_type pos     = pathvar.find(":", offset);
-			while (pos != std::string::npos) {
-				std::string path = pathvar.substr(offset, pos - offset);
-				FileStat    executable(path, executable_name);
-				if (executable.isExecutable()) {
-					return (executable.getFull());
-				}
-				offset = pos + 1;
-				pos    = pathvar.find(":", offset);
-			}
-			throw Utils::ErrorPageException("502");
-			return ("");
-		}
-
 	private:
 		std::map<std::string, std::string>           _executables;
 		std::map<std::string, std::string>::iterator _end;

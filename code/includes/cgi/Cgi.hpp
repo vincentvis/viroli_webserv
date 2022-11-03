@@ -1,7 +1,6 @@
 #pragma once
 
 #include "cgi/CgiVars.hpp"
-#include "cgi/Pipes.hpp"
 #include "ipollable/ClientFD.hpp"
 #include "utils/Exception.hpp"
 #include "utils/FileStat.hpp"
@@ -41,7 +40,6 @@ class Cgi {
 		pid_t       _pid;
 
 		// char                    *_buff;
-		// Pipes                    _pipes;
 		char   *_tmpnam;
 		int     _fd;
 

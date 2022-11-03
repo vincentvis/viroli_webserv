@@ -27,7 +27,7 @@ CgiVars CgiVars::setVar(std::string key, std::string value) {
 	return (*this);
 }
 
-void CgiVars::setInChild() {
+void CgiVars::loadInChildEnv() {
 	std::vector<std::pair<std::string, std::string> >::iterator it  = _vars.begin();
 	std::vector<std::pair<std::string, std::string> >::iterator end = _vars.end();
 

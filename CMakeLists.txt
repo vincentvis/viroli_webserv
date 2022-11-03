@@ -51,8 +51,6 @@ add_executable(webserv
         code/includes/response/HttpStatus.hpp
         code/includes/cgi/Cgi.hpp
         code/source_files/cgi/Cgi.cpp
-        code/source_files/cgi/Pipes.cpp
-        code/includes/cgi/Pipes.hpp
         code/source_files/cgi/CgiVars.cpp
         code/includes/cgi/CgiVars.hpp
         code/source_files/utils/FileStat.cpp

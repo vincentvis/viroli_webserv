@@ -13,9 +13,10 @@ Cgi::Cgi(FileStat filestats, std::string const &method, uint16_t port,
 	this->_pid           = 0;
 	this->_script_name   = _source.getFilename();
 	this->_executor_name = Executables::getExecutable(_source.getExtension());
-	this->_executable    = Executables::findExecutableInPath(this->_executor_name);
+	// this->_executable    = Executables::findExecutableInPath(this->_executor_name);
+	this->_executable = this->_executor_name;
 
-	_bash_string         = "";
+	_bash_string      = "";
 	// _args.push_back(this->_executable);
 	// _args.push_back(_source.getFull());
 
@@ -82,7 +83,7 @@ int Cgi::execute(ClientFD &Client, CGIRequest *interface, enum request_type type
 		std::cerr << CGICHILDCLR "child running: bash [" << _bash_string << "]\033[0m"
 				  << std::endl;
 		errno = 0;
-		_env.setInChild();
+		_env.loadInChildEnv();
 		execl("/bin/bash", "/bin/bash", "-c", _bash_string.c_str(), NULL);
 		std::cerr << "\033[31;1;3mExecve FAILED: " << strerror(errno) << "\033[0m\n";
 		exit(1);
