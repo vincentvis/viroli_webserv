@@ -29,7 +29,6 @@ void FileFD::pollin() {
 						 Buffer::getInstance().getBuff().begin() + _bytes);
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		std::cerr << e.what() << std::endl;
 		_client->_response.generateErrorResponse(_client, "500");
 		setClosed();
 	}
@@ -64,7 +63,6 @@ void FileFD::pollout() {
 			setClosed();
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		std::cerr << e.what() << std::endl;
 		_client->_response.generateErrorResponse(_client, "500");
 		setClosed();
 	}
