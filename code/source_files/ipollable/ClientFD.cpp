@@ -232,7 +232,7 @@ void ClientFD::pollin() {
 		process();
 	} catch (const Utils::ErrorPageException &e) {
 		_state = ERROR;
-		std::cerr << e.what() << std::endl;
+		std::cerr << "Respond with " << e.what() << " error page" << std::endl;
 		this->_response.generateErrorResponse(this, e.what());
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
 		std::cerr << e.what() << std::endl;

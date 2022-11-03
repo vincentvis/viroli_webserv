@@ -139,6 +139,8 @@ void Response::generateErrorPage(
 void Response::generateErrorResponse(ClientFD *Client, std::string StatusCode) {
 	setStatusCode(StatusCode);
 	addHeader(Utils::contentType_string, "text/html");
+	std::cerr << "just before generateErrorPage " << __LINE__
+			  << " config: " << Client->_config << std::endl;
 	generateErrorPage(StatusCode, &Client->_config->getErrorPages());
 	createStatusLine(Client);
 	setBasicHeaders(Client);

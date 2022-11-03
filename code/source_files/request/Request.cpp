@@ -107,11 +107,11 @@ void Request::ParseRequest(std::string BUF) {
 	this->_headerAvailable = true;
 }
 
-bool	Request::validateHeaderMap(){
+bool Request::validateHeaderMap() {
 	for (this->_itr = _header.begin(); this->_itr != _header.end(); this->_itr++) {
-		 if (Utils::validateFieldName(this->_itr->first) == false){
-			 return false;
-		 }
+		if (Utils::validateFieldName(this->_itr->first) == false) {
+			return false;
+		}
 	}
 	return true;
 }
@@ -150,6 +150,9 @@ void Request::ValidateRequest(Config *Conf, Location *Loc) {
 	/* set CGI for initialisation request interface */
 	if (Executables::isCgiRequest(this->_filestats)) {
 		this->_CGI = true;
+		if (getMethod() == Utils::delete_string) {
+			throw Utils::ErrorPageException("405");
+		}
 	}
 }
 

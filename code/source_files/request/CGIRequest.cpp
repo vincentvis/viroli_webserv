@@ -14,8 +14,6 @@ CGIRequest::CGIRequest(ClientFD &Client) {
 	}
 }
 
-#include <iomanip>
-
 void CGIRequest::GETRequest(ClientFD &Client) {
 	char *tmp = new char[80];
 	memcpy(tmp, "/tmp/viroli_cgi_file___XXXXXXXX\0", 32);
@@ -62,19 +60,12 @@ void CGIRequest::POSTRequest(ClientFD &Client) {
 
 	cgi.execute(Client, this, Cgi::POST);
 
-
 	delete[] tmp;
-	//
-	//
-	std::cout << "\033[32m" << std::setw(4) << cgi.getPid() << ": [CGI] "
-			  << Client._request.getMethod() << " " << Client._request.getUri()
-			  << std::endl;
-	std::cout << "\033[4mBODY: " << Client._request.getBody() << "\033[0m" << std::endl;
 }
 
 void CGIRequest::DELETERequest(ClientFD &Client) {
-	std::cout << "\033[32m[CGI] " << Client._request.getMethod() << " "
-			  << Client._request.getUri() << std::endl;
+	(void)Client;
+	std::cerr << "DELETE requests are not part of CGI" << std::endl;
 }
 
 CGIRequest::~CGIRequest() {
