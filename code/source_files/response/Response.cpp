@@ -220,7 +220,7 @@ void Response::generateCGIResponse(ClientFD *Client, std::string cgiOutput) {
 			if (Utils::isValidHttpStatus(value)) {
 				setStatusCode(value);
 				_statusLine.clear();
-				createStatusLine();
+				createStatusLine(Client);
 			} else {
 				addHeader(key, value);
 			}

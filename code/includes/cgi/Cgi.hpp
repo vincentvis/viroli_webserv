@@ -1,6 +1,5 @@
 #pragma once
 
-#include "cgi/CgiVars.hpp"
 #include "ipollable/ClientFD.hpp"
 #include "utils/Exception.hpp"
 #include "utils/FileStat.hpp"
@@ -9,26 +8,22 @@
 #include <cstring>
 #include <string.h>
 #include <unistd.h>
+#include <utility>
 
 class Cgi {
 	public:
-		enum cgi_status { CONTINUE, ERROR, DONE };
-		enum request_type { GET, POST, DELETE };
 		Cgi(FileStat filestats, std::string const &method, uint16_t port,
 			std::string servername, char *tmpfilename);
-		Cgi(const Cgi &other);
-		Cgi &operator=(const Cgi &other);
-		~Cgi();
 		void               setBody(std::string &body);
 		void               setQuery(std::string &query);
 
-		cgi_status         getStatus() const;
 		std::string const &getStatusCode() const;
 		Cgi                setQueryString(std::string queryString);
-		Cgi                setEnv(std::string key, std::string value);
-		int   execute(ClientFD &Client, CGIRequest *interface, enum request_type);
+		Cgi                prepEnv(std::string key, std::string value);
+		void               putEnvInChild(void);
+		int                execute(ClientFD &Client, CGIRequest *interface);
 
-		pid_t getPid() const;
+		pid_t              getPid() const;
 
 	protected:
 		FileStat    _source;
@@ -39,11 +34,12 @@ class Cgi {
 		std::string _bash_string;
 		pid_t       _pid;
 
-		// char                    *_buff;
-		char   *_tmpnam;
-		int     _fd;
+		std::string _tmp_filename;
+		int         _fd;
 
-		CgiVars _env;
+		// CgiVars     _env;
+		//
+		std::vector<std::pair<std::string, std::string> > _env;
 
 	private:
 		Cgi();

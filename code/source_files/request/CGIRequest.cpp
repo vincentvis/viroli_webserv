@@ -29,7 +29,7 @@ void CGIRequest::GETRequest(ClientFD &Client) {
 		cgi.setQueryString(Client._request.getQuery());
 	}
 
-	cgi.execute(Client, this, Cgi::GET);
+	cgi.execute(Client, this);
 }
 
 void CGIRequest::POSTRequest(ClientFD &Client) {
@@ -44,18 +44,18 @@ void CGIRequest::POSTRequest(ClientFD &Client) {
 			Client._server->getPort(), Client._config->getFirstServerName(), tmp);
 
 	// cgi.setQueryString(Client._request.getBody());
-	cgi.setEnv("CONTENT_LENGTH", Utils::to_string(Client._request.getContentLength()));
+	cgi.prepEnv("CONTENT_LENGTH", Utils::to_string(Client._request.getContentLength()));
 	std::map<std::string, std::string>::const_iterator contentType =
 		Client._request.getHeaderMap().find("Content-Type");
 	if (contentType != Client._request.getHeaderMap().end()) {
-		cgi.setEnv("CONTENT_TYPE", contentType->second);
+		cgi.prepEnv("CONTENT_TYPE", contentType->second);
 	}
 
 	if (Client._request.getBody().empty() == false) {
 		cgi.setQueryString(Client._request.getBody());
 	}
 
-	cgi.execute(Client, this, Cgi::POST);
+	cgi.execute(Client, this);
 }
 
 void CGIRequest::DELETERequest(ClientFD &Client) {
