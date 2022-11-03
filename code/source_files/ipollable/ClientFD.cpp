@@ -249,7 +249,6 @@ void ClientFD::pollin() {
 		std::cerr << e.what() << std::endl;
 		this->_response.generateErrorResponse(this, e.what());
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		std::cerr << e.what() << std::endl;
 		setClosed();
 	}
 }
@@ -301,7 +300,6 @@ void ClientFD::pollout() {
 			}
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		std::cerr << e.what() << std::endl;
 		setClosed();
 	}
 }
