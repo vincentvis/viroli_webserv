@@ -310,6 +310,11 @@ bool ClientFD::isClosed() const {
 }
 
 void ClientFD::setClosed() {
+//	while(1){
+//		if (_fileFD->isClosed() == true)
+//			break;
+//	}
+	_fileFD->setClosed();
 	_closed = true;
 }
 

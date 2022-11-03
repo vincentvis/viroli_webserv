@@ -22,6 +22,7 @@ class ServerFD : public IPollable {
 		Server       *getServer() const;
 		void          timeout();
 		bool          isClosed() const;
+		bool          isBusy() const;
 		void          setClosed();
 		void          setIndex(int32_t index);
 		void          updateTick();
