@@ -51,8 +51,8 @@ void Request::ParseRequest(std::string BUF) {
 	}
 
 	/* validate Header Fields in HeaderMap */
-	if (validateHeaderMap() == false){
-		std::cout << "Header Fields are invalid" << std::cout;
+	if (validateHeaderMap() == false) {
+		std::cout << "Header Fields are invalid" << std::endl;
 		throw Utils::ErrorPageException("405");
 	}
 
@@ -74,7 +74,7 @@ void Request::ParseRequest(std::string BUF) {
 		if (this->_connection == std::string("close")) {
 			this->_ConnectionAvailable = false;
 		}
-		std::cout << this->_connection << std::endl;
+		// std::cout << this->_connection << std::endl;
 	}
 
 	/* set content length and chunked for body creation in connectionClass */
@@ -107,11 +107,11 @@ void Request::ParseRequest(std::string BUF) {
 	this->_headerAvailable = true;
 }
 
-bool	Request::validateHeaderMap(){
+bool Request::validateHeaderMap() {
 	for (this->_itr = _header.begin(); this->_itr != _header.end(); this->_itr++) {
-		 if (Utils::validateFieldName(this->_itr->first) == false){
-			 return false;
-		 }
+		if (Utils::validateFieldName(this->_itr->first) == false) {
+			return false;
+		}
 	}
 	return true;
 }

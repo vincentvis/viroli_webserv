@@ -116,7 +116,7 @@ void Response::createResponseString() {
 		/* add second CRLF to mark end of header */
 		_responseString.append(CRLF);
 		_responseString.append(_messageBody);
-//		_responseString.append(CRLF);
+		//		_responseString.append(CRLF);
 	}
 
 	/* clear Map and statusLine for next request */
@@ -143,9 +143,8 @@ void Response::generateErrorResponse(ClientFD *Client, std::string StatusCode) {
 	generateErrorPage(StatusCode, &Client->_config->getErrorPages());
 	createStatusLine(Client);
 	setBasicHeaders(Client);
-
 	createResponseString();
-	Client->sendResponse();
+	Client->setupResponse();
 }
 
 void Response::generateResponse(ClientFD *Client, std::string messageBody,
@@ -156,7 +155,7 @@ void Response::generateResponse(ClientFD *Client, std::string messageBody,
 	setBasicHeaders(Client);
 
 	createResponseString();
-	Client->sendResponse();
+	Client->setupResponse();
 }
 
 void Response::generateResponse(ClientFD *Client, std::string StatusCode) {
@@ -165,14 +164,14 @@ void Response::generateResponse(ClientFD *Client, std::string StatusCode) {
 	setBasicHeaders(Client);
 
 	createResponseString();
-	Client->sendResponse();
+	Client->setupResponse();
 }
 
 void Response::generateResponse(ClientFD *Client) {
 	createStatusLine(Client);
 	setBasicHeaders(Client);
 	createResponseString();
-	Client->sendResponse();
+	Client->setupResponse();
 }
 
 void Response::clean() {

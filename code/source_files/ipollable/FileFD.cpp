@@ -2,11 +2,8 @@
 
 FileFD::FileFD(Server *server, int fd, int index) :
 	_state(PROCESS), _server(server), _data(), _bytes(0), _left(0), _total(0), _fd(fd),
-	_index(index), _tick(), _closed(false) {
+	_index(index), _tick(), _closed(false), _client(nullptr) {
 	time(&_tick);
-}
-
-FileFD::~FileFD() {
 }
 
 void FileFD::pollin() {
@@ -14,7 +11,7 @@ void FileFD::pollin() {
 	_client->updateTick();
 
 	try {
-		_bytes = read(_fd, Buffer::getInstance().getBuff().data(), BUFFERSIZE);
+		_bytes = read(_fd, Buffer::getInstance().getBuff().data(), BUFFER_SIZE);
 
 		/* error during read; close pollable; send error response */
 		if (_bytes == -1) {
@@ -22,8 +19,8 @@ void FileFD::pollin() {
 
 			/* done reading; close pollable; send response with data */
 		} else if (_bytes == 0) {
-			setClosed();
 			_client->_response.generateResponse(_client, _data, "200");
+			setClosed();
 
 			/* append buffer to data */
 		} else if (_bytes > 0) {
@@ -32,24 +29,13 @@ void FileFD::pollin() {
 						 Buffer::getInstance().getBuff().begin() + _bytes);
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		std::cerr << e.what() << std::endl;
-		setClosed();
 		_client->_response.generateErrorResponse(_client, "500");
+		setClosed();
 	}
 }
 
-void FileFD::setRequestInterface(RequestInterface *req, ClientFD *Client) {
-	_requestInterface = req;
-	_client           = Client;
-}
-
-int32_t FileFD::getRemainderBytes() const {
-	return BUFFERSIZE > _left ? _left : BUFFERSIZE;
-}
-
-void FileFD::setData(std::string data) {
-	_data = data;
-	_left = _data.size();
+int32_t FileFD::getWriteSize() const {
+	return BUFFER_SIZE > _left ? _left : BUFFER_SIZE;
 }
 
 void FileFD::pollout() {
@@ -57,9 +43,9 @@ void FileFD::pollout() {
 	_client->updateTick();
 
 	try {
-		Buffer::getInstance().getBuff().assign(
-			_data.begin() + _total, _data.begin() + _total + getRemainderBytes());
-		_bytes = write(_fd, Buffer::getInstance().getBuff().data(), getRemainderBytes());
+		Buffer::getInstance().getBuff().assign(_data.begin() + _total,
+											   _data.begin() + _total + getWriteSize());
+		_bytes = write(_fd, Buffer::getInstance().getBuff().data(), getWriteSize());
 
 		/* error during write; close pollable; send error response */
 		if (_bytes == -1) {
@@ -73,13 +59,12 @@ void FileFD::pollout() {
 
 		/* done writing; close pollable; send response */
 		if (_left == 0) {
-			setClosed();
 			_client->_response.generateResponse(_client, "201");
+			setClosed();
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		std::cerr << e.what() << std::endl;
-		setClosed();
 		_client->_response.generateErrorResponse(_client, "500");
+		setClosed();
 	}
 }
 
@@ -96,7 +81,7 @@ void FileFD::timeout() {
 
 	time(&timeout);
 	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
-		std::cerr << "Timeout\n";
+		std::cerr << "FileFD::timeout\n";
 		setClosed();
 	}
 }
@@ -106,13 +91,32 @@ bool FileFD::isClosed() const {
 }
 
 void FileFD::setClosed() {
-	_closed = true;
+	_closed            = true;
+	_client->_file_open = false;
 }
 
 void FileFD::setIndex(int32_t index) {
 	_index = index;
 }
 
+int32_t FileFD::getIndex() const {
+	return _index;
+}
+
 void FileFD::updateTick() {
 	time(&_tick);
+}
+
+void FileFD::setData(std::string data) {
+	_data = data;
+	_left = _data.size();
+}
+
+void FileFD::setRequestInterface(RequestInterface *req, ClientFD *Client) {
+	_requestInterface = req;
+	_client           = Client;
+}
+
+bool FileFD::hasChildren() const {
+	return false;
 }

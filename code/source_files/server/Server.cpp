@@ -1,5 +1,4 @@
 #include "server/Server.hpp"
-#include <cassert> // remove in prod
 
 Server::Server() {
 	this->_port = 0;
@@ -81,13 +80,10 @@ int32_t Server::getFD() const {
 	return _fd;
 }
 
-void Server::removePollable(int index) {
+void Server::remove(int index) {
 	close(Server::_pfds[index].fd);
 
-	std::cout << "_pfd fd: " << Server::_pfds[index].fd
-			  << " | _pollables fd: " << Server::_pollables[index]->getFD() << "\n";
-
-	/* swap pollable to be removed with last element in vector */
+	/* swap pollable-to-be-removed with last element in vector */
 	if (Server::_pfds.size() > 1 &&
 		(Server::_pfds.at(index).fd != Server::_pfds.back().fd) &&
 		(Server::_pollables.at(index)->getFD() != Server::_pollables.back()->getFD()))
@@ -96,18 +92,15 @@ void Server::removePollable(int index) {
 		std::swap(Server::_pfds.at(index), Server::_pfds.back());
 		Server::_pollables[index]->setIndex(index);
 	}
-
-	/* deallocate IPollable* */
 	delete Server::_pollables.back();
-
-	/* remove last element in vector */
 	Server::_pollables.pop_back();
 	Server::_pfds.pop_back();
+}
 
-	std::cout << "size _pfds (post-removal): " << Server::_pfds.size();
-	std::cout << " | size _replace (post-removal): " << Server::_pollables.size()
-			  << std::endl;
-	std::cout << "succesful removal\n";
+void Server::clear() {
+	for (size_t i = 0; i < Server::_pollables.size(); ++i) {
+		remove(i);
+	}
 }
 
 /* events var might be not needed */
@@ -125,12 +118,13 @@ void Server::run() {
 
 		/* check events and timeout */
 		for (size_t i = 0; i < Server::_pfds.size(); ++i) {
-			assert(Server::_pollables[i]->getFD() != -1); // remove eventually
 			Server::_pollables[i]->timeout();
 			if (Server::_pollables[i]->isClosed() == true) {
-				removePollable(i);
-				--i;
-				continue;
+				if (Server::_pollables[i]->hasChildren() == false) {
+					remove(i);
+					--i;
+					continue;
+				}
 			}
 
 			try {
