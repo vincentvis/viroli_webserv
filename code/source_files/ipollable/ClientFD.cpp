@@ -144,7 +144,7 @@ void ClientFD::receiveHeader() {
 	} else if (end == std::string::npos && _inbound.size() > MAX_HEADER_SIZE) {
 		throw(Utils::ErrorPageException("413"));
 	} else if (end != std::string::npos) {
-		this->_request.ParseRequest(this->_inbound);
+		this->_request.ParseRequest(this->_inbound.substr(0, end));
 		// this->_request.printAttributesInRequestClass();
 		this->_config   = this->_server->findConfig(this->_request);
 		this->_location = this->_config->findLocation(this->_request);
