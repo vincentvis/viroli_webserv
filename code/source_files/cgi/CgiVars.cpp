@@ -27,22 +27,12 @@ CgiVars CgiVars::setVar(std::string key, std::string value) {
 	return (*this);
 }
 
-// only call this in the child process?
-char *const *CgiVars::toCharPtrs() {
+void CgiVars::setInChild() {
 	std::vector<std::pair<std::string, std::string> >::iterator it  = _vars.begin();
 	std::vector<std::pair<std::string, std::string> >::iterator end = _vars.end();
-	char **envp = new char *[_vars.size() + 1];
-	int    i    = 0;
 
 	while (it != end) {
-		envp[i] = new char[it->first.length() + it->second.length() + 3];
-		memcpy(envp[i], it->first.c_str(), it->first.length());
-		envp[i][it->first.length()] = '=';
-		memcpy(envp[i] + it->first.length() + 1, it->second.c_str(), it->second.length());
-		envp[i][it->first.length() + it->second.length() + 1] = 0;
-
+		setenv(it->first.c_str(), it->second.c_str(), 1);
 		it++;
-		i++;
 	}
-	return (envp);
 }

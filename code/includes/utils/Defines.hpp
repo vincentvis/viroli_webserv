@@ -15,6 +15,11 @@
 
 #define DEBUGSTART std::cerr << "\033[32;4m"
 #define DEBUGEND   "\033[0m\n"
+#define CGIDEBUG(pid)                                                                  \
+	std::cerr << "\033[32;4m" << std::setw(4) << (pid) << " (pid):" << __FILE__ << "." \
+			  << __LINE__ << ": "
+#define CGICHILDCLR "\033[33m"
+#define CGIPARNTCLR "\033[36m"
 
 enum PollableType { SERVERPOLL, CLIENTPOLL, FILEPOLL, CGIPOLL };
 

@@ -10,9 +10,9 @@
 class CgiVars {
 	public:
 		CgiVars();
-		CgiVars      setVar(std::string, std::string);
-		char *const *toCharPtrs();
-		CgiVars      setDefaultsForEnv(void);
+		CgiVars setVar(std::string, std::string);
+		CgiVars setDefaultsForEnv(void);
+		void    setInChild(void);
 
 	private:
 		std::vector<std::pair<std::string, std::string> > _vars;

@@ -17,29 +17,36 @@ CGIRequest::CGIRequest(ClientFD &Client) {
 #include <iomanip>
 
 void CGIRequest::GETRequest(ClientFD &Client) {
+	char *tmp = new char[80];
+	memcpy(tmp, "/tmp/viroli_cgi_file___XXXXXXXX\0", 32);
+	if (mktemp(tmp) == NULL) {
+		throw Utils::ErrorPageException("502");
+	}
+	_tmpfilename = std::string(tmp);
+
 	Cgi cgi(Client._request.getFileStatCopy(), Client._request.getMethod(),
-			Client._server->getPort(), Client._config->getFirstServerName());
+			Client._server->getPort(), Client._config->getFirstServerName(), tmp);
 
 	if (Client._request.getQuery().empty() == false) {
 		cgi.setQueryString(Client._request.getQuery());
 	}
 
-	DEBUGSTART << std::setw(4) << cgi.getPid() << ": Execute CGI get" << DEBUGEND;
 	cgi.execute(Client, this, Cgi::GET);
 
-
-	//
-	//
-	std::cout << "\033[32m" << std::setw(4) << cgi.getPid() << ": [CGI] "
-			  << Client._request.getMethod() << " " << Client._request.getUri()
-			  << std::endl;
-	std::cout << "\033[4m" << std::setw(4) << cgi.getPid()
-			  << ": QUERY: " << Client._request.getQuery() << "\033[0m" << std::endl;
+	// should this be here?
+	delete[] tmp;
 }
 
 void CGIRequest::POSTRequest(ClientFD &Client) {
+	char *tmp = new char[80];
+	memcpy(tmp, "/tmp/viroli_cgi_file___XXXXXXXX\0", 32);
+	if (mktemp(tmp) == NULL) {
+		throw Utils::ErrorPageException("502");
+	}
+	_tmpfilename = std::string(tmp);
+
 	Cgi cgi(Client._request.getFileStatCopy(), Client._request.getMethod(),
-			Client._server->getPort(), Client._config->getFirstServerName());
+			Client._server->getPort(), Client._config->getFirstServerName(), tmp);
 
 	// cgi.setQueryString(Client._request.getBody());
 	cgi.setEnv("CONTENT_LENGTH", Utils::to_string(Client._request.getContentLength()));
@@ -49,7 +56,14 @@ void CGIRequest::POSTRequest(ClientFD &Client) {
 		cgi.setEnv("CONTENT_TYPE", contentType->second);
 	}
 
+	if (Client._request.getBody().empty() == false) {
+		cgi.setQueryString(Client._request.getBody());
+	}
 
+	cgi.execute(Client, this, Cgi::POST);
+
+
+	delete[] tmp;
 	//
 	//
 	std::cout << "\033[32m" << std::setw(4) << cgi.getPid() << ": [CGI] "
@@ -64,4 +78,11 @@ void CGIRequest::DELETERequest(ClientFD &Client) {
 }
 
 CGIRequest::~CGIRequest() {
+	errno = 0;
+	int x = remove(_tmpfilename.c_str());
+	std::cerr << CGIPARNTCLR "CGIRequest destructor - Remove: " << x;
+	if (x < 0) {
+		std::cerr << " " << strerror(errno);
+	}
+	std::cerr << "\033[0m" << std::endl;
 }

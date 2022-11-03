@@ -9,6 +9,9 @@ ClientFD::ClientFD(Server *server, int fd, int index) :
 }
 
 ClientFD::~ClientFD() {
+	if (this->_requestInterface) {
+		delete _requestInterface;
+	}
 }
 
 void ClientFD::resetBytes() {

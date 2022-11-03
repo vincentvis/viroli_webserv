@@ -11,6 +11,7 @@ class CGIRequest : public RequestInterface {
 		void POSTRequest(ClientFD &Client);
 		void DELETERequest(ClientFD &Client);
 		CGIRequest();
+		std::string _tmpfilename;
 
 	public:
 		CGIRequest(ClientFD &Client);
