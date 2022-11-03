@@ -94,7 +94,7 @@ bool FileFD::isClosed() const {
 
 void FileFD::setClosed() {
 	_closed            = true;
-	_client->_children = false;
+	_client->_file_open = false;
 }
 
 void FileFD::setIndex(int32_t index) {
