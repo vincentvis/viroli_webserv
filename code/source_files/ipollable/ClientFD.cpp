@@ -208,6 +208,7 @@ void ClientFD::clean() {
 }
 
 void ClientFD::respond() {
+	Server::_pfds[_index].events = POLLHOLD;
 	/* discard body when request is not POST */
 	if (_request.getMethod() == Utils::post_string && !_body.empty()) {
 		_request.setBody(_body);
@@ -222,7 +223,6 @@ void ClientFD::respond() {
 	} else {
 		this->_requestInterface = new HttpRequest(*this);
 	}
-	Server::_pfds[_index].events = POLLHOLD;
 }
 
 void ClientFD::processHttpMessage() {
