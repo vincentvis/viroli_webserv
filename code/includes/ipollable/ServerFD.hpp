@@ -26,4 +26,5 @@ class ServerFD : public IPollable {
 		int32_t       getIndex() const;
 		void          updateTick();
 		const time_t &getTick() const;
+		bool          hasChildren() const;
 };

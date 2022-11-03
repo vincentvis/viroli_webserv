@@ -33,6 +33,7 @@ class ClientFD : public IPollable {
 		int               _index;
 		time_t            _tick;
 		bool              _closed;
+		bool              _children;
 
 
 		ClientFD(Server *server, int fd, int index);
@@ -64,4 +65,5 @@ class ClientFD : public IPollable {
 		void          clean();
 		void          updateTick();
 		const time_t &getTick() const;
+		bool          hasChildren() const;
 };

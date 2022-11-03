@@ -42,4 +42,5 @@ class FileFD : public IPollable {
 		void    setIndex(int32_t index);
 		int32_t getIndex() const;
 		void    updateTick();
+		bool    hasChildren() const;
 };

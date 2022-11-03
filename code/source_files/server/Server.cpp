@@ -154,9 +154,11 @@ void Server::run() {
 			assert(Server::_pollables[i]->getFD() != -1); // remove eventually
 			Server::_pollables[i]->timeout();
 			if (Server::_pollables[i]->isClosed() == true) {
-				remove(i);
-				--i;
-				continue;
+				if (Server::_pollables[i]->hasChildren() == false) {
+					remove(i);
+					--i;
+					continue;
+				}
 			}
 
 			try {

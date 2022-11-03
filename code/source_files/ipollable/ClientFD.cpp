@@ -3,7 +3,7 @@
 ClientFD::ClientFD(Server *server, int fd, int index) :
 	_requestInterface(nullptr), _server(server), _fileFD(nullptr), _state(HEADER),
 	_inbound(), _outbound(), _body(), _bytes(0), _left(0), _total(0), _fd(fd),
-	_index(index), _tick(), _closed(false) {
+	_index(index), _tick(), _closed(false), _children(false) {
 	time(&_tick);
 }
 
@@ -201,7 +201,6 @@ void ClientFD::clean() {
 	_state            = HEADER;
 	_inbound.clear();
 	_outbound.clear();
-	Buffer::getInstance().getBuff().clear();
 	_body.clear();
 	_bytes = 0;
 	_left  = 0;
@@ -209,6 +208,7 @@ void ClientFD::clean() {
 }
 
 void ClientFD::respond() {
+	Server::_pfds[_index].events = 0;
 	/* discard body when request is not POST */
 	if (_request.getMethod() == Utils::post_string && !_body.empty()) {
 		_request.setBody(_body);
@@ -348,4 +348,8 @@ void ClientFD::updateTick() {
 
 const time_t &ClientFD::getTick() const {
 	return _tick;
+}
+
+bool ClientFD::hasChildren() const {
+	return _children;
 }

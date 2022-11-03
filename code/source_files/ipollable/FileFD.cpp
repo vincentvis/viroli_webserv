@@ -8,9 +8,7 @@ FileFD::FileFD(Server *server, int fd, int index) :
 
 void FileFD::pollin() {
 	updateTick();
-
 	_client->updateTick();
-
 
 	try {
 		_bytes = read(_fd, Buffer::getInstance().getBuff().data(), BUFFER_SIZE);
@@ -22,9 +20,8 @@ void FileFD::pollin() {
 			/* done reading; close pollable; send response with data */
 		} else if (_bytes == 0) {
 			setClosed();
-
 			_client->_response.generateResponse(_client, _data, "200");
-
+			_client->_children = false;
 
 			/* append buffer to data */
 		} else if (_bytes > 0) {
@@ -71,6 +68,7 @@ void FileFD::pollout() {
 		std::cerr << e.what() << std::endl;
 		setClosed();
 		_client->_response.generateErrorResponse(_client, "500");
+		_client->_children = false;
 	}
 }
 
@@ -120,4 +118,8 @@ void FileFD::setData(std::string data) {
 void FileFD::setRequestInterface(RequestInterface *req, ClientFD *Client) {
 	_requestInterface = req;
 	_client           = Client;
+}
+
+bool FileFD::hasChildren() const {
+	return false;
 }
