@@ -63,6 +63,7 @@ void FileFD::pollout() {
 		if (_left == 0) {
 			setClosed();
 			_client->_response.generateResponse(_client, "201");
+			_client->_children = false;
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
 		std::cerr << e.what() << std::endl;
