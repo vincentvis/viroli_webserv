@@ -36,7 +36,6 @@ void FileFD::pollin() {
 		setClosed();
 		_client->_response.generateErrorResponse(_client, "500");
 	}
-
 }
 
 void FileFD::setRequestInterface(RequestInterface *req, ClientFD *Client) {
