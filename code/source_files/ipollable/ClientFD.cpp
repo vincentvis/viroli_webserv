@@ -208,7 +208,6 @@ void ClientFD::clean() {
 }
 
 void ClientFD::respond() {
-	Server::_pfds[_index].events = 0;
 	/* discard body when request is not POST */
 	if (_request.getMethod() == Utils::post_string && !_body.empty()) {
 		_request.setBody(_body);
@@ -223,6 +222,7 @@ void ClientFD::respond() {
 	} else {
 		this->_requestInterface = new HttpRequest(*this);
 	}
+	Server::_pfds[_index].events = POLLHOLD;
 }
 
 void ClientFD::processHttpMessage() {
@@ -250,7 +250,6 @@ void ClientFD::pollin() {
 		this->_response.generateErrorResponse(this, e.what());
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
 		std::cerr << e.what() << std::endl;
-		std::cerr << _fd << std::endl;
 		setClosed();
 	}
 }
