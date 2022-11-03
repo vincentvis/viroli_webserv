@@ -116,7 +116,7 @@ void Response::createResponseString() {
 		/* add second CRLF to mark end of header */
 		_responseString.append(CRLF);
 		_responseString.append(_messageBody);
-//		_responseString.append(CRLF);
+		//		_responseString.append(CRLF);
 	}
 
 	/* clear Map and statusLine for next request */
@@ -126,27 +126,15 @@ void Response::createResponseString() {
 
 void Response::generateErrorPage(
 	std::string status, const std::map<std::string, std::string> *customErrorPages) {
-	if (customErrorPages != nullptr) {
-		std::cout << "hi\n";
+	if (customErrorPages && customErrorPages->empty() == false) {
+		std::map<std::string, std::string>::const_iterator custom =
+			customErrorPages->find(status);
+		if (custom != customErrorPages->end()) {
+			this->_messageBody = custom->second;
+			return;
+		}
 	}
-	// if (customErrorPages->empty() == false && customErrorPages) {
-	//    std::map<std::string, std::string>::const_iterator custom =
-	//    customErrorPages->find(status); if (custom != customErrorPages->end()) {
-	//       this->_messageBody = custom->second;
-	//       return;
-	//    }
-	// }
 	this->_messageBody = HttpStatus::generateErrorPage(status);
-
-	// if (customErrorPages && customErrorPages->empty() == false) {
-	// 	std::map<std::string, std::string>::const_iterator custom =
-	// 		customErrorPages->find(status);
-	// 	if (custom != customErrorPages->end()) {
-	// 		this->_messageBody = custom->second;
-	// 		return;
-	// 	}
-	// }
-	// this->_messageBody = HttpStatus::generateErrorPage(status);
 }
 
 void Response::generateErrorResponse(ClientFD *Client, std::string StatusCode) {
