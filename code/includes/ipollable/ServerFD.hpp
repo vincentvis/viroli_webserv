@@ -14,7 +14,6 @@ class ServerFD : public IPollable {
 		time_t  _tick;
 
 		ServerFD(Server *server, int fd, int index);
-		~ServerFD();
 
 		void          pollin();
 		void          pollout();
@@ -24,7 +23,7 @@ class ServerFD : public IPollable {
 		bool          isClosed() const;
 		void          setClosed();
 		void          setIndex(int32_t index);
-    int32_t getIndex() const;
+		int32_t       getIndex() const;
 		void          updateTick();
 		const time_t &getTick() const;
 };

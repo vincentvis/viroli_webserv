@@ -9,7 +9,6 @@
 #include <vector>
 
 class FileFD;
-// class Response;
 class RequestInterface;
 
 class ClientFD : public IPollable {
@@ -37,7 +36,6 @@ class ClientFD : public IPollable {
 
 
 		ClientFD(Server *server, int fd, int index);
-		~ClientFD();
 
 		void          pollin();
 		void          pollout();

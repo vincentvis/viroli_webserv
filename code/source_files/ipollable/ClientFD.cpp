@@ -1,13 +1,10 @@
 #include "ipollable/ClientFD.hpp"
 
 ClientFD::ClientFD(Server *server, int fd, int index) :
-	_requestInterface(nullptr), _server(server), _state(HEADER), _inbound(), _outbound(),
-	_body(), _bytes(0), _left(0), _total(0), _fd(fd), _index(index), _tick(),
-	_closed(false) {
+	_requestInterface(nullptr), _server(server), _fileFD(nullptr), _state(HEADER),
+	_inbound(), _outbound(), _body(), _bytes(0), _left(0), _total(0), _fd(fd),
+	_index(index), _tick(), _closed(false) {
 	time(&_tick);
-}
-
-ClientFD::~ClientFD() {
 }
 
 void ClientFD::resetCounters() {
@@ -21,7 +18,7 @@ void ClientFD::receiveHttpMessage() {
 
 	if (_bytes == -1) {
 		std::cerr << strerror(errno) << std::endl; // REMOVE
-		throw(Utils::SystemCallFailedExceptionNoErrno("ClientFD::pollout::recv"));
+		throw(Utils::SystemCallFailedExceptionNoErrno("ClientFD::pollin::recv"));
 	} else if (_bytes == 0) {
 		setClosed();
 	} else if (_bytes > 0) {
@@ -253,6 +250,7 @@ void ClientFD::pollin() {
 		this->_response.generateErrorResponse(this, e.what());
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
 		std::cerr << e.what() << std::endl;
+		std::cerr << _fd << std::endl;
 		setClosed();
 	}
 }
@@ -300,6 +298,7 @@ void ClientFD::pollout() {
 
 				/* sent response; reset to accept new requests */
 			} else {
+				// setClosed();
 				clean();
 			}
 		}

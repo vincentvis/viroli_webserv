@@ -82,42 +82,48 @@ int32_t Server::getFD() const {
 }
 
 void Server::remove(int index) {
-	IPollable *obsolete = Server::_pollables.at(index);
+	// IPollable *obsolete = Server::_pollables.at(index);
 
-	// std::cout << "pre: " << obsolete->getFD() << std::endl;
-	// std::cout << "addr: " << obsolete << std::endl;
+	// // std::cout << "pre: " << obsolete->getFD() << std::endl;
+	// // std::cout << "addr: " << obsolete << std::endl;
 
-	// shutdown(Server::_pfds[index].fd, SHUT_RDWR);
-	close(Server::_pfds[index].fd);
-
-	/* swap pollable to be removed with last element in vector */
-	if (Server::_pfds.size() > 1) {
-		std::swap(Server::_pfds.at(index), Server::_pfds.back());
-		std::swap(obsolete, Server::_pollables.back());
-		Server::_pollables[index]->setIndex(index);
-	}
-
-	// std::cout << "post: " << obsolete->getFD() << std::endl;
-	// std::cout << "addr: " << obsolete << std::endl;
-	delete obsolete;
-	obsolete = nullptr;
-
-	// std::cout << "addr: " << obsolete << std::endl;
-
+	// // shutdown(Server::_pfds[index].fd, SHUT_RDWR);
 	// close(Server::_pfds[index].fd);
 
 	// /* swap pollable to be removed with last element in vector */
-	// if (Server::_pfds.size() > 1 &&
-	// 	(Server::_pfds.at(index).fd != Server::_pfds.back().fd) &&
-	// 	(Server::_pollables.at(index)->getFD() != Server::_pollables.back()->getFD()))
-	// {
-	// 	std::swap(Server::_pollables.at(index), Server::_pollables.back());
+	// if (Server::_pfds.size() > 1) {
 	// 	std::swap(Server::_pfds.at(index), Server::_pfds.back());
+	// 	std::swap(obsolete, Server::_pollables.back());
 	// 	Server::_pollables[index]->setIndex(index);
 	// }
 
-	// /* deallocate IPollable* */
+	// // std::cout << "post: " << obsolete->getFD() << std::endl;
+	// // std::cout << "addr: " << obsolete << std::endl;
+	// delete obsolete;
+	// obsolete = nullptr;
+
+	// std::cout << "addr: " << obsolete << std::endl;
+
+	close(Server::_pfds[index].fd);
+
+	/* swap pollable to be removed with last element in vector */
+	if (Server::_pfds.size() > 1 &&
+		(Server::_pfds.at(index).fd != Server::_pfds.back().fd) &&
+		(Server::_pollables.at(index)->getFD() != Server::_pollables.back()->getFD()))
+	{
+		std::swap(Server::_pollables.at(index), Server::_pollables.back());
+		std::swap(Server::_pfds.at(index), Server::_pfds.back());
+		Server::_pollables[index]->setIndex(index);
+	}
+
+	delete Server::_pollables.back();
+
+	/* deallocate IPollable* */
+	// IPollable *obsolote = Server::_pollables.back();
+	// std::vector<IPollable *>::reverse_iterator it = Server::_pollables.rbegin();
+	// delete *it;
 	// delete Server::_pollables.back();
+	// obsolote = nullptr;
 
 	/* remove last element in vector */
 	Server::_pollables.pop_back();

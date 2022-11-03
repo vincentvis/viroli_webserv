@@ -52,7 +52,7 @@ void Request::ParseRequest(std::string BUF) {
 
 	/* validate Header Fields in HeaderMap */
 	if (validateHeaderMap() == false) {
-		std::cout << "Header Fields are invalid" << std::cout;
+		std::cout << "Header Fields are invalid" << std::endl;
 		throw Utils::ErrorPageException("405");
 	}
 

@@ -2,17 +2,15 @@
 
 FileFD::FileFD(Server *server, int fd, int index) :
 	_state(PROCESS), _server(server), _data(), _bytes(0), _left(0), _total(0), _fd(fd),
-	_index(index), _tick(), _closed(false) {
+	_index(index), _tick(), _closed(false), _client(nullptr) {
 	time(&_tick);
-}
-
-FileFD::~FileFD() {
 }
 
 void FileFD::pollin() {
 	updateTick();
-	if (_client)
-		_client->updateTick();
+
+	_client->updateTick();
+
 
 	try {
 		_bytes = read(_fd, Buffer::getInstance().getBuff().data(), BUFFER_SIZE);
@@ -24,9 +22,9 @@ void FileFD::pollin() {
 			/* done reading; close pollable; send response with data */
 		} else if (_bytes == 0) {
 			setClosed();
-			if (_client && _client->isClosed() == false) {
-				_client->_response.generateResponse(_client, _data, "200");
-			}
+
+			_client->_response.generateResponse(_client, _data, "200");
+
 
 			/* append buffer to data */
 		} else if (_bytes > 0) {
@@ -37,9 +35,7 @@ void FileFD::pollin() {
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
 		std::cerr << e.what() << std::endl;
 		setClosed();
-		if (_client && _client->isClosed() == false) {
-			_client->_response.generateErrorResponse(_client, "500");
-		}
+		_client->_response.generateErrorResponse(_client, "500");
 	}
 }
 
@@ -49,8 +45,7 @@ int32_t FileFD::getWriteSize() const {
 
 void FileFD::pollout() {
 	updateTick();
-	if (_client)
-		_client->updateTick();
+	_client->updateTick();
 
 	try {
 		Buffer::getInstance().getBuff().assign(_data.begin() + _total,
@@ -70,15 +65,12 @@ void FileFD::pollout() {
 		/* done writing; close pollable; send response */
 		if (_left == 0) {
 			setClosed();
-			if (_client && _client->isClosed() == false) {
-				_client->_response.generateResponse(_client, "201");
-			}
+			_client->_response.generateResponse(_client, "201");
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
 		std::cerr << e.what() << std::endl;
 		setClosed();
-		if (_client)
-			_client->_response.generateErrorResponse(_client, "500");
+		_client->_response.generateErrorResponse(_client, "500");
 	}
 }
 

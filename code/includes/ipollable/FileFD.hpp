@@ -26,7 +26,6 @@ class FileFD : public IPollable {
 		ClientFD         *_client;
 
 		FileFD(Server *server, int fd, int index);
-		~FileFD();
 
 		void    pollin();
 		void    pollout();
