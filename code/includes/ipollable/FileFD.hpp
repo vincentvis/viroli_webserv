@@ -11,35 +11,36 @@ class FileFD : public IPollable {
 	public:
 		enum State { PROCESS, READY };
 
-		State       _state;
-		Server     *_server;
-		std::string _data;
-		int         _bytes;
-		int         _left;
-		int         _total;
-		int         _fd;
-		int         _index;
-		time_t      _tick;
-		bool        _closed;
-
-
-		FileFD(Server *server, int fd, int index);
-		~FileFD();
-
-		void              pollin();
-		void              pollout();
-		int               getFD() const;
-		void              readFile();
-		void              writeFile();
-		void              setData(std::string data);
-		Server           *getServer() const;
-		int32_t           getRemainderBytes() const;
-		void              timeout();
-		void              setRequestInterface(RequestInterface *req, ClientFD *Client);
+		State             _state;
+		Server           *_server;
+		std::vector<char> _buffer;
+		std::string       _data;
+		int               _bytes;
+		int               _left;
+		int               _total;
+		int               _fd;
+		int               _index;
+		time_t            _tick;
+		bool              _closed;
 		RequestInterface *_requestInterface;
 		ClientFD         *_client;
-		bool              isClosed() const;
-		void              setClosed();
-		void              setIndex(int32_t index);
-		void              updateTick();
+
+		FileFD(Server *server, int fd, int index);
+
+		void    pollin();
+		void    pollout();
+		int     getFD() const;
+		void    readFile();
+		void    writeFile();
+		void    setData(std::string data);
+		Server *getServer() const;
+		int32_t getWriteSize() const;
+		void    timeout();
+		void    setRequestInterface(RequestInterface *req, ClientFD *Client);
+		bool    isClosed() const;
+		void    setClosed();
+		void    setIndex(int32_t index);
+		int32_t getIndex() const;
+		void    updateTick();
+		bool    hasChildren() const;
 };

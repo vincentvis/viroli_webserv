@@ -5,9 +5,6 @@ ServerFD::ServerFD(Server *server, int fd, int index) :
 	updateTick();
 }
 
-ServerFD::~ServerFD() {
-}
-
 /* accept new ClientFD */
 void ServerFD::pollin() {
 	int                newfd = 0;
@@ -30,7 +27,6 @@ void ServerFD::pollin() {
 		throw(Utils::SocketAcceptException("ServerFD::pollin::fcntl"));
 	}
 
-	std::cout << "new connection accepted\n";
 	PollableFactory::getInstance().createPollable(_server, newfd, CLIENTPOLL, POLLIN);
 }
 
@@ -60,10 +56,18 @@ void ServerFD::setIndex(int32_t index) {
 	_index = index;
 }
 
+int32_t ServerFD::getIndex() const {
+	return _index;
+}
+
 void ServerFD::updateTick() {
 	time(&_tick);
 }
 
 const time_t &ServerFD::getTick() const {
 	return _tick;
+}
+
+bool ServerFD::hasChildren() const {
+	return false;
 }

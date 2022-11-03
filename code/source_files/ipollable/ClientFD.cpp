@@ -1,31 +1,35 @@
 #include "ipollable/ClientFD.hpp"
 
 ClientFD::ClientFD(Server *server, int fd, int index) :
-	_requestInterface(nullptr), _config(nullptr), _server(server), _state(HEADER),
-	_inbound(), _outbound(), _body(), _bytes(0), _left(0), _total(0), _fd(fd),
-	_index(index), _tick(), _closed(false) {
+	_requestInterface(nullptr), _config(nullptr), _server(server), _fileFD(nullptr),
+	_cgiFD(nullptr), _state(HEADER), _inbound(), _outbound(), _body(), _bytes(0),
+	_left(0), _total(0), _fd(fd), _index(index), _tick(), _closed(false),
+	_file_open(false) {
 	time(&_tick);
 	this->_config = *(this->_server->_configs.begin());
 }
 
-ClientFD::~ClientFD() {
-	if (this->_requestInterface) {
-		delete _requestInterface;
-		_requestInterface = nullptr;
-	}
-}
+// This function is removed in the MAIN branch at the time of CGI merge
+// I need to check if this is OK or if it is needed
+// if it is needed, also add back prototype
+// ClientFD::~ClientFD() {
+// 	if (this->_requestInterface) {
+// 		delete _requestInterface;
+// 		_requestInterface = nullptr;
+// 	}
+// }
 
-void ClientFD::resetBytes() {
+void ClientFD::resetCounters() {
 	_bytes = 0;
 	_left  = 0;
 	_total = 0;
 }
 
-void ClientFD::receive(size_t len) {
-	_bytes = recv(_fd, Buffer::getInstance().getBuff().data(), len, 0);
+void ClientFD::receiveHttpMessage() {
+	_bytes = recv(_fd, Buffer::getInstance().getBuff().data(), BUFFER_SIZE, 0);
 
 	if (_bytes == -1) {
-		throw(Utils::SystemCallFailedExceptionNoErrno("ClientFD::pollout::recv"));
+		throw(Utils::SystemCallFailedExceptionNoErrno("ClientFD::pollin::recv"));
 	} else if (_bytes == 0) {
 		setClosed();
 	} else if (_bytes > 0) {
@@ -34,56 +38,85 @@ void ClientFD::receive(size_t len) {
 	}
 }
 
-void ClientFD::receiveChunked() {
+bool ClientFD::getChunkedSize(size_t pos) {
 	std::stringstream stream;
-	size_t            pos = 0;
+
+	/* no known chunk size, look for chunk size in _inbound */
+	if (_left == 0 && pos != std::string::npos) {
+		stream << std::hex << _inbound.substr(0, pos);
+		stream >> _left;
+		_inbound = _inbound.substr(pos + CRLF_LEN);
+
+		if (_left > 0) {
+			_total += _left;
+
+			/* body exceeds the config limit */
+			if (_total > _config->getMaxBodySize()) {
+				throw(Utils::ErrorPageException("413"));
+			}
+			return (true);
+		}
+	}
+	return (false);
+}
+
+bool ClientFD::getChunked() {
+	/* chunk size known */
+	if (_left > 0) {
+		/* chunk present in _inbound */
+		if (_left + CRLF_LEN <= static_cast<int64_t>(_inbound.size())) {
+			if (_inbound.substr(_left, CRLF_LEN).find("\r\n") == std::string::npos) {
+				throw(Utils::ErrorPageException("400"));
+			}
+
+			/* extract chunk from _inbound and append to _body */
+			_body.append(_inbound.begin(), _inbound.begin() + _left);
+			_inbound = _inbound.substr(_left + CRLF_LEN);
+			_left    = 0;
+			return (true);
+		}
+	}
+
+	/* chunk not present; receive more bytes */
+	return (false);
+}
+
+bool ClientFD::endOfChunked() {
+	if (_left == 0) {
+		_state = RESPOND;
+		return (true);
+	}
+	return (false);
+}
+
+bool ClientFD::chunkedSizeUnavailable(size_t pos) {
+	if (_left == 0 && pos == std::string::npos) {
+		return (true);
+	}
+	return (false);
+}
+
+void ClientFD::receiveChunked() {
+	size_t pos = 0;
 
 	while (_state == BODY) {
 		pos = _inbound.find("\r\n");
 
-		/* no known chunk size and not present in _inbound, receive more bytes */
-		if (_left == 0 && pos == std::string::npos) {
+		/* no known chunk size and not yet received; receive more bytes */
+		if (chunkedSizeUnavailable(pos)) {
 			break;
 		}
 
-		/* no known chunk size, look for chunk size in _inbound */
-		if (_left == 0 && pos != std::string::npos) {
-			stream << std::hex << _inbound.substr(0, pos);
-			stream >> _left;
-			_inbound = _inbound.substr(pos + CRLF_LEN);
-
-			if (_left > 0) {
-				_total += _left;
-
-				/* body exceeds the config limit */
-				if (_total > _config->getMaxBodySize()) {
-					throw(Utils::ErrorPageException("413"));
-				}
-
-				/* ending chunk received */
-			} else if (_left == 0) {
-				_state = RESPOND;
-				return;
+		/* no known chunk size; get size in received bytes */
+		if (getChunkedSize(pos) == false) {
+			if (endOfChunked() == true) {
+				break;
 			}
 		}
 
-		/* chunk size known */
-		if (_left > 0) {
-			/* chunk present in _inbound */
-			if (_left + CRLF_LEN <= static_cast<int64_t>(_inbound.size())) {
-				if (_inbound.substr(_left, CRLF_LEN).find("\r\n") == std::string::npos) {
-					throw(Utils::ErrorPageException("400"));
-				}
-
-				/* extract chunk from _inbound and append to _body */
-				_body.append(_inbound.begin(), _inbound.begin() + _left);
-				_inbound = _inbound.substr(_left + CRLF_LEN);
-				_left    = 0;
-
-				/* chunk not present; receive more bytes */
-			} else {
-				break;
-			}
+		/* extract and append chunked */
+		if (getChunked() == false) {
+			break;
 		}
 	}
 }
@@ -106,7 +139,7 @@ void ClientFD::receiveLength() {
 	}
 }
 
-void ClientFD::sendResponse() {
+void ClientFD::setupResponse() {
 	Server::_pfds[_index].events = POLLOUT;
 	_outbound                    = _response.getResponseString();
 	_bytes                       = 0;
@@ -114,21 +147,15 @@ void ClientFD::sendResponse() {
 	_left                        = _outbound.size();
 }
 
-/*
--> receive bytes:
-  -> header is present:
-	-> POST request:
-	  -> 'Expect: 100-continue' is present:
-		-> (part of) body is present:
-		  -> omit sending 100-continue response
-		-> send 100-continue response
-*/
-
 void ClientFD::receiveHeader() {
-	size_t end = 0;
+	size_t end = _inbound.find(CRLF_END);
 
-	if ((end = _inbound.find(CRLF_END)) != std::string::npos) {
-		this->_request.ParseRequest(this->_inbound);
+	if (end != std::string::npos && end > MAX_HEADER_SIZE) {
+		throw(Utils::ErrorPageException("413"));
+	} else if (end == std::string::npos && _inbound.size() > MAX_HEADER_SIZE) {
+		throw(Utils::ErrorPageException("413"));
+	} else if (end != std::string::npos) {
+		this->_request.ParseRequest(this->_inbound.substr(0, end));
 		// this->_request.printAttributesInRequestClass();
 		this->_config   = this->_server->findConfig(this->_request);
 		this->_location = this->_config->findLocation(this->_request);
@@ -157,12 +184,11 @@ void ClientFD::receiveHeader() {
 	}
 }
 
-std::string ClientFD::getBodyStr() const {
+std::string ClientFD::getBody() const {
 	return _body;
 }
 
 void ClientFD::receiveBody() {
-	// std::cout << __PRETTY_FUNCTION__ << std::endl;
 	if (_request.contentLenAvailable() == true) {
 		receiveLength();
 	} else if (_request.getChunked() == true) {
@@ -172,11 +198,11 @@ void ClientFD::receiveBody() {
 	}
 }
 
-int32_t ClientFD::getRemainderBytes() const {
-	return BUFFERSIZE > _left ? _left : BUFFERSIZE;
+int32_t ClientFD::getSendSize() const {
+	return BUFFER_SIZE > _left ? _left : BUFFER_SIZE;
 }
 
-void ClientFD::cleanClientFD() {
+void ClientFD::clean() {
 	_request.clean();
 	_response.clean();
 	_requestInterface = nullptr;
@@ -187,7 +213,6 @@ void ClientFD::cleanClientFD() {
 	_state            = HEADER;
 	_inbound.clear();
 	_outbound.clear();
-	Buffer::getInstance().getBuff().clear();
 	_body.clear();
 	_bytes = 0;
 	_left  = 0;
@@ -195,6 +220,7 @@ void ClientFD::cleanClientFD() {
 }
 
 void ClientFD::respond() {
+	Server::_pfds[_index].events = POLLHOLD;
 	/* discard body when request is not POST */
 	if (_request.getMethod() == Utils::post_string && !_body.empty()) {
 		_request.setBody(_body);
@@ -211,7 +237,7 @@ void ClientFD::respond() {
 	}
 }
 
-void ClientFD::process() {
+void ClientFD::processHttpMessage() {
 	if (_state == HEADER) {
 		receiveHeader();
 	}
@@ -228,14 +254,13 @@ void ClientFD::pollin() {
 	updateTick();
 
 	try {
-		receive(BUFFERSIZE);
-		process();
+		receiveHttpMessage();
+		processHttpMessage();
 	} catch (const Utils::ErrorPageException &e) {
 		_state = ERROR;
 		std::cerr << "Respond with " << e.what() << " error page" << std::endl;
 		this->_response.generateErrorResponse(this, e.what());
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		std::cerr << e.what() << std::endl;
 		setClosed();
 	}
 }
@@ -246,9 +271,8 @@ void ClientFD::pollout() {
 
 	try {
 		Buffer::getInstance().getBuff().assign(
-			_outbound.begin() + _total, _outbound.begin() + _total + getRemainderBytes());
-		_bytes =
-			send(_fd, Buffer::getInstance().getBuff().data(), getRemainderBytes(), 0);
+			_outbound.begin() + _total, _outbound.begin() + _total + getSendSize());
+		_bytes = send(_fd, Buffer::getInstance().getBuff().data(), getSendSize(), 0);
 
 		if (_bytes == -1) {
 			throw(Utils::SystemCallFailedExceptionNoErrno("ClientFD::pollout::send"));
@@ -267,7 +291,7 @@ void ClientFD::pollout() {
 
 			/* sent error response; reset to accept new requests */
 			if (_state == ERROR) {
-				cleanClientFD();
+				clean();
 
 				/* close fd and remove pollable and pollfd struct */
 			} else if (_request.getConnectionAvailable() == false) {
@@ -278,18 +302,18 @@ void ClientFD::pollout() {
 			} else if (_request.getMethod() == Utils::post_string &&
 					   _request.getExpect() == Utils::continue_string)
 			{
-				resetBytes();
+				resetCounters();
 				_state = BODY;
 
 				/* sent response; reset to accept new requests */
 			} else if (_request.getMethod() == Utils::post_string) {
 				setClosed();
 			} else {
-				cleanClientFD();
+				// setClosed();
+				clean();
 			}
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		std::cerr << e.what() << std::endl;
 		setClosed();
 	}
 }
@@ -307,7 +331,7 @@ void ClientFD::timeout() {
 
 	time(&timeout);
 	if (difftime(timeout, _tick) > TIMEOUT_SECONDS) {
-		COUT_DEBUGMSG << "clientFD Timeout\n";
+		std::cerr << "ClientFD::timeout\n";
 		setClosed();
 	}
 }
@@ -324,10 +348,18 @@ void ClientFD::setIndex(int32_t index) {
 	_index = index;
 }
 
+int32_t ClientFD::getIndex() const {
+	return _index;
+}
+
 void ClientFD::updateTick() {
 	time(&_tick);
 }
 
 const time_t &ClientFD::getTick() const {
 	return _tick;
+}
+
+bool ClientFD::hasChildren() const {
+	return _file_open;
 }

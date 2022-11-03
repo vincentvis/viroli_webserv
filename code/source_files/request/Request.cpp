@@ -74,7 +74,7 @@ void Request::ParseRequest(std::string BUF) {
 		if (this->_connection == std::string("close")) {
 			this->_ConnectionAvailable = false;
 		}
-		std::cout << this->_connection << std::endl;
+		// std::cout << this->_connection << std::endl;
 	}
 
 	/* set content length and chunked for body creation in connectionClass */

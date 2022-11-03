@@ -37,12 +37,6 @@ int main(int argc, char const *argv[]) {
 
 		PollableFactory::getInstance().createPollable(serv, serv->getFD(), SERVERPOLL,
 													  POLLIN);
-
-		// struct pollfd pfd = {serv->getFileDescriptor(), POLLIN, 0};
-		// Server::addPollable(pfd, new ServerFD(serv, pfd.fd, Server::_pfds.size()));
-
-		// Server::addPoll(serv);
-		// servers.push_back(serv);
 		it++;
 	}
 
@@ -65,10 +59,13 @@ int main(int argc, char const *argv[]) {
 		Server::run();
 	} catch (const Utils::SystemCallFailedException &e) {
 		std::cerr << e.what() << std::endl;
+		Server::clear();
 		return (EXIT_FAILURE);
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << std::endl;
+		Server::clear();
 		return (EXIT_FAILURE);
 	}
+	Server::clear();
 	return (EXIT_SUCCESS);
 }

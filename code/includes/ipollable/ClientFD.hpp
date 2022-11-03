@@ -12,7 +12,6 @@
 
 class FileFD;
 class CgiFD;
-// class Response;
 class RequestInterface;
 
 class ClientFD : public IPollable {
@@ -31,39 +30,44 @@ class ClientFD : public IPollable {
 		std::string       _inbound;
 		std::string       _outbound;
 		std::string       _body;
-		int               _bytes;
+		int64_t           _bytes;
 		int64_t           _left;
 		int64_t           _total;
 		int               _fd;
 		int               _index;
 		time_t            _tick;
 		bool              _closed;
+		bool              _file_open;
 
 
 		ClientFD(Server *server, int fd, int index);
-		~ClientFD();
 
 		void          pollin();
 		void          pollout();
-		void          resetBytes();
+		void          resetCounters();
 		int           getFD() const;
-		size_t        extractChunkedSize(size_t pos);
 		void          receiveHeader();
 		void          receiveBody();
-		std::string   getBodyStr() const;
-		void          receive(size_t len);
+		std::string   getBody() const;
+		void          receiveHttpMessage();
 		void          receiveChunked();
+		bool          chunkedSizeUnavailable(size_t pos);
+		bool          getChunkedSize(size_t pos);
+		bool          getChunked();
+		bool          endOfChunked();
 		void          receiveLength();
 		void          respond();
 		Server       *getServer() const;
-		void          sendResponse();
-		int32_t       getRemainderBytes() const;
+		void          setupResponse();
+		int32_t       getSendSize() const;
 		void          timeout();
 		bool          isClosed() const;
 		void          setClosed();
-		void          process();
+		void          processHttpMessage();
 		void          setIndex(int32_t index);
-		void          cleanClientFD();
+		int32_t       getIndex() const;
+		void          clean();
 		void          updateTick();
 		const time_t &getTick() const;
+		bool          hasChildren() const;
 };
