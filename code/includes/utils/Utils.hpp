@@ -28,6 +28,7 @@ bool        ends_with(const std::string &source, const std::string &match);
 std::string getExtensionFromString(const std::string &source);
 std::string strToLower(std::string original);
 bool        validateFieldName(const std::string &original);
+bool        isValidHttpStatus(const std::string &status);
 
 template <typename T> void print_vector(const std::vector<T> &vec) {
 	typename std::vector<T>::const_iterator it  = vec.begin();

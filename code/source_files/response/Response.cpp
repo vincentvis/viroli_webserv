@@ -178,7 +178,6 @@ void Response::generateResponse(ClientFD *Client) {
 }
 
 void Response::generateCGIResponse(ClientFD *Client, std::string cgiOutput) {
-	// if cgi contains a header, parse it and strip it from the body to be returned
 	std::string::size_type cgiHeaders = cgiOutput.find("\n\n");
 
 	setStatusCode("200");
@@ -217,7 +216,17 @@ void Response::generateCGIResponse(ClientFD *Client, std::string cgiOutput) {
 		std::string value = headerPart.substr(name_end + 1, value_end - name_end - 1);
 		Utils::trimWhitespaceRef(value);
 		headerPart = headerPart.substr(value_end + 1);
-		addHeader(key, value);
+		if (key == "Status" || key == "status") {
+			if (Utils::isValidHttpStatus(value)) {
+				setStatusCode(value);
+				_statusLine.clear();
+				createStatusLine();
+			} else {
+				addHeader(key, value);
+			}
+		} else {
+			addHeader(key, value);
+		}
 	}
 	// std::cout << "key: [" << key << "] next: " << headerPart.at(name_end) << "\n";
 
