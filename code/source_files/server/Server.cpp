@@ -1,5 +1,4 @@
 #include "server/Server.hpp"
-#include <cassert> // remove in prod
 
 Server::Server() {
 	this->_port = 0;
@@ -119,7 +118,6 @@ void Server::run() {
 
 		/* check events and timeout */
 		for (size_t i = 0; i < Server::_pfds.size(); ++i) {
-			assert(Server::_pollables[i]->getFD() != -1); // remove eventually
 			Server::_pollables[i]->timeout();
 			if (Server::_pollables[i]->isClosed() == true) {
 				if (Server::_pollables[i]->hasChildren() == false) {

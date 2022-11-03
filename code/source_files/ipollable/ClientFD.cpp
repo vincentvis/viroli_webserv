@@ -17,7 +17,6 @@ void ClientFD::receiveHttpMessage() {
 	_bytes = recv(_fd, Buffer::getInstance().getBuff().data(), BUFFER_SIZE, 0);
 
 	if (_bytes == -1) {
-		std::cerr << strerror(errno) << std::endl; // REMOVE
 		throw(Utils::SystemCallFailedExceptionNoErrno("ClientFD::pollin::recv"));
 	} else if (_bytes == 0) {
 		setClosed();
@@ -264,7 +263,6 @@ void ClientFD::pollout() {
 		_bytes = send(_fd, Buffer::getInstance().getBuff().data(), getSendSize(), 0);
 
 		if (_bytes == -1) {
-			std::cerr << strerror(errno) << std::endl; // REMOVE
 			throw(Utils::SystemCallFailedExceptionNoErrno("ClientFD::pollout::send"));
 		} else if (_bytes >= 0) {
 			_total += _bytes;
