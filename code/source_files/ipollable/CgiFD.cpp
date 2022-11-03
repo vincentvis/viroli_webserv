@@ -19,7 +19,7 @@ void CgiFD::pollin() {
 			/* done reading; close pollable; send response with data */
 		} else if (_bytes == 0) {
 			if (_data.empty() == false) {
-				_client->_response.generateResponse(_client, _data, "200");
+				_client->_response.generateCGIResponse(_client, _data);
 				setClosed();
 			}
 			/* append buffer to data */
