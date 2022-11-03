@@ -33,7 +33,7 @@ class ClientFD : public IPollable {
 		int               _index;
 		time_t            _tick;
 		bool              _closed;
-		bool              _children;
+		bool              _file_open;
 
 
 		ClientFD(Server *server, int fd, int index);

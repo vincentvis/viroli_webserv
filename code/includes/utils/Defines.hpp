@@ -8,7 +8,7 @@
 #define CRLF_LEN        2
 #define CRLF_LEN2       4
 #define TIMEOUT_SECONDS 5
-#define MAX_HEADER_SIZE 1
+#define MAX_HEADER_SIZE 8192
 #define BUFFER_SIZE     16384
 #define POLLHOLD        0
 

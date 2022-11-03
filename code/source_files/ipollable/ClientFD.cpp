@@ -3,7 +3,7 @@
 ClientFD::ClientFD(Server *server, int fd, int index) :
 	_requestInterface(nullptr), _server(server), _fileFD(nullptr), _state(HEADER),
 	_inbound(), _outbound(), _body(), _bytes(0), _left(0), _total(0), _fd(fd),
-	_index(index), _tick(), _closed(false), _children(false) {
+	_index(index), _tick(), _closed(false), _file_open(false) {
 	time(&_tick);
 	this->_config = *(this->_server->_configs.begin());
 }
@@ -249,7 +249,6 @@ void ClientFD::pollin() {
 		std::cerr << e.what() << std::endl;
 		this->_response.generateErrorResponse(this, e.what());
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		std::cerr << e.what() << std::endl;
 		setClosed();
 	}
 }
@@ -301,7 +300,6 @@ void ClientFD::pollout() {
 			}
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		std::cerr << e.what() << std::endl;
 		setClosed();
 	}
 }
@@ -349,5 +347,5 @@ const time_t &ClientFD::getTick() const {
 }
 
 bool ClientFD::hasChildren() const {
-	return _children;
+	return _file_open;
 }
