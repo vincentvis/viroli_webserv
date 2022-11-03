@@ -15,7 +15,7 @@ CGIRequest::CGIRequest(ClientFD &Client) {
 }
 
 void CGIRequest::GETRequest(ClientFD &Client) {
-	char *tmp = new char[80];
+	char tmp[80];
 	memcpy(tmp, "/tmp/viroli_cgi_file___XXXXXXXX\0", 32);
 	if (mktemp(tmp) == NULL) {
 		throw Utils::ErrorPageException("502");
@@ -30,13 +30,10 @@ void CGIRequest::GETRequest(ClientFD &Client) {
 	}
 
 	cgi.execute(Client, this, Cgi::GET);
-
-	// should this be here?
-	delete[] tmp;
 }
 
 void CGIRequest::POSTRequest(ClientFD &Client) {
-	char *tmp = new char[80];
+	char tmp[80];
 	memcpy(tmp, "/tmp/viroli_cgi_file___XXXXXXXX\0", 32);
 	if (mktemp(tmp) == NULL) {
 		throw Utils::ErrorPageException("502");
@@ -59,8 +56,6 @@ void CGIRequest::POSTRequest(ClientFD &Client) {
 	}
 
 	cgi.execute(Client, this, Cgi::POST);
-
-	delete[] tmp;
 }
 
 void CGIRequest::DELETERequest(ClientFD &Client) {
