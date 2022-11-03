@@ -69,11 +69,5 @@ void CGIRequest::DELETERequest(ClientFD &Client) {
 }
 
 CGIRequest::~CGIRequest() {
-	errno = 0;
-	int x = remove(_tmpfilename.c_str());
-	std::cerr << CGIPARNTCLR "CGIRequest destructor - Remove: " << x;
-	if (x < 0) {
-		std::cerr << " " << strerror(errno);
-	}
-	std::cerr << "\033[0m" << std::endl;
+	remove(_tmpfilename.c_str());
 }

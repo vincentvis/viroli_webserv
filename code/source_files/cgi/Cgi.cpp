@@ -1,8 +1,6 @@
 #include "cgi/Cgi.hpp"
 #include "cgi/Executables.hpp"
 
-#include <iomanip>
-
 Cgi::Cgi(FileStat filestats, std::string const &method, uint16_t port,
 		 std::string servername, char *tmpfilename) :
 	_source(filestats),
@@ -80,12 +78,9 @@ int Cgi::execute(ClientFD &Client, CGIRequest *interface, enum request_type type
 	if (_pid == 0) {
 		(void)type;
 		chdir(_source.getPath().c_str());
-		std::cerr << CGICHILDCLR "child running: bash [" << _bash_string << "]\033[0m"
-				  << std::endl;
 		errno = 0;
 		_env.loadInChildEnv();
 		execl("/bin/bash", "/bin/bash", "-c", _bash_string.c_str(), NULL);
-		std::cerr << "\033[31;1;3mExecve FAILED: " << strerror(errno) << "\033[0m\n";
 		exit(1);
 	}
 	if (_pid != 0) {

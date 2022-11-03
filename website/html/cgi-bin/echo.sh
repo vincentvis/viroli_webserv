@@ -1,5 +1,4 @@
 #!/bin/bash
 
-echo "Hallo daar!"
-echo "1:" $1
-echo "2:" $2
+echo "Hi there!<br>"
+echo "Parameters to work with: '" $1 "'<br>"

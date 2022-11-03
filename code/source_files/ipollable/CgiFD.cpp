@@ -27,7 +27,6 @@ void CgiFD::pollin() {
 			}
 			/* append buffer to data */
 		} else if (_bytes > 0) {
-			std::cout << "CgiFD recieved " << _bytes << std::endl;
 			updateTick();
 			_total += _bytes;
 			_data.append(_buffer.begin(), _buffer.begin() + _bytes);
