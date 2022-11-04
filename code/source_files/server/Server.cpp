@@ -107,7 +107,10 @@ void Server::clear() {
 void Server::run() {
 	signal(SIGPIPE, SIG_IGN);
 
-	while (true) {
+	size_t i = 0;
+
+	while (true && i < 1000000) {
+		++i;
 		if (poll(Server::_pfds.data(), Server::_pfds.size(), 0) < 0) {
 			if (errno == EAGAIN) {
 				continue;
