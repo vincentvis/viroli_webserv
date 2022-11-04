@@ -5,6 +5,10 @@ ServerFD::ServerFD(Server *server, int fd, int index) :
 	updateTick();
 }
 
+ServerFD::~ServerFD() {
+	delete _server;
+}
+
 /* accept new ClientFD */
 void ServerFD::pollin() {
 	int                newfd = 0;

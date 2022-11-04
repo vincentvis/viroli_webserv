@@ -3,7 +3,7 @@
 CgiFD::CgiFD(Server *server, int fd, int index) :
 	_state(PROCESS), _server(server), _data(), _bytes(0), _left(0), _total(0), _fd(fd),
 	_index(index), _tick(), _closed(false), _client(nullptr) {
-	time(&_tick);
+	updateTick();
 }
 
 void CgiFD::pollin() {
