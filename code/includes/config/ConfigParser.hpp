@@ -1,10 +1,11 @@
+#pragma once
+
 #include "config/Config.hpp"
 #include "response/HttpStatus.hpp"
 #include "server/Server.hpp"
 #include "utils/Defines.hpp"
 #include "utils/FileStat.hpp"
 #include "utils/Utils.hpp"
-
 #include <algorithm>
 #include <cctype>
 #include <exception>
