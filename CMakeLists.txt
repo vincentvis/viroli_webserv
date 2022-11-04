@@ -45,7 +45,6 @@ add_executable(webserv
         code/includes/response/Response.hpp
         code/includes/utils/Defines.hpp
         code/source_files/autoindex/Autoindex.cpp
-        code/source_files/config/MimeTypes.cpp
         code/includes/config/MimeTypes.hpp
         code/source_files/response/HttpStatus.cpp
         code/includes/response/HttpStatus.hpp
