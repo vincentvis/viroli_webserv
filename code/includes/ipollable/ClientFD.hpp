@@ -39,6 +39,7 @@ class ClientFD : public IPollable {
 
 	public:
 		ClientFD(Server *server, int fd, int index);
+		~ClientFD();
 
 		void          pollin();
 		void          pollout();

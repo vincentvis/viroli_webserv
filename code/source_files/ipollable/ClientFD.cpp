@@ -9,15 +9,12 @@ ClientFD::ClientFD(Server *server, int fd, int index) :
 	this->_config = *(this->_server->_configs.begin());
 }
 
-// This function is removed in the MAIN branch at the time of CGI merge
-// I need to check if this is OK or if it is needed
-// if it is needed, also add back prototype
-// ClientFD::~ClientFD() {
-// 	if (this->_requestInterface) {
-// 		delete _requestInterface;
-// 		_requestInterface = nullptr;
-// 	}
-// }
+ClientFD::~ClientFD() {
+	if (this->_requestInterface) {
+		delete _requestInterface;
+		_requestInterface = nullptr;
+	}
+}
 
 void ClientFD::resetCounters() {
 	_bytes = 0;
