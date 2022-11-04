@@ -6,27 +6,28 @@ HttpRequest::HttpRequest() {
 }
 
 HttpRequest::HttpRequest(ClientFD &Client) {
-	if (Client._request.getMethod() == Utils::get_string) {
+	if (Client.getRequest().getMethod() == Utils::get_string) {
 		GETRequest(Client);
 	}
-	if (Client._request.getMethod() == Utils::post_string) {
+	if (Client.getRequest().getMethod() == Utils::post_string) {
 		POSTRequest(Client);
 	}
-	if (Client._request.getMethod() == Utils::delete_string) {
+	if (Client.getRequest().getMethod() == Utils::delete_string) {
 		DELETERequest(Client);
 	}
 }
 
 void HttpRequest::GETRequest(ClientFD &Client) {
-	std::string path = Client._request.getFileStat().getFull();
+	std::string path = Client.getRequest().getFileStat().getFull();
 	int         fd;
 
-	if (Client._request.getFileStat().isDir()) {
-		if (Client._config->getAutoIndex(Client._location) == "on") {
+	if (Client.getRequest().getFileStat().isDir()) {
+		if (Client.getConfig()->getAutoIndex(Client.getLocation()) == "on") {
 			try {
 				Autoindex autoindex(path);
-				Client._response.addHeader(Utils::contentType_string, "text/html");
-				Client._response.generateResponse(&Client, autoindex.getHtml(), "200");
+				Client.getResponse().addHeader(Utils::contentType_string, "text/html");
+				Client.getResponse().generateResponse(&Client, autoindex.getHtml(),
+													  "200");
 				return;
 			} catch (const Utils::AutoindexException &e) {
 				throw Utils::ErrorPageException("404");
@@ -34,7 +35,8 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 				throw Utils::ErrorPageException("500"); // internal server error?
 			}
 		}
-		std::vector<std::string> indexes = Client._config->getIndex(Client._location);
+		std::vector<std::string> indexes =
+			Client.getConfig()->getIndex(Client.getLocation());
 		std::vector<std::string>::const_iterator it  = indexes.begin();
 		std::vector<std::string>::const_iterator end = indexes.end();
 		std::string                              tmp;
@@ -44,7 +46,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 			fd  = open(tmp.c_str(), O_RDONLY);
 			if (fd > 0) {
 				path = tmp;
-				Client._request.setUri(Client._request.getUri() + *it);
+				Client.getRequest().setUri(Client.getRequest().getUri() + *it);
 				break;
 			}
 			fd = -1;
@@ -57,15 +59,18 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 		throw Utils::ErrorPageException("404");
 	}
 	/* add fileFd to poll */
-	Client._fileFD =
+	Client.setFileFD(
 		reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
-			Client._server, fd, FILEPOLL, POLLIN));
-	Client._file_open = true;
-	Client._fileFD->setRequestInterface(this, &Client);
+			Client.getServer(), fd, FILEPOLL, POLLIN)));
+	// Client._fileFD =
+	// 	reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
+	// 		Client._server, fd, FILEPOLL, POLLIN));
+	Client.setFileStatus(true);
+	Client.getFileFD()->setRequestInterface(this, &Client);
 }
 
 void HttpRequest::POSTRequest(ClientFD &Client) {
-	std::string path = Client._request.getFileStat().getFull();
+	std::string path = Client.getRequest().getFileStat().getFull();
 	int         fd   = open(path.c_str(), O_TRUNC | O_CREAT | O_WRONLY,
 							S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
@@ -73,24 +78,26 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 		throw Utils::ErrorPageException("404");
 	} else {
 		/* add fileFd to poll */
-		Client._fileFD =
+		Client.setFileFD(
 			reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
-				Client._server, fd, FILEPOLL, POLLOUT));
-		Client._file_open = true;
+				Client.getServer(), fd, FILEPOLL, POLLOUT)));
+		// Client._fileFD =
+
+		Client.setFileStatus(true);
 		if (!Client.getBody().empty()) {
-			Client._fileFD->setData(Client._request.getBody());
+			Client.getFileFD()->setData(Client.getRequest().getBody());
 		}
-		Client._fileFD->setRequestInterface(this, &Client);
+		Client.getFileFD()->setRequestInterface(this, &Client);
 	}
 }
 
 void HttpRequest::DELETERequest(ClientFD &Client) {
 	int r = 0;
 	errno = 0;
-	if (Client._request.getFileStat().isReg() &&
-		(r = remove(Client._request.getFileStat().getFull().c_str())) == 0)
+	if (Client.getRequest().getFileStat().isReg() &&
+		(r = remove(Client.getRequest().getFileStat().getFull().c_str())) == 0)
 	{
-		Client._response.generateResponse(&Client, "204");
+		Client.getResponse().generateResponse(&Client, "204");
 	} else {
 		if (r == -1) {
 			if (errno == EACCES || errno == ECANCELED || errno == EFAULT ||

@@ -1,9 +1,14 @@
 #include "ipollable/ClientFD.hpp"
 
+// _requestInterface(nullptr), _config(nullptr), _server(server), _fileFD(nullptr),
+// _state(HEADER), _inbound(), _outbound(), _body(), _bytes(0), _left(0), _total(0),
+// _fd(fd), _index(index), _tick(), _closed(false), _file_open(false)
+
 ClientFD::ClientFD(Server *server, int fd, int index) :
-	_requestInterface(nullptr), _server(server), _fileFD(nullptr), _state(HEADER),
-	_inbound(), _outbound(), _body(), _bytes(0), _left(0), _total(0), _fd(fd),
-	_index(index), _tick(), _closed(false), _file_open(false) {
+	_requestInterface(nullptr), _config(nullptr), _location(nullptr), _server(server),
+	_fileFD(nullptr), _request(), _response(), _state(HEADER), _inbound(), _outbound(),
+	_body(), _bytes(0), _left(0), _total(0), _fd(fd), _index(index), _tick(),
+	_closed(false), _file_open(false) {
 	time(&_tick);
 	this->_config = *(this->_server->_configs.begin());
 }
@@ -144,11 +149,11 @@ void ClientFD::receiveHeader() {
 	} else if (end == std::string::npos && _inbound.size() > MAX_HEADER_SIZE) {
 		throw(Utils::ErrorPageException("413"));
 	} else if (end != std::string::npos) {
-		this->_request.ParseRequest(this->_inbound.substr(0, end));
-		// this->_request.printAttributesInRequestClass();
-		this->_config   = this->_server->findConfig(this->_request);
-		this->_location = this->_config->findLocation(this->_request);
-		this->_request.ValidateRequest(this->_config, this->_location);
+		this->getRequest().ParseRequest(this->_inbound.substr(0, end));
+		// this->getRequest().printAttributesInRequestClass();
+		this->_config   = this->_server->findConfig(this->getRequest());
+		this->_location = this->_config->findLocation(this->getRequest());
+		this->getRequest().ValidateRequest(this->_config, this->_location);
 
 		/* truncate header */
 		_inbound = _inbound.substr(end + CRLF_LEN2);
@@ -192,6 +197,7 @@ int32_t ClientFD::getSendSize() const {
 }
 
 void ClientFD::clean() {
+	Server::_pfds[_index].events = POLLIN;
 	_request.clean();
 	_response.clean();
 	_requestInterface = nullptr;
@@ -217,11 +223,11 @@ void ClientFD::respond() {
 	if (_request.getMethod() == Utils::post_string &&
 		_request.getExpect() == Utils::continue_string && _inbound.empty())
 	{
-		this->_response.generateResponse(this, "100");
-	} else if (this->_request.getCgi() == true) {
-		this->_requestInterface = new CGIRequest(*this);
+		this->getResponse().generateResponse(this, "100");
+	} else if (this->getRequest().getCgi() == true) {
+		this->setRequestInterface(new CGIRequest(*this));
 	} else {
-		this->_requestInterface = new HttpRequest(*this);
+		this->setRequestInterface(new HttpRequest(*this));
 	}
 }
 
@@ -247,8 +253,9 @@ void ClientFD::pollin() {
 	} catch (const Utils::ErrorPageException &e) {
 		_state = ERROR;
 		std::cerr << e.what() << std::endl;
-		this->_response.generateErrorResponse(this, e.what());
+		this->getResponse().generateErrorResponse(this, e.what());
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
+		std::cerr << e.what() << std::endl;
 		setClosed();
 	}
 }
@@ -272,7 +279,6 @@ void ClientFD::pollout() {
 		/* data is sent */
 		if (_left == 0) {
 			/* accept incoming activity again */
-			Server::_pfds[_index].events = POLLIN;
 
 			delete _requestInterface;
 			_requestInterface = nullptr;
@@ -291,15 +297,16 @@ void ClientFD::pollout() {
 					   _request.getExpect() == Utils::continue_string)
 			{
 				resetCounters();
-				_state = BODY;
+				_state                       = BODY;
+				Server::_pfds[_index].events = POLLIN;
 
 				/* sent response; reset to accept new requests */
 			} else {
-				// setClosed();
 				clean();
 			}
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
+		std::cerr << e.what() << std::endl;
 		setClosed();
 	}
 }
@@ -344,6 +351,38 @@ void ClientFD::updateTick() {
 
 const time_t &ClientFD::getTick() const {
 	return _tick;
+}
+
+Response &ClientFD::getResponse() {
+	return _response;
+}
+
+void ClientFD::setFileStatus(bool open) {
+	_file_open = open;
+}
+
+Request &ClientFD::getRequest() {
+	return _request;
+}
+
+void ClientFD::setRequestInterface(RequestInterface *req) {
+	_requestInterface = req;
+}
+
+FileFD *ClientFD::getFileFD() {
+	return _fileFD;
+}
+
+void ClientFD::setFileFD(FileFD *pollable) {
+	_fileFD = pollable;
+}
+
+Location *ClientFD::getLocation() {
+	return _location;
+}
+
+Config *ClientFD::getConfig() {
+  return _config;
 }
 
 bool ClientFD::hasChildren() const {

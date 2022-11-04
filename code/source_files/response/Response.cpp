@@ -50,7 +50,7 @@ std::string Response::getStatusCode() const {
 }
 
 void Response::createStatusLine(ClientFD *Client) {
-	this->_statusLine.append(Client->_request.getHTTPVersion());
+	this->_statusLine.append(Client->getRequest().getHTTPVersion());
 	this->_statusLine.append(" ");
 	this->_statusLine.append(getStatusCode());
 	this->_statusLine.append(" ");
@@ -67,25 +67,26 @@ void Response::setBasicHeaders(ClientFD *Client) {
 	/* add contentType */
 	if (!this->_messageBody.empty()) {
 		addHeaderIfNotSet(Utils::contentType_string,
-						  MimeTypes::findMimeType(Client->_request.getUri()));
+						  MimeTypes::findMimeType(Client->getRequest().getUri()));
 	}
 
 	/* add connection */
-	if (Client->_request.getConnectionAvailable() == false) {
-		addHeaderIfNotSet(Utils::connection_string, Client->_request.getConnectionInfo());
+	if (Client->getRequest().getConnectionAvailable() == false) {
+		addHeaderIfNotSet(Utils::connection_string,
+						  Client->getRequest().getConnectionInfo());
 	} else {
 		addHeaderIfNotSet(Utils::connection_string, "Keep-Alive");
 	}
 
 	/* add content length */
-	if (Client->_request.getMethod() == Utils::get_string) {
+	if (Client->getRequest().getMethod() == Utils::get_string) {
 		addHeaderIfNotSet(Utils::contentLength_string, this->_messageBody.length());
 	}
 
 	/* add location */
-	if (Client->_request.getMethod() == Utils::post_string)
+	if (Client->getRequest().getMethod() == Utils::post_string)
 	{ // do you agree we only set location with post?
-		addHeaderIfNotSet(Utils::location_string, Client->_request.getUri());
+		addHeaderIfNotSet(Utils::location_string, Client->getRequest().getUri());
 	}
 }
 
@@ -140,7 +141,7 @@ void Response::generateErrorPage(
 void Response::generateErrorResponse(ClientFD *Client, std::string StatusCode) {
 	setStatusCode(StatusCode);
 	addHeader(Utils::contentType_string, "text/html");
-	generateErrorPage(StatusCode, &Client->_config->getErrorPages());
+	generateErrorPage(StatusCode, &Client->getConfig()->getErrorPages());
 	createStatusLine(Client);
 	setBasicHeaders(Client);
 	createResponseString();

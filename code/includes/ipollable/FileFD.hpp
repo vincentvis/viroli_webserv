@@ -43,4 +43,5 @@ class FileFD : public IPollable {
 		int32_t getIndex() const;
 		void    updateTick();
 		bool    hasChildren() const;
+		void    setRequestInterface(RequestInterface *req);
 };

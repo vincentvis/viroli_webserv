@@ -19,7 +19,7 @@ void FileFD::pollin() {
 
 			/* done reading; close pollable; send response with data */
 		} else if (_bytes == 0) {
-			_client->_response.generateResponse(_client, _data, "200");
+			_client->getResponse().generateResponse(_client, _data, "200");
 			setClosed();
 
 			/* append buffer to data */
@@ -29,7 +29,8 @@ void FileFD::pollin() {
 						 Buffer::getInstance().getBuff().begin() + _bytes);
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		_client->_response.generateErrorResponse(_client, "500");
+		std::cerr << e.what() << std::endl;
+		_client->getResponse().generateErrorResponse(_client, "500");
 		setClosed();
 	}
 }
@@ -59,11 +60,12 @@ void FileFD::pollout() {
 
 		/* done writing; close pollable; send response */
 		if (_left == 0) {
-			_client->_response.generateResponse(_client, "201");
+			_client->getResponse().generateResponse(_client, "201");
 			setClosed();
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		_client->_response.generateErrorResponse(_client, "500");
+		std::cerr << e.what() << std::endl;
+		_client->getResponse().generateErrorResponse(_client, "500");
 		setClosed();
 	}
 }
@@ -91,8 +93,8 @@ bool FileFD::isClosed() const {
 }
 
 void FileFD::setClosed() {
-	_closed            = true;
-	_client->_file_open = false;
+	_closed = true;
+	_client->setFileStatus(false);
 }
 
 void FileFD::setIndex(int32_t index) {
@@ -119,4 +121,8 @@ void FileFD::setRequestInterface(RequestInterface *req, ClientFD *Client) {
 
 bool FileFD::hasChildren() const {
 	return false;
+}
+
+void FileFD::setRequestInterface(RequestInterface *req) {
+	_requestInterface = req;
 }

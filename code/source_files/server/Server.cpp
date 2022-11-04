@@ -83,6 +83,8 @@ int32_t Server::getFD() const {
 void Server::remove(int index) {
 	close(Server::_pfds[index].fd);
 
+	std::cerr << "fd closed: " << Server::_pfds[index].fd << std::endl;
+
 	/* swap pollable-to-be-removed with last element in vector */
 	if (Server::_pfds.size() > 1 &&
 		(Server::_pfds.at(index).fd != Server::_pfds.back().fd) &&

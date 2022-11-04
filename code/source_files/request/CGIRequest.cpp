@@ -4,13 +4,13 @@ CGIRequest::CGIRequest() {
 }
 
 CGIRequest::CGIRequest(ClientFD &Client) {
-	if (Client._request.getMethod() == Utils::get_string) {
+	if (Client.getRequest().getMethod() == Utils::get_string) {
 		GETRequest(Client);
 	}
-	if (Client._request.getMethod() == Utils::post_string) {
+	if (Client.getRequest().getMethod() == Utils::post_string) {
 		POSTRequest(Client);
 	}
-	if (Client._request.getMethod() == Utils::delete_string) {
+	if (Client.getRequest().getMethod() == Utils::delete_string) {
 		DELETERequest(Client);
 	}
 }
