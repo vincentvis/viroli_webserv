@@ -6,13 +6,14 @@
 #include <cstring>
 
 class ServerFD : public IPollable {
-	public:
+	private:
 		Server *_server;
 		int     _fd;
 		int     _index;
 		bool    _closed;
 		time_t  _tick;
 
+	public:
 		ServerFD(Server *server, int fd, int index);
 
 		void          pollin();

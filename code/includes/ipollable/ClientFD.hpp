@@ -70,8 +70,8 @@ class ClientFD : public IPollable {
 		Server       *getServer() const;
 		const time_t &getTick() const;
 		Config       *getConfig() const;
-		Response     &getResponse() const;
-		Request      &getRequest() const;
+		Response     &getResponse();
+		Request      &getRequest();
 		FileFD       *getFileFD() const;
 		Location     *getLocation() const;
 };

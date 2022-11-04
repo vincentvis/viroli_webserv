@@ -1,8 +1,9 @@
 #include "ipollable/FileFD.hpp"
 
 FileFD::FileFD(Server *server, int fd, int index) :
-	_state(PROCESS), _server(server), _data(), _bytes(0), _left(0), _total(0), _fd(fd),
-	_index(index), _tick(), _closed(false), _client(nullptr) {
+	_server(server), _client(nullptr), _requestInterface(nullptr), _state(PROCESS),
+	_data(), _bytes(0), _left(0), _total(0), _fd(fd), _index(index), _tick(),
+	_closed(false) {
 	time(&_tick);
 }
 
@@ -29,7 +30,6 @@ void FileFD::pollin() {
 						 Buffer::getInstance().getBuff().begin() + _bytes);
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		std::cerr << e.what() << std::endl;
 		_client->getResponse().generateErrorResponse(_client, "500");
 		setClosed();
 	}
@@ -64,7 +64,6 @@ void FileFD::pollout() {
 			setClosed();
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		std::cerr << e.what() << std::endl;
 		_client->getResponse().generateErrorResponse(_client, "500");
 		setClosed();
 	}

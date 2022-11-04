@@ -1,9 +1,5 @@
 #include "ipollable/ClientFD.hpp"
 
-// _requestInterface(nullptr), _config(nullptr), _server(server), _fileFD(nullptr),
-// _state(HEADER), _inbound(), _outbound(), _body(), _bytes(0), _left(0), _total(0),
-// _fd(fd), _index(index), _tick(), _closed(false), _file_open(false)
-
 ClientFD::ClientFD(Server *server, int fd, int index) :
 	_requestInterface(nullptr), _config(nullptr), _location(nullptr), _server(server),
 	_fileFD(nullptr), _request(), _response(), _state(HEADER), _inbound(), _outbound(),
@@ -252,10 +248,8 @@ void ClientFD::pollin() {
 		processHttpMessage();
 	} catch (const Utils::ErrorPageException &e) {
 		_state = ERROR;
-		std::cerr << e.what() << std::endl;
 		this->getResponse().generateErrorResponse(this, e.what());
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		std::cerr << e.what() << std::endl;
 		setClosed();
 	}
 }
@@ -306,7 +300,6 @@ void ClientFD::pollout() {
 			}
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		std::cerr << e.what() << std::endl;
 		setClosed();
 	}
 }
@@ -369,7 +362,7 @@ void ClientFD::setRequestInterface(RequestInterface *req) {
 	_requestInterface = req;
 }
 
-FileFD *ClientFD::getFileFD() {
+FileFD *ClientFD::getFileFD() const {
 	return _fileFD;
 }
 
@@ -377,12 +370,12 @@ void ClientFD::setFileFD(FileFD *pollable) {
 	_fileFD = pollable;
 }
 
-Location *ClientFD::getLocation() {
+Location *ClientFD::getLocation() const {
 	return _location;
 }
 
-Config *ClientFD::getConfig() {
-  return _config;
+Config *ClientFD::getConfig() const {
+	return _config;
 }
 
 bool ClientFD::hasChildren() const {
