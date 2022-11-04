@@ -76,8 +76,14 @@ CPPFLAGS	+= $(foreach dir, $(UNIQ_DIRS), $(join -I$(INC_DIR)/,$(dir)))
 $(NAME): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OBJECTS) -o $(NAME)
 
+
 # include all .d files
 -include $(DEP)
+
+run_test_config: $(NAME)
+	@echo "\033[31;1;4mPINDASERV -- Everything everywhere all the pinda\033[0m"
+	./webserv ../website/config/test.config
+
 
 all: $(NAME)
 

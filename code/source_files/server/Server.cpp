@@ -123,8 +123,8 @@ void Server::run() {
 				if (Server::_pollables[i]->hasFileOpen() == false) {
 					remove(i);
 					--i;
-					continue;
 				}
+				continue;
 			}
 
 			try {
