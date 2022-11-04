@@ -8,9 +8,8 @@ Cgi::Cgi(FileStat filestats, std::string const &method, uint16_t port,
 	if (_source.isReg() == false) {
 		throw Utils::ErrorPageException("404");
 	}
-	this->_script_name   = _source.getFilename();
-	this->_executor_name = Executables::getExecutable(_source.getExtension());
-	this->_executable    = this->_executor_name;
+	this->_script_name = _source.getFilename();
+	this->_executable  = Executables::getExecutable(_source.getExtension());
 
 	_bash_string.clear();
 
@@ -53,7 +52,6 @@ int Cgi::execute(ClientFD &Client, CGIRequest *interface) {
 }
 
 Cgi Cgi::setQueryString(std::string queryString) {
-	_query = queryString;
 	_bash_string += " \"" + queryString + "\"";
 	return (*this);
 }
