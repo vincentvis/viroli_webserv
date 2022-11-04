@@ -118,6 +118,6 @@ void CgiFD::setRequestInterface(RequestInterface *req, ClientFD *Client) {
 	_client           = Client;
 }
 
-bool CgiFD::hasChildren() const {
+bool CgiFD::hasFileOpen() const {
 	return false;
 }

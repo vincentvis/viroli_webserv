@@ -120,7 +120,7 @@ void Server::run() {
 		for (size_t i = 0; i < Server::_pfds.size(); ++i) {
 			Server::_pollables[i]->timeout();
 			if (Server::_pollables[i]->isClosed() == true) {
-				if (Server::_pollables[i]->hasChildren() == false) {
+				if (Server::_pollables[i]->hasFileOpen() == false) {
 					remove(i);
 					--i;
 					continue;

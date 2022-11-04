@@ -397,6 +397,6 @@ Config *ClientFD::getConfig() const {
 	return _config;
 }
 
-bool ClientFD::hasChildren() const {
+bool ClientFD::hasFileOpen() const {
 	return _file_open;
 }

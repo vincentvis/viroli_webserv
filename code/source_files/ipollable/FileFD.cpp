@@ -118,7 +118,7 @@ void FileFD::setRequestInterface(RequestInterface *req, ClientFD *Client) {
 	_client           = Client;
 }
 
-bool FileFD::hasChildren() const {
+bool FileFD::hasFileOpen() const {
 	return false;
 }
 

@@ -62,9 +62,6 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 	Client.setFileFD(
 		reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
 			Client.getServer(), fd, FILEPOLL, POLLIN)));
-	// Client._fileFD =
-	// 	reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
-	// 		Client._server, fd, FILEPOLL, POLLIN));
 	Client.setFileStatus(true);
 	Client.getFileFD()->setRequestInterface(this, &Client);
 }
@@ -81,8 +78,6 @@ void HttpRequest::POSTRequest(ClientFD &Client) {
 		Client.setFileFD(
 			reinterpret_cast<FileFD *>(PollableFactory::getInstance().createPollable(
 				Client.getServer(), fd, FILEPOLL, POLLOUT)));
-		// Client._fileFD =
-
 		Client.setFileStatus(true);
 		if (!Client.getBody().empty()) {
 			Client.getFileFD()->setData(Client.getRequest().getBody());

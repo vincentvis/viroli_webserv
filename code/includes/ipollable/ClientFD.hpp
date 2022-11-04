@@ -67,7 +67,7 @@ class ClientFD : public IPollable {
 		void          setCgiFD(CgiFD *pollable);
 		void          setRequestInterface(RequestInterface *req);
 		void          setFileStatus(bool open);
-		bool          hasChildren() const;
+		bool          hasFileOpen() const;
 		int           getFD() const;
 		int32_t       getSendSize() const;
 		int32_t       getIndex() const;

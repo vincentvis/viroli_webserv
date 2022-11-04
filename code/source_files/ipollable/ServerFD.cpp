@@ -68,6 +68,6 @@ const time_t &ServerFD::getTick() const {
 	return _tick;
 }
 
-bool ServerFD::hasChildren() const {
+bool ServerFD::hasFileOpen() const {
 	return false;
 }
