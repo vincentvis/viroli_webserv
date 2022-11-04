@@ -255,28 +255,5 @@ void Request::clean() {
 	this->_header.clear();
 }
 
-/* !REMOVE later, print function used for testing */
-void Request::printAttributesInRequestClass() {
-	std::cout << "--------------------------------------" << std::endl;
-	std::cout << "method = [" << this->_method << "]" << std::endl;
-	std::cout << "uri = [" << this->_uri << "]" << std::endl;
-	std::cout << "query = [" << this->_query << "]" << std::endl;
-	std::cout << "HTTPVersion = [" << this->_HTTPVersion << "]" << std::endl;
-	std::cout << "--------------------------------------" << std::endl;
-	std::cout << "map = \n";
-	for (this->_itr = _header.begin(); this->_itr != _header.end(); this->_itr++) {
-		std::cout << "[" << this->_itr->first << "] [" << this->_itr->second << "]"
-				  << std::endl;
-	}
-	std::cout << "--------------------------------------" << std::endl;
-	std::cout << "Body = [" << this->_body << "]" << std::endl;
-	std::cout << "CGI = [" << std::boolalpha << this->_CGI << "]" << std::endl;
-	std::cout << "chunked = [" << this->_TransferEncodingChunked << "]" << std::endl;
-	std::cout << "content-length = [" << this->getContentLength() << "]" << std::endl;
-	std::cout << "expect = [" << this->getExpect() << "]" << std::endl;
-	std::cout << "connection = [" << this->_ConnectionAvailable << "]" << std::endl;
-	std::cout << "--------------------------------------" << std::endl;
-}
-
 Request::~Request() {
 }
