@@ -283,7 +283,6 @@ void ClientFD::pollout() {
 		/* data is sent */
 		if (_left == 0) {
 			/* accept incoming activity again */
-
 			delete _requestInterface;
 			_requestInterface = nullptr;
 

@@ -7,7 +7,6 @@
 #include "ipollable/PollableFactory.hpp"
 #include "ipollable/ServerFD.hpp"
 #include "utils/Utils.hpp"
-
 #include <arpa/inet.h>
 #include <csignal>
 #include <cstring>

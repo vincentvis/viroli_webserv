@@ -2,10 +2,6 @@
 #include "config/Config.hpp"
 #include "utils/Defines.hpp"
 
-// Various ad hoc limitations on request-line length are found in practice. It is
-// RECOMMENDED that all HTTP senders and recipients support, at a minimum, request-line
-// lengths of 8000 octets.
-
 Request::Request() {
 	this->_headerAvailable         = false;
 	this->_ContentLength           = 0;
@@ -74,7 +70,6 @@ void Request::ParseRequest(std::string BUF) {
 		if (this->_connection == std::string("close")) {
 			this->_ConnectionAvailable = false;
 		}
-		// std::cout << this->_connection << std::endl;
 	}
 
 	/* set content length and chunked for body creation in connectionClass */
@@ -133,8 +128,6 @@ bool Request::checkValidMethod() {
 void Request::ValidateRequest(Config *Conf, Location *Loc) {
 	/* check method */
 	if (checkValidMethod() == false) {
-		// not sure if this is the right number; the method given by the
-		// client could be "DOG"
 		throw Utils::ErrorPageException("405");
 	}
 	if (methodsAllowed(Conf, Loc) == false) {

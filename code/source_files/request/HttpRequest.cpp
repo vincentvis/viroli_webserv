@@ -9,10 +9,10 @@ HttpRequest::HttpRequest(ClientFD &Client) {
 	if (Client.getRequest().getMethod() == Utils::get_string) {
 		GETRequest(Client);
 	}
-	if (Client.getRequest().getMethod() == Utils::post_string) {
+	else if (Client.getRequest().getMethod() == Utils::post_string) {
 		POSTRequest(Client);
 	}
-	if (Client.getRequest().getMethod() == Utils::delete_string) {
+	else if (Client.getRequest().getMethod() == Utils::delete_string) {
 		DELETERequest(Client);
 	}
 }
@@ -32,7 +32,7 @@ void HttpRequest::GETRequest(ClientFD &Client) {
 			} catch (const Utils::AutoindexException &e) {
 				throw Utils::ErrorPageException("404");
 			} catch (const std::exception &e) {
-				throw Utils::ErrorPageException("500"); // internal server error?
+				throw Utils::ErrorPageException("500");
 			}
 		}
 		std::vector<std::string> indexes =
