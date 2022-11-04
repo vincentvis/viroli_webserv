@@ -12,17 +12,6 @@
 #define BUFFER_SIZE     16384
 #define POLLHOLD        0
 
-#define COUT_DEBUGMSG \
-	std::cout << "\033[37m" << __PRETTY_FUNCTION__ << "[" << __LINE__ << "]: \033[0m"
-
-#define DEBUGSTART std::cerr << "\033[32;4m"
-#define DEBUGEND   "\033[0m\n"
-#define CGIDEBUG(pid)                                                                  \
-	std::cerr << "\033[32;4m" << std::setw(4) << (pid) << " (pid):" << __FILE__ << "." \
-			  << __LINE__ << ": "
-#define CGICHILDCLR "\033[33m"
-#define CGIPARNTCLR "\033[36m"
-
 enum PollableType { SERVERPOLL, CLIENTPOLL, FILEPOLL, CGIPOLL };
 
 namespace Utils {

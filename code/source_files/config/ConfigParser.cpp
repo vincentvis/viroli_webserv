@@ -576,8 +576,6 @@ bool ConfigParser::isValidConfigURI(const std::string &match_str) {
 	std::string::size_type word   = 0;
 
 	while (i != length) {
-		// if (match_str.at(i) == '/' && word == 0)
-		// 	return (false);
 		if (std::isalnum(match_str.at(i)) || match_str.at(i) == '-' ||
 			match_str.at(i) == '_' || match_str.at(i) == '.')
 		{

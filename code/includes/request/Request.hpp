@@ -38,8 +38,7 @@ class Request {
 		~Request();
 
 		std::map<std::string, std::string>::iterator _itr;
-		void printAttributesInRequestClass(); // !used for testing; REMOVE later
-		void ParseRequest(std::string BUF);
+		void                                         ParseRequest(std::string BUF);
 		void ValidateRequest(Config *Conf, Location *Loc);
 		bool validateHeaderMap();
 		bool methodsAllowed(Config *Conf, Location *Loc);
