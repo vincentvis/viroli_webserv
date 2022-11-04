@@ -14,6 +14,7 @@ class ServerFD : public IPollable {
 		time_t  _tick;
 
 		ServerFD(Server *server, int fd, int index);
+		~ServerFD();
 
 		void          pollin();
 		void          pollout();

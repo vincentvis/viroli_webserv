@@ -5,7 +5,7 @@ ClientFD::ClientFD(Server *server, int fd, int index) :
 	_cgiFD(nullptr), _state(HEADER), _inbound(), _outbound(), _body(), _bytes(0),
 	_left(0), _total(0), _fd(fd), _index(index), _tick(), _closed(false),
 	_file_open(false) {
-	time(&_tick);
+	updateTick();
 	this->_config = *(this->_server->_configs.begin());
 }
 
