@@ -1,8 +1,8 @@
 #pragma once
 
+#include "utils/Utils.hpp"
 #include <map>
 #include <string>
-#include "utils/Utils.hpp"
 
 class MimeTypes {
 	public:
@@ -10,9 +10,10 @@ class MimeTypes {
 			static MimeTypes instance;
 			return instance._mimetypes;
 		}
-		static std::string findMimeType(std::string uri){
+		static std::string findMimeType(std::string uri) {
 			std::string extension = Utils::getExtensionFromString(uri);
-			std::map<std::string, std::string>::iterator _mimetypeItr = getMap().find(extension);
+			std::map<std::string, std::string>::iterator _mimetypeItr =
+				getMap().find(extension);
 			if (_mimetypeItr != getMap().end())
 				return (_mimetypeItr->second);
 			return ("text/plain");

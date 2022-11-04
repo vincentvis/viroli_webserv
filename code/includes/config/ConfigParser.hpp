@@ -1,10 +1,11 @@
+#pragma once
+
 #include "config/Config.hpp"
 #include "response/HttpStatus.hpp"
 #include "server/Server.hpp"
 #include "utils/Defines.hpp"
 #include "utils/FileStat.hpp"
 #include "utils/Utils.hpp"
-
 #include <algorithm>
 #include <cctype>
 #include <exception>
@@ -41,11 +42,10 @@ class ConfigParser {
 		std::ifstream _fileStream;
 		std::string   _currentLine;
 
-		//
-		uint16_t stringToPort(std::string &string);
-		void     processListen(Config &target);
-		void     processErrorPages(std::map<std::string, std::string> &target);
-		void     getErrorPageContent(Config *source);
+		uint16_t      stringToPort(std::string &string);
+		void          processListen(Config &target);
+		void          processErrorPages(std::map<std::string, std::string> &target);
+		void          getErrorPageContent(Config *source);
 		void processAddParamsToVector(std::string name, std::vector<std::string> &target,
 									  std::vector<std::string>::size_type min,
 									  bool                                shouldBeUnique);

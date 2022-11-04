@@ -9,27 +9,27 @@ RST="\033[0m"
 
 can_post:
 	@echo $(CLR)"Try putting a pinda in a postable directory"$(RST)
-	curl --data-binary "@testfiles/pinda.jpg" localhost:8080/can_post/a_new_pinda.jpg
+	curl -v --data-binary "@testfiles/pinda.jpg" localhost:8080/can_post/a_new_pinda.jpg
 
 can_post_and_get:
 	@echo $(CLR)"Try putting a pinda in a postable directory"$(RST)
-	curl --data-binary "@testfiles/pinda.jpg" localhost:8080/can_post_and_get/a_new_pinda.jpg
+	curl -v --data-binary "@testfiles/pinda.jpg" localhost:8080/can_post_and_get/a_new_pinda.jpg
 	@echo $(CLR)"Try getting the pinda back"$(RST)
-	curl localhost:8080/can_post_and_get/a_new_pinda.jpg > verify_pinda.jpg
+	curl -v localhost:8080/can_post_and_get/a_new_pinda.jpg > verify_pinda.jpg
 	@echo $(CLR)"Opening the verification pinda"$(RST)
 	open verify_pinda.jpg
 
 can_get:
 	@echo $(CLR)"Try get request to valid location (should recieve 'example response'"$(RST)
-	curl localhost:8080/can_get/can_get.txt
+	curl -v localhost:8080/can_get/can_get.txt
 	@echo $(CLR)"Try getting from a route but file does not exist"$(RST)
-	curl localhost:8080/can_get/slfjdsklfj.jpg
+	curl -v localhost:8080/can_get/slfjdsklfj.jpg
 
 can_delete:
 	@echo $(CLR)"Try deleting a file that exists"$(RST)
-	curl -X DELETE localhost:8080/can_delete/file1.txt
+	curl -v -X DELETE localhost:8080/can_delete/file1.txt
 	@echo $(CLR)"Try deleting a file that does not exist"$(RST)
-	curl -X DELETE localhost:8080/can_delete/file.txt
+	curl -v -X DELETE localhost:8080/can_delete/file.txt
 
 cannot_post:
 	@echo $(CLR)"Try posting to a route where it is not allowed (expect 405 response)"$(RST)

@@ -668,16 +668,9 @@ void ConfigParser::processReturn(Location &target) {
 		typeParam = params.at(0);
 	}
 
-	if (isValidConfigURI(uriParam)) {
-		target._redirect       = uriParam;
-		target._shouldRedirect = true;
-	} else {
-		throw std::runtime_error(
-			"Value \"" + uriParam +
-			"\" is not a valid value for directive \"return\" in configfile at "
-			"line " +
-			Utils::to_string(_linenum));
-	}
-	target._redirectType = typeParam;
+	target._redirect       = uriParam;
+	target._shouldRedirect = true;
+
+	target._redirectType   = typeParam;
 	check_and_skip_semicolon("return");
 }

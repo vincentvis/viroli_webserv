@@ -27,6 +27,10 @@ std::vector<std::string> const &Location::getAllow() const {
 	return (_allow);
 }
 
+int64_t Location::getMaxBodySize() const {
+	return _maxBodySize;
+}
+
 std::vector<std::string> const &Location::getIndex() const {
 	return (_index);
 }
@@ -41,6 +45,18 @@ std::string const &Location::getAutoIndex() const {
 
 int Location::getSortWeight() const {
 	return _sortWeight;
+}
+
+bool Location::getShouldRedirect() const {
+	return _shouldRedirect;
+}
+
+std::string const &Location::getRedirect() const {
+	return _redirect;
+}
+
+std::string const &Location::getRedirectType() const {
+	return _redirectType;
 }
 
 // stream output

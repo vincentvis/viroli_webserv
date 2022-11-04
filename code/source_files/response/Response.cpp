@@ -84,8 +84,7 @@ void Response::setBasicHeaders(ClientFD *Client) {
 	}
 
 	/* add location */
-	if (Client->getRequest().getMethod() == Utils::post_string)
-	{ // do you agree we only set location with post?
+	if (Client->getRequest().getMethod() == Utils::post_string) {
 		addHeaderIfNotSet(Utils::location_string, Client->getRequest().getUri());
 	}
 }
@@ -187,8 +186,6 @@ void Response::generateCGIResponse(ClientFD *Client, std::string cgiOutput) {
 	createStatusLine(Client);
 
 	if (cgiHeaders == std::string::npos) {
-		// no headers...
-		// just send everything I guess?
 		addHeader(Utils::contentType_string, "text/html");
 		addHeader(Utils::contentLength_string, cgiOutput.length());
 		setMessageBody(cgiOutput);
@@ -197,7 +194,6 @@ void Response::generateCGIResponse(ClientFD *Client, std::string cgiOutput) {
 		Client->setupResponse();
 		return;
 	}
-	// there are headers, extract them and set them?
 	std::string headerPart = cgiOutput.substr(0, cgiHeaders + 1);
 	std::string bodyPart   = cgiOutput.substr(cgiHeaders + 2);
 
@@ -229,14 +225,21 @@ void Response::generateCGIResponse(ClientFD *Client, std::string cgiOutput) {
 			addHeader(key, value);
 		}
 	}
-	// std::cout << "key: [" << key << "] next: " << headerPart.at(name_end) << "\n";
-
-	// this should be possible gotten from the header of the cgi output
 	addHeaderIfNotSet(Utils::contentLength_string, bodyPart.length());
 	addHeaderIfNotSet(Utils::contentType_string, "text/html");
 
 	setMessageBody(bodyPart);
 	setBasicHeaders(Client);
+	createResponseString();
+	Client->setupResponse();
+}
+
+void Response::generateRedirectResponse(ClientFD *Client) {
+	setStatusCode(Client->getLocation()->getRedirectType());
+	addHeader("Location", Client->getLocation()->getRedirect());
+	addHeaderIfNotSet(Utils::date_string, getDate());
+	addHeaderIfNotSet(Utils::server_string, Utils::serverType_string);
+	createStatusLine(Client);
 	createResponseString();
 	Client->setupResponse();
 }

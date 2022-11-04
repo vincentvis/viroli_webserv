@@ -19,15 +19,14 @@ class Cgi {
 		pid_t getPid() const;
 
 	protected:
-		FileStat    _source;
-		std::string _executable;
-		std::string _script_name;
-		std::string _bash_string;
-		pid_t       _pid;
+		FileStat                                          _source;
+		std::string                                       _executable;
+		std::string                                       _script_name;
+		std::string                                       _bash_string;
+		pid_t                                             _pid;
 
-		std::string _tmp_filename;
-		int         _fd;
-		//
+		std::string                                       _tmp_filename;
+		int                                               _fd;
 		std::vector<std::pair<std::string, std::string> > _env;
 
 	private:

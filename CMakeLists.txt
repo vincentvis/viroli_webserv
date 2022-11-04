@@ -31,6 +31,8 @@ add_executable(webserv
         code/includes/ipollable/ServerFD.hpp
         code/source_files/ipollable/Buffer.cpp
         code/includes/ipollable/Buffer.hpp
+        code/source_files/ipollable/CgiFD.cpp
+        code/includes/ipollable/CgiFD.hpp
         code/source_files/request/Request.cpp
         code/includes/request/Request.hpp
         code/source_files/request/RequestInterface.cpp
@@ -45,14 +47,13 @@ add_executable(webserv
         code/includes/response/Response.hpp
         code/includes/utils/Defines.hpp
         code/source_files/autoindex/Autoindex.cpp
-        code/source_files/config/MimeTypes.cpp
         code/includes/config/MimeTypes.hpp
         code/source_files/response/HttpStatus.cpp
         code/includes/response/HttpStatus.hpp
-        code/includes/cgi/Cgi.hpp
-        code/source_files/cgi/Cgi.cpp
         code/source_files/utils/FileStat.cpp
         code/includes/utils/FileStat.hpp
-        code/includes/cgi/Executables.hpp)
+        code/includes/cgi/Executables.hpp
+        code/includes/cgi/Cgi.hpp
+        code/source_files/cgi/Cgi.cpp)
 
 #target_link_libraries(webserv PUBLIC libft)
