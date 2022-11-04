@@ -234,6 +234,16 @@ void Response::generateCGIResponse(ClientFD *Client, std::string cgiOutput) {
 	Client->setupResponse();
 }
 
+void Response::generateRedirectResponse(ClientFD *Client) {
+	setStatusCode(Client->getLocation()->getRedirectType());
+	addHeader("Location", Client->getLocation()->getRedirect());
+	addHeaderIfNotSet(Utils::date_string, getDate());
+	addHeaderIfNotSet(Utils::server_string, Utils::serverType_string);
+	createStatusLine(Client);
+	createResponseString();
+	Client->setupResponse();
+}
+
 void Response::clean() {
 	this->_statusLine.clear();
 	this->_responseHeader.clear();

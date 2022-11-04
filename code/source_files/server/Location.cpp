@@ -47,6 +47,18 @@ int Location::getSortWeight() const {
 	return _sortWeight;
 }
 
+bool Location::getShouldRedirect() const {
+	return _shouldRedirect;
+}
+
+std::string const &Location::getRedirect() const {
+	return _redirect;
+}
+
+std::string const &Location::getRedirectType() const {
+	return _redirectType;
+}
+
 // stream output
 std::ostream &operator<<(std::ostream &os, const Location &location) {
 #define PRINT_ALIGN "    " << std::setw(15) << std::left

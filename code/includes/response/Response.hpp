@@ -2,9 +2,9 @@
 
 #include "config/Config.hpp"
 #include "response/HttpStatus.hpp"
+#include <ctime>
 #include <iostream>
 #include <map>
-#include <ctime>
 
 // Statuscode range:
 //	100-199 is classed as Informational.
@@ -46,6 +46,7 @@ class Response {
 		std::string getDate();
 		void        clean();
 		void
-		generateErrorPage(std::string                               status,
-						  const std::map<std::string, std::string> *customErrorPages);
+			 generateErrorPage(std::string                               status,
+							   const std::map<std::string, std::string> *customErrorPages);
+		void generateRedirectResponse(ClientFD *Client);
 };

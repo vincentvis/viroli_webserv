@@ -6,6 +6,11 @@ HttpRequest::HttpRequest() {
 }
 
 HttpRequest::HttpRequest(ClientFD &Client) {
+	if (Client.getLocation() && Client.getLocation()->getShouldRedirect()) {
+		Client.getResponse().generateRedirectResponse(&Client);
+		return;
+	}
+
 	if (Client.getRequest().getMethod() == Utils::get_string) {
 		GETRequest(Client);
 	} else if (Client.getRequest().getMethod() == Utils::post_string) {

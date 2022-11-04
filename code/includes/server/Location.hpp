@@ -25,6 +25,10 @@ class Location {
 
 		int                                getSortWeight() const;
 
+		bool                               getShouldRedirect() const;
+		std::string const                 &getRedirect() const;
+		std::string const                 &getRedirectType() const;
+
 	private:
 		std::string                        _match;
 		std::string                        _root;
