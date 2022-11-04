@@ -5,10 +5,13 @@
 #include "request/HttpRequest.hpp"
 #include "response/Response.hpp"
 #include "server/Server.hpp"
+// #include "utils/Defines.hpp"
+// #include "utils/Exception.hpp"
 #include <string>
 #include <vector>
 
 class FileFD;
+class CgiFD;
 class RequestInterface;
 
 class ClientFD : public IPollable {
@@ -21,6 +24,7 @@ class ClientFD : public IPollable {
 		Location         *_location;
 		Server           *_server;
 		FileFD           *_fileFD;
+		CgiFD            *_cgiFD;
 		Response          _response;
 		State             _state;
 		std::string       _inbound;

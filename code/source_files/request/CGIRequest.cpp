@@ -1,4 +1,5 @@
 #include "request/CGIRequest.hpp"
+#include "cgi/Cgi.hpp"
 
 CGIRequest::CGIRequest() {
 }
@@ -6,29 +7,63 @@ CGIRequest::CGIRequest() {
 CGIRequest::CGIRequest(ClientFD &Client) {
 	if (Client._request.getMethod() == Utils::get_string) {
 		GETRequest(Client);
-	}
-	if (Client._request.getMethod() == Utils::post_string) {
+	} else if (Client._request.getMethod() == Utils::post_string) {
 		POSTRequest(Client);
-	}
-	if (Client._request.getMethod() == Utils::delete_string) {
+	} else if (Client._request.getMethod() == Utils::delete_string) {
 		DELETERequest(Client);
 	}
 }
 
 void CGIRequest::GETRequest(ClientFD &Client) {
-	(void)Client;
-	std::cout << "this is a GET CGI Request" << std::endl; // REMOVE LATER
+	char tmp[80];
+	std::memcpy(tmp, "/tmp/viroli_cgi_file___XXXXXXXX\0", 32);
+	if (mktemp(tmp) == NULL) {
+		throw Utils::ErrorPageException("502");
+	}
+	_tmpfilename = std::string(tmp);
+
+	Cgi cgi(Client._request.getFileStatCopy(), Client._request.getMethod(),
+			Client._server->getPort(), Client._config->getFirstServerName(), tmp);
+
+	if (Client._request.getQuery().empty() == false) {
+		cgi.setQueryString(Client._request.getQuery());
+	}
+
+	cgi.execute(Client, this);
 }
 
 void CGIRequest::POSTRequest(ClientFD &Client) {
-	(void)Client;
-	std::cout << "this is a POST CGI Request" << std::endl; // REMOVE LATER
+	char tmp[80];
+	std::memcpy(tmp, "/tmp/viroli_cgi_file___XXXXXXXX\0", 32);
+	if (mktemp(tmp) == NULL) {
+		throw Utils::ErrorPageException("502");
+	}
+	_tmpfilename = std::string(tmp);
+
+	Cgi cgi(Client._request.getFileStatCopy(), Client._request.getMethod(),
+			Client._server->getPort(), Client._config->getFirstServerName(), tmp);
+
+	// cgi.setQueryString(Client._request.getBody());
+	cgi.prepEnv("CONTENT_LENGTH", Utils::to_string(Client._request.getContentLength()));
+	std::map<std::string, std::string>::const_iterator contentType =
+		Client._request.getHeaderMap().find("Content-Type");
+	if (contentType != Client._request.getHeaderMap().end()) {
+		cgi.prepEnv("CONTENT_TYPE", contentType->second);
+	}
+
+	if (Client._request.getBody().empty() == false) {
+		cgi.setQueryString(Client._request.getBody());
+	}
+
+	cgi.execute(Client, this);
 }
 
 void CGIRequest::DELETERequest(ClientFD &Client) {
 	(void)Client;
-	std::cout << "this is a DELETE CGI Request" << std::endl; // REMOVE LATER
+	std::cerr << "DELETE requests are not part of CGI (we should never see this..)"
+			  << std::endl;
 }
 
 CGIRequest::~CGIRequest() {
+	remove(_tmpfilename.c_str());
 }

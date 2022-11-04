@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utils/Defines.hpp"
+#include "utils/Exception.hpp"
 #include "utils/FileStat.hpp"
 #include "utils/Utils.hpp"
 #include <map>
@@ -52,7 +53,7 @@ class Executables {
 		std::map<std::string, std::string>           _executables;
 		std::map<std::string, std::string>::iterator _end;
 		Executables() {
-			_executables["py"] = "python";
+			_executables["py"] = "python3";
 			_executables["sh"] = "bash";
 			_end               = _executables.end();
 		}

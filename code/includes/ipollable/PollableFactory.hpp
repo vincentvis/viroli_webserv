@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ipollable/CgiFD.hpp"
 #include "ipollable/ClientFD.hpp"
 #include "ipollable/FileFD.hpp"
 #include "ipollable/ServerFD.hpp"
@@ -16,10 +17,11 @@ class PollableFactory {
 
 	private:
 		PollableFactory();
-		std::array<MemFunP, 3> _memfun;
+		std::array<MemFunP, 4> _memfun;
 		IPollable             *createClientFD(Server *serv, int fd, int event);
 		IPollable             *createServerFD(Server *serv, int fd, int event);
 		IPollable             *createFileFD(Server *serv, int fd, int event);
+		IPollable             *createCgiFD(Server *serv, int fd, int event);
 
 		PollableFactory(PollableFactory const &);
 		void operator=(PollableFactory const &);

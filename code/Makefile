@@ -38,6 +38,7 @@ CLASSES		:= \
 				config/ConfigParser\
 				ipollable/ClientFD\
 				ipollable/FileFD\
+				ipollable/CgiFD\
 				ipollable/IPollable\
 				ipollable/PollableFactory\
 				ipollable/ServerFD\
@@ -48,6 +49,7 @@ CLASSES		:= \
 				utils/FileStat\
 				utils/Utils\
         		response/HttpStatus\
+                cgi/Cgi\
                 request/HttpRequest\
                 request/Request\
                 request/RequestInterface\

@@ -1,12 +1,23 @@
 #include "ipollable/ClientFD.hpp"
 
 ClientFD::ClientFD(Server *server, int fd, int index) :
-	_requestInterface(nullptr), _server(server), _fileFD(nullptr), _state(HEADER),
-	_inbound(), _outbound(), _body(), _bytes(0), _left(0), _total(0), _fd(fd),
-	_index(index), _tick(), _closed(false), _file_open(false) {
+	_requestInterface(nullptr), _config(nullptr), _server(server), _fileFD(nullptr),
+	_cgiFD(nullptr), _state(HEADER), _inbound(), _outbound(), _body(), _bytes(0),
+	_left(0), _total(0), _fd(fd), _index(index), _tick(), _closed(false),
+	_file_open(false) {
 	time(&_tick);
 	this->_config = *(this->_server->_configs.begin());
 }
+
+// This function is removed in the MAIN branch at the time of CGI merge
+// I need to check if this is OK or if it is needed
+// if it is needed, also add back prototype
+// ClientFD::~ClientFD() {
+// 	if (this->_requestInterface) {
+// 		delete _requestInterface;
+// 		_requestInterface = nullptr;
+// 	}
+// }
 
 void ClientFD::resetCounters() {
 	_bytes = 0;
@@ -198,6 +209,7 @@ void ClientFD::clean() {
 	_config           = nullptr;
 	_location         = nullptr;
 	_fileFD           = nullptr;
+	_cgiFD            = nullptr;
 	_state            = HEADER;
 	_inbound.clear();
 	_outbound.clear();
@@ -246,7 +258,7 @@ void ClientFD::pollin() {
 		processHttpMessage();
 	} catch (const Utils::ErrorPageException &e) {
 		_state = ERROR;
-		std::cerr << e.what() << std::endl;
+		std::cerr << "Respond with " << e.what() << " error page" << std::endl;
 		this->_response.generateErrorResponse(this, e.what());
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
 		setClosed();

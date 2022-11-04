@@ -86,6 +86,17 @@ std::map<std::string, std::string> const &Config::getErrorPages() const {
 	return _errorPages;
 }
 
+std::vector<std::string> const &Config::getServerNames() const {
+	return _serverNames;
+}
+
+std::string Config::getFirstServerName() const {
+	if (_serverNames.empty()) {
+		return ("");
+	}
+	return (_serverNames.at(0));
+}
+
 // stream output
 std::ostream &operator<<(std::ostream &os, const Config &config) {
 	os << "\033[1;4mConfig info:\033[0m" << std::endl;

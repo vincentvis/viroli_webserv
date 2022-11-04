@@ -49,6 +49,8 @@ add_executable(webserv
         code/includes/config/MimeTypes.hpp
         code/source_files/response/HttpStatus.cpp
         code/includes/response/HttpStatus.hpp
+        code/includes/cgi/Cgi.hpp
+        code/source_files/cgi/Cgi.cpp
         code/source_files/utils/FileStat.cpp
         code/includes/utils/FileStat.hpp
         code/includes/cgi/Executables.hpp)
