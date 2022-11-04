@@ -8,11 +8,9 @@ HttpRequest::HttpRequest() {
 HttpRequest::HttpRequest(ClientFD &Client) {
 	if (Client.getRequest().getMethod() == Utils::get_string) {
 		GETRequest(Client);
-	}
-	else if (Client.getRequest().getMethod() == Utils::post_string) {
+	} else if (Client.getRequest().getMethod() == Utils::post_string) {
 		POSTRequest(Client);
-	}
-	else if (Client.getRequest().getMethod() == Utils::delete_string) {
+	} else if (Client.getRequest().getMethod() == Utils::delete_string) {
 		DELETERequest(Client);
 	}
 }
