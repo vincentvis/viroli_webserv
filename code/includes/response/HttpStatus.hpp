@@ -68,7 +68,6 @@ class HttpStatus {
 			_statusses["409"] = "Conflict";
 			_statusses["410"] = "Gone";
 			_statusses["411"] = "Length Required";
-			_statusses["412"] = "Precondition Failed";
 			_statusses["413"] = "Payload Too Large";
 			_statusses["414"] = "Request-URI Too Long";
 			_statusses["415"] = "Unsupported Media Type";
@@ -95,16 +94,9 @@ class HttpStatus {
 			_statusses["502"] = "Bad Gateway";
 			_statusses["503"] = "Service Unavailable";
 			_statusses["504"] = "Gateway Timeout";
-			_statusses["506"] = "Variant Also Negotiates";
-			_statusses["507"] = "Insufficient Storage";
-			_statusses["508"] = "Loop Detected";
-			_statusses["509"] = "Bandwidth Limit Exceeded";
 			_statusses["510"] = "Not Extended";
 			_statusses["511"] = "Network Authentication Required";
-			_statusses["521"] = "Web Server Is Down";
 			_statusses["522"] = "Connection Timed Out";
-			_statusses["523"] = "Origin Is Unreachable";
-			_statusses["525"] = "SSL Handshake Failed";
 			_statusses["599"] = "Network Connect Timeout Error";
 		}
 		HttpStatus(HttpStatus const &);
