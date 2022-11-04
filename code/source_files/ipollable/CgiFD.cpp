@@ -19,7 +19,7 @@ void CgiFD::pollin() {
 			/* done reading; close pollable; send response with data */
 		} else if (_bytes == 0) {
 			if (_data.empty() == false) {
-				_client->_response.generateCGIResponse(_client, _data);
+				_client->getResponse().generateCGIResponse(_client, _data);
 				setClosed();
 			}
 			/* append buffer to data */
@@ -30,7 +30,7 @@ void CgiFD::pollin() {
 						 Buffer::getInstance().getBuff().begin() + _bytes);
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		_client->_response.generateErrorResponse(_client, "500");
+		_client->getResponse().generateErrorResponse(_client, "500");
 		setClosed();
 	}
 }
@@ -60,11 +60,11 @@ void CgiFD::pollout() {
 
 		/* done writing; close pollable; send response */
 		if (_left == 0) {
-			_client->_response.generateResponse(_client, "201");
+			_client->getResponse().generateResponse(_client, "201");
 			setClosed();
 		}
 	} catch (const Utils::SystemCallFailedExceptionNoErrno &e) {
-		_client->_response.generateErrorResponse(_client, "500");
+		_client->getResponse().generateErrorResponse(_client, "500");
 		setClosed();
 	}
 }
@@ -92,8 +92,8 @@ bool CgiFD::isClosed() const {
 }
 
 void CgiFD::setClosed() {
-	_closed             = true;
-	_client->_file_open = false;
+	_closed = true;
+	_client->setFileStatus(false);
 }
 
 void CgiFD::setIndex(int32_t index) {
@@ -118,6 +118,6 @@ void CgiFD::setRequestInterface(RequestInterface *req, ClientFD *Client) {
 	_client           = Client;
 }
 
-bool CgiFD::hasChildren() const {
+bool CgiFD::hasFileOpen() const {
 	return false;
 }
