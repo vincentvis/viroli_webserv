@@ -4,7 +4,7 @@ FileFD::FileFD(Server *server, int fd, int index) :
 	_server(server), _client(nullptr), _requestInterface(nullptr), _state(PROCESS),
 	_data(), _bytes(0), _left(0), _total(0), _fd(fd), _index(index), _tick(),
 	_closed(false) {
-	time(&_tick);
+	updateTick();
 }
 
 void FileFD::pollin() {
