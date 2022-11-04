@@ -13,5 +13,5 @@ class RequestInterface {
 	public:
 		RequestInterface();
 		RequestInterface(ClientFD &Client);
-		virtual ~RequestInterface()= 0;
+		virtual ~RequestInterface() = 0;
 };

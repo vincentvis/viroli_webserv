@@ -125,4 +125,16 @@ bool validateFieldName(const std::string &original) {
 	return true;
 }
 
+bool isValidHttpStatus(const std::string &status) {
+	if (status.empty() == true || status.length() > 3) {
+		return (false);
+	}
+	if (status.at(0) < '1' || status.at(0) > '5' || status.at(1) < '0' ||
+		status.at(1) > '9' || status.at(2) < '0' || status.at(2) > '9')
+	{
+		return (false);
+	}
+	return (true);
+}
+
 } // namespace Utils

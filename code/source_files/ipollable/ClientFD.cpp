@@ -2,12 +2,22 @@
 
 ClientFD::ClientFD(Server *server, int fd, int index) :
 	_requestInterface(nullptr), _config(nullptr), _location(nullptr), _server(server),
-	_fileFD(nullptr), _request(), _response(), _state(HEADER), _inbound(), _outbound(),
-	_body(), _bytes(0), _left(0), _total(0), _fd(fd), _index(index), _tick(),
-	_closed(false), _file_open(false) {
+	_fileFD(nullptr), _cgiFD(nullptr), _request(), _response(), _state(HEADER),
+	_inbound(), _outbound(), _body(), _bytes(0), _left(0), _total(0), _fd(fd),
+	_index(index), _tick(), _closed(false), _file_open(false) {
 	time(&_tick);
 	this->_config = *(this->_server->_configs.begin());
 }
+
+// This function is removed in the MAIN branch at the time of CGI merge
+// I need to check if this is OK or if it is needed
+// if it is needed, also add back prototype
+// ClientFD::~ClientFD() {
+// 	if (this->_requestInterface) {
+// 		delete _requestInterface;
+// 		_requestInterface = nullptr;
+// 	}
+// }
 
 void ClientFD::resetCounters() {
 	_bytes = 0;
@@ -200,6 +210,7 @@ void ClientFD::clean() {
 	_config           = nullptr;
 	_location         = nullptr;
 	_fileFD           = nullptr;
+	_cgiFD            = nullptr;
 	_state            = HEADER;
 	_inbound.clear();
 	_outbound.clear();
@@ -368,6 +379,14 @@ FileFD *ClientFD::getFileFD() const {
 
 void ClientFD::setFileFD(FileFD *pollable) {
 	_fileFD = pollable;
+}
+
+void ClientFD::setCgiFD(CgiFD *pollable) {
+	_cgiFD = pollable;
+}
+
+CgiFD *ClientFD::getCgiFD() const {
+	return _cgiFD;
 }
 
 Location *ClientFD::getLocation() const {

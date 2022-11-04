@@ -12,11 +12,11 @@ uint16_t Server::getPort() const {
 }
 
 Config *Server::findConfig(const Request &request) const {
-	std::vector<Config *>::const_iterator        begin  = this->_configs.begin();
-	std::vector<Config *>::const_iterator        end    = this->_configs.end();
+	std::vector<Config *>::const_iterator              begin  = this->_configs.begin();
+	std::vector<Config *>::const_iterator              end    = this->_configs.end();
 
-	std::map<std::string, std::string>           header = request.getHeaderMap();
-	std::map<std::string, std::string>::iterator host   = header.find("host");
+	std::map<std::string, std::string>                 header = request.getHeaderMap();
+	std::map<std::string, std::string>::const_iterator host   = header.find("host");
 
 	if (host == header.end()) {
 		return (*(this->_configs.begin()));

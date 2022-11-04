@@ -2,6 +2,7 @@
 #include "config/ConfigParser.hpp"
 #include "server/Server.hpp"
 #include "utils/Utils.hpp"
+
 #include <iostream>
 #include <string>
 
@@ -27,6 +28,9 @@ int main(int argc, char const *argv[]) {
 		try {
 			serv = new Server(it->first, it->second);
 		} catch (const Utils::SystemCallFailedException &e) {
+			std::cerr << e.what() << std::endl;
+			exit(EXIT_FAILURE);
+		} catch (const std::exception &e) {
 			std::cerr << e.what() << std::endl;
 			exit(EXIT_FAILURE);
 		}

@@ -150,6 +150,9 @@ void Request::ValidateRequest(Config *Conf, Location *Loc) {
 	/* set CGI for initialisation request interface */
 	if (Executables::isCgiRequest(this->_filestats)) {
 		this->_CGI = true;
+		if (getMethod() == Utils::delete_string) {
+			throw Utils::ErrorPageException("405");
+		}
 	}
 }
 
@@ -157,7 +160,7 @@ void Request::setBody(std::string NewBody) {
 	this->_body = NewBody;
 }
 
-std::map<std::string, std::string> Request::getHeaderMap() const {
+std::map<std::string, std::string> const &Request::getHeaderMap() const {
 	return this->_header;
 }
 
@@ -267,7 +270,7 @@ void Request::printAttributesInRequestClass() {
 	}
 	std::cout << "--------------------------------------" << std::endl;
 	std::cout << "Body = [" << this->_body << "]" << std::endl;
-	std::cout << "CGI = [" << this->_CGI << "]" << std::endl;
+	std::cout << "CGI = [" << std::boolalpha << this->_CGI << "]" << std::endl;
 	std::cout << "chunked = [" << this->_TransferEncodingChunked << "]" << std::endl;
 	std::cout << "content-length = [" << this->getContentLength() << "]" << std::endl;
 	std::cout << "expect = [" << this->getExpect() << "]" << std::endl;

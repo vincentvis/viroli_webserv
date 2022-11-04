@@ -3,7 +3,9 @@
 #include "ipollable/ClientFD.hpp"
 #include "request/RequestInterface.hpp"
 #include "utils/Defines.hpp"
+#include <cstring>
 #include <iostream>
+#include <unistd.h>
 
 class CGIRequest : public RequestInterface {
 	private:
@@ -11,6 +13,7 @@ class CGIRequest : public RequestInterface {
 		void POSTRequest(ClientFD &Client);
 		void DELETERequest(ClientFD &Client);
 		CGIRequest();
+		std::string _tmpfilename;
 
 	public:
 		CGIRequest(ClientFD &Client);

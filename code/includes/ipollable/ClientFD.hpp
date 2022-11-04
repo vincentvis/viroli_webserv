@@ -5,10 +5,13 @@
 #include "request/HttpRequest.hpp"
 #include "response/Response.hpp"
 #include "server/Server.hpp"
+// #include "utils/Defines.hpp"
+// #include "utils/Exception.hpp"
 #include <string>
 #include <vector>
 
 class FileFD;
+class CgiFD;
 class RequestInterface;
 
 class ClientFD : public IPollable {
@@ -20,6 +23,7 @@ class ClientFD : public IPollable {
 		Location         *_location;
 		Server           *_server;
 		FileFD           *_fileFD;
+		CgiFD            *_cgiFD;
 		Request           _request;
 		Response          _response;
 		State             _state;
@@ -60,6 +64,7 @@ class ClientFD : public IPollable {
 		void          clean();
 		void          updateTick();
 		void          setFileFD(FileFD *pollable);
+		void          setCgiFD(CgiFD *pollable);
 		void          setRequestInterface(RequestInterface *req);
 		void          setFileStatus(bool open);
 		bool          hasChildren() const;
@@ -73,5 +78,6 @@ class ClientFD : public IPollable {
 		Response     &getResponse();
 		Request      &getRequest();
 		FileFD       *getFileFD() const;
+		CgiFD        *getCgiFD() const;
 		Location     *getLocation() const;
 };
