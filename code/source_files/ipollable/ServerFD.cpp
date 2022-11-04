@@ -5,6 +5,10 @@ ServerFD::ServerFD(Server *server, int fd, int index) :
 	updateTick();
 }
 
+ServerFD::~ServerFD() {
+	delete _server;
+}
+
 /* accept new ClientFD */
 void ServerFD::pollin() {
 	int                newfd = 0;
@@ -68,6 +72,6 @@ const time_t &ServerFD::getTick() const {
 	return _tick;
 }
 
-bool ServerFD::hasChildren() const {
+bool ServerFD::hasFileOpen() const {
 	return false;
 }

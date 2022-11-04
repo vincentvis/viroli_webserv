@@ -21,5 +21,5 @@ class IPollable {
 		virtual void    setIndex(int32_t index) = 0;
 		virtual int32_t getIndex() const        = 0;
 		virtual void    updateTick()            = 0;
-		virtual bool    hasChildren() const     = 0;
+		virtual bool    hasFileOpen() const     = 0;
 };

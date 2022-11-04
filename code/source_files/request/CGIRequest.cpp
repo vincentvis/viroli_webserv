@@ -5,11 +5,13 @@ CGIRequest::CGIRequest() {
 }
 
 CGIRequest::CGIRequest(ClientFD &Client) {
-	if (Client._request.getMethod() == Utils::get_string) {
+	if (Client.getRequest().getMethod() == Utils::get_string) {
 		GETRequest(Client);
-	} else if (Client._request.getMethod() == Utils::post_string) {
+	}
+	if (Client.getRequest().getMethod() == Utils::post_string) {
 		POSTRequest(Client);
-	} else if (Client._request.getMethod() == Utils::delete_string) {
+	}
+	if (Client.getRequest().getMethod() == Utils::delete_string) {
 		DELETERequest(Client);
 	}
 }
@@ -22,11 +24,11 @@ void CGIRequest::GETRequest(ClientFD &Client) {
 	}
 	_tmpfilename = std::string(tmp);
 
-	Cgi cgi(Client._request.getFileStatCopy(), Client._request.getMethod(),
-			Client._server->getPort(), Client._config->getFirstServerName(), tmp);
+	Cgi cgi(Client.getRequest().getFileStatCopy(), Client.getRequest().getMethod(),
+			Client.getServer()->getPort(), Client.getConfig()->getFirstServerName(), tmp);
 
-	if (Client._request.getQuery().empty() == false) {
-		cgi.setQueryString(Client._request.getQuery());
+	if (Client.getRequest().getQuery().empty() == false) {
+		cgi.setQueryString(Client.getRequest().getQuery());
 	}
 
 	cgi.execute(Client, this);
@@ -40,19 +42,20 @@ void CGIRequest::POSTRequest(ClientFD &Client) {
 	}
 	_tmpfilename = std::string(tmp);
 
-	Cgi cgi(Client._request.getFileStatCopy(), Client._request.getMethod(),
-			Client._server->getPort(), Client._config->getFirstServerName(), tmp);
+	Cgi cgi(Client.getRequest().getFileStatCopy(), Client.getRequest().getMethod(),
+			Client.getServer()->getPort(), Client.getConfig()->getFirstServerName(), tmp);
 
-	// cgi.setQueryString(Client._request.getBody());
-	cgi.prepEnv("CONTENT_LENGTH", Utils::to_string(Client._request.getContentLength()));
+	// cgi.setQueryString(Client.getRequest().getBody());
+	cgi.prepEnv("CONTENT_LENGTH",
+				Utils::to_string(Client.getRequest().getContentLength()));
 	std::map<std::string, std::string>::const_iterator contentType =
-		Client._request.getHeaderMap().find("Content-Type");
-	if (contentType != Client._request.getHeaderMap().end()) {
+		Client.getRequest().getHeaderMap().find("Content-Type");
+	if (contentType != Client.getRequest().getHeaderMap().end()) {
 		cgi.prepEnv("CONTENT_TYPE", contentType->second);
 	}
 
-	if (Client._request.getBody().empty() == false) {
-		cgi.setQueryString(Client._request.getBody());
+	if (Client.getRequest().getBody().empty() == false) {
+		cgi.setQueryString(Client.getRequest().getBody());
 	}
 
 	cgi.execute(Client, this);

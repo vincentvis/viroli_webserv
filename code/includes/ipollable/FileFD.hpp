@@ -8,12 +8,13 @@
 #include <vector>
 
 class FileFD : public IPollable {
-	public:
+	private:
 		enum State { PROCESS, READY };
 
-		State             _state;
 		Server           *_server;
-		std::vector<char> _buffer;
+		ClientFD         *_client;
+		RequestInterface *_requestInterface;
+		State             _state;
 		std::string       _data;
 		int               _bytes;
 		int               _left;
@@ -22,9 +23,8 @@ class FileFD : public IPollable {
 		int               _index;
 		time_t            _tick;
 		bool              _closed;
-		RequestInterface *_requestInterface;
-		ClientFD         *_client;
 
+	public:
 		FileFD(Server *server, int fd, int index);
 
 		void    pollin();
@@ -42,5 +42,6 @@ class FileFD : public IPollable {
 		void    setIndex(int32_t index);
 		int32_t getIndex() const;
 		void    updateTick();
-		bool    hasChildren() const;
+		bool    hasFileOpen() const;
+		void    setRequestInterface(RequestInterface *req);
 };
