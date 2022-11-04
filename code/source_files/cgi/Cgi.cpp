@@ -8,7 +8,6 @@ Cgi::Cgi(FileStat filestats, std::string const &method, uint16_t port,
 	if (_source.isReg() == false) {
 		throw Utils::ErrorPageException("404");
 	}
-	this->_pid           = 0;
 	this->_script_name   = _source.getFilename();
 	this->_executor_name = Executables::getExecutable(_source.getExtension());
 	this->_executable    = this->_executor_name;
@@ -39,7 +38,6 @@ int Cgi::execute(ClientFD &Client, CGIRequest *interface) {
 
 	if (_pid == 0) {
 		chdir(_source.getPath().c_str());
-		errno = 0;
 		putEnvInChild();
 		execl("/bin/bash", "/bin/bash", "-c", _bash_string.c_str(), NULL);
 		exit(1);
