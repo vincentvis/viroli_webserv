@@ -123,8 +123,8 @@ void Server::run() {
 				if (Server::_pollables[i]->hasChildren() == false) {
 					remove(i);
 					--i;
-					continue;
 				}
+				continue;
 			}
 
 			try {
