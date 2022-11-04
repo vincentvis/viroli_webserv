@@ -306,8 +306,6 @@ void ClientFD::pollout() {
 				_state = BODY;
 
 				/* sent response; reset to accept new requests */
-			} else if (_request.getMethod() == Utils::post_string) {
-				setClosed();
 			} else {
 				// setClosed();
 				clean();
