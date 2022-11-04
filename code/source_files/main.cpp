@@ -7,8 +7,6 @@
 #include <string>
 
 int main(int argc, char const *argv[]) {
-	std::vector<Server *> servers;
-	servers.reserve(100); // placeholder
 	ConfigParser config;
 
 	try {
