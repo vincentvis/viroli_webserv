@@ -408,8 +408,7 @@ uint16_t ConfigParser::stringToPort(std::string &string) {
 	uint16_t intval  = longval;
 
 	if (errno == EINVAL || errno == ERANGE || string.c_str() == endptr ||
-		intval != longval)
-	{
+		intval != longval) {
 		throw std::runtime_error("the string \"" + string +
 								 "\" does not contain a valid port number");
 	}
@@ -439,8 +438,7 @@ void ConfigParser::processListen(Config &target) {
 				// it's only a port
 				uint16_t port = stringToPort(param);
 				if (std::find(target._ports.begin(), target._ports.end(), port) ==
-					target._ports.end())
-				{
+					target._ports.end()) {
 					target._ports.push_back(port);
 					addConfigToPort(port, target);
 				}
@@ -454,14 +452,12 @@ void ConfigParser::processListen(Config &target) {
 			std::string after_colon  = param.substr(colon_position + 1);
 			// should be {ip}:{port}
 			if (std::find(target._ips.begin(), target._ips.end(), before_colon) ==
-				target._ips.end())
-			{
+				target._ips.end()) {
 				target._ips.push_back(before_colon);
 			}
 			int port = stringToPort(after_colon);
 			if (std::find(target._ports.begin(), target._ports.end(), port) ==
-				target._ports.end())
-			{
+				target._ports.end()) {
 				target._ports.push_back(port);
 				addConfigToPort(port, target);
 			}
@@ -672,16 +668,9 @@ void ConfigParser::processReturn(Location &target) {
 		typeParam = params.at(0);
 	}
 
-	if (isValidConfigURI(uriParam)) {
-		target._redirect       = uriParam;
-		target._shouldRedirect = true;
-	} else {
-		throw std::runtime_error(
-			"Value \"" + uriParam +
-			"\" is not a valid value for directive \"return\" in configfile at "
-			"line " +
-			Utils::to_string(_linenum));
-	}
-	target._redirectType = typeParam;
+	target._redirect       = uriParam;
+	target._shouldRedirect = true;
+
+	target._redirectType   = typeParam;
 	check_and_skip_semicolon("return");
 }
