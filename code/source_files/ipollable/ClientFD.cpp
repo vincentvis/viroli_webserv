@@ -156,7 +156,6 @@ void ClientFD::receiveHeader() {
 		throw(Utils::ErrorPageException("413"));
 	} else if (end != std::string::npos) {
 		this->getRequest().ParseRequest(this->_inbound.substr(0, end));
-		// this->getRequest().printAttributesInRequestClass();
 		this->_config   = this->_server->findConfig(this->getRequest());
 		this->_location = this->_config->findLocation(this->getRequest());
 		this->getRequest().ValidateRequest(this->_config, this->_location);
