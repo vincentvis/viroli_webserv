@@ -6,8 +6,8 @@
     <title>CGI adder</title>
 </head>
 <body>
-    <h2>Uses a form and method GET</h2>
-    <form action="add.py">
+    <h2>Uses a form and method POST</h2>
+    <form action="/cgi-bin/add.py" method="POST">
         <input type="text" name="val1" placeholder="NUMBER">
         +
         <input type="text" name="val2" placeholder="NUMBER">
@@ -16,6 +16,6 @@
     <br>
     <hr>
     <br>
-    <a href="/cgi-bin/post/">Or try it with a POST request</a>
+    <a href="/cgi-bin/">Or try it with a GET request</a>
 </body>
 </html>
