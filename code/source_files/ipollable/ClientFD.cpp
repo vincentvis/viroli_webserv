@@ -48,7 +48,7 @@ bool ClientFD::getChunkedSize(size_t pos) {
 			_total += _left;
 
 			/* body exceeds the config limit */
-			if (_total > _config->getMaxBodySize()) {
+			if (_total > _config->getMaxBodySize(_location)) {
 				throw(Utils::ErrorPageException("413"));
 			}
 			return (true);
@@ -127,6 +127,10 @@ void ClientFD::receiveLength() {
 	/* add _bytes received in current iteration to _total bytes read */
 	if (_bytes > 0) {
 		_total += _bytes;
+
+		if (_total > _config->getMaxBodySize(_location)) {
+			throw(Utils::ErrorPageException("413"));
+		}
 	}
 
 	/* received all the bytes specified by content-length */
@@ -169,7 +173,11 @@ void ClientFD::receiveHeader() {
 			/* 'content-length': _total is set to data already received */
 		} else if (_request.contentLenAvailable() == true) {
 			_total = _inbound.size();
+			if (_total > _config->getMaxBodySize(_location)) {
+				throw(Utils::ErrorPageException("413"));
+			}
 		}
+
 
 		/* 'Expect: 100-continue' without (part of) body */
 		if (_request.getExpect() == Utils::continue_string && _inbound.empty()) {

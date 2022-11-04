@@ -67,6 +67,13 @@ int64_t Config::getMaxBodySize() const {
 	return _maxBodySize;
 }
 
+int64_t Config::getMaxBodySize(Location *const primary) const {
+	if (primary->getMaxBodySize() > 0) {
+		return (primary->getMaxBodySize());
+	}
+	return _maxBodySize;
+}
+
 std::string const &Config::getAutoIndex() const {
 	return _autoIndex;
 }

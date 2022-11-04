@@ -27,6 +27,10 @@ std::vector<std::string> const &Location::getAllow() const {
 	return (_allow);
 }
 
+int64_t Location::getMaxBodySize() const {
+	return _maxBodySize;
+}
+
 std::vector<std::string> const &Location::getIndex() const {
 	return (_index);
 }

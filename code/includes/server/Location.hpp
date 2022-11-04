@@ -21,6 +21,7 @@ class Location {
 		std::vector<std::string> const    &getIndex() const;
 		std::map<std::string, std::string> getErrorPages() const;
 		std::string const                 &getAutoIndex() const;
+		int64_t                            getMaxBodySize() const;
 
 		int                                getSortWeight() const;
 
