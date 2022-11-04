@@ -108,7 +108,6 @@ void Server::run() {
 	signal(SIGPIPE, SIG_IGN);
 
 	while (true) {
-		++i;
 		if (poll(Server::_pfds.data(), Server::_pfds.size(), 0) < 0) {
 			if (errno == EAGAIN) {
 				continue;
