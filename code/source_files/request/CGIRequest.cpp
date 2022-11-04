@@ -16,7 +16,7 @@ CGIRequest::CGIRequest(ClientFD &Client) {
 
 void CGIRequest::GETRequest(ClientFD &Client) {
 	char tmp[80];
-	memcpy(tmp, "/tmp/viroli_cgi_file___XXXXXXXX\0", 32);
+	std::memcpy(tmp, "/tmp/viroli_cgi_file___XXXXXXXX\0", 32);
 	if (mktemp(tmp) == NULL) {
 		throw Utils::ErrorPageException("502");
 	}
@@ -34,7 +34,7 @@ void CGIRequest::GETRequest(ClientFD &Client) {
 
 void CGIRequest::POSTRequest(ClientFD &Client) {
 	char tmp[80];
-	memcpy(tmp, "/tmp/viroli_cgi_file___XXXXXXXX\0", 32);
+	std::memcpy(tmp, "/tmp/viroli_cgi_file___XXXXXXXX\0", 32);
 	if (mktemp(tmp) == NULL) {
 		throw Utils::ErrorPageException("502");
 	}
@@ -60,7 +60,8 @@ void CGIRequest::POSTRequest(ClientFD &Client) {
 
 void CGIRequest::DELETERequest(ClientFD &Client) {
 	(void)Client;
-	std::cerr << "DELETE requests are not part of CGI" << std::endl;
+	std::cerr << "DELETE requests are not part of CGI (we should never see this..)"
+			  << std::endl;
 }
 
 CGIRequest::~CGIRequest() {

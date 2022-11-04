@@ -3,7 +3,9 @@
 #include "ipollable/ClientFD.hpp"
 #include "request/RequestInterface.hpp"
 #include "utils/Defines.hpp"
+#include <cstring>
 #include <iostream>
+#include <unistd.h>
 
 class CGIRequest : public RequestInterface {
 	private:

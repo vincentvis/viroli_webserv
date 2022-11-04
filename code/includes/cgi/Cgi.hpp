@@ -3,11 +3,7 @@
 #include "ipollable/ClientFD.hpp"
 #include "utils/Exception.hpp"
 #include "utils/FileStat.hpp"
-#include <cerrno>
 #include <cstdlib>
-#include <cstring>
-#include <string.h>
-#include <unistd.h>
 #include <utility>
 
 class Cgi {
@@ -36,8 +32,6 @@ class Cgi {
 
 		std::string _tmp_filename;
 		int         _fd;
-
-		// CgiVars     _env;
 		//
 		std::vector<std::pair<std::string, std::string> > _env;
 
