@@ -45,7 +45,6 @@ void CGIRequest::POSTRequest(ClientFD &Client) {
 	Cgi cgi(Client.getRequest().getFileStatCopy(), Client.getRequest().getMethod(),
 			Client.getServer()->getPort(), Client.getConfig()->getFirstServerName(), tmp);
 
-	// cgi.setQueryString(Client.getRequest().getBody()); //remove?
 	cgi.prepEnv("CONTENT_LENGTH",
 				Utils::to_string(Client.getRequest().getContentLength()));
 	std::map<std::string, std::string>::const_iterator contentType =
