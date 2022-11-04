@@ -1,6 +1,5 @@
-http://localhost:8248/index.html
-http://localhost:8248/
-http://localhost:8248
-http://localhost:8248/uploads/image_01.jpeg
-http://localhost:8248/uploads/text.txt
-
+http://localhost:8080/index.html
+http://localhost:8080/
+http://localhost:8080
+http://localhost:8080/images/image_01.jpg
+http://localhost:8080/images/test.png
