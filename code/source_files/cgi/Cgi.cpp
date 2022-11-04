@@ -44,10 +44,10 @@ int Cgi::execute(ClientFD &Client, CGIRequest *interface) {
 	}
 	if (_pid != 0) {
 		_fd = open(_tmp_filename.c_str(), O_CREAT | O_NONBLOCK | O_RDWR, 0777);
-		Client._cgiFD =
+		Client.setCgiFD(
 			reinterpret_cast<CgiFD *>(PollableFactory::getInstance().createPollable(
-				Client._server, _fd, CGIPOLL, POLLIN));
-		Client._cgiFD->setRequestInterface(interface, &Client);
+				Client.getServer(), _fd, CGIPOLL, POLLIN)));
+		Client.getCgiFD()->setRequestInterface(interface, &Client);
 	}
 	return (0);
 }

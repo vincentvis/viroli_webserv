@@ -30,16 +30,13 @@ class IPollable;
 
 class Server {
 	public:
-		Server();
-		~Server();
-
 		Server(uint16_t port, std::vector<Config *> configs);
+		~Server();
 
 		Config              *findConfig(const Request &request) const;
 
 		friend std::ostream &operator<<(std::ostream &os, const Server &server);
 		friend class ConfigParser;
-
 
 		uint16_t                          getPort() const;
 		int32_t                           getFD() const;
@@ -54,4 +51,7 @@ class Server {
 	protected:
 		int32_t  _fd;
 		uint16_t _port;
+
+	private:
+		Server();
 };
