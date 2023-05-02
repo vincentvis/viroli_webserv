@@ -14,8 +14,10 @@ Run the server with default configuration and browse its testing websites.
 ```
 cd build
 ./webserv
+```
 
-Open your favorite browser and enter in its url bar:
+Open your favorite browser and enter in its address bar:
+```
 http://localhost:8248/
 OR
 http://localhost:8248/servernames/koda.com/index.html
